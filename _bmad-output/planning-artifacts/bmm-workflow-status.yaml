@@ -78,25 +78,70 @@ workflow_status:
     name: "Planning"
     workflows:
       - id: "prd"
-        status: "required"
+        status: "_bmad-output/planning-artifacts/prd.md"
         agent: "pm"
         command: "/bmad:bmm:workflows:prd"
-        output: "Product Requirements Document with FRs and NFRs"
+        completed: "2026-01-24"
+        last_edited: "2026-01-24"
+        outputs:
+          - "_bmad-output/planning-artifacts/prd.md"
+        edits:
+          - date: "2026-01-24"
+            reason: "Integrated RLCF Feedback Architecture (7 feedback points)"
+            sections_added:
+              - "RLCF Feedback Architecture"
+              - "IDE per Giuristi paradigm reference"
+              - "4-Profile System reference"
+          - date: "2026-01-24"
+            reason: "Added System Component Specification with full agent, database, and relationship mapping"
+            sections_added:
+              - "System Component Specification"
+              - "Agent Catalog (A1-A10)"
+              - "Database Catalog (DB1-DB4)"
+              - "Component Relationships"
+              - "Data Flow Diagrams"
       - id: "create-ux-design"
-        status: "conditional"
+        status: "_bmad-output/planning-artifacts/ux-design-specification.md"
         condition: "if_has_ui"
         agent: "ux-designer"
         command: "/bmad:bmm:workflows:create-ux-design"
+        completed: "2026-01-24"
+        outputs:
+          - "_bmad-output/planning-artifacts/ux-design-specification.md"
+        key_decisions:
+          - "IDE per Giuristi - Paradigma UX (Command Palette, Peek, Split View)"
+          - "4-Profile System (Consultazione, Ricerca, Analisi, Contributore)"
+          - "Progressive Loading Pattern (3 livelli)"
+          - "Summary + Accordion per MERL-T trace"
+          - "Feedback Adattivo per Profilo"
+          - "Earned Opt-In per upgrade profilo"
+          - "NER via RLCF - Two-Tier Architecture (rules + ML)"
+          - "Devil's Advocate - Preserva pluralismo interpretativo (RLCF Pillar IV)"
+        sections_completed:
+          - "Executive Summary"
+          - "Conceptual Framework: IDE per Giuristi"
+          - "Core UX Decisions (7)"
+          - "Interaction Patterns"
+          - "Visual Design System"
+          - "Validation & Handoff"
 
   # Phase 3: Solutioning
   - phase: 3
     name: "Solutioning"
     workflows:
       - id: "create-architecture"
-        status: "required"
+        status: "_bmad-output/planning-artifacts/architecture.md"
         agent: "architect"
         command: "/bmad:bmm:workflows:create-architecture"
-        output: "System architecture document"
+        completed: "2026-01-24"
+        outputs:
+          - "_bmad-output/planning-artifacts/architecture.md"
+        adrs:
+          - "ADR-001: Circuit Breaker Strategy"
+          - "ADR-002: GDPR Consent Management"
+          - "ADR-003: API Versioning Strategy"
+          - "ADR-004: Audit Trail (7-Year Retention)"
+          - "ADR-005: Warm-Start Caching Strategy"
       - id: "create-epics-and-stories"
         status: "required"
         agent: "pm"
