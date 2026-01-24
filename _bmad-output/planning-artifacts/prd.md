@@ -1,9 +1,9 @@
 ---
-stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation', 'step-07-project-type', 'step-08-scoping', 'step-09-functional', 'step-10-nonfunctional', 'step-11-polish', 'step-12-complete', 'edit-rlcf-feedback-architecture', 'edit-system-component-specification']
+stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation', 'step-07-project-type', 'step-08-scoping', 'step-09-functional', 'step-10-nonfunctional', 'step-11-polish', 'step-12-complete', 'edit-rlcf-feedback-architecture', 'edit-system-component-specification', 'edit-f8-bridge-quality-feedback']
 workflowStatus: 'complete'
 completedAt: '2026-01-24'
 lastEditedAt: '2026-01-24'
-editReason: 'Added System Component Specification with full agent, database, and relationship mapping'
+editReason: 'Added F8: Bridge Quality Feedback for TraversalPolicy learning and path virtuosi'
 inputDocuments:
   - _bmad-output/planning-artifacts/research/technical-vector-space-legal-interpretation-research-2026-01-23.md
   - _bmad-output/analysis/brainstorming-session-2026-01-23.md
@@ -450,24 +450,34 @@ If innovation doesn't validate:
 
 ### Feedback Points Overview
 
-ALIS implements **7 distinct feedback collection points** along the MERL-T pipeline, each targeting a specific trainable component:
+ALIS implements **8 distinct feedback collection points** along the MERL-T pipeline, each targeting a specific trainable component:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         RLCF FEEDBACK FLOW                              │
-│                                                                         │
-│  ┌─────────┐    ┌─────────┐    ┌─────────────────────┐    ┌─────────┐ │
-│  │ PROMPT  │───▶│   NER   │───▶│       ROUTER        │───▶│ EXPERTS │ │
-│  └─────────┘    └────┬────┘    └──────────┬──────────┘    └────┬────┘ │
-│                      │                    │                     │      │
-│                   [F1]                 [F2]              [F3-F6]       │
-│                                                                         │
-│                                                         ┌─────────┐    │
-│                                                    ───▶│ SYNTH   │    │
-│                                                         └────┬────┘    │
-│                                                              │         │
-│                                                           [F7]        │
-└─────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           RLCF FEEDBACK FLOW                                     │
+│                                                                                  │
+│  ┌─────────┐    ┌─────────┐    ┌─────────────────────┐    ┌─────────┐          │
+│  │ PROMPT  │───▶│   NER   │───▶│       ROUTER        │───▶│ EXPERTS │          │
+│  └─────────┘    └────┬────┘    └──────────┬──────────┘    └────┬────┘          │
+│                      │                    │                     │               │
+│                   [F1]                 [F2]              [F3-F6]                │
+│                                                                │               │
+│                                                                ▼               │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │                         RETRIEVAL LAYER                                   │  │
+│  │  ┌──────────┐         ┌──────────────┐         ┌──────────┐              │  │
+│  │  │  Qdrant  │◀───────▶│ Bridge Table │◀───────▶│ FalkorDB │              │  │
+│  │  │ (chunks) │         │   [F8] ⭐    │         │ (graph)  │              │  │
+│  │  └──────────┘         └──────────────┘         └──────────┘              │  │
+│  └──────────────────────────────────────────────────────────────────────────┘  │
+│                                                                │               │
+│                                                                ▼               │
+│                                                         ┌─────────┐           │
+│                                                         │ SYNTH   │           │
+│                                                         └────┬────┘           │
+│                                                              │                │
+│                                                           [F7]               │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Feedback Points Summary
@@ -481,6 +491,7 @@ ALIS implements **7 distinct feedback collection points** along the MERL-T pipel
 | **F5** | Teleological Expert | TeleologicalExpert | Quality of principles analysis | Expert prompt/weights |
 | **F6** | Precedent Expert | PrecedentExpert | Quality of jurisprudence analysis | Expert prompt/weights |
 | **F7** | Synthesizer | Synthesizer | Quality of final aggregation | Aggregation weights |
+| **F8** | Bridge Quality | Bridge Table | Quality of chunk↔node mapping | TraversalPolicy weights |
 
 ### F1: NER Recognition Feedback
 
@@ -580,6 +591,172 @@ ALIS implements **7 distinct feedback collection points** along the MERL-T pipel
 | 🔍 Analisi | Synthesis + sources | [👍👎💬] |
 | 🎓 Contributore | Synthesis + weights | Full evaluation + usability |
 
+### F8: Bridge Quality Feedback ⭐ NEW
+
+**Position:** `RETRIEVAL LAYER (Qdrant ↔ Bridge Table ↔ FalkorDB)`
+
+**Purpose:** Validate quality of chunk-to-graph mappings and train Expert-specific traversal preferences ("path virtuosi")
+
+#### Architectural Role
+
+F8 addresses a critical gap: when Expert output is poor, is it due to bad reasoning (F3-F6) or bad retrieval (F8)?
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                     TRI-LAYER ARCHITECTURE & F8 ROLE                             │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  ┌──────────────────┐     PUBBLICO / CONDIVISO                                  │
+│  │    FalkorDB      │     • Struttura normativa (nodi, relazioni)               │
+│  │   (Knowledge     │     • Asset unico per community                           │
+│  │     Graph)       │     • NO testi, solo URN e metadati                       │
+│  └────────┬─────────┘                                                           │
+│           │                                                                      │
+│           │  graph_node_urn                                                      │
+│           ▼                                                                      │
+│  ┌──────────────────┐     GUIDA / POLICY LAYER  ◀──── F8 TRAINS THIS           │
+│  │   Bridge Table   │     • Mapping chunk_id ↔ graph_node_urn                   │
+│  │   (PostgreSQL)   │     • expert_affinity per Expert                          │
+│  │                  │     • Learned traversal preferences                        │
+│  └────────┬─────────┘                                                           │
+│           │                                                                      │
+│           │  chunk_id + expert_affinity                                          │
+│           ▼                                                                      │
+│  ┌──────────────────┐     PRIVATO / CUSTOM                                      │
+│  │     Qdrant       │     • Testi completi (chunks + embeddings)                │
+│  │   (Vector DB)    │     • Può essere proprietario / multi-tenant              │
+│  └──────────────────┘                                                           │
+│                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Expert-Specific Traversal Weights
+
+Each Expert has different affinities for edge types in the Knowledge Graph:
+
+| Edge Type | LiteralExpert | SystemicExpert | PrinciplesExpert | PrecedentExpert |
+|-----------|---------------|----------------|------------------|-----------------|
+| `DEFINISCE` | **1.0** | 0.3 | 0.4 | 0.3 |
+| `RIFERIMENTO` | 0.5 | **1.0** | 0.7 | 0.5 |
+| `MODIFICA` | 0.4 | **0.9** | 0.5 | 0.4 |
+| `CITATO_DA` | 0.3 | 0.6 | 0.5 | **1.0** |
+| `PRINCIPIO` | 0.2 | 0.5 | **1.0** | 0.4 |
+| `ATTUA` | 0.3 | 0.7 | **0.9** | 0.5 |
+
+**F8 feedback updates these weights** to crystallize "path virtuosi" per Expert.
+
+#### Feedback Collection
+
+| Aspect | Specification |
+|--------|---------------|
+| **Feedback Types** | `relevant_source`, `irrelevant_source`, `missing_source`, `wrong_relation_type` |
+| **Data Collected** | chunk_ids_used, graph_nodes_traversed, edge_types_followed, expert_type, relevance_rating |
+| **Training Output** | TraversalPolicy weight updates via PolicyGradientTrainer |
+| **Weight Factor** | 0.4 × A_u(t) |
+
+#### Collection Modes
+
+**Mode 1: Implicit (All Profiles)**
+
+```
+IF user gives 👎 on F7 (Synthesizer)
+   AND F3-F6 (Expert outputs) are rated positively
+   → Infer negative signal on F8 (retrieval was the problem)
+
+IF user gives 👍 on F7
+   AND specific Expert contributed heavily
+   → Reinforce that Expert's traversal weights for used edge types
+```
+
+**Mode 2: Explicit (🎓 Contributore only)**
+
+| UI Element | Action | Signal |
+|------------|--------|--------|
+| "Fonti usate" panel | Rate source relevance (1-5⭐) | Direct F8 feedback |
+| "Fonte mancante" button | Suggest missing source | Positive training sample |
+| "Relazione errata" flag | Correct relation type | Relation classifier training |
+
+#### Training Pipeline
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                        F8 TRAINING LOOP                                          │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  1. Expert executes query                                                        │
+│     └─▶ Uses current traversal_weights to select edges                          │
+│                                                                                  │
+│  2. Bridge Table provides chunk_ids for selected graph_node_urns                │
+│     └─▶ Filtered by expert_affinity threshold                                   │
+│                                                                                  │
+│  3. Expert produces response using retrieved chunks                              │
+│                                                                                  │
+│  4. User provides feedback                                                       │
+│     ├─▶ F3-F6: Expert quality                                                   │
+│     ├─▶ F7: Synthesis quality                                                   │
+│     └─▶ F8: Source relevance (explicit or inferred)                             │
+│                                                                                  │
+│  5. RLCF aggregates with authority weighting                                    │
+│     └─▶ R = Σ(feedback_i × A_u(t)) / Σ(A_u(t))                                 │
+│                                                                                  │
+│  6. PolicyGradientTrainer updates TraversalPolicy                               │
+│     └─▶ ∇J(θ) = E[∇log π(edge|state,θ) · R]                                    │
+│                                                                                  │
+│  7. New traversal_weights saved to Bridge Table (expert_affinity)               │
+│                                                                                  │
+│  8. Next query uses updated weights → "Path virtuosi" crystallized              │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Storage Schema Extension
+
+```sql
+-- expert_affinity già presente in Qdrant payload
+-- Bridge Table extension per learned weights (Growth phase)
+
+ALTER TABLE bridge_table ADD COLUMN IF NOT EXISTS expert_affinity JSONB DEFAULT '{
+  "literal": 0.5,
+  "systemic": 0.5,
+  "principles": 0.5,
+  "precedent": 0.5
+}';
+
+ALTER TABLE bridge_table ADD COLUMN IF NOT EXISTS feedback_count INTEGER DEFAULT 0;
+ALTER TABLE bridge_table ADD COLUMN IF NOT EXISTS last_feedback_at TIMESTAMP;
+
+-- Index per retrieval veloce
+CREATE INDEX IF NOT EXISTS idx_bridge_expert_affinity
+ON bridge_table USING GIN (expert_affinity);
+```
+
+#### MVP vs Growth Implementation
+
+| Aspect | MVP (Thesis) | Growth (Post-Thesis) |
+|--------|--------------|----------------------|
+| **Collection Mode** | Implicit only | Implicit + Explicit |
+| **Storage** | `expert_affinity` in Qdrant payload | + Bridge Table extension |
+| **UI** | None (behind the scenes) | "Fonti usate" panel for 🎓 |
+| **Training** | Correlation-based inference | Direct PolicyGradientTrainer |
+
+#### Visibility by Profile
+
+| Profile | UI | Interaction |
+|---------|-----|-------------|
+| ⚡ Consultazione | None | Implicit only |
+| 📖 Ricerca | None | Implicit only |
+| 🔍 Analisi | "Fonti" collapsed | View only |
+| 🎓 Contributore | "Fonti usate" panel | Rate + suggest + correct |
+
+#### Value Proposition
+
+| Beneficio | Per Chi | Come |
+|-----------|---------|------|
+| **Isolamento failure** | Sistema | Distingue errori retrieval da errori reasoning |
+| **Path virtuosi** | Experts | Ogni Expert impara quali edge seguire |
+| **Asset separation** | Organizzazioni | Grafo pubblico, testi privati, Bridge impara |
+| **Retrieval quality** | Utenti | Risposte più accurate nel tempo |
+
 ### Authority Weighting Formula
 
 All feedback is weighted by user authority (RLCF Pillar I):
@@ -609,25 +786,34 @@ P_u(t) = Recent performance (last N feedback)
 | F5: Teleological | - | - | [👍👎💬] | 4-level rating |
 | F6: Precedent | - | - | [👍👎💬] | 4-level rating |
 | F7: Synthesizer | - | [👍👎] | [👍👎💬] | Eval + usability |
+| **F8: Bridge** | *(implicit)* | *(implicit)* | View fonti | Rate + suggest |
 
 ### Training Pipeline Integration
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│  FEEDBACK COLLECTION          AGGREGATION              TRAINING         │
-│  ─────────────────────────────────────────────────────────────────────  │
-│                                                                         │
-│  F1 feedback ──┐                                  ┌──▶ Train NER       │
-│                │     ┌─────────────────┐          │                     │
-│  F2 feedback ──┼────▶│ Authority-      │──────────┼──▶ Train Router    │
-│                │     │ Weighted        │          │                     │
-│  F3-F6 feedback┼────▶│ Aggregation     │──────────┼──▶ Train Experts   │
-│                │     │ (per component) │          │                     │
-│  F7 feedback ──┘     └─────────────────┘          └──▶ Adjust Weights  │
-│                                                                         │
-│  Buffer: 100 samples minimum before training trigger                    │
-│  Frequency: Weekly batch or on-demand for critical corrections          │
-└─────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  FEEDBACK COLLECTION          AGGREGATION              TRAINING                  │
+│  ───────────────────────────────────────────────────────────────────────────────│
+│                                                                                  │
+│  F1 feedback ──┐                                  ┌──▶ Train NER                │
+│                │     ┌─────────────────┐          │                              │
+│  F2 feedback ──┼────▶│ Authority-      │──────────┼──▶ Train Router             │
+│                │     │ Weighted        │          │                              │
+│  F3-F6 feedback┼────▶│ Aggregation     │──────────┼──▶ Train Experts            │
+│                │     │ (per component) │          │                              │
+│  F7 feedback ──┼────▶│               │──────────┼──▶ Adjust Gating Weights     │
+│                │     │                 │          │                              │
+│  F8 feedback ──┘     └─────────────────┘          └──▶ Train TraversalPolicy ⭐ │
+│       ▲                                                      │                   │
+│       │                                                      ▼                   │
+│       │                                           ┌─────────────────────┐        │
+│       └───────────────────────────────────────────│ Update expert_     │        │
+│         (implicit: inferred from F7↔F3-F6)        │ affinity in Bridge │        │
+│                                                   └─────────────────────┘        │
+│                                                                                  │
+│  Buffer: 100 samples minimum before training trigger                             │
+│  Frequency: Weekly batch or on-demand for critical corrections                   │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Devil's Advocate Integration
@@ -663,11 +849,16 @@ When consensus is high (δ < 0.2), the Devil's Advocate system activates:
 - **FR-F2:** System can collect Router decision feedback from high-authority users
 - **FR-F3-F6:** System can collect Expert output feedback with 4-level granularity
 - **FR-F7:** System can collect Synthesizer feedback including usability assessment
-- **FR-F8:** System can weight all feedback by user authority score
-- **FR-F9:** System can aggregate feedback per component for training
-- **FR-F10:** System can trigger training pipeline when buffer threshold reached
-- **FR-F11:** System can display Devil's Advocate for high-consensus responses
-- **FR-F12:** System can collect Devil's Advocate evaluation feedback
+- **FR-F8:** System can collect Bridge quality feedback (source relevance rating)
+- **FR-F8a:** System can infer F8 implicitly from F7↔F3-F6 correlation
+- **FR-F8b:** System can display "Fonti usate" panel to 🎓 Contributore
+- **FR-F8c:** System can update expert_affinity weights based on F8 feedback
+- **FR-F8d:** System can train TraversalPolicy via PolicyGradientTrainer
+- **FR-F9:** System can weight all feedback by user authority score
+- **FR-F10:** System can aggregate feedback per component for training
+- **FR-F11:** System can trigger training pipeline when buffer threshold reached
+- **FR-F12:** System can display Devil's Advocate for high-consensus responses
+- **FR-F13:** System can collect Devil's Advocate evaluation feedback
 
 ---
 
