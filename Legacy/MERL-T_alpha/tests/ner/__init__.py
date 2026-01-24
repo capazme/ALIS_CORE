@@ -1,0 +1,1 @@
+"""Tests per modulo NER."""

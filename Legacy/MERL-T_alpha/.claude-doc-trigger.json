@@ -1,0 +1,1297 @@
+[
+  {
+    "timestamp": "2026-01-06 08:56:04",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 08:56:10",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:09:57",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:10:16",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:10:36",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:10:59",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:11:37",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:13:49",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:26:47",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:29:57",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:30:16",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:30:31",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:30:53",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:31:04",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:36:55",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:37:12",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:58:47",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 09:59:27",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 10:02:16",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 10:02:40",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 10:03:29",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 10:04:44",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 10:22:59",
+    "file": "merlt/storage/enrichment/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/storage/enrichment. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 10:23:05",
+    "file": "merlt/storage/enrichment/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/storage/enrichment. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 10:23:45",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 10:23:53",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 10:24:05",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 10:24:11",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 10:24:45",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 10:28:33",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 10:28:43",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 10:29:03",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 10:29:26",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 11:14:20",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 11:14:36",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 11:14:44",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 11:14:49",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 12:50:56",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 12:51:25",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:57:57",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:58:11",
+    "file": "merlt/api/models/profile_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/profile_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:58:17",
+    "file": "merlt/api/models/profile_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/profile_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:58:24",
+    "file": "merlt/api/models/profile_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/profile_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:59:08",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:59:30",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:59:40",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:59:51",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:00:14",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:00:25",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:02:43",
+    "file": "merlt/api/models/profile_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/profile_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:02:48",
+    "file": "merlt/api/models/profile_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/profile_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:02:54",
+    "file": "merlt/api/models/profile_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/profile_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:03:01",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:03:10",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:03:25",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:03:50",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:04:13",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:04:17",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:19:03",
+    "file": "merlt/api/visualex_bridge.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/visualex_bridge.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:19:12",
+    "file": "merlt/api/visualex_bridge.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/visualex_bridge.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:19:20",
+    "file": "merlt/api/visualex_bridge.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/visualex_bridge.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:19:25",
+    "file": "merlt/api/visualex_bridge.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/visualex_bridge.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:20:31",
+    "file": "merlt/api/visualex_bridge.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/visualex_bridge.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:25:42",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:25:53",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:26:02",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 22:26:10",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 23:04:22",
+    "file": "merlt/api/visualex_bridge.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/visualex_bridge.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 23:18:41",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 23:24:57",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 23:27:07",
+    "file": "merlt/api/graph_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/graph_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 23:27:36",
+    "file": "merlt/api/visualex_bridge.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/visualex_bridge.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 23:27:50",
+    "file": "merlt/api/visualex_bridge.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/visualex_bridge.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 23:29:15",
+    "file": "merlt/api/graph_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/graph_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-06 23:29:26",
+    "file": "merlt/api/graph_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/graph_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 12:31:01",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 12:31:25",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 12:32:03",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 12:32:11",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 12:33:29",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 12:33:46",
+    "file": "merlt/storage/enrichment/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/storage/enrichment. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 12:33:58",
+    "file": "merlt/storage/enrichment/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/storage/enrichment. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 13:12:07",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 13:12:28",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 13:15:52",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 13:26:42",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 13:26:57",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 13:27:07",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 14:06:21",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 14:06:48",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 14:07:26",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 14:08:02",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 14:47:39",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 14:48:16",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 14:49:06",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 15:20:44",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 15:21:17",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 15:21:39",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 15:27:25",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 22:40:10",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 23:24:21",
+    "file": "merlt/api/graph_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/graph_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 23:25:36",
+    "file": "merlt/api/graph_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/graph_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 23:29:11",
+    "file": "merlt/api/graph_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/graph_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 23:33:07",
+    "file": "merlt/api/graph_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/graph_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 23:40:33",
+    "file": "merlt/api/graph_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/graph_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-07 23:41:14",
+    "file": "merlt/api/graph_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/graph_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 00:08:46",
+    "file": "merlt/api/models/pipeline_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/pipeline_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 00:14:59",
+    "file": "merlt/pipeline/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/pipeline. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 00:34:27",
+    "file": "merlt/api/pipeline_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/pipeline_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 00:36:43",
+    "file": "merlt/api/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/api. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 00:56:10",
+    "file": "merlt/api/models/pipeline_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/pipeline_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 00:56:18",
+    "file": "merlt/api/pipeline_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/pipeline_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 00:56:34",
+    "file": "merlt/pipeline/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/pipeline. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 08:36:21",
+    "file": "merlt/api/training_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/training_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 08:36:39",
+    "file": "merlt/api/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/api. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 08:36:39",
+    "file": "merlt/api/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/api. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 08:37:02",
+    "file": "merlt/rlcf/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/rlcf. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 08:37:02",
+    "file": "merlt/rlcf/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/rlcf. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 08:43:29",
+    "file": "merlt/api/experts_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/experts_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 08:43:42",
+    "file": "merlt/api/experts_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/experts_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 08:47:25",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 08:47:33",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 08:48:37",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 08:48:59",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 08:50:33",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 09:10:55",
+    "file": "merlt/api/models/ner_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/ner_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 09:11:30",
+    "file": "merlt/api/models/ner_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/ner_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 09:25:11",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 09:26:34",
+    "file": "merlt/ner/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/ner. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 09:27:17",
+    "file": "tests/ner/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: tests/ner. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 09:27:44",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 09:30:35",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 19:00:08",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 19:56:37",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 19:56:48",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 19:57:00",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 19:57:11",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 19:57:29",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:12:09",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:12:42",
+    "file": "merlt/api/models/enrichment_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/enrichment_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:13:10",
+    "file": "merlt/rlcf/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/rlcf. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:13:27",
+    "file": "merlt/rlcf/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/rlcf. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:18:09",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:20:09",
+    "file": "merlt/api/models/profile_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/profile_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:23:09",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:23:29",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:23:38",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:23:46",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:23:56",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:24:04",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:24:17",
+    "file": "merlt/api/profile_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/profile_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:31:48",
+    "file": "merlt/api/visualex_bridge.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/visualex_bridge.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:32:00",
+    "file": "merlt/api/visualex_bridge.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/visualex_bridge.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:32:15",
+    "file": "merlt/api/visualex_bridge.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/visualex_bridge.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:32:28",
+    "file": "merlt/api/visualex_bridge.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/visualex_bridge.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:46:21",
+    "file": "merlt/api/models/pipeline_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/pipeline_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:46:28",
+    "file": "merlt/api/pipeline_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/pipeline_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 20:48:03",
+    "file": "merlt/api/pipeline_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/pipeline_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 00:49:20",
+    "file": "merlt/api/models/dashboard_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/dashboard_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 00:50:18",
+    "file": "merlt/api/models/statistics_models.py",
+    "change_type": "schema_change",
+    "context": "Data model modified: merlt/api/models/statistics_models.py. Update architecture/design docs if schema changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 00:51:55",
+    "file": "merlt/api/dashboard_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/dashboard_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 00:53:26",
+    "file": "merlt/api/statistics_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/statistics_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 00:54:31",
+    "file": "merlt/api/rlcf_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/rlcf_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 00:55:58",
+    "file": "merlt/api/expert_metrics_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/expert_metrics_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 00:56:25",
+    "file": "merlt/api/visualex_bridge.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/visualex_bridge.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 00:56:32",
+    "file": "merlt/api/visualex_bridge.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/visualex_bridge.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 00:56:43",
+    "file": "merlt/api/visualex_bridge.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/visualex_bridge.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:14:54",
+    "file": "merlt/api/rlcf_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/rlcf_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:15:03",
+    "file": "merlt/api/rlcf_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/rlcf_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:15:25",
+    "file": "merlt/api/rlcf_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/rlcf_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:15:48",
+    "file": "merlt/api/rlcf_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/rlcf_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:16:07",
+    "file": "merlt/api/rlcf_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/rlcf_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:17:56",
+    "file": "merlt/api/rlcf_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/rlcf_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:18:27",
+    "file": "merlt/api/dashboard_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/dashboard_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:18:37",
+    "file": "merlt/api/dashboard_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/dashboard_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:18:50",
+    "file": "merlt/api/dashboard_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/dashboard_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:18:54",
+    "file": "merlt/api/dashboard_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/dashboard_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:19:55",
+    "file": "merlt/api/expert_metrics_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/expert_metrics_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:21:31",
+    "file": "merlt/api/statistics_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/statistics_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:51:18",
+    "file": "merlt/api/dashboard_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/dashboard_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 02:26:01",
+    "file": "merlt/api/dashboard_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/dashboard_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 02:26:14",
+    "file": "merlt/api/dashboard_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/dashboard_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 02:26:24",
+    "file": "merlt/api/dashboard_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/dashboard_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-09 02:31:16",
+    "file": "merlt/api/dashboard_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/dashboard_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-23 20:35:27",
+    "file": "pyproject.toml",
+    "change_type": "core_change",
+    "context": "Core file modified: pyproject.toml. May require updating setup/installation docs.",
+    "project_docs": "README.md readme.md docs/ CONTRIBUTING.md CLAUDE.md"
+  }
+]

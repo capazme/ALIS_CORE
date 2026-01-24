@@ -1,0 +1,409 @@
+/**
+ * EXAMPLE: Refactored ArticleTabContent.tsx
+ *
+ * This file shows how ArticleTabContent.tsx should be modified to use the plugin system
+ * instead of direct MERLT imports.
+ *
+ * Key changes:
+ * 1. Remove all MERLT imports (hooks, components, services)
+ * 2. Use EventBus to emit events
+ * 3. Use PluginSlot for MERLT UI components
+ * 4. Remove MERLT-specific state management
+ *
+ * Original location: Legacy/VisuaLexAPI/frontend/src/components/features/search/ArticleTabContent.tsx
+ * Target location: visualex-platform/frontend/src/components/features/search/ArticleTabContent.tsx
+ */
+
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import type { ArticleData, SearchParams } from '../../../types';
+import { BrocardiDisplay } from './BrocardiDisplay';
+import { SelectionPopup, type SelectedTextInfo } from './SelectionPopup';
+import {
+  ExternalLink,
+  Zap,
+  FolderPlus,
+  Copy,
+  StickyNote,
+  Highlighter,
+  Share2,
+  Download,
+  X,
+  MoreHorizontal,
+  Clock,
+  BookOpen,
+  GitCompare,
+  Brain,
+} from 'lucide-react';
+import { useAppStore } from '../../../store/useAppStore';
+import { useAuth } from '../../../hooks/useAuth';
+import { cn } from '../../../lib/utils';
+import { DossierModal } from '../../ui/DossierModal';
+import { Toast } from '../../ui/Toast';
+import { CopyModal, type CopyOptions } from '../../ui/CopyModal';
+import { AdvancedExportModal } from '../../ui/AdvancedExportModal';
+import { SafeHTML } from '../../../utils/sanitize';
+import { CitationPreviewPopup } from '../../ui/CitationPreviewPopup';
+import { useCitationPreview } from '../../../hooks/useCitationPreview';
+import {
+  wrapCitationsInHtml,
+  deserializeCitation,
+  type ParsedCitationData,
+} from '../../../utils/citationMatcher';
+import { getContextFromDOM } from '../../../utils/domContext';
+import { openCompareWithArticle, getCompareState } from '../../../hooks/useCompare';
+
+// ============================================================================
+// PLUGIN SYSTEM IMPORTS - New imports to replace MERLT direct imports
+// ============================================================================
+import { PluginSlot, EventBus } from '@/lib/plugins';
+
+// ============================================================================
+// REMOVED IMPORTS - These are no longer needed in platform
+// ============================================================================
+// ❌ REMOVED: import { useMerltArticleStatus } from '../../../hooks/useMerltArticleStatus';
+// ❌ REMOVED: import { MerltInspectorPanel } from '../merlt/MerltInspectorPanel';
+// ❌ REMOVED: import { ProposeEntityDrawer } from '../merlt/ProposeEntityDrawer';
+// ❌ REMOVED: import { ProposeRelationDrawer } from '../merlt/ProposeRelationDrawer';
+// ❌ REMOVED: import { CitationCorrectionCard } from '../merlt/CitationCorrectionCard';
+// ❌ REMOVED: import { merltService } from '../../../services/merltService';
+
+interface ArticleTabContentProps {
+  data: ArticleData;
+  onCrossReferenceNavigate?: (
+    articleNumber: string,
+    normaData: ArticleData['norma_data']
+  ) => void;
+  onOpenStudyMode?: () => void;
+}
+
+// [... DICTIONARY_TERMS and HIGHLIGHT_STYLES stay the same ...]
+
+export function ArticleTabContent({
+  data,
+  onCrossReferenceNavigate,
+  onOpenStudyMode,
+}: ArticleTabContentProps) {
+  const { article_text, norma_data, brocardi_info, url, versionInfo } = data;
+  const {
+    annotations,
+    addAnnotation,
+    removeAnnotation,
+    highlights,
+    addHighlight,
+    removeHighlight,
+    triggerSearch,
+    addQuickNorm,
+  } = useAppStore();
+
+  const [showDossierModal, setShowDossierModal] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
+  const [noteText, setNoteText] = useState('');
+  const [highlightColor] = useState<'yellow' | 'green' | 'red' | 'blue'>('yellow');
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [showAdvancedExport, setShowAdvancedExport] = useState(false);
+  const [showVersionInput, setShowVersionInput] = useState(false);
+  const [versionDate, setVersionDate] = useState('');
+  const [toastMessage, setToastMessage] = useState<{
+    text: string;
+    type: 'success' | 'error' | 'info';
+  } | null>(null);
+  const [showHighlightPicker, setShowHighlightPicker] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const highlightSelectionRef = useRef<{
+    start: number;
+    end: number;
+    text: string;
+  } | null>(null);
+
+  // Citation preview hook
+  const citationPreviewState = useCitationPreview();
+  const { showPreview, hidePreview } = citationPreviewState;
+  const isHoveringPopupRef = useRef(false);
+
+  // Auth hook for user ID
+  const { user, isAuthenticated } = useAuth();
+
+  // ============================================================================
+  // REMOVED STATE - MERLT-specific state is now managed by the plugin
+  // ============================================================================
+  // ❌ REMOVED: const [showMerltPanel, setShowMerltPanel] = useState(false);
+  // ❌ REMOVED: const [showProposeEntityDrawer, setShowProposeEntityDrawer] = useState(false);
+  // ❌ REMOVED: const [showProposeRelationDrawer, setShowProposeRelationDrawer] = useState(false);
+  // ❌ REMOVED: const [selectedTextForProposal, setSelectedTextForProposal] = useState<SelectedTextInfo | null>(null);
+  // ❌ REMOVED: const merltStatus = useMerltArticleStatus({...});
+
+  // ============================================================================
+  // PLUGIN STATE - Simple state to track if plugin panel is open
+  // The actual MERLT state is managed internally by the plugin
+  // ============================================================================
+  const [showPluginSidebar, setShowPluginSidebar] = useState(false);
+
+  // Generate URN for this article
+  const articleUrn = useMemo(() => {
+    return `urn:nir:stato:${norma_data.tipo_atto.replace(/\s+/g, '.')}:art${norma_data.numero_articolo}`;
+  }, [norma_data.tipo_atto, norma_data.numero_articolo]);
+
+  // ============================================================================
+  // NEW: Emit article:viewed event when article is viewed
+  // This replaces direct MERLT service calls
+  // ============================================================================
+  useEffect(() => {
+    EventBus.emit('article:viewed', {
+      urn: articleUrn,
+      articleId: norma_data.numero_articolo,
+      userId: user?.id,
+    });
+  }, [articleUrn, norma_data.numero_articolo, user?.id]);
+
+  // ============================================================================
+  // NEW: Handler for text selection that emits events
+  // This allows plugins to react to text selection
+  // ============================================================================
+  const handleTextSelected = useCallback(
+    (info: SelectedTextInfo) => {
+      EventBus.emit('article:text-selected', {
+        urn: articleUrn,
+        text: info.text,
+        startOffset: info.startOffset,
+        endOffset: info.endOffset,
+      });
+    },
+    [articleUrn]
+  );
+
+  // [... Keep all the existing helper functions like generateKey, handleAddToQuickNorms, etc. ...]
+
+  // ============================================================================
+  // MODIFIED: SelectionPopup handlers - emit events instead of direct MERLT calls
+  // ============================================================================
+
+  // Handler for SelectionPopup propose entity action
+  // This now just emits an event instead of opening a MERLT drawer
+  const handlePopupProposeEntity = (info: SelectedTextInfo) => {
+    if (!isAuthenticated) {
+      showToast('Effettua il login per proporre entità', 'error');
+      return;
+    }
+    // Emit event - plugin will handle showing UI
+    EventBus.emit('article:text-selected', {
+      urn: articleUrn,
+      text: info.text,
+      startOffset: info.startOffset,
+      endOffset: info.endOffset,
+    });
+    // Open plugin sidebar
+    setShowPluginSidebar(true);
+  };
+
+  // [... Keep all other handlers that don't involve MERLT ...]
+
+  // ============================================================================
+  // MODIFIED RENDER - Replace MERLT components with PluginSlot
+  // ============================================================================
+
+  return (
+    <div className="animate-in fade-in duration-300 relative">
+      {/* Sticky Reading Toolbar - MODIFIED */}
+      <div className="glass-toolbar sticky top-0 z-10 flex items-center justify-between p-2 rounded-t-xl mb-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-b-2 border-slate-200/50 dark:border-slate-800/50">
+        {/* ... other toolbar items ... */}
+
+        {/* Desktop: Full Quick Actions */}
+        <div className="hidden md:flex items-center gap-1">
+          {/* ... other buttons ... */}
+
+          {/* ================================================================
+              MODIFIED: MERLT/Plugin toggle button
+              Now just toggles the sidebar visibility - plugin handles the rest
+              ================================================================ */}
+          <button
+            onClick={() => setShowPluginSidebar(!showPluginSidebar)}
+            className={cn(
+              'p-1.5 rounded-md transition-colors relative',
+              showPluginSidebar
+                ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400'
+                : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-primary-500'
+            )}
+            title="Knowledge Graph (Plugin)"
+          >
+            <Brain size={16} />
+            {/* Badge would be rendered by plugin if needed */}
+          </button>
+
+          {/* ... other buttons ... */}
+        </div>
+      </div>
+
+      {/* Article Content */}
+      <div className="relative group/content" ref={contentRef}>
+        <SelectionPopup
+          containerRef={contentRef}
+          onHighlight={handlePopupHighlight}
+          onAddNote={handlePopupAddNote}
+          onCopy={handlePopupCopy}
+          onProposeEntity={handlePopupProposeEntity}
+          onAnnotateCitation={handleAnnotateCitation}
+        />
+
+        <div
+          className="prose prose-lg dark:prose-invert max-w-none legal-prose prose-slate prose-headings:font-bold font-serif px-2 sm:px-4"
+          id={`article-content-${itemKey}`}
+        >
+          {processedContent ? (
+            <SafeHTML html={processedContent} />
+          ) : (
+            <div className="text-slate-400 italic text-center py-8 flex flex-col items-center gap-2">
+              <div className="w-4 h-4 rounded-full border-2 border-slate-300 border-t-primary-500 animate-spin" />
+              Caricamento testo...
+            </div>
+          )}
+        </div>
+
+        {/* Brocardi Display */}
+        {brocardi_info && (
+          <div className="mt-8 border-t border-slate-200 dark:border-slate-800 pt-6">
+            <BrocardiDisplay
+              info={brocardi_info}
+              currentNorma={{
+                tipo_atto: norma_data.tipo_atto,
+                data: norma_data.data,
+                numero_atto: norma_data.numero_atto,
+              }}
+              onArticleClick={(articleNumber, tipoAtto) => {
+                /* ... same logic ... */
+              }}
+            />
+          </div>
+        )}
+
+        {/* ================================================================
+            NEW: PluginSlot for article-content-overlay
+            This is where the plugin renders floating UI (citation correction, etc.)
+            ================================================================ */}
+        <PluginSlot
+          name="article-content-overlay"
+          props={{
+            urn: articleUrn,
+            articleId: norma_data.numero_articolo,
+            contentRef: contentRef,
+          }}
+          fallback={null}
+        />
+      </div>
+
+      {/* ... other existing UI (highlights summary, modals, etc.) ... */}
+
+      {/* Citation Preview Popup - stays the same, it's a platform feature */}
+      <CitationPreviewPopup
+        isVisible={citationPreviewState.isVisible}
+        isLoading={citationPreviewState.isLoading}
+        error={citationPreviewState.error}
+        citation={citationPreviewState.citation}
+        article={citationPreviewState.article}
+        position={citationPreviewState.position}
+        targetElement={citationPreviewState.targetElement}
+        onClose={hidePreview}
+        onOpenInTab={handleOpenCitationInTab}
+        // ================================================================
+        // MODIFIED: These handlers now emit events instead of calling merltService
+        // ================================================================
+        onConfirmCorrect={(data) => {
+          EventBus.emit('citation:detected', {
+            urn: articleUrn,
+            text: data.originalText,
+            parsed: data.parsed,
+          });
+        }}
+        onRequestCorrection={(data) => {
+          EventBus.emit('citation:detected', {
+            urn: articleUrn,
+            text: data.originalText,
+            parsed: data.parsed,
+          });
+        }}
+        onMouseEnter={() => {
+          isHoveringPopupRef.current = true;
+        }}
+        onMouseLeave={() => {
+          isHoveringPopupRef.current = false;
+          hidePreview();
+        }}
+      />
+
+      {/* ================================================================
+          NEW: PluginSlot for article-sidebar (MERLT Inspector Panel)
+          This replaces the direct MerltInspectorPanel component
+          The plugin will render its own UI here if the user has MERLT enabled
+          ================================================================ */}
+      {showPluginSidebar && (
+        <div
+          className="fixed right-0 top-0 h-full w-96 bg-white dark:bg-slate-900 shadow-2xl z-50 transform transition-transform duration-300"
+          style={{ transform: showPluginSidebar ? 'translateX(0)' : 'translateX(100%)' }}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => setShowPluginSidebar(false)}
+            className="absolute top-4 right-4 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+          >
+            <X size={20} />
+          </button>
+
+          {/* PluginSlot renders MERLT content here */}
+          <div className="h-full overflow-y-auto pt-12 px-4">
+            <PluginSlot
+              name="article-sidebar"
+              props={{
+                urn: articleUrn,
+                articleId: norma_data.numero_articolo,
+              }}
+              fallback={
+                <div className="text-center text-slate-500 py-8">
+                  <Brain size={48} className="mx-auto mb-4 opacity-50" />
+                  <p>Knowledge Graph non disponibile</p>
+                  <p className="text-sm text-slate-400 mt-2">
+                    Contatta l'amministratore per abilitare questa funzione
+                  </p>
+                </div>
+              }
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ================================================================
+          REMOVED: Direct MERLT Components
+          These are now rendered by the plugin via PluginSlot
+          ================================================================ */}
+      {/* ❌ REMOVED: <MerltInspectorPanel isOpen={showMerltPanel} ... /> */}
+      {/* ❌ REMOVED: <ProposeEntityDrawer isOpen={showProposeEntityDrawer} ... /> */}
+      {/* ❌ REMOVED: <ProposeRelationDrawer isOpen={showProposeRelationDrawer} ... /> */}
+      {/* ❌ REMOVED: <CitationCorrectionCard isOpen={showCitationCorrectionCard} ... /> */}
+    </div>
+  );
+}
+
+// [... parseInlineStyle helper stays the same ...]
+
+/**
+ * MIGRATION CHECKLIST for ArticleTabContent.tsx:
+ *
+ * 1. ✅ Remove MERLT hook imports (useMerltArticleStatus)
+ * 2. ✅ Remove MERLT component imports (MerltInspectorPanel, ProposeEntityDrawer, etc.)
+ * 3. ✅ Remove merltService import
+ * 4. ✅ Add plugin system imports (PluginSlot, EventBus)
+ * 5. ✅ Replace merltStatus with simple showPluginSidebar state
+ * 6. ✅ Add article:viewed event emission on mount
+ * 7. ✅ Add article:text-selected event emission on text selection
+ * 8. ✅ Add citation:detected event emission for citation feedback
+ * 9. ✅ Replace MerltInspectorPanel with PluginSlot name="article-sidebar"
+ * 10. ✅ Replace drawers/cards with PluginSlot name="article-content-overlay"
+ * 11. ✅ Update handlePopupProposeEntity to emit event instead of managing state
+ * 12. ✅ Add fallback UI for when plugin is not loaded
+ *
+ * The plugin (visualex-merlt) will:
+ * - Listen to article:viewed and load enrichment data
+ * - Listen to article:text-selected and enable entity proposal
+ * - Listen to citation:detected and handle NER feedback
+ * - Render MerltInspectorPanel in article-sidebar slot
+ * - Render ProposeEntityDrawer/ProposeRelationDrawer/CitationCorrectionCard in article-content-overlay slot
+ */

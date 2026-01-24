@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Override noEmit for plugin build
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./dist/types"
+  },
+  "include": ["src/plugin/index.ts", "src/components/**/*.tsx", "src/services/**/*.ts", "src/types/**/*.ts", "src/hooks/**/*.ts", "src/store/**/*.ts", "src/utils/**/*.ts"],
+  "exclude": ["node_modules", "dist", "src/main.tsx", "src/App.tsx"]
+}

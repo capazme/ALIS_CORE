@@ -1,0 +1,18 @@
+.venv
+__pycache__
+*.log
+*.pem
+*.pdf
+download
+.vscode/*
+.DS_Store
+
+dist/*
+.claude
+data
+
+# Environment files - NEVER commit secrets
+.env
+.env.*
+!.env.example
+*.env.local

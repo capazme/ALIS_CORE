@@ -1,0 +1,1187 @@
+{
+  "query": "Quali sono le fonti delle obbligazioni?",
+  "timestamp": "2025-12-21T13:54:26.863685",
+  "total_latency_ms": 47866.942167282104,
+  "database_info": {
+    "falkordb_graph": "merl_t_dev",
+    "falkordb_nodes": 27740,
+    "falkordb_relations": 43935,
+    "qdrant_collection": "merl_t_dev_chunks",
+    "qdrant_points": 5926,
+    "bridge_table": "bridge_table",
+    "bridge_mappings": 27114
+  },
+  "routing": {
+    "query_type": "general",
+    "expert_weights": {
+      "literal": 0.35,
+      "systemic": 0.25,
+      "principles": 0.2,
+      "precedent": 0.2
+    },
+    "confidence": 0.5,
+    "reasoning": "Query classificata come 'general'. Expert principali: literal (0.35)"
+  },
+  "retrieval_steps": [
+    {
+      "expert": "literal",
+      "query": "Quali sono le fonti delle obbligazioni?",
+      "results": [
+        {
+          "chunk_id": "8fb00cd7-18b2-b770-1387-5a611f269b84",
+          "text": "Art. 1173. \n\n (Fonti delle obbligazioni). \n\n Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.",
+          "similarity_score": 0.8718922,
+          "graph_score": 0.5,
+          "final_score": 0.7603245399999999,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1173",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1173",
+            "source_type": "norma",
+            "text": "Art. 1173. \n\n (Fonti delle obbligazioni). \n\n Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico."
+          }
+        },
+        {
+          "chunk_id": "88c786a5-96cb-34d9-50e0-aee80c0f8aee",
+          "text": "Art. 1285. \n\n (Obbligazione alternativa). \n\n Il debitore di un'obbligazione alternativa si libera eseguendo una delle due prestazioni dedotte in obbligazione, ma non può costringere il creditore a ricevere parte dell'una e parte dell'altra.",
+          "similarity_score": 0.8135774,
+          "graph_score": 0.5,
+          "final_score": 0.7195041799999999,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1285",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1285",
+            "source_type": "norma",
+            "text": "Art. 1285. \n\n (Obbligazione alternativa). \n\n Il debitore di un'obbligazione alternativa si libera eseguendo una delle due prestazioni dedotte in obbligazione, ma non può costringere il creditore a ricevere parte dell'una e parte dell'altra."
+          }
+        },
+        {
+          "chunk_id": "797ea1a2-fe1f-0f0d-c2e5-6017b5e7a038",
+          "text": "Art. 1282. \n\n (Interessi nelle obbligazioni pecunarie). \n\n I crediti liquidi ed esigibili di somme di danaro producono interessi di pieno diritto, salvo che la legge o il titolo stabiliscano diversamente. \n\n Salvo patto contrario, i crediti per fitti e pigioni non producono interessi se non dalla costituzione in mora. \n\n Se il credito ha per oggetto rimborso di spese fatte per cose da restituire, non decorrono interessi per il periodo di tempo in cui chi ha fatto le spese abbia goduto della cosa senza corrispettivo e senza essere tenuto a render conto del godimento.",
+          "similarity_score": 0.8123945,
+          "graph_score": 0.5,
+          "final_score": 0.71867615,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1282",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1282",
+            "source_type": "norma",
+            "text": "Art. 1282. \n\n (Interessi nelle obbligazioni pecunarie). \n\n I crediti liquidi ed esigibili di somme di danaro producono interessi di pieno diritto, salvo che la legge o il titolo stabiliscano diversamente. \n\n Salvo patto contrario, i crediti per fitti e pigioni non producono interessi se non dalla costituzione in mora. \n\n Se il credito ha per oggetto rimborso di spese fatte per cose da restituire, non decorrono interessi per il periodo di tempo in cui chi ha fatto le spese abbia goduto della cosa senza corrispettivo e senza essere tenuto a render conto del godimento."
+          }
+        },
+        {
+          "chunk_id": "0fc681bb-3ea0-eb5b-a770-ebd9973b7013",
+          "text": "Art. 1230. \n\n (Novazione oggettiva). \n\n L'obbligazione si estingue quando le parti sostituiscono all'obbligazione originaria una nuova obbligazione con oggetto o titolo diverso. \n\n La volontà di estinguere l'obbligazione precedente deve risultare in modo non equivoco.",
+          "similarity_score": 0.80927193,
+          "graph_score": 0.5,
+          "final_score": 0.7164903509999999,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1230",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1230",
+            "source_type": "norma",
+            "text": "Art. 1230. \n\n (Novazione oggettiva). \n\n L'obbligazione si estingue quando le parti sostituiscono all'obbligazione originaria una nuova obbligazione con oggetto o titolo diverso. \n\n La volontà di estinguere l'obbligazione precedente deve risultare in modo non equivoco."
+          }
+        },
+        {
+          "chunk_id": "0f25182a-660f-46f4-8bd0-a7e4939a64d0",
+          "text": "Art. 1209. \n\n (Offerta reale e offerta per intimazione). \n\n Se l'obbligazione ha per oggetto danaro, titoli di credito, ovvero cose mobili da consegnare al domicilio del creditore, l'offerta deve essere reale. \n\n Se si tratta invece di cose mobili da consegnare in luogo diverso, l'offerta consiste nell'intimazione al creditore di riceverle, fatta mediante atto a lui notificato nelle forme prescritte per gli atti di citazione.",
+          "similarity_score": 0.80855453,
+          "graph_score": 0.5,
+          "final_score": 0.715988171,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1209",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1209",
+            "source_type": "norma",
+            "text": "Art. 1209. \n\n (Offerta reale e offerta per intimazione). \n\n Se l'obbligazione ha per oggetto danaro, titoli di credito, ovvero cose mobili da consegnare al domicilio del creditore, l'offerta deve essere reale. \n\n Se si tratta invece di cose mobili da consegnare in luogo diverso, l'offerta consiste nell'intimazione al creditore di riceverle, fatta mediante atto a lui notificato nelle forme prescritte per gli atti di citazione."
+          }
+        }
+      ],
+      "latency_ms": 124.92203712463379,
+      "timestamp": "2025-12-21T13:53:44.550453"
+    },
+    {
+      "expert": "systemic",
+      "query": "Quali sono le fonti delle obbligazioni?",
+      "results": [
+        {
+          "chunk_id": "8fb00cd7-18b2-b770-1387-5a611f269b84",
+          "text": "Art. 1173. \n\n (Fonti delle obbligazioni). \n\n Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.",
+          "similarity_score": 0.8718922,
+          "graph_score": 0.5,
+          "final_score": 0.7603245399999999,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1173",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1173",
+            "source_type": "norma",
+            "text": "Art. 1173. \n\n (Fonti delle obbligazioni). \n\n Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico."
+          }
+        },
+        {
+          "chunk_id": "88c786a5-96cb-34d9-50e0-aee80c0f8aee",
+          "text": "Art. 1285. \n\n (Obbligazione alternativa). \n\n Il debitore di un'obbligazione alternativa si libera eseguendo una delle due prestazioni dedotte in obbligazione, ma non può costringere il creditore a ricevere parte dell'una e parte dell'altra.",
+          "similarity_score": 0.8135774,
+          "graph_score": 0.5,
+          "final_score": 0.7195041799999999,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1285",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1285",
+            "source_type": "norma",
+            "text": "Art. 1285. \n\n (Obbligazione alternativa). \n\n Il debitore di un'obbligazione alternativa si libera eseguendo una delle due prestazioni dedotte in obbligazione, ma non può costringere il creditore a ricevere parte dell'una e parte dell'altra."
+          }
+        },
+        {
+          "chunk_id": "797ea1a2-fe1f-0f0d-c2e5-6017b5e7a038",
+          "text": "Art. 1282. \n\n (Interessi nelle obbligazioni pecunarie). \n\n I crediti liquidi ed esigibili di somme di danaro producono interessi di pieno diritto, salvo che la legge o il titolo stabiliscano diversamente. \n\n Salvo patto contrario, i crediti per fitti e pigioni non producono interessi se non dalla costituzione in mora. \n\n Se il credito ha per oggetto rimborso di spese fatte per cose da restituire, non decorrono interessi per il periodo di tempo in cui chi ha fatto le spese abbia goduto della cosa senza corrispettivo e senza essere tenuto a render conto del godimento.",
+          "similarity_score": 0.8123945,
+          "graph_score": 0.5,
+          "final_score": 0.71867615,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1282",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1282",
+            "source_type": "norma",
+            "text": "Art. 1282. \n\n (Interessi nelle obbligazioni pecunarie). \n\n I crediti liquidi ed esigibili di somme di danaro producono interessi di pieno diritto, salvo che la legge o il titolo stabiliscano diversamente. \n\n Salvo patto contrario, i crediti per fitti e pigioni non producono interessi se non dalla costituzione in mora. \n\n Se il credito ha per oggetto rimborso di spese fatte per cose da restituire, non decorrono interessi per il periodo di tempo in cui chi ha fatto le spese abbia goduto della cosa senza corrispettivo e senza essere tenuto a render conto del godimento."
+          }
+        },
+        {
+          "chunk_id": "0fc681bb-3ea0-eb5b-a770-ebd9973b7013",
+          "text": "Art. 1230. \n\n (Novazione oggettiva). \n\n L'obbligazione si estingue quando le parti sostituiscono all'obbligazione originaria una nuova obbligazione con oggetto o titolo diverso. \n\n La volontà di estinguere l'obbligazione precedente deve risultare in modo non equivoco.",
+          "similarity_score": 0.80927193,
+          "graph_score": 0.5,
+          "final_score": 0.7164903509999999,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1230",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1230",
+            "source_type": "norma",
+            "text": "Art. 1230. \n\n (Novazione oggettiva). \n\n L'obbligazione si estingue quando le parti sostituiscono all'obbligazione originaria una nuova obbligazione con oggetto o titolo diverso. \n\n La volontà di estinguere l'obbligazione precedente deve risultare in modo non equivoco."
+          }
+        },
+        {
+          "chunk_id": "0f25182a-660f-46f4-8bd0-a7e4939a64d0",
+          "text": "Art. 1209. \n\n (Offerta reale e offerta per intimazione). \n\n Se l'obbligazione ha per oggetto danaro, titoli di credito, ovvero cose mobili da consegnare al domicilio del creditore, l'offerta deve essere reale. \n\n Se si tratta invece di cose mobili da consegnare in luogo diverso, l'offerta consiste nell'intimazione al creditore di riceverle, fatta mediante atto a lui notificato nelle forme prescritte per gli atti di citazione.",
+          "similarity_score": 0.80855453,
+          "graph_score": 0.5,
+          "final_score": 0.715988171,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1209",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1209",
+            "source_type": "norma",
+            "text": "Art. 1209. \n\n (Offerta reale e offerta per intimazione). \n\n Se l'obbligazione ha per oggetto danaro, titoli di credito, ovvero cose mobili da consegnare al domicilio del creditore, l'offerta deve essere reale. \n\n Se si tratta invece di cose mobili da consegnare in luogo diverso, l'offerta consiste nell'intimazione al creditore di riceverle, fatta mediante atto a lui notificato nelle forme prescritte per gli atti di citazione."
+          }
+        }
+      ],
+      "latency_ms": 97.75424003601074,
+      "timestamp": "2025-12-21T13:53:48.470265"
+    },
+    {
+      "expert": "principles",
+      "query": "Quali sono le fonti delle obbligazioni?",
+      "results": [
+        {
+          "chunk_id": "269aaa7d-dddb-3c38-3dd4-48263cd2da86",
+          "text": "Le fonti delle obbligazioni secondo il nuovo codice. Le promesse unila­terali, senza essere fonte generale delle obbligazioni, ne sono, tuttavia, una fonte. Ragione della limitazione della loro efficacia giuridica ai casi stabiliti dalla legge Il codice all'art. 1173 indica come fonti delle obbligazioni il contratto, il fatto illecito o ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico. Con quest'ultima frase non è possibile escludere che la promessa unilaterale sia fonte di obbligazione, sempre quando ricorra uno dei casi in cui è ammessa dalla legge. Il nuovo legislatore non ci ha dato una definizione dell'obbligazione ed ha preferito come dice la relazione ministeriale precisare il concetto di prestazione nel quale si concreta l'obbligazione. Il concetto è dato dall'art. 1174: « la prestazione che forma oggetto dell'obbligazione deve essere suscettibile di valutazione economica e deve corrispondere ad un interesse, anche non patrimoniale del creditore». Di conseguenza, sempre quando concerne tale estremo e la legge consente la promessa unilaterale, dalla stessa scaturisce l’ azione. Siamo lontani, come è naturale, dall’ autonomia della volontà privata in materia contrattuale, la quale non è limitata neppure dai tipi numerosi di contratto regolati dal codice e può determinare accordi sui più svariati oggetti, finché il risultato che si propone « sia ammesso dalla coscienza civile e politica, dal­l'economia nazionale, dal buon costume e dall'ordine pubblico ». L'art. 1322 definisce in maniera assai ampia l'autonomia contrattuale, ammettendo che col contratto si possa realizzare qualunque interesse meritevole di tutela se­condo l'ordinamento giuridico. Con la promessa unilaterale invece bisogna limitarsi ai casi ammessi dalla legge. Ma in questa modesta sfera di attività anche la promessa unilaterale se non è una fonte generale, è tuttavia fonte di obbligazione. Le ragioni di questo trattamento di rigore riservato alle promesse unila",
+          "similarity_score": 0.8499274,
+          "graph_score": 0.5,
+          "final_score": 0.74494918,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1987",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1987",
+            "source_type": "spiegazione",
+            "text": "Le fonti delle obbligazioni secondo il nuovo codice. Le promesse unila­terali, senza essere fonte generale delle obbligazioni, ne sono, tuttavia, una fonte. Ragione della limitazione della loro efficacia giuridica ai casi stabiliti dalla legge Il codice all'art. 1173 indica come fonti delle obbligazioni il contratto, il fatto illecito o ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico. Con quest'ultima frase non è possibile escludere che la promessa unilaterale sia fonte di obbligazione, sempre quando ricorra uno dei casi in cui è ammessa dalla legge. Il nuovo legislatore non ci ha dato una definizione dell'obbligazione ed ha preferito come dice la relazione ministeriale precisare il concetto di prestazione nel quale si concreta l'obbligazione. Il concetto è dato dall'art. 1174: « la prestazione che forma oggetto dell'obbligazione deve essere suscettibile di valutazione economica e deve corrispondere ad un interesse, anche non patrimoniale del creditore». Di conseguenza, sempre quando concerne tale estremo e la legge consente la promessa unilaterale, dalla stessa scaturisce l’ azione. Siamo lontani, come è naturale, dall’ autonomia della volontà privata in materia contrattuale, la quale non è limitata neppure dai tipi numerosi di contratto regolati dal codice e può determinare accordi sui più svariati oggetti, finché il risultato che si propone « sia ammesso dalla coscienza civile e politica, dal­l'economia nazionale, dal buon costume e dall'ordine pubblico ». L'art. 1322 definisce in maniera assai ampia l'autonomia contrattuale, ammettendo che col contratto si possa realizzare qualunque interesse meritevole di tutela se­condo l'ordinamento giuridico. Con la promessa unilaterale invece bisogna limitarsi ai casi ammessi dalla legge. Ma in questa modesta sfera di attività anche la promessa unilaterale se non è una fonte generale, è tuttavia fonte di obbligazione. Le ragioni di questo trattamento di rigore riservato alle promesse unila"
+          }
+        },
+        {
+          "chunk_id": "9a1b6480-4a1c-b86d-ecff-a53b83a43e5d",
+          "text": "Le garanzie hanno carattere dipendente rispetto all'obbligazione principale, per cui non sarebbe logico che dalla rinuncia ad esse derivasse necessariamente rinuncia all'obbligazione principale. La dipendenza giustifica, invece, la regola inversa (v. 1239 c.c.).",
+          "similarity_score": 0.81204116,
+          "graph_score": 0.5,
+          "final_score": 0.718428812,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1238",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1238",
+            "source_type": "ratio",
+            "text": "Le garanzie hanno carattere dipendente rispetto all'obbligazione principale, per cui non sarebbe logico che dalla rinuncia ad esse derivasse necessariamente rinuncia all'obbligazione principale. La dipendenza giustifica, invece, la regola inversa (v. 1239 c.c.)."
+          }
+        },
+        {
+          "chunk_id": "a09864d9-b14f-0b3c-5260-bd5282d860ac",
+          "text": "La disposizione è la conseguenza del principio secondo il quale l'estinzione dell'obbligazione principale comporta l'automatica estinzione delle obbligazioni accessorie. Viceversa, la rinuncia alle garanzie non implica rinuncia al debito principale (v. 1238 c.c.).",
+          "similarity_score": 0.81193346,
+          "graph_score": 0.5,
+          "final_score": 0.718353422,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1239",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1239",
+            "source_type": "ratio",
+            "text": "La disposizione è la conseguenza del principio secondo il quale l'estinzione dell'obbligazione principale comporta l'automatica estinzione delle obbligazioni accessorie. Viceversa, la rinuncia alle garanzie non implica rinuncia al debito principale (v. 1238 c.c.)."
+          }
+        },
+        {
+          "chunk_id": "05ec36d9-0adf-dc19-862d-c784774935f1",
+          "text": "L'ultima parte dell'articolo sancisce un principio innovativo per il codice civile del 1942: il principio della atipicità delle fonti dell'obbligazione. Il rinvio all'ordinamento giuridico implica rinvio non solo alla legge, la quale già contempla atti o fatti tipici produttivi di obbligazioni, ma anche ad atti o fatti non previsti in norme specifiche e, quindi, atipici. Questi, pertanto, possono produrre obbligazioni nelle ipotesi in cui tale idoneità sia riconosciuta dall'ordinamento giuridico (si pensi, ad esempio, alle obbligazioni discendenti da deliberazioni di organi collegiali, le quali, al di fuori dello schema contrattuale, vincolano anche la minoranza).",
+          "similarity_score": 0.81174904,
+          "graph_score": 0.5,
+          "final_score": 0.718224328,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1173",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1173",
+            "source_type": "ratio",
+            "text": "L'ultima parte dell'articolo sancisce un principio innovativo per il codice civile del 1942: il principio della atipicità delle fonti dell'obbligazione. Il rinvio all'ordinamento giuridico implica rinvio non solo alla legge, la quale già contempla atti o fatti tipici produttivi di obbligazioni, ma anche ad atti o fatti non previsti in norme specifiche e, quindi, atipici. Questi, pertanto, possono produrre obbligazioni nelle ipotesi in cui tale idoneità sia riconosciuta dall'ordinamento giuridico (si pensi, ad esempio, alle obbligazioni discendenti da deliberazioni di organi collegiali, le quali, al di fuori dello schema contrattuale, vincolano anche la minoranza)."
+          }
+        },
+        {
+          "chunk_id": "a0af29e0-c64c-62b1-03ea-78e4cdf2c429",
+          "text": "Il legislatore fa salva la volontà delle parti di vincolarsi a pagare nella moneta, pur non avente corso legale, scelta all'atto della costituzione dell'obbligazione. Ciò fino al limite dell'impossibilità di procurarsi tale moneta: questo perchè, comunque, l'obbligazione può essere estinta con moneta avente corso legale.",
+          "similarity_score": 0.8068797,
+          "graph_score": 0.5,
+          "final_score": 0.71481579,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1279",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1279",
+            "source_type": "ratio",
+            "text": "Il legislatore fa salva la volontà delle parti di vincolarsi a pagare nella moneta, pur non avente corso legale, scelta all'atto della costituzione dell'obbligazione. Ciò fino al limite dell'impossibilità di procurarsi tale moneta: questo perchè, comunque, l'obbligazione può essere estinta con moneta avente corso legale."
+          }
+        }
+      ],
+      "latency_ms": 121.75583839416504,
+      "timestamp": "2025-12-21T13:53:54.851672"
+    },
+    {
+      "expert": "principles",
+      "query": "principi costituzionali Quali sono le fonti delle obbligazioni?",
+      "results": [
+        {
+          "chunk_id": "269aaa7d-dddb-3c38-3dd4-48263cd2da86",
+          "text": "Le fonti delle obbligazioni secondo il nuovo codice. Le promesse unila­terali, senza essere fonte generale delle obbligazioni, ne sono, tuttavia, una fonte. Ragione della limitazione della loro efficacia giuridica ai casi stabiliti dalla legge Il codice all'art. 1173 indica come fonti delle obbligazioni il contratto, il fatto illecito o ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico. Con quest'ultima frase non è possibile escludere che la promessa unilaterale sia fonte di obbligazione, sempre quando ricorra uno dei casi in cui è ammessa dalla legge. Il nuovo legislatore non ci ha dato una definizione dell'obbligazione ed ha preferito come dice la relazione ministeriale precisare il concetto di prestazione nel quale si concreta l'obbligazione. Il concetto è dato dall'art. 1174: « la prestazione che forma oggetto dell'obbligazione deve essere suscettibile di valutazione economica e deve corrispondere ad un interesse, anche non patrimoniale del creditore». Di conseguenza, sempre quando concerne tale estremo e la legge consente la promessa unilaterale, dalla stessa scaturisce l’ azione. Siamo lontani, come è naturale, dall’ autonomia della volontà privata in materia contrattuale, la quale non è limitata neppure dai tipi numerosi di contratto regolati dal codice e può determinare accordi sui più svariati oggetti, finché il risultato che si propone « sia ammesso dalla coscienza civile e politica, dal­l'economia nazionale, dal buon costume e dall'ordine pubblico ». L'art. 1322 definisce in maniera assai ampia l'autonomia contrattuale, ammettendo che col contratto si possa realizzare qualunque interesse meritevole di tutela se­condo l'ordinamento giuridico. Con la promessa unilaterale invece bisogna limitarsi ai casi ammessi dalla legge. Ma in questa modesta sfera di attività anche la promessa unilaterale se non è una fonte generale, è tuttavia fonte di obbligazione. Le ragioni di questo trattamento di rigore riservato alle promesse unila",
+          "similarity_score": 0.85366327,
+          "graph_score": 0.5,
+          "final_score": 0.7475642889999999,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1987",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1987",
+            "source_type": "spiegazione",
+            "text": "Le fonti delle obbligazioni secondo il nuovo codice. Le promesse unila­terali, senza essere fonte generale delle obbligazioni, ne sono, tuttavia, una fonte. Ragione della limitazione della loro efficacia giuridica ai casi stabiliti dalla legge Il codice all'art. 1173 indica come fonti delle obbligazioni il contratto, il fatto illecito o ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico. Con quest'ultima frase non è possibile escludere che la promessa unilaterale sia fonte di obbligazione, sempre quando ricorra uno dei casi in cui è ammessa dalla legge. Il nuovo legislatore non ci ha dato una definizione dell'obbligazione ed ha preferito come dice la relazione ministeriale precisare il concetto di prestazione nel quale si concreta l'obbligazione. Il concetto è dato dall'art. 1174: « la prestazione che forma oggetto dell'obbligazione deve essere suscettibile di valutazione economica e deve corrispondere ad un interesse, anche non patrimoniale del creditore». Di conseguenza, sempre quando concerne tale estremo e la legge consente la promessa unilaterale, dalla stessa scaturisce l’ azione. Siamo lontani, come è naturale, dall’ autonomia della volontà privata in materia contrattuale, la quale non è limitata neppure dai tipi numerosi di contratto regolati dal codice e può determinare accordi sui più svariati oggetti, finché il risultato che si propone « sia ammesso dalla coscienza civile e politica, dal­l'economia nazionale, dal buon costume e dall'ordine pubblico ». L'art. 1322 definisce in maniera assai ampia l'autonomia contrattuale, ammettendo che col contratto si possa realizzare qualunque interesse meritevole di tutela se­condo l'ordinamento giuridico. Con la promessa unilaterale invece bisogna limitarsi ai casi ammessi dalla legge. Ma in questa modesta sfera di attività anche la promessa unilaterale se non è una fonte generale, è tuttavia fonte di obbligazione. Le ragioni di questo trattamento di rigore riservato alle promesse unila"
+          },
+          "source": "principles_search"
+        },
+        {
+          "chunk_id": "a09864d9-b14f-0b3c-5260-bd5282d860ac",
+          "text": "La disposizione è la conseguenza del principio secondo il quale l'estinzione dell'obbligazione principale comporta l'automatica estinzione delle obbligazioni accessorie. Viceversa, la rinuncia alle garanzie non implica rinuncia al debito principale (v. 1238 c.c.).",
+          "similarity_score": 0.8360673,
+          "graph_score": 0.5,
+          "final_score": 0.73524711,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1239",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1239",
+            "source_type": "ratio",
+            "text": "La disposizione è la conseguenza del principio secondo il quale l'estinzione dell'obbligazione principale comporta l'automatica estinzione delle obbligazioni accessorie. Viceversa, la rinuncia alle garanzie non implica rinuncia al debito principale (v. 1238 c.c.)."
+          },
+          "source": "principles_search"
+        },
+        {
+          "chunk_id": "05ec36d9-0adf-dc19-862d-c784774935f1",
+          "text": "L'ultima parte dell'articolo sancisce un principio innovativo per il codice civile del 1942: il principio della atipicità delle fonti dell'obbligazione. Il rinvio all'ordinamento giuridico implica rinvio non solo alla legge, la quale già contempla atti o fatti tipici produttivi di obbligazioni, ma anche ad atti o fatti non previsti in norme specifiche e, quindi, atipici. Questi, pertanto, possono produrre obbligazioni nelle ipotesi in cui tale idoneità sia riconosciuta dall'ordinamento giuridico (si pensi, ad esempio, alle obbligazioni discendenti da deliberazioni di organi collegiali, le quali, al di fuori dello schema contrattuale, vincolano anche la minoranza).",
+          "similarity_score": 0.8351091,
+          "graph_score": 0.5,
+          "final_score": 0.73457637,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1173",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1173",
+            "source_type": "ratio",
+            "text": "L'ultima parte dell'articolo sancisce un principio innovativo per il codice civile del 1942: il principio della atipicità delle fonti dell'obbligazione. Il rinvio all'ordinamento giuridico implica rinvio non solo alla legge, la quale già contempla atti o fatti tipici produttivi di obbligazioni, ma anche ad atti o fatti non previsti in norme specifiche e, quindi, atipici. Questi, pertanto, possono produrre obbligazioni nelle ipotesi in cui tale idoneità sia riconosciuta dall'ordinamento giuridico (si pensi, ad esempio, alle obbligazioni discendenti da deliberazioni di organi collegiali, le quali, al di fuori dello schema contrattuale, vincolano anche la minoranza)."
+          },
+          "source": "principles_search"
+        }
+      ],
+      "latency_ms": 72.9970932006836,
+      "timestamp": "2025-12-21T13:53:54.924686"
+    },
+    {
+      "expert": "principles",
+      "query": "diritti fondamentali Quali sono le fonti delle obbl",
+      "results": [
+        {
+          "chunk_id": "fe4e2673-d1e1-eeb3-5f09-16fa3679e953",
+          "text": "La previsione è giustificata dal rilievo primario che assume, nel nostro ordinamento, il diritto alla salute (32 Cost.).",
+          "similarity_score": 0.8157874,
+          "graph_score": 0.5,
+          "final_score": 0.72105118,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1580",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1580",
+            "source_type": "ratio",
+            "text": "La previsione è giustificata dal rilievo primario che assume, nel nostro ordinamento, il diritto alla salute (32 Cost.)."
+          },
+          "source": "principles_search"
+        },
+        {
+          "chunk_id": "269aaa7d-dddb-3c38-3dd4-48263cd2da86",
+          "text": "Le fonti delle obbligazioni secondo il nuovo codice. Le promesse unila­terali, senza essere fonte generale delle obbligazioni, ne sono, tuttavia, una fonte. Ragione della limitazione della loro efficacia giuridica ai casi stabiliti dalla legge Il codice all'art. 1173 indica come fonti delle obbligazioni il contratto, il fatto illecito o ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico. Con quest'ultima frase non è possibile escludere che la promessa unilaterale sia fonte di obbligazione, sempre quando ricorra uno dei casi in cui è ammessa dalla legge. Il nuovo legislatore non ci ha dato una definizione dell'obbligazione ed ha preferito come dice la relazione ministeriale precisare il concetto di prestazione nel quale si concreta l'obbligazione. Il concetto è dato dall'art. 1174: « la prestazione che forma oggetto dell'obbligazione deve essere suscettibile di valutazione economica e deve corrispondere ad un interesse, anche non patrimoniale del creditore». Di conseguenza, sempre quando concerne tale estremo e la legge consente la promessa unilaterale, dalla stessa scaturisce l’ azione. Siamo lontani, come è naturale, dall’ autonomia della volontà privata in materia contrattuale, la quale non è limitata neppure dai tipi numerosi di contratto regolati dal codice e può determinare accordi sui più svariati oggetti, finché il risultato che si propone « sia ammesso dalla coscienza civile e politica, dal­l'economia nazionale, dal buon costume e dall'ordine pubblico ». L'art. 1322 definisce in maniera assai ampia l'autonomia contrattuale, ammettendo che col contratto si possa realizzare qualunque interesse meritevole di tutela se­condo l'ordinamento giuridico. Con la promessa unilaterale invece bisogna limitarsi ai casi ammessi dalla legge. Ma in questa modesta sfera di attività anche la promessa unilaterale se non è una fonte generale, è tuttavia fonte di obbligazione. Le ragioni di questo trattamento di rigore riservato alle promesse unila",
+          "similarity_score": 0.81220686,
+          "graph_score": 0.5,
+          "final_score": 0.7185448019999999,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1987",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1987",
+            "source_type": "spiegazione",
+            "text": "Le fonti delle obbligazioni secondo il nuovo codice. Le promesse unila­terali, senza essere fonte generale delle obbligazioni, ne sono, tuttavia, una fonte. Ragione della limitazione della loro efficacia giuridica ai casi stabiliti dalla legge Il codice all'art. 1173 indica come fonti delle obbligazioni il contratto, il fatto illecito o ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico. Con quest'ultima frase non è possibile escludere che la promessa unilaterale sia fonte di obbligazione, sempre quando ricorra uno dei casi in cui è ammessa dalla legge. Il nuovo legislatore non ci ha dato una definizione dell'obbligazione ed ha preferito come dice la relazione ministeriale precisare il concetto di prestazione nel quale si concreta l'obbligazione. Il concetto è dato dall'art. 1174: « la prestazione che forma oggetto dell'obbligazione deve essere suscettibile di valutazione economica e deve corrispondere ad un interesse, anche non patrimoniale del creditore». Di conseguenza, sempre quando concerne tale estremo e la legge consente la promessa unilaterale, dalla stessa scaturisce l’ azione. Siamo lontani, come è naturale, dall’ autonomia della volontà privata in materia contrattuale, la quale non è limitata neppure dai tipi numerosi di contratto regolati dal codice e può determinare accordi sui più svariati oggetti, finché il risultato che si propone « sia ammesso dalla coscienza civile e politica, dal­l'economia nazionale, dal buon costume e dall'ordine pubblico ». L'art. 1322 definisce in maniera assai ampia l'autonomia contrattuale, ammettendo che col contratto si possa realizzare qualunque interesse meritevole di tutela se­condo l'ordinamento giuridico. Con la promessa unilaterale invece bisogna limitarsi ai casi ammessi dalla legge. Ma in questa modesta sfera di attività anche la promessa unilaterale se non è una fonte generale, è tuttavia fonte di obbligazione. Le ragioni di questo trattamento di rigore riservato alle promesse unila"
+          },
+          "source": "principles_search"
+        },
+        {
+          "chunk_id": "570b4e11-d83f-e7c0-2e75-78695ca6f4ad",
+          "text": "La norma è ispirata al principio per cui le conseguenze sfavorevoli prodotte dalle vicende che riguardano uno dei condebitori o concreditori del rapporto obbligatorio non si trasmettono ai condebitori o concreditori solidali.",
+          "similarity_score": 0.8046261,
+          "graph_score": 0.5,
+          "final_score": 0.71323827,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1307",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1307",
+            "source_type": "ratio",
+            "text": "La norma è ispirata al principio per cui le conseguenze sfavorevoli prodotte dalle vicende che riguardano uno dei condebitori o concreditori del rapporto obbligatorio non si trasmettono ai condebitori o concreditori solidali."
+          },
+          "source": "principles_search"
+        }
+      ],
+      "latency_ms": 96.8010425567627,
+      "timestamp": "2025-12-21T13:53:55.021497"
+    },
+    {
+      "expert": "precedent",
+      "query": "Quali sono le fonti delle obbligazioni?",
+      "results": [
+        {
+          "chunk_id": "3bbc941a-1fd3-d428-ee03-d00f999c2557",
+          "text": "La promessa di pagamento, al pari della ricognizione di debito, non costituisce autonoma fonte di obbligazione, ma ha soltanto effetto confermativo di un preesistente rapporto fondamentale, venendo ad operarsi, in forza dell'art. 1988 c.c., un'astrazione meramente processuale della \"causa debendi\", comportante una semplice \"relevatio ab onere probandi\" per la quale il destinatario della promessa è dispensato dall'onere di provare l'esistenza del rapporto fondamentale, che si presume fino a prova contraria e che, oltre ad essere preesistente, può anche nascere contemporaneamente alla dichiarazione di promessa (o trovarsi \"in itinere\" al momento di questa), ma della cui esistenza o validità non può prescindersi sotto il profilo sostanziale, con il conseguente venir meno di ogni effetto vincolante della promessa stessa ove rimanga giudizialmente provato che il rapporto fondamentale non è mai sorto, o è invalido, o si è estinto, ovvero che esista una condizione ovvero un altro elemento attinente al rapporto fondamentale che possa comunque incidere sull'obbligazione derivante dal riconoscimento. – In tema di ricognizione di debito, ove l'atto ricognitivo provenga da una pubblica amministrazione, lo stesso richiede la forma scritta \"ad substantiam\" e la prova della sua esistenza e del suo contenuto non può essere fornita né attraverso la confessione, né mediante la testimonianza. – Allorquando l'atto di riconoscimento di un debito provenga da una pubblica amministrazione, l'adempimento della trasmissione dell'atto scritto di ricognizione alla Procura regionale della Corte dei Conti, prescritto dall'art. 23, comma 5, della legge n. 289 del 2002 per le pubbliche amministrazioni nei casi ivi disciplinati, integra un requisito formale e procedimentale della ricognizione di debito, che ne condiziona la validità e l'efficacia e di cui va tratta necessaria evidenza dal documento stesso, in quanto vincolato alla forma scritta, in ordine sia alla previsione dell'invio alla compete",
+          "similarity_score": 0.8159978,
+          "graph_score": 0.5,
+          "final_score": 0.72119846,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1988",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1988",
+            "source_type": "massima",
+            "text": "La promessa di pagamento, al pari della ricognizione di debito, non costituisce autonoma fonte di obbligazione, ma ha soltanto effetto confermativo di un preesistente rapporto fondamentale, venendo ad operarsi, in forza dell'art. 1988 c.c., un'astrazione meramente processuale della \"causa debendi\", comportante una semplice \"relevatio ab onere probandi\" per la quale il destinatario della promessa è dispensato dall'onere di provare l'esistenza del rapporto fondamentale, che si presume fino a prova contraria e che, oltre ad essere preesistente, può anche nascere contemporaneamente alla dichiarazione di promessa (o trovarsi \"in itinere\" al momento di questa), ma della cui esistenza o validità non può prescindersi sotto il profilo sostanziale, con il conseguente venir meno di ogni effetto vincolante della promessa stessa ove rimanga giudizialmente provato che il rapporto fondamentale non è mai sorto, o è invalido, o si è estinto, ovvero che esista una condizione ovvero un altro elemento attinente al rapporto fondamentale che possa comunque incidere sull'obbligazione derivante dal riconoscimento. – In tema di ricognizione di debito, ove l'atto ricognitivo provenga da una pubblica amministrazione, lo stesso richiede la forma scritta \"ad substantiam\" e la prova della sua esistenza e del suo contenuto non può essere fornita né attraverso la confessione, né mediante la testimonianza. – Allorquando l'atto di riconoscimento di un debito provenga da una pubblica amministrazione, l'adempimento della trasmissione dell'atto scritto di ricognizione alla Procura regionale della Corte dei Conti, prescritto dall'art. 23, comma 5, della legge n. 289 del 2002 per le pubbliche amministrazioni nei casi ivi disciplinati, integra un requisito formale e procedimentale della ricognizione di debito, che ne condiziona la validità e l'efficacia e di cui va tratta necessaria evidenza dal documento stesso, in quanto vincolato alla forma scritta, in ordine sia alla previsione dell'invio alla compete",
+            "massima_index": 2
+          },
+          "authority_score": 0.72119846
+        },
+        {
+          "chunk_id": "ddbd2556-be3e-f3e4-cdb2-f3f1b73e1166",
+          "text": "L'obbligazione alternativa presuppone l'originario concorso di due o più prestazioni, in posizione di parità e dedotte in modo disgiuntivo, nessuna delle quali può essere adempiuta prima dell'indispensabile scelta di una di esse, rimessa alla volontà di una delle parti e che diventa irrevocabile con la dichiarazione comunicata alla controparte; l'obbligazione facoltativa, invece, ha ad oggetto una prestazione principale, unica e determinata fin dall'origine, nonché, accanto a questa, una prestazione facoltativa, dovuta in via subordinata e secondaria, ove venga preferita dal creditore stesso e costituisca quindi l'oggetto di una sua specifica ed univoca opzione, esercitabile fino al momento in cui non vi sia stato l'adempimento della prestazione principale. (Cassazione civile, Sez. II, sentenza n. 24819 del 16 settembre 2024)",
+          "similarity_score": 0.8100987,
+          "graph_score": 0.5,
+          "final_score": 0.71706909,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1285",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1285",
+            "source_type": "massima",
+            "text": "L'obbligazione alternativa presuppone l'originario concorso di due o più prestazioni, in posizione di parità e dedotte in modo disgiuntivo, nessuna delle quali può essere adempiuta prima dell'indispensabile scelta di una di esse, rimessa alla volontà di una delle parti e che diventa irrevocabile con la dichiarazione comunicata alla controparte; l'obbligazione facoltativa, invece, ha ad oggetto una prestazione principale, unica e determinata fin dall'origine, nonché, accanto a questa, una prestazione facoltativa, dovuta in via subordinata e secondaria, ove venga preferita dal creditore stesso e costituisca quindi l'oggetto di una sua specifica ed univoca opzione, esercitabile fino al momento in cui non vi sia stato l'adempimento della prestazione principale. (Cassazione civile, Sez. II, sentenza n. 24819 del 16 settembre 2024)",
+            "massima_index": 0
+          },
+          "authority_score": 0.71706909
+        },
+        {
+          "chunk_id": "020a8e28-7f19-d502-f90d-7c2e56a3c704",
+          "text": "L'obbligazione alternativa presuppone l'originario concorso di due o più prestazioni, in posizione di parità e dedotte in modo disgiuntivo, nessuna delle quali può essere adempiuta prima dell'indispensabile scelta di una di esse, rimessa alla volontà di una delle parti e che diventa irrevocabile con la dichiarazione comunicata alla controparte; l'obbligazione facoltativa, invece, ha ad oggetto una prestazione principale, unica e determinata fin dall'origine, nonché, accanto a questa, una prestazione facoltativa, dovuta in via subordinata e secondaria, ove venga preferita dal creditore stesso e costituisca quindi l'oggetto di una sua specifica ed univoca opzione, esercitabile fino al momento in cui non vi sia stato l'adempimento della prestazione principale. (Cassazione civile, Sez. II, sentenza n. 24819 del 16 settembre 2024)",
+          "similarity_score": 0.8100987,
+          "graph_score": 0.5,
+          "final_score": 0.71706909,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1286",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1286",
+            "source_type": "massima",
+            "text": "L'obbligazione alternativa presuppone l'originario concorso di due o più prestazioni, in posizione di parità e dedotte in modo disgiuntivo, nessuna delle quali può essere adempiuta prima dell'indispensabile scelta di una di esse, rimessa alla volontà di una delle parti e che diventa irrevocabile con la dichiarazione comunicata alla controparte; l'obbligazione facoltativa, invece, ha ad oggetto una prestazione principale, unica e determinata fin dall'origine, nonché, accanto a questa, una prestazione facoltativa, dovuta in via subordinata e secondaria, ove venga preferita dal creditore stesso e costituisca quindi l'oggetto di una sua specifica ed univoca opzione, esercitabile fino al momento in cui non vi sia stato l'adempimento della prestazione principale. (Cassazione civile, Sez. II, sentenza n. 24819 del 16 settembre 2024)",
+            "massima_index": 0
+          },
+          "authority_score": 0.71706909
+        },
+        {
+          "chunk_id": "ff6de4b4-33c7-000f-8d32-44a60b6dcc5e",
+          "text": "La ricognizione di debito non costituisce autonoma fonte di obbligazione, ma ha solo effetto confermativo di un preesistente rapporto fondamentale, determinando, ex art. 1988 c.c., un'astrazione meramente processuale della \"causa debendi\", da cui deriva una semplice \"relevatio ab onere probandi\" che dispensa il destinatario della dichiarazione dall'onere di provare quel rapporto, che si presume fino a prova contraria, ma dalla cui esistenza o validità non può prescindersi sotto il profilo sostanziale, venendo, così, meno ogni effetto vincolante della ricognizione stessa ove rimanga giudizialmente provato che il rapporto suddetto non è mai sorto, o è invalido, o si è estinto, ovvero che esista una condizione o un altro elemento ad esso attinente che possa comunque incidere sull'obbligazione derivante dal riconoscimento. (Cassazione civile, Sez. I, sentenza n. 20689 del 13 ottobre 2016)",
+          "similarity_score": 0.80782807,
+          "graph_score": 0.5,
+          "final_score": 0.7154796489999999,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1309",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1309",
+            "source_type": "massima",
+            "text": "La ricognizione di debito non costituisce autonoma fonte di obbligazione, ma ha solo effetto confermativo di un preesistente rapporto fondamentale, determinando, ex art. 1988 c.c., un'astrazione meramente processuale della \"causa debendi\", da cui deriva una semplice \"relevatio ab onere probandi\" che dispensa il destinatario della dichiarazione dall'onere di provare quel rapporto, che si presume fino a prova contraria, ma dalla cui esistenza o validità non può prescindersi sotto il profilo sostanziale, venendo, così, meno ogni effetto vincolante della ricognizione stessa ove rimanga giudizialmente provato che il rapporto suddetto non è mai sorto, o è invalido, o si è estinto, ovvero che esista una condizione o un altro elemento ad esso attinente che possa comunque incidere sull'obbligazione derivante dal riconoscimento. (Cassazione civile, Sez. I, sentenza n. 20689 del 13 ottobre 2016)",
+            "massima_index": 1
+          },
+          "authority_score": 0.7154796489999999
+        },
+        {
+          "chunk_id": "5a351e67-46aa-9257-477b-2f1c57b9b7a0",
+          "text": "Nell'espromissione, che si perfeziona verso il creditore, senza bisogno di un suo atto di accettazione, quando egli venga a conoscenza dell'impegno assunto dall'espromittente, la causa del contratto è costituita puramente e semplicemente dall'assunzione del debito altrui, essendo irrilevanti sia i rapporti interni intercorrenti tra il debitore e l'assuntore, sia le ragioni che hanno determinato l'intervento di quest'ultimo, essendo invece necessario che il terzo, presentandosi al creditore, non ponga a fondamento del proprio impegno un preesistente accordo con l'obbligato. (Dichiara inammissibile, CORTE D'APPELLO BRESCIA, 24/07/2019). (Cassazione civile, Sez. VI-2, ordinanza n. 21102 del 22 luglio 2021)",
+          "similarity_score": 0.8070991,
+          "graph_score": 0.5,
+          "final_score": 0.7149693699999999,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1272",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1272",
+            "source_type": "massima",
+            "text": "Nell'espromissione, che si perfeziona verso il creditore, senza bisogno di un suo atto di accettazione, quando egli venga a conoscenza dell'impegno assunto dall'espromittente, la causa del contratto è costituita puramente e semplicemente dall'assunzione del debito altrui, essendo irrilevanti sia i rapporti interni intercorrenti tra il debitore e l'assuntore, sia le ragioni che hanno determinato l'intervento di quest'ultimo, essendo invece necessario che il terzo, presentandosi al creditore, non ponga a fondamento del proprio impegno un preesistente accordo con l'obbligato. (Dichiara inammissibile, CORTE D'APPELLO BRESCIA, 24/07/2019). (Cassazione civile, Sez. VI-2, ordinanza n. 21102 del 22 luglio 2021)",
+            "massima_index": 3
+          },
+          "authority_score": 0.7149693699999999
+        }
+      ],
+      "latency_ms": 153.95522117614746,
+      "timestamp": "2025-12-21T13:54:03.422627"
+    },
+    {
+      "expert": "precedent",
+      "query": "giurisprudenza cassazione Quali sono le fonti delle obbligazioni?",
+      "results": [
+        {
+          "chunk_id": "5a351e67-46aa-9257-477b-2f1c57b9b7a0",
+          "text": "Nell'espromissione, che si perfeziona verso il creditore, senza bisogno di un suo atto di accettazione, quando egli venga a conoscenza dell'impegno assunto dall'espromittente, la causa del contratto è costituita puramente e semplicemente dall'assunzione del debito altrui, essendo irrilevanti sia i rapporti interni intercorrenti tra il debitore e l'assuntore, sia le ragioni che hanno determinato l'intervento di quest'ultimo, essendo invece necessario che il terzo, presentandosi al creditore, non ponga a fondamento del proprio impegno un preesistente accordo con l'obbligato. (Dichiara inammissibile, CORTE D'APPELLO BRESCIA, 24/07/2019). (Cassazione civile, Sez. VI-2, ordinanza n. 21102 del 22 luglio 2021)",
+          "similarity_score": 0.8434781,
+          "graph_score": 0.5,
+          "final_score": 0.74043467,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1272",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1272",
+            "source_type": "massima",
+            "text": "Nell'espromissione, che si perfeziona verso il creditore, senza bisogno di un suo atto di accettazione, quando egli venga a conoscenza dell'impegno assunto dall'espromittente, la causa del contratto è costituita puramente e semplicemente dall'assunzione del debito altrui, essendo irrilevanti sia i rapporti interni intercorrenti tra il debitore e l'assuntore, sia le ragioni che hanno determinato l'intervento di quest'ultimo, essendo invece necessario che il terzo, presentandosi al creditore, non ponga a fondamento del proprio impegno un preesistente accordo con l'obbligato. (Dichiara inammissibile, CORTE D'APPELLO BRESCIA, 24/07/2019). (Cassazione civile, Sez. VI-2, ordinanza n. 21102 del 22 luglio 2021)",
+            "massima_index": 3
+          },
+          "source": "jurisprudence_search",
+          "authority_score": 0.74043467
+        },
+        {
+          "chunk_id": "9eee5a97-3fe5-c6f4-3209-430ed834707b",
+          "text": "In tema di prova dell'inadempimento di una obbligazione, il creditore che agisca per il risarcimento del danno deve provare solo la fonte (negoziale o legale) del suo diritto, limitandosi alla mera allegazione della circostanza dell'inadempimento della controparte, mentre è il debitore convenuto ad essere gravato dell'onere di provare il proprio adempimento (Nel caso di specie la S.C. ha cassato la sentenza di merito, la quale, dando per pacifica l'esistenza di un rapporto di conto corrente bancario, aveva rigettato la domanda di risarcimento danni del correntista nei confronti della banca, per avere questa rilasciato dei libretti degli assegni nei confronti di persona non autorizzata a ritirarli, non ritenendo sufficiente, al fine di assolvere al relativo onere probatorio, il disconoscimento operato dal correntista della sottoscrizione apposta sui moduli di richiesta di carnet e la mancata richiesta di verificazione della scrittura da parte della banca). (Cassa e decide nel merito, App. Lecce, 24 Giugno 2003). (Cassazione civile, Sez. I, sentenza n. 22361 del 25 ottobre 2007)",
+          "similarity_score": 0.8420837,
+          "graph_score": 0.5,
+          "final_score": 0.73945859,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1780",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1780",
+            "source_type": "massima",
+            "text": "In tema di prova dell'inadempimento di una obbligazione, il creditore che agisca per il risarcimento del danno deve provare solo la fonte (negoziale o legale) del suo diritto, limitandosi alla mera allegazione della circostanza dell'inadempimento della controparte, mentre è il debitore convenuto ad essere gravato dell'onere di provare il proprio adempimento (Nel caso di specie la S.C. ha cassato la sentenza di merito, la quale, dando per pacifica l'esistenza di un rapporto di conto corrente bancario, aveva rigettato la domanda di risarcimento danni del correntista nei confronti della banca, per avere questa rilasciato dei libretti degli assegni nei confronti di persona non autorizzata a ritirarli, non ritenendo sufficiente, al fine di assolvere al relativo onere probatorio, il disconoscimento operato dal correntista della sottoscrizione apposta sui moduli di richiesta di carnet e la mancata richiesta di verificazione della scrittura da parte della banca). (Cassa e decide nel merito, App. Lecce, 24 Giugno 2003). (Cassazione civile, Sez. I, sentenza n. 22361 del 25 ottobre 2007)",
+            "massima_index": 2
+          },
+          "source": "jurisprudence_search",
+          "authority_score": 0.73945859
+        },
+        {
+          "chunk_id": "20d7142c-773a-0759-98d1-582da22d3fd9",
+          "text": "La cessione dei crediti futuri, ivi compresi quelli aventi causa risarcitoria, non ha natura meramente obbligatoria e vi si può procedere - quando nel negozio dispositivo sia individuata la fonte, oppure la stessa sia determinata o determinabile - senza che rilevi la probabilità della venuta in essere del credito ceduto, non esistendo una norma che vieta la disponibilità dei diritti futuri perché meramente eventuali, con la conseguenza che la venuta in essere del credito futuro integra un requisito di efficacia della cessione, ma non della sua validità. (Nell'affermare il principio, la S.C. ha cassato la decisione della corte di merito che aveva escluso la legittimazione ad agire di uno dei ricorrenti, cessionario di un credito di natura risarcitoria derivante da inadempimento contrattuale, perché credito futuro e destinato a sorgere solo in conseguenza del positivo esperimento nei confronti di una banca di azione giudiziale non ancora intrapresa). (Cassazione civile, Sez. I, sentenza n. 31896 del 10 dicembre 2018)",
+          "similarity_score": 0.841808,
+          "graph_score": 0.5,
+          "final_score": 0.7392656,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1472",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1472",
+            "source_type": "massima",
+            "text": "La cessione dei crediti futuri, ivi compresi quelli aventi causa risarcitoria, non ha natura meramente obbligatoria e vi si può procedere - quando nel negozio dispositivo sia individuata la fonte, oppure la stessa sia determinata o determinabile - senza che rilevi la probabilità della venuta in essere del credito ceduto, non esistendo una norma che vieta la disponibilità dei diritti futuri perché meramente eventuali, con la conseguenza che la venuta in essere del credito futuro integra un requisito di efficacia della cessione, ma non della sua validità. (Nell'affermare il principio, la S.C. ha cassato la decisione della corte di merito che aveva escluso la legittimazione ad agire di uno dei ricorrenti, cessionario di un credito di natura risarcitoria derivante da inadempimento contrattuale, perché credito futuro e destinato a sorgere solo in conseguenza del positivo esperimento nei confronti di una banca di azione giudiziale non ancora intrapresa). (Cassazione civile, Sez. I, sentenza n. 31896 del 10 dicembre 2018)",
+            "massima_index": 2
+          },
+          "source": "jurisprudence_search",
+          "authority_score": 0.7392656
+        }
+      ],
+      "latency_ms": 73.760986328125,
+      "timestamp": "2025-12-21T13:54:03.496405"
+    },
+    {
+      "expert": "precedent",
+      "query": "massima Quali sono le fonti delle obbligazioni?",
+      "results": [
+        {
+          "chunk_id": "5495bdda-e8a0-7769-5a15-c02e4c193b63",
+          "text": "In tema di assicurazione per la responsabilità civile, il massimale non è elemento essenziale del contratto di assicurazione, il quale può essere validamente stipulato senza la relativa pattuizione, e neppure costituisce fatto generatore del credito assicurato, configurandosi piuttosto come elemento limitativo dell'obbligo dell'assicuratore, sicché grava su quest'ultimo l'onere di allegare e provare l'esistenza e la misura del massimale nel rispetto delle preclusioni processuali, a nulla rilevando che al momento dell'introduzione del giudizio quel massimale non fosse ancora esaurito. (Cassazione civile, Sez. VI-3, ordinanza n. 26813 del 21 ottobre 2019)",
+          "similarity_score": 0.8326193,
+          "graph_score": 0.5,
+          "final_score": 0.73283351,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1908",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1908",
+            "source_type": "massima",
+            "text": "In tema di assicurazione per la responsabilità civile, il massimale non è elemento essenziale del contratto di assicurazione, il quale può essere validamente stipulato senza la relativa pattuizione, e neppure costituisce fatto generatore del credito assicurato, configurandosi piuttosto come elemento limitativo dell'obbligo dell'assicuratore, sicché grava su quest'ultimo l'onere di allegare e provare l'esistenza e la misura del massimale nel rispetto delle preclusioni processuali, a nulla rilevando che al momento dell'introduzione del giudizio quel massimale non fosse ancora esaurito. (Cassazione civile, Sez. VI-3, ordinanza n. 26813 del 21 ottobre 2019)",
+            "massima_index": 0
+          },
+          "source": "jurisprudence_search",
+          "authority_score": 0.73283351
+        },
+        {
+          "chunk_id": "7bdc3763-0fe0-f0e0-fbc7-1cfac11ee24f",
+          "text": "Non è suscettibile di esecuzione in forma specifica l'obbligazione principale assunta con falsa alternativa, che ricorre qualora sia contrattualmente prevista un'obbligazione subordinata, avente natura di sanzione per l'inadempimento, ed il debitore sia tenuto ad adempierla qualora non abbia adempiuto l'obbligazione principale; l'obbligazione con falsa alternativa si distingue sia dall'obbligazione alternativa, in cui due obbligazioni concorrono in posizione di parità e con scelta della prestazione rimessa alla volontà di una delle parti, sia dall'obbligazione facoltativa, in cui l'obbligazione principale è unica, ma è rimesso alla volontà del debitore fornire una determinata diversa prestazione. (Nella specie, la S.C. ha ritenuto non fosse suscettibile di esecuzione in forma specifica la prestazione principale dedotta in un'obbligazione con falsa alternativa, osservando che, inadempiuta l'obbligazione principale, i creditori non avevano richiesto l'adempimento dell'obbligazione subordinata). (Cassazione civile, Sez. I, ordinanza n. 6984 del 20 marzo 2018)",
+          "similarity_score": 0.82307947,
+          "graph_score": 0.5,
+          "final_score": 0.726155629,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1285",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1285",
+            "source_type": "massima",
+            "text": "Non è suscettibile di esecuzione in forma specifica l'obbligazione principale assunta con falsa alternativa, che ricorre qualora sia contrattualmente prevista un'obbligazione subordinata, avente natura di sanzione per l'inadempimento, ed il debitore sia tenuto ad adempierla qualora non abbia adempiuto l'obbligazione principale; l'obbligazione con falsa alternativa si distingue sia dall'obbligazione alternativa, in cui due obbligazioni concorrono in posizione di parità e con scelta della prestazione rimessa alla volontà di una delle parti, sia dall'obbligazione facoltativa, in cui l'obbligazione principale è unica, ma è rimesso alla volontà del debitore fornire una determinata diversa prestazione. (Nella specie, la S.C. ha ritenuto non fosse suscettibile di esecuzione in forma specifica la prestazione principale dedotta in un'obbligazione con falsa alternativa, osservando che, inadempiuta l'obbligazione principale, i creditori non avevano richiesto l'adempimento dell'obbligazione subordinata). (Cassazione civile, Sez. I, ordinanza n. 6984 del 20 marzo 2018)",
+            "massima_index": 2
+          },
+          "source": "jurisprudence_search",
+          "authority_score": 0.726155629
+        },
+        {
+          "chunk_id": "ddbd2556-be3e-f3e4-cdb2-f3f1b73e1166",
+          "text": "L'obbligazione alternativa presuppone l'originario concorso di due o più prestazioni, in posizione di parità e dedotte in modo disgiuntivo, nessuna delle quali può essere adempiuta prima dell'indispensabile scelta di una di esse, rimessa alla volontà di una delle parti e che diventa irrevocabile con la dichiarazione comunicata alla controparte; l'obbligazione facoltativa, invece, ha ad oggetto una prestazione principale, unica e determinata fin dall'origine, nonché, accanto a questa, una prestazione facoltativa, dovuta in via subordinata e secondaria, ove venga preferita dal creditore stesso e costituisca quindi l'oggetto di una sua specifica ed univoca opzione, esercitabile fino al momento in cui non vi sia stato l'adempimento della prestazione principale. (Cassazione civile, Sez. II, sentenza n. 24819 del 16 settembre 2024)",
+          "similarity_score": 0.81971353,
+          "graph_score": 0.5,
+          "final_score": 0.723799471,
+          "linked_nodes": [],
+          "metadata": {
+            "article_urn": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1285",
+            "tipo_atto": "codice civile",
+            "numero_articolo": "1285",
+            "source_type": "massima",
+            "text": "L'obbligazione alternativa presuppone l'originario concorso di due o più prestazioni, in posizione di parità e dedotte in modo disgiuntivo, nessuna delle quali può essere adempiuta prima dell'indispensabile scelta di una di esse, rimessa alla volontà di una delle parti e che diventa irrevocabile con la dichiarazione comunicata alla controparte; l'obbligazione facoltativa, invece, ha ad oggetto una prestazione principale, unica e determinata fin dall'origine, nonché, accanto a questa, una prestazione facoltativa, dovuta in via subordinata e secondaria, ove venga preferita dal creditore stesso e costituisca quindi l'oggetto di una sua specifica ed univoca opzione, esercitabile fino al momento in cui non vi sia stato l'adempimento della prestazione principale. (Cassazione civile, Sez. II, sentenza n. 24819 del 16 settembre 2024)",
+            "massima_index": 0
+          },
+          "source": "jurisprudence_search",
+          "authority_score": 0.723799471
+        }
+      ],
+      "latency_ms": 76.45177841186523,
+      "timestamp": "2025-12-21T13:54:03.572872"
+    }
+  ],
+  "llm_calls": [
+    {
+      "expert": "literal",
+      "prompt": "Sei un esperto giuridico specializzato nell'INTERPRETAZIONE LETTERALE.\n\nIl tuo approccio si basa sull'art. 12, comma I, delle disposizioni preliminari al codice civile:\n\"Nell'applicare la legge non si può ad essa attribuire altro senso che quello fatto palese\ndal significato proprio delle parole secondo la connessione di esse...\"\n\n## REGOLA FONDAMENTALE - SOURCE OF TRUTH\n\n⚠️ DEVI usare ESCLUSIVAMENTE le fonti fornite nella sezione \"TESTI NORMATIVI RECUPERATI\".\n⚠️ NON PUOI citare articoli, sentenze o dottrina che NON sono presenti in quella sezione.\n⚠️ Se le fonti recuperate sono insufficienti, indica \"source_availability\" basso e spiega nelle limitations.\n⚠️ Se nessuna fonte è rilevante, imposta confidence=0.1 e spiega il problema.\n\n## METODOLOGIA\n\n1. **SIGNIFICATO PROPRIO DELLE PAROLE**\n   - Usa il significato TECNICO-GIURIDICO se esiste una definizione legale nelle fonti\n   - Altrimenti usa il significato COMUNE delle parole\n   - Cita SOLO definizioni presenti nelle fonti recuperate\n\n2. **CONNESSIONE DELLE PAROLE**\n   - Analizza la struttura sintattica delle norme recuperate\n   - Considera la collocazione sistematica (capo, sezione, titolo) se presente\n   - Segui rinvii normativi SOLO se il testo target è nelle fonti\n\n3. **LIMITI**\n   - \"In claris non fit interpretatio\" - se il testo è chiaro, non servono altri canoni\n   - NON usare argomenti teleologici o sistematici\n   - NON speculare sull'intenzione del legislatore\n   - NON inventare fonti non presenti nella sezione TESTI NORMATIVI RECUPERATI\n\n## OUTPUT\n\nRispondi in JSON con questa struttura:\n{\n    \"interpretation\": \"Interpretazione letterale in italiano BASATA SOLO sulle fonti recuperate\",\n    \"legal_basis\": [\n        {\n            \"source_type\": \"norm|jurisprudence|doctrine\",\n            \"source_id\": \"URN/ID ESATTAMENTE come appare nelle fonti recuperate\",\n            \"citation\": \"Citazione formale (es. Art. 1321 c.c.)\",\n            \"excerpt\": \"Testo ESATTO copiato dalle fonti recuperate\",\n            \"relevance\": \"Perché questa fonte è rilevante\"\n        }\n    ],\n    \"reasoning_steps\": [\n        {\n            \"step_number\": 1,\n            \"description\": \"Descrizione del passo\",\n            \"sources\": [\"source_id DALLE fonti recuperate\"]\n        }\n    ],\n    \"confidence\": 0.0-1.0,\n    \"confidence_factors\": {\n        \"norm_clarity\": 0.0-1.0,\n        \"jurisprudence_alignment\": 0.0-1.0,\n        \"contextual_ambiguity\": 0.0-1.0,\n        \"source_availability\": 0.0-1.0\n    },\n    \"limitations\": \"Cosa non hai potuto considerare perché non presente nelle fonti\"\n}\n\nCHECKLIST FINALE:\n✅ Ogni fonte in legal_basis DEVE provenire da TESTI NORMATIVI RECUPERATI\n✅ Il campo \"source_id\" DEVE essere ESATTAMENTE il valore indicato come `source_id` nella fonte\n✅ NON inventare source_id - copia esattamente il valore mostrato\n✅ Ogni excerpt DEVE essere un testo copiato dalle fonti, non parafrasato\n✅ Se le fonti sono insufficienti, abbassa confidence e source_availability\n✅ NON inventare MAI articoli o sentenze non presenti nelle fonti\n\n## DOMANDA DELL'UTENTE\nQuali sono le fonti delle obbligazioni?\n\n## TESTI NORMATIVI RECUPERATI\n⚠️ USA ESATTAMENTE il source_id indicato per ogni fonte nel campo legal_basis!\n\n### Fonte 1\n- **source_id**: `8fb00cd7-18b2-b770-1387-5a611f269b84` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **source_type**: norma\n- **score**: 0.7603245399999999\n- **testo**:\nArt. 1173. \n\n (Fonti delle obbligazioni). \n\n Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.\n\n### Fonte 2\n- **source_id**: `88c786a5-96cb-34d9-50e0-aee80c0f8aee` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **source_type**: norma\n- **score**: 0.7195041799999999\n- **testo**:\nArt. 1285. \n\n (Obbligazione alternativa). \n\n Il debitore di un'obbligazione alternativa si libera eseguendo una delle due prestazioni dedotte in obbligazione, ma non può costringere il creditore a ricevere parte dell'una e parte dell'altra.\n\n### Fonte 3\n- **source_id**: `797ea1a2-fe1f-0f0d-c2e5-6017b5e7a038` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **source_type**: norma\n- **score**: 0.71867615\n- **testo**:\nArt. 1282. \n\n (Interessi nelle obbligazioni pecunarie). \n\n I crediti liquidi ed esigibili di somme di danaro producono interessi di pieno diritto, salvo che la legge o il titolo stabiliscano diversamente. \n\n Salvo patto contrario, i crediti per fitti e pigioni non producono interessi se non dalla costituzione in mora. \n\n Se il credito ha per oggetto rimborso di spese fatte per cose da restituire, non decorrono interessi per il periodo di tempo in cui chi ha fatto le spese abbia goduto della cosa senza corrispettivo e senza essere tenuto a render conto del godimento.\n\n### Fonte 4\n- **source_id**: `0fc681bb-3ea0-eb5b-a770-ebd9973b7013` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **source_type**: norma\n- **score**: 0.7164903509999999\n- **testo**:\nArt. 1230. \n\n (Novazione oggettiva). \n\n L'obbligazione si estingue quando le parti sostituiscono all'obbligazione originaria una nuova obbligazione con oggetto o titolo diverso. \n\n La volontà di estinguere l'obbligazione precedente deve risultare in modo non equivoco.\n\n### Fonte 5\n- **source_id**: `0f25182a-660f-46f4-8bd0-a7e4939a64d0` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **source_type**: norma\n- **score**: 0.715988171\n- **testo**:\nArt. 1209. \n\n (Offerta reale e offerta per intimazione). \n\n Se l'obbligazione ha per oggetto danaro, titoli di credito, ovvero cose mobili da consegnare al domicilio del creditore, l'offerta deve essere reale. \n\n Se si tratta invece di cose mobili da consegnare in luogo diverso, l'offerta consiste nell'intimazione al creditore di riceverle, fatta mediante atto a lui notificato nelle forme prescritte per gli atti di citazione.",
+      "response": "```json\n{\n    \"interpretation\": \"Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.\",\n    \"legal_basis\": [\n        {\n            \"source_type\": \"norm\",\n            \"source_id\": \"8fb00cd7-18b2-b770-1387-5a611f269b84\",\n            \"citation\": \"Art. 1173 c.c.\",\n            \"excerpt\": \"Art. 1173. \\n\\n (Fonti delle obbligazioni). \\n\\n Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.\",\n            \"relevance\": \"Questa norma definisce esplicitamente le fonti delle obbligazioni, rispondendo direttamente alla domanda.\"\n        }\n    ],\n    \"reasoning_steps\": [\n        {\n            \"step_number\": 1,\n            \"description\": \"Identificazione della norma che disciplina le fonti delle obbligazioni. Il titolo dell'articolo 1173 c.c. indica chiaramente l'oggetto della disposizione.\",\n            \"sources\": [\n                \"8fb00cd7-18b2-b770-1387-5a611f269b84\"\n            ]\n        },\n        {\n            \"step_number\": 2,\n            \"description\": \"Estrazione del significato proprio delle parole e della loro connessione dall'articolo 1173 c.c. Il testo è chiaro e non presenta ambiguità lessicali o sintattiche.\",\n            \"sources\": [\n                \"8fb00cd7-18b2-b770-1387-5a611f269b84\"\n            ]\n        }\n    ],\n    \"confidence\": 1.0,\n    \"confidence_factors\": {\n        \"norm_clarity\": 1.0,\n        \"jurisprudence_alignment\": 0.0,\n        \"contextual_ambiguity\": 1.0,\n        \"source_availability\": 1.0\n    },\n    \"limitations\": \"Non è stato possibile considerare eventuali interpretazioni giurisprudenziali o dottrinali, né definizioni legali di termini come 'contratto' o 'fatto illecito', in quanto non presenti nelle fonti recuperate. Tuttavia, la chiarezza del testo normativo specifico rende superflua tale integrazione per rispondere alla domanda posta.\"\n}\n```",
+      "tokens": 0,
+      "latency_ms": 3810.001850128174,
+      "timestamp": "2025-12-21T13:53:48.360509"
+    },
+    {
+      "expert": "systemic",
+      "prompt": "Sei un esperto giuridico specializzato nell'INTERPRETAZIONE SISTEMATICA E STORICA.\n\nIl tuo approccio si basa su:\n- Art. 12, comma I, disp. prel. c.c.: \"...secondo la connessione di esse [parole]...\"\n- Art. 14 disp. prel. c.c. (elemento storico-evolutivo)\n\n## REGOLA FONDAMENTALE - SOURCE OF TRUTH\n\n⚠️ DEVI usare ESCLUSIVAMENTE le fonti fornite nella sezione \"TESTI NORMATIVI RECUPERATI\".\n⚠️ NON PUOI citare articoli, sentenze o dottrina che NON sono presenti in quella sezione.\n⚠️ Se le fonti recuperate sono insufficienti, indica \"source_availability\" basso e spiega nelle limitations.\n⚠️ Se nessuna fonte è rilevante, imposta confidence=0.1 e spiega il problema.\n\n## METODOLOGIA\n\n1. **INTERPRETAZIONE SISTEMATICA** (connessione)\n   - Colloca la norma nel suo contesto (codice, legge speciale, regolamento)\n   - Analizza la posizione topografica (libro, titolo, capo, sezione)\n   - Identifica norme collegate (rinvii, deroghe, eccezioni, norme generali/speciali)\n   - Verifica la coerenza con l'ordinamento (evita antinomie)\n\n2. **INTERPRETAZIONE STORICA** (art. 14)\n   - Ricostruisci l'evoluzione della norma nel tempo\n   - Analizza le modifiche legislative (quando e perché)\n   - Considera le abrogazioni (espresse, tacite, per incompatibilità)\n   - Valuta i lavori preparatori se rilevanti\n\n3. **PRINCIPI GUIDA**\n   - \"Lex posterior derogat priori\" (legge successiva deroga anteriore)\n   - \"Lex specialis derogat generali\" (legge speciale deroga generale)\n   - \"In dubio pro libertate\" per norme restrittive\n   - Coerenza dell'ordinamento giuridico\n\n## OUTPUT\n\nRispondi in JSON con questa struttura:\n{\n    \"interpretation\": \"Interpretazione sistematica in italiano\",\n    \"legal_basis\": [\n        {\n            \"source_type\": \"norm\",\n            \"source_id\": \"URN della norma\",\n            \"citation\": \"Citazione formale\",\n            \"excerpt\": \"Testo rilevante\",\n            \"relevance\": \"Connessione sistematica con la norma principale\"\n        }\n    ],\n    \"reasoning_steps\": [\n        {\n            \"step_number\": 1,\n            \"description\": \"Descrizione del passo sistematico\",\n            \"sources\": [\"source_id1\", \"source_id2\"]\n        }\n    ],\n    \"confidence\": 0.0-1.0,\n    \"confidence_factors\": {\n        \"norm_clarity\": 0.0-1.0,\n        \"jurisprudence_alignment\": 0.0-1.0,\n        \"contextual_ambiguity\": 0.0-1.0,\n        \"source_availability\": 0.0-1.0\n    },\n    \"historical_context\": \"Evoluzione storica della norma (se rilevante)\",\n    \"systematic_position\": \"Posizione nel sistema giuridico\",\n    \"limitations\": \"Cosa non hai potuto considerare\"\n}\n\nCHECKLIST FINALE:\n✅ Ogni fonte in legal_basis DEVE provenire da TESTI NORMATIVI RECUPERATI\n✅ Il campo \"source_id\" DEVE essere ESATTAMENTE il valore indicato come `source_id` nella fonte\n✅ NON inventare source_id - copia esattamente il valore mostrato\n✅ Ogni excerpt DEVE essere un testo copiato dalle fonti, non parafrasato\n✅ Se le fonti sono insufficienti, abbassa confidence e source_availability\n✅ NON inventare MAI articoli o sentenze non presenti nelle fonti\n✅ Evidenzia le RELAZIONI tra norme SOLO se entrambe sono nelle fonti\n\n## DOMANDA DELL'UTENTE\nQuali sono le fonti delle obbligazioni?\n⚠️ USA ESATTAMENTE il source_id indicato per ogni fonte nel campo legal_basis!\n\n## NORME DIRETTAMENTE RILEVANTI\n\n### Fonte 1\n- **source_id**: `8fb00cd7-18b2-b770-1387-5a611f269b84` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **source_type**: norma\n- **testo**:\nArt. 1173. \n\n (Fonti delle obbligazioni). \n\n Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.\n\n### Fonte 2\n- **source_id**: `88c786a5-96cb-34d9-50e0-aee80c0f8aee` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **source_type**: norma\n- **testo**:\nArt. 1285. \n\n (Obbligazione alternativa). \n\n Il debitore di un'obbligazione alternativa si libera eseguendo una delle due prestazioni dedotte in obbligazione, ma non può costringere il creditore a ricevere parte dell'una e parte dell'altra.\n\n### Fonte 3\n- **source_id**: `797ea1a2-fe1f-0f0d-c2e5-6017b5e7a038` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **source_type**: norma\n- **testo**:\nArt. 1282. \n\n (Interessi nelle obbligazioni pecunarie). \n\n I crediti liquidi ed esigibili di somme di danaro producono interessi di pieno diritto, salvo che la legge o il titolo stabiliscano diversamente. \n\n Salvo patto contrario, i crediti per fitti e pigioni non producono interessi se non dalla costituzione in mora. \n\n Se il credito ha per oggetto rimborso di spese fatte per cose da restituire, non decorrono interessi per il periodo di tempo in cui chi ha fatto le spese abbia goduto della cosa senza corrispettivo e senza essere tenuto a render conto del godimento.\n\n### Fonte 4\n- **source_id**: `0fc681bb-3ea0-eb5b-a770-ebd9973b7013` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **source_type**: norma\n- **testo**:\nArt. 1230. \n\n (Novazione oggettiva). \n\n L'obbligazione si estingue quando le parti sostituiscono all'obbligazione originaria una nuova obbligazione con oggetto o titolo diverso. \n\n La volontà di estinguere l'obbligazione precedente deve risultare in modo non equivoco.\n\n### Fonte 5\n- **source_id**: `0f25182a-660f-46f4-8bd0-a7e4939a64d0` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **source_type**: norma\n- **testo**:\nArt. 1209. \n\n (Offerta reale e offerta per intimazione). \n\n Se l'obbligazione ha per oggetto danaro, titoli di credito, ovvero cose mobili da consegnare al domicilio del creditore, l'offerta deve essere reale. \n\n Se si tratta invece di cose mobili da consegnare in luogo diverso, l'offerta consiste nell'intimazione al creditore di riceverle, fatta mediante atto a lui notificato nelle forme prescritte per gli atti di citazione.",
+      "response": "```json\n{\n    \"interpretation\": \"Le fonti delle obbligazioni, secondo l'ordinamento giuridico italiano, sono il contratto, il fatto illecito e ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento stesso. Questa disposizione stabilisce un principio fondamentale del diritto delle obbligazioni, indicando le categorie generali da cui possono scaturire i vincoli giuridici tra soggetti.\",\n    \"legal_basis\": [\n        {\n            \"source_type\": \"norm\",\n            \"source_id\": \"8fb00cd7-18b2-b770-1387-5a611f269b84\",\n            \"citation\": \"Art. 1173 c.c. (Fonti delle obbligazioni).\",\n            \"excerpt\": \"Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.\",\n            \"relevance\": \"Questa è la norma principale che definisce esplicitamente le fonti delle obbligazioni.\"\n        }\n    ],\n    \"reasoning_steps\": [\n        {\n            \"step_number\": 1,\n            \"description\": \"Identificazione della norma che definisce le fonti delle obbligazioni. L'Art. 1173 c.c. è la disposizione chiave che risponde direttamente alla domanda.\",\n            \"sources\": [\"8fb00cd7-18b2-b770-1387-5a611f269b84\"]\n        },\n        {\n            \"step_number\": 2,\n            \"description\": \"Analisi della collocazione sistematica. L'Art. 1173 c.c. si trova all'inizio del Libro IV del Codice Civile, dedicato alle obbligazioni, fungendo da norma introduttiva e fondamentale per l'intera disciplina.\",\n            \"sources\": [\"8fb00cd7-18b2-b770-1387-5a611f269b84\"]\n        },\n        {\n            \"step_number\": 3,\n            \"description\": \"Esclusione di altre norme recuperate. Le altre norme fornite (Art. 1285, 1282, 1230, 1209 c.c.) riguardano aspetti specifici delle obbligazioni (es. obbligazione alternativa, interessi, novazione, offerta reale) e non le loro fonti, pertanto non sono direttamente rilevanti per la domanda posta.\",\n            \"sources\": [\"88c786a5-96cb-34d9-50e0-aee80c0f8aee\", \"797ea1a2-fe1f-0f0d-c2e5-6017b5e7a038\", \"0fc681bb-3ea0-eb5b-a770-ebd9973b7013\", \"0f25182a-660f-46f4-8bd0-a7e4939a64d0\"]\n        }\n    ],\n    \"confidence\": 1.0,\n    \"confidence_factors\": {\n        \"norm_clarity\": 1.0,\n        \"jurisprudence_alignment\": 1.0,\n        \"contextual_ambiguity\": 1.0,\n        \"source_availability\": 1.0\n    },\n    \"historical_context\": \"L'Art. 1173 del Codice Civile del 1942 riprende e modernizza la tripartizione delle fonti delle obbligazioni già presente nel diritto romano (contratto, quasi contratto, delitto, quasi delitto) e nel Codice Civile del 1865 (contratto, quasi contratto, delitto, quasi delitto, legge). La formulazione attuale, con la clausola generale \\\"ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico\\\", consente di includere fonti atipiche e di adattare la disciplina all'evoluzione sociale e giuridica, senza dover elencare tassativamente ogni singola fonte.\",\n    \"systematic_position\": \"L'Art. 1173 c.c. è la norma di apertura del Titolo I del Libro IV del Codice Civile, intitolato \\\"Delle obbligazioni in generale\\\". La sua posizione topografica ne sottolinea il ruolo di principio generale e fondante per l'intera disciplina delle obbligazioni, stabilendo le categorie da cui esse possono sorgere prima di addentrarsi nella loro regolamentazione specifica.\",\n    \"limitations\": \"Le fonti fornite sono sufficienti per rispondere alla domanda specifica sulle fonti delle obbligazioni. Non sono state fornite fonti relative a lavori preparatori o a specifiche modifiche legislative dell'Art. 1173 c.c., ma la norma è rimasta sostanzialmente invariata nella sua formulazione essenziale dal 1942. Non sono state fornite sentenze o dottrina, come richiesto dalla regola fondamentale.\"\n}\n```",
+      "tokens": 0,
+      "latency_ms": 6246.871709823608,
+      "timestamp": "2025-12-21T13:53:54.717191"
+    },
+    {
+      "expert": "principles",
+      "prompt": "Sei un esperto giuridico specializzato nell'INTERPRETAZIONE TELEOLOGICA E PER PRINCIPI.\n\nIl tuo approccio si basa sull'art. 12, comma II, disp. prel. c.c.:\n\"...si decide secondo i principi generali dell'ordinamento giuridico dello Stato.\"\n\n## REGOLA FONDAMENTALE - SOURCE OF TRUTH\n\n⚠️ DEVI usare ESCLUSIVAMENTE le fonti fornite nella sezione \"TESTI NORMATIVI RECUPERATI\".\n⚠️ NON PUOI citare articoli, sentenze o dottrina che NON sono presenti in quella sezione.\n⚠️ Se le fonti recuperate sono insufficienti, indica \"source_availability\" basso e spiega nelle limitations.\n⚠️ Se nessuna fonte è rilevante, imposta confidence=0.1 e spiega il problema.\n\n## METODOLOGIA\n\n1. **RATIO LEGIS** (scopo della norma)\n   - Identifica la FINALITÀ perseguita dalla norma\n   - Ricostruisci il BENE GIURIDICO tutelato\n   - Considera il CONTESTO STORICO-SOCIALE dell'emanazione\n   - Valuta l'EFFICACIA della norma rispetto allo scopo\n\n2. **INTENZIONE DEL LEGISLATORE**\n   - Analizza i lavori preparatori (se disponibili)\n   - Considera le relazioni illustrative\n   - Valuta il dibattito parlamentare\n   - Attenzione: l'intenzione oggettiva prevale su quella soggettiva\n\n3. **INTERPRETAZIONE CONFORME**\n   - A COSTITUZIONE: artt. 2, 3, 24, 41, 42... (diritti fondamentali)\n   - A DIRITTO UE: Trattati, Carta diritti fondamentali, direttive\n   - A CEDU: Convenzione Europea Diritti dell'Uomo\n   - Principio di proporzionalità, ragionevolezza, non discriminazione\n\n4. **PRINCIPI GENERALI**\n   - Buona fede (art. 1175, 1375 c.c.)\n   - Affidamento legittimo\n   - Certezza del diritto\n   - Proporzionalità\n   - Effettività della tutela\n\n## OUTPUT\n\nRispondi in JSON con questa struttura:\n{\n    \"interpretation\": \"Interpretazione teleologica in italiano\",\n    \"legal_basis\": [\n        {\n            \"source_type\": \"constitutional|eu|principle|norm\",\n            \"source_id\": \"URN o riferimento\",\n            \"citation\": \"Citazione formale\",\n            \"excerpt\": \"Testo rilevante\",\n            \"relevance\": \"Come questo principio guida l'interpretazione\"\n        }\n    ],\n    \"reasoning_steps\": [\n        {\n            \"step_number\": 1,\n            \"description\": \"Passo del ragionamento teleologico\",\n            \"sources\": [\"source_id1\", \"source_id2\"]\n        }\n    ],\n    \"confidence\": 0.0-1.0,\n    \"confidence_factors\": {\n        \"norm_clarity\": 0.0-1.0,\n        \"jurisprudence_alignment\": 0.0-1.0,\n        \"contextual_ambiguity\": 0.0-1.0,\n        \"source_availability\": 0.0-1.0\n    },\n    \"ratio_legis\": \"Scopo identificato della norma\",\n    \"constitutional_framework\": \"Principi costituzionali rilevanti\",\n    \"limitations\": \"Cosa non hai potuto considerare\"\n}\n\nCHECKLIST FINALE:\n✅ Ogni fonte in legal_basis DEVE provenire da TESTI NORMATIVI RECUPERATI\n✅ Il campo \"source_id\" DEVE essere ESATTAMENTE il valore indicato come `source_id` nella fonte\n✅ NON inventare source_id - copia esattamente il valore mostrato\n✅ Ogni excerpt DEVE essere un testo copiato dalle fonti, non parafrasato\n✅ Se le fonti sono insufficienti, abbassa confidence e source_availability\n✅ NON inventare MAI articoli o sentenze non presenti nelle fonti\n✅ Identifica ratio_legis SOLO da fonti presenti (dottrina, relazioni illustrative)\n\n## DOMANDA DELL'UTENTE\nQuali sono le fonti delle obbligazioni?\n⚠️ USA ESATTAMENTE il source_id indicato per ogni fonte nel campo legal_basis!\n\n## NORME ORDINARIE\n\n### Norma 1\n- **source_id**: `269aaa7d-dddb-3c38-3dd4-48263cd2da86` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **source_type**: norma\n- **testo**:\nLe fonti delle obbligazioni secondo il nuovo codice. Le promesse unila­terali, senza essere fonte generale delle obbligazioni, ne sono, tuttavia, una fonte. Ragione della limitazione della loro efficacia giuridica ai casi stabiliti dalla legge Il codice all'art. 1173 indica come fonti delle obbligazioni il contratto, il fatto illecito o ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico. Con quest'ultima frase non è possibile escludere che la promessa unilaterale sia fonte di obbligazione, sempre quando ricorra uno dei casi in cui è ammessa dalla legge. Il nuovo legislatore non ci ha dato una definizione dell'obbligazione ed ha preferito come dice la relazione ministeriale precisare il concetto di prestazione nel quale si concreta l'obbligazione. Il concetto è dato dall'art. 1174: « la prestazione che forma oggetto dell'obbligazione deve essere suscettibile di valutazione economica e deve corrispondere ad un interesse, anche non patrimoniale del creditore». Di conseguenza, sempre quando concerne tale estremo e la legge consente la promessa unilaterale, dalla stessa scaturisce l’ azione. Siamo lontani, come è naturale, dall’ autonomia della volontà privata in materia contrattuale, la quale non è limitata neppure dai tipi numerosi di contratto regolati dal codice e può determinare accordi sui più svariati oggetti, finché il risultato che si propone « sia ammesso dalla coscienza civile e politica, dal­l'economia nazionale, dal buon costume e dall'ordine pubblico ». L'art. 1322 definisce in maniera assai ampia l'autonomia contrattuale, ammettendo che col contratto si possa realizzare qualunque interesse meritevole di tutela se­condo l'ordinamento giuridico. Con la promessa unilaterale invece bisogna limitarsi ai casi ammessi dalla legge. Ma in questa modesta sfera di attività anche la promessa unilaterale se non è una fonte generale, è tuttavia fonte di obbligazione. Le ragioni di questo trattamento di rigore riservato alle promesse unila\n\n### Norma 2\n- **source_id**: `9a1b6480-4a1c-b86d-ecff-a53b83a43e5d` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **source_type**: norma\n- **testo**:\nLe garanzie hanno carattere dipendente rispetto all'obbligazione principale, per cui non sarebbe logico che dalla rinuncia ad esse derivasse necessariamente rinuncia all'obbligazione principale. La dipendenza giustifica, invece, la regola inversa (v. 1239 c.c.).\n\n### Norma 3\n- **source_id**: `a09864d9-b14f-0b3c-5260-bd5282d860ac` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **source_type**: norma\n- **testo**:\nLa disposizione è la conseguenza del principio secondo il quale l'estinzione dell'obbligazione principale comporta l'automatica estinzione delle obbligazioni accessorie. Viceversa, la rinuncia alle garanzie non implica rinuncia al debito principale (v. 1238 c.c.).\n\n### Norma 4\n- **source_id**: `05ec36d9-0adf-dc19-862d-c784774935f1` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **source_type**: norma\n- **testo**:\nL'ultima parte dell'articolo sancisce un principio innovativo per il codice civile del 1942: il principio della atipicità delle fonti dell'obbligazione. Il rinvio all'ordinamento giuridico implica rinvio non solo alla legge, la quale già contempla atti o fatti tipici produttivi di obbligazioni, ma anche ad atti o fatti non previsti in norme specifiche e, quindi, atipici. Questi, pertanto, possono produrre obbligazioni nelle ipotesi in cui tale idoneità sia riconosciuta dall'ordinamento giuridico (si pensi, ad esempio, alle obbligazioni discendenti da deliberazioni di organi collegiali, le quali, al di fuori dello schema contrattuale, vincolano anche la minoranza).\n\n### Norma 5\n- **source_id**: `a0af29e0-c64c-62b1-03ea-78e4cdf2c429` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **source_type**: norma\n- **testo**:\nIl legislatore fa salva la volontà delle parti di vincolarsi a pagare nella moneta, pur non avente corso legale, scelta all'atto della costituzione dell'obbligazione. Ciò fino al limite dell'impossibilità di procurarsi tale moneta: questo perchè, comunque, l'obbligazione può essere estinta con moneta avente corso legale.\n\n## PRINCIPI E NORME COSTITUZIONALI/EU\n\n### Principio 1\n- **source_id**: `269aaa7d-dddb-3c38-3dd4-48263cd2da86` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **testo**:\nLe fonti delle obbligazioni secondo il nuovo codice. Le promesse unila­terali, senza essere fonte generale delle obbligazioni, ne sono, tuttavia, una fonte. Ragione della limitazione della loro efficacia giuridica ai casi stabiliti dalla legge Il codice all'art. 1173 indica come fonti delle obbligazioni il contratto, il fatto illecito o ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico. Con quest'ultima frase non è possibile escludere che la promessa unilaterale sia fonte di obbligazione, sempre quando ricorra uno dei casi in cui è ammessa dalla legge. Il nuovo legislatore non ci ha dato una definizione dell'obbligazione ed ha preferito come dice la relazione ministeriale precisare il concetto di prestazione nel quale si concreta l'obbligazione. Il concetto è dato dall'art. 1174: « la prestazione che forma oggetto dell'obbligazione deve essere suscettibile di valutazione economica e deve corrispondere ad un interesse, anche non patrimoniale del creditore». Di conseguenza, sempre quando concerne tale estremo e la legge consente la promessa unilaterale, dalla stessa scaturisce l’ azione. Siamo lontani, come è naturale, dall’ autonomia della volontà privata in materia contrattuale, la quale non è limitata neppure dai tipi numerosi di contratto regolati dal codice e può determinare accordi sui più svariati oggetti, finché il risultato che si propone « sia ammesso dalla coscienza civile e politica, dal­l'economia nazionale, dal buon costume e dall'ordine pubblico ». L'art. 1322 definisce in maniera assai ampia l'autonomia contrattuale, ammettendo che col contratto si possa realizzare qualunque interesse meritevole di tutela se­condo l'ordinamento giuridico. Con la promessa unilaterale invece bisogna limitarsi ai casi ammessi dalla legge. Ma in questa modesta sfera di attività anche la promessa unilaterale se non è una fonte generale, è tuttavia fonte di obbligazione. Le ragioni di questo trattamento di rigore riservato alle promesse unila\n\n### Principio 2\n- **source_id**: `a09864d9-b14f-0b3c-5260-bd5282d860ac` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **testo**:\nLa disposizione è la conseguenza del principio secondo il quale l'estinzione dell'obbligazione principale comporta l'automatica estinzione delle obbligazioni accessorie. Viceversa, la rinuncia alle garanzie non implica rinuncia al debito principale (v. 1238 c.c.).\n\n### Principio 3\n- **source_id**: `05ec36d9-0adf-dc19-862d-c784774935f1` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **testo**:\nL'ultima parte dell'articolo sancisce un principio innovativo per il codice civile del 1942: il principio della atipicità delle fonti dell'obbligazione. Il rinvio all'ordinamento giuridico implica rinvio non solo alla legge, la quale già contempla atti o fatti tipici produttivi di obbligazioni, ma anche ad atti o fatti non previsti in norme specifiche e, quindi, atipici. Questi, pertanto, possono produrre obbligazioni nelle ipotesi in cui tale idoneità sia riconosciuta dall'ordinamento giuridico (si pensi, ad esempio, alle obbligazioni discendenti da deliberazioni di organi collegiali, le quali, al di fuori dello schema contrattuale, vincolano anche la minoranza).\n\n### Principio 4\n- **source_id**: `fe4e2673-d1e1-eeb3-5f09-16fa3679e953` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **testo**:\nLa previsione è giustificata dal rilievo primario che assume, nel nostro ordinamento, il diritto alla salute (32 Cost.).\n\n### Principio 5\n- **source_id**: `269aaa7d-dddb-3c38-3dd4-48263cd2da86` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **testo**:\nLe fonti delle obbligazioni secondo il nuovo codice. Le promesse unila­terali, senza essere fonte generale delle obbligazioni, ne sono, tuttavia, una fonte. Ragione della limitazione della loro efficacia giuridica ai casi stabiliti dalla legge Il codice all'art. 1173 indica come fonti delle obbligazioni il contratto, il fatto illecito o ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico. Con quest'ultima frase non è possibile escludere che la promessa unilaterale sia fonte di obbligazione, sempre quando ricorra uno dei casi in cui è ammessa dalla legge. Il nuovo legislatore non ci ha dato una definizione dell'obbligazione ed ha preferito come dice la relazione ministeriale precisare il concetto di prestazione nel quale si concreta l'obbligazione. Il concetto è dato dall'art. 1174: « la prestazione che forma oggetto dell'obbligazione deve essere suscettibile di valutazione economica e deve corrispondere ad un interesse, anche non patrimoniale del creditore». Di conseguenza, sempre quando concerne tale estremo e la legge consente la promessa unilaterale, dalla stessa scaturisce l’ azione. Siamo lontani, come è naturale, dall’ autonomia della volontà privata in materia contrattuale, la quale non è limitata neppure dai tipi numerosi di contratto regolati dal codice e può determinare accordi sui più svariati oggetti, finché il risultato che si propone « sia ammesso dalla coscienza civile e politica, dal­l'economia nazionale, dal buon costume e dall'ordine pubblico ». L'art. 1322 definisce in maniera assai ampia l'autonomia contrattuale, ammettendo che col contratto si possa realizzare qualunque interesse meritevole di tutela se­condo l'ordinamento giuridico. Con la promessa unilaterale invece bisogna limitarsi ai casi ammessi dalla legge. Ma in questa modesta sfera di attività anche la promessa unilaterale se non è una fonte generale, è tuttavia fonte di obbligazione. Le ragioni di questo trattamento di rigore riservato alle promesse unila",
+      "response": "```json\n{\n    \"interpretation\": \"L'interpretazione delle fonti delle obbligazioni, basata sui principi generali dell'ordinamento giuridico, rivela un sistema che, pur indicando esplicitamente il contratto e il fatto illecito, si apre a una concezione più ampia e atipica. La finalità è quella di garantire che ogni atto o fatto idoneo a produrre obbligazioni, in conformità con l'ordinamento giuridico, possa essere riconosciuto come tale, bilanciando la certezza del diritto con l'esigenza di tutelare interessi meritevoli e l'autonomia privata, seppur con limiti specifici per le promesse unilaterali.\",\n    \"legal_basis\": [\n        {\n            \"source_type\": \"norm\",\n            \"source_id\": \"269aaa7d-dddb-3c38-3dd4-48263cd2da86\",\n            \"citation\": \"Norma 1\",\n            \"excerpt\": \"Il codice all'art. 1173 indica come fonti delle obbligazioni il contratto, il fatto illecito o ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.\",\n            \"relevance\": \"Fornisce la base normativa esplicita per l'individuazione delle fonti delle obbligazioni, introducendo il concetto di 'atipicità' attraverso la clausola generale.\"\n        },\n        {\n            \"source_type\": \"norm\",\n            \"source_id\": \"05ec36d9-0adf-dc19-862d-c784774935f1\",\n            \"citation\": \"Norma 4\",\n            \"excerpt\": \"L'ultima parte dell'articolo sancisce un principio innovativo per il codice civile del 1942: il principio della atipicità delle fonti dell'obbligazione. Il rinvio all'ordinamento giuridico implica rinvio non solo alla legge, la quale già contempla atti o fatti tipici produttivi di obbligazioni, ma anche ad atti o fatti non previsti in norme specifiche e, quindi, atipici.\",\n            \"relevance\": \"Chiarisce la portata della clausola generale dell'art. 1173, evidenziando il principio di atipicità e la possibilità di riconoscere fonti di obbligazione non espressamente previste dalla legge.\"\n        },\n        {\n            \"source_type\": \"norm\",\n            \"source_id\": \"269aaa7d-dddb-3c38-3dd4-48263cd2da86\",\n            \"citation\": \"Norma 1\",\n            \"excerpt\": \"L'art. 1322 definisce in maniera assai ampia l'autonomia contrattuale, ammettendo che col contratto si possa realizzare qualunque interesse meritevole di tutela se­condo l'ordinamento giuridico.\",\n            \"relevance\": \"Sottolinea il principio dell'autonomia contrattuale come fonte primaria di obbligazioni, purché l'interesse sia meritevole di tutela secondo l'ordinamento.\"\n        },\n        {\n            \"source_type\": \"principle\",\n            \"source_id\": \"269aaa7d-dddb-3c38-3dd4-48263cd2da86\",\n            \"citation\": \"Principio 1\",\n            \"excerpt\": \"Con la promessa unilaterale invece bisogna limitarsi ai casi ammessi dalla legge. Ma in questa modesta sfera di attività anche la promessa unilaterale se non è una fonte generale, è tuttavia fonte di obbligazione.\",\n            \"relevance\": \"Evidenzia il principio della tipicità delle promesse unilaterali, che, pur essendo fonti di obbligazione, sono soggette a un regime più rigoroso rispetto all'autonomia contrattuale.\"\n        }\n    ],\n    \"reasoning_steps\": [\n        {\n            \"step_number\": 1,\n            \"description\": \"Identificazione delle fonti esplicite delle obbligazioni: contratto e fatto illecito, come indicato dall'art. 1173 c.c.\",\n            \"sources\": [\"269aaa7d-dddb-3c38-3dd4-48263cd2da86\"]\n        },\n        {\n            \"step_number\": 2,\n            \"description\": \"Analisi della clausola generale 'ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico' per comprendere la portata della tipicità/atipicità delle fonti.\",\n            \"sources\": [\"269aaa7d-dddb-3c38-3dd4-48263cd2da86\"]\n        },\n        {\n            \"step_number\": 3,\n            \"description\": \"Ricostruzione del principio di atipicità delle fonti delle obbligazioni, interpretando il rinvio all'ordinamento giuridico come inclusivo di atti o fatti non specificamente previsti dalla legge, ma riconosciuti come idonei a produrre obbligazioni.\",\n            \"sources\": [\"05ec36d9-0adf-dc19-862d-c784774935f1\"]\n        },\n        {\n            \"step_number\": 4,\n            \"description\": \"Considerazione dell'autonomia contrattuale (art. 1322 c.c.) come principio fondamentale che consente la creazione di obbligazioni per interessi meritevoli di tutela, evidenziando la sua ampiezza rispetto ad altre fonti.\",\n            \"sources\": [\"269aaa7d-dddb-3c38-3dd4-48263cd2da86\"]\n        },\n        {\n            \"step_number\": 5,\n            \"description\": \"Distinzione del regime delle promesse unilaterali, che, pur essendo fonti di obbligazione, sono soggette a un principio di tipicità e ammesse solo nei casi previsti dalla legge, bilanciando l'autonomia privata con la certezza del diritto.\",\n            \"sources\": [\"269aaa7d-dddb-3c38-3dd4-48263cd2da86\"]\n        }\n    ],\n    \"confidence\": 0.9,\n    \"confidence_factors\": {\n        \"norm_clarity\": 0.9,\n        \"jurisprudence_alignment\": 0.8,\n        \"contextual_ambiguity\": 0.7,\n        \"source_availability\": 1.0\n    },\n    \"ratio_legis\": \"La finalità della disciplina sulle fonti delle obbligazioni è duplice: da un lato, fornire un quadro di riferimento chiaro per la nascita dei vincoli giuridici (contratto, fatto illecito); dall'altro, consentire all'ordinamento di adattarsi a nuove esigenze e forme di interazione sociale, riconoscendo come fonti di obbligazione anche atti o fatti atipici, purché conformi all'ordinamento giuridico e meritevoli di tutela. Questo bilanciamento mira a garantire la certezza del diritto e, al contempo, l'effettività della tutela degli interessi.\",\n    \"constitutional_framework\": \"Sebbene le fonti fornite non includano direttamente articoli costituzionali, il principio dell'autonomia contrattuale (art. 1322 c.c.) e la tutela degli interessi meritevoli di tutela, pur non esplicitamente costituzionalizzati in queste fonti, richiamano implicitamente principi come la libertà di iniziativa economica (art. 41 Cost.) e la tutela dei diritti inviolabili dell'uomo (art. 2 Cost.), che possono trovare espressione anche nella capacità dei privati di autoregolamentare i propri interessi attraverso obbligazioni, nei limiti dell'ordinamento giuridico.\",\n    \"limitations\": \"Non sono stati forniti lavori preparatori, relazioni illustrative o sentenze specifiche che avrebbero potuto arricchire l'analisi dell'intenzione del legislatore e l'interpretazione conforme alla giurisprudenza. La mancanza di riferimenti diretti a principi costituzionali o del diritto UE nelle fonti recuperate limita la possibilità di un'interpretazione conforme a tali livelli normativi, sebbene i principi generali dell'ordinamento siano stati utilizzati per guidare l'interpretazione.\"\n}\n```",
+      "tokens": 0,
+      "latency_ms": 8233.011960983276,
+      "timestamp": "2025-12-21T13:54:03.254585"
+    },
+    {
+      "expert": "precedent",
+      "prompt": "Sei un esperto giuridico specializzato nell'INTERPRETAZIONE GIURISPRUDENZIALE.\n\nIl tuo approccio si basa sulla prassi applicativa e sul \"diritto vivente\":\ncome le corti interpretano e applicano effettivamente le norme.\n\n## REGOLA FONDAMENTALE - SOURCE OF TRUTH\n\n⚠️ DEVI usare ESCLUSIVAMENTE le fonti fornite nella sezione \"TESTI NORMATIVI RECUPERATI\".\n⚠️ NON PUOI citare sentenze, massime o orientamenti che NON sono presenti in quella sezione.\n⚠️ Se le fonti recuperate sono insufficienti, indica \"source_availability\" basso e spiega nelle limitations.\n⚠️ Se nessuna sentenza è rilevante, imposta confidence=0.1 e spiega il problema.\n\n## METODOLOGIA\n\n1. **GERARCHIA DELLE FONTI GIURISPRUDENZIALI**\n   - Corte Costituzionale: Massima autorità, sentenze interpretative/additive\n   - Cassazione a Sezioni Unite: Funzione nomofilattica (art. 65 Ord. Giud.)\n   - CGUE: Interpretazione vincolante del diritto UE\n   - CEDU: Standard minimi diritti fondamentali\n   - Cassazione ordinaria: Orientamenti consolidati\n   - Giurisprudenza di merito: Prassi applicativa diffusa\n\n2. **ANALISI DEI PRECEDENTI**\n   - Identifica la MASSIMA (principio di diritto estratto)\n   - Distingui RATIO DECIDENDI (vincolante) da OBITER DICTUM\n   - Valuta la COSTANZA dell'orientamento\n   - Segnala CONTRASTI giurisprudenziali\n\n3. **EVOLUZIONE GIURISPRUDENZIALE**\n   - Orientamento CONSOLIDATO vs. ISOLATO\n   - Eventuali OVERRULING (cambiamenti di orientamento)\n   - Tendenze RECENTI della giurisprudenza\n   - Interventi delle Sezioni Unite per dirimere contrasti\n\n4. **TIPOLOGIE DI PRONUNCE (Corte Cost.)**\n   - Sentenze interpretative di rigetto\n   - Sentenze additive (\"nella parte in cui non prevede...\")\n   - Sentenze ablative/sostitutive\n   - Sentenze di inammissibilità con monito\n\n## OUTPUT\n\nRispondi in JSON con questa struttura:\n{\n    \"interpretation\": \"Interpretazione giurisprudenziale in italiano\",\n    \"legal_basis\": [\n        {\n            \"source_type\": \"jurisprudence\",\n            \"source_id\": \"Riferimento sentenza (es. Cass. SU 12345/2020)\",\n            \"citation\": \"Citazione formale\",\n            \"excerpt\": \"Massima o passaggio chiave\",\n            \"relevance\": \"Perché questo precedente è rilevante\"\n        }\n    ],\n    \"reasoning_steps\": [\n        {\n            \"step_number\": 1,\n            \"description\": \"Passo dell'analisi giurisprudenziale\",\n            \"sources\": [\"source_id1\", \"source_id2\"]\n        }\n    ],\n    \"confidence\": 0.0-1.0,\n    \"confidence_factors\": {\n        \"norm_clarity\": 0.0-1.0,\n        \"jurisprudence_alignment\": 0.0-1.0,\n        \"contextual_ambiguity\": 0.0-1.0,\n        \"source_availability\": 0.0-1.0\n    },\n    \"jurisprudential_trend\": \"Orientamento consolidato / in evoluzione / contrastato\",\n    \"key_precedents\": [\"Lista dei precedenti più rilevanti\"],\n    \"limitations\": \"Cosa non hai potuto considerare\"\n}\n\nCHECKLIST FINALE:\n✅ Ogni fonte in legal_basis DEVE provenire da TESTI NORMATIVI RECUPERATI\n✅ Il campo \"source_id\" DEVE essere ESATTAMENTE il valore indicato come `source_id` nella fonte\n✅ NON inventare source_id - copia esattamente il valore mostrato\n✅ Ogni massima o excerpt DEVE essere copiato dalle fonti, non parafrasato\n✅ Se le fonti sono insufficienti, abbassa confidence e source_availability\n✅ NON inventare MAI sentenze, massime o riferimenti non presenti nelle fonti\n✅ Usa SOLO le sentenze effettivamente recuperate dal database\n\n## DOMANDA DELL'UTENTE\nQuali sono le fonti delle obbligazioni?\n⚠️ USA ESATTAMENTE il source_id indicato per ogni fonte nel campo legal_basis!\n\n## FONTI GIURISPRUDENZIALI (ordinate per autorità)\n\n### Precedente 1\n- **source_id**: `5a351e67-46aa-9257-477b-2f1c57b9b7a0` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **autorità**: 0.74043467\n- **corte**: N/D\n- **testo**:\nNell'espromissione, che si perfeziona verso il creditore, senza bisogno di un suo atto di accettazione, quando egli venga a conoscenza dell'impegno assunto dall'espromittente, la causa del contratto è costituita puramente e semplicemente dall'assunzione del debito altrui, essendo irrilevanti sia i rapporti interni intercorrenti tra il debitore e l'assuntore, sia le ragioni che hanno determinato l'intervento di quest'ultimo, essendo invece necessario che il terzo, presentandosi al creditore, non ponga a fondamento del proprio impegno un preesistente accordo con l'obbligato. (Dichiara inammissibile, CORTE D'APPELLO BRESCIA, 24/07/2019). (Cassazione civile, Sez. VI-2, ordinanza n. 21102 del 22 luglio 2021)\n\n### Precedente 2\n- **source_id**: `9eee5a97-3fe5-c6f4-3209-430ed834707b` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **autorità**: 0.73945859\n- **corte**: N/D\n- **testo**:\nIn tema di prova dell'inadempimento di una obbligazione, il creditore che agisca per il risarcimento del danno deve provare solo la fonte (negoziale o legale) del suo diritto, limitandosi alla mera allegazione della circostanza dell'inadempimento della controparte, mentre è il debitore convenuto ad essere gravato dell'onere di provare il proprio adempimento (Nel caso di specie la S.C. ha cassato la sentenza di merito, la quale, dando per pacifica l'esistenza di un rapporto di conto corrente bancario, aveva rigettato la domanda di risarcimento danni del correntista nei confronti della banca, per avere questa rilasciato dei libretti degli assegni nei confronti di persona non autorizzata a ritirarli, non ritenendo sufficiente, al fine di assolvere al relativo onere probatorio, il disconoscimento operato dal correntista della sottoscrizione apposta sui moduli di richiesta di carnet e la mancata richiesta di verificazione della scrittura da parte della banca). (Cassa e decide nel merito, App. Lecce, 24 Giugno 2003). (Cassazione civile, Sez. I, sentenza n. 22361 del 25 ottobre 2007)\n\n### Precedente 3\n- **source_id**: `20d7142c-773a-0759-98d1-582da22d3fd9` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **autorità**: 0.7392656\n- **corte**: N/D\n- **testo**:\nLa cessione dei crediti futuri, ivi compresi quelli aventi causa risarcitoria, non ha natura meramente obbligatoria e vi si può procedere - quando nel negozio dispositivo sia individuata la fonte, oppure la stessa sia determinata o determinabile - senza che rilevi la probabilità della venuta in essere del credito ceduto, non esistendo una norma che vieta la disponibilità dei diritti futuri perché meramente eventuali, con la conseguenza che la venuta in essere del credito futuro integra un requisito di efficacia della cessione, ma non della sua validità. (Nell'affermare il principio, la S.C. ha cassato la decisione della corte di merito che aveva escluso la legittimazione ad agire di uno dei ricorrenti, cessionario di un credito di natura risarcitoria derivante da inadempimento contrattuale, perché credito futuro e destinato a sorgere solo in conseguenza del positivo esperimento nei confronti di una banca di azione giudiziale non ancora intrapresa). (Cassazione civile, Sez. I, sentenza n. 31896 del 10 dicembre 2018)\n\n### Precedente 4\n- **source_id**: `5495bdda-e8a0-7769-5a15-c02e4c193b63` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **autorità**: 0.73283351\n- **corte**: N/D\n- **testo**:\nIn tema di assicurazione per la responsabilità civile, il massimale non è elemento essenziale del contratto di assicurazione, il quale può essere validamente stipulato senza la relativa pattuizione, e neppure costituisce fatto generatore del credito assicurato, configurandosi piuttosto come elemento limitativo dell'obbligo dell'assicuratore, sicché grava su quest'ultimo l'onere di allegare e provare l'esistenza e la misura del massimale nel rispetto delle preclusioni processuali, a nulla rilevando che al momento dell'introduzione del giudizio quel massimale non fosse ancora esaurito. (Cassazione civile, Sez. VI-3, ordinanza n. 26813 del 21 ottobre 2019)\n\n### Precedente 5\n- **source_id**: `7bdc3763-0fe0-f0e0-fbc7-1cfac11ee24f` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **autorità**: 0.726155629\n- **corte**: N/D\n- **testo**:\nNon è suscettibile di esecuzione in forma specifica l'obbligazione principale assunta con falsa alternativa, che ricorre qualora sia contrattualmente prevista un'obbligazione subordinata, avente natura di sanzione per l'inadempimento, ed il debitore sia tenuto ad adempierla qualora non abbia adempiuto l'obbligazione principale; l'obbligazione con falsa alternativa si distingue sia dall'obbligazione alternativa, in cui due obbligazioni concorrono in posizione di parità e con scelta della prestazione rimessa alla volontà di una delle parti, sia dall'obbligazione facoltativa, in cui l'obbligazione principale è unica, ma è rimesso alla volontà del debitore fornire una determinata diversa prestazione. (Nella specie, la S.C. ha ritenuto non fosse suscettibile di esecuzione in forma specifica la prestazione principale dedotta in un'obbligazione con falsa alternativa, osservando che, inadempiuta l'obbligazione principale, i creditori non avevano richiesto l'adempimento dell'obbligazione subordinata). (Cassazione civile, Sez. I, ordinanza n. 6984 del 20 marzo 2018)\n\n### Precedente 6\n- **source_id**: `ddbd2556-be3e-f3e4-cdb2-f3f1b73e1166` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **autorità**: 0.723799471\n- **corte**: N/D\n- **testo**:\nL'obbligazione alternativa presuppone l'originario concorso di due o più prestazioni, in posizione di parità e dedotte in modo disgiuntivo, nessuna delle quali può essere adempiuta prima dell'indispensabile scelta di una di esse, rimessa alla volontà di una delle parti e che diventa irrevocabile con la dichiarazione comunicata alla controparte; l'obbligazione facoltativa, invece, ha ad oggetto una prestazione principale, unica e determinata fin dall'origine, nonché, accanto a questa, una prestazione facoltativa, dovuta in via subordinata e secondaria, ove venga preferita dal creditore stesso e costituisca quindi l'oggetto di una sua specifica ed univoca opzione, esercitabile fino al momento in cui non vi sia stato l'adempimento della prestazione principale. (Cassazione civile, Sez. II, sentenza n. 24819 del 16 settembre 2024)\n\n## NORME INTERPRETATE\n\n### Norma 1\n- **source_id**: `3bbc941a-1fd3-d428-ee03-d00f999c2557` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **testo**:\nLa promessa di pagamento, al pari della ricognizione di debito, non costituisce autonoma fonte di obbligazione, ma ha soltanto effetto confermativo di un preesistente rapporto fondamentale, venendo ad operarsi, in forza dell'art. 1988 c.c., un'astrazione meramente processuale della \"causa debendi\", comportante una semplice \"relevatio ab onere probandi\" per la quale il destinatario della promessa è dispensato dall'onere di provare l'esistenza del rapporto fondamentale, che si presume fino a prova contraria e che, oltre ad essere preesistente, può anche nascere contemporaneamente alla dichiarazione di promessa (o trovarsi \"in itinere\" al momento di questa), ma della cui esistenza o validità non può prescindersi sotto il profilo sostanziale, con il conseguente venir meno di ogni effetto vincolante della promessa stessa ove rimanga giudizialmente provato che il rapporto fondamentale non è mai sorto, o è invalido, o si è estinto, ovvero che esista una condizione ovvero un altro elemento attinente al rapporto fondamentale che possa comunque incidere sull'obbligazione derivante dal riconoscimento. – In tema di ricognizione di debito, ove l'atto ricognitivo provenga da una pubblica amministrazione, lo stesso richiede la forma scritta \"ad substantiam\" e la prova della sua esistenza e del suo contenuto non può essere fornita né attraverso la confessione, né mediante la testimonianza. – Allorquando l'atto di riconoscimento di un debito provenga da una pubblica amministrazione, l'adempimento della trasmissione dell'atto scritto di ricognizione alla Procura regionale della Corte dei Conti, prescritto dall'art. 23, comma 5, della legge n. 289 del 2002 per le pubbliche amministrazioni nei casi ivi disciplinati, integra un requisito formale e procedimentale della ricognizione di debito, che ne condiziona la validità e l'efficacia e di cui va tratta necessaria evidenza dal documento stesso, in quanto vincolato alla forma scritta, in ordine sia alla previsione dell'invio alla compete\n\n### Norma 2\n- **source_id**: `ddbd2556-be3e-f3e4-cdb2-f3f1b73e1166` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **testo**:\nL'obbligazione alternativa presuppone l'originario concorso di due o più prestazioni, in posizione di parità e dedotte in modo disgiuntivo, nessuna delle quali può essere adempiuta prima dell'indispensabile scelta di una di esse, rimessa alla volontà di una delle parti e che diventa irrevocabile con la dichiarazione comunicata alla controparte; l'obbligazione facoltativa, invece, ha ad oggetto una prestazione principale, unica e determinata fin dall'origine, nonché, accanto a questa, una prestazione facoltativa, dovuta in via subordinata e secondaria, ove venga preferita dal creditore stesso e costituisca quindi l'oggetto di una sua specifica ed univoca opzione, esercitabile fino al momento in cui non vi sia stato l'adempimento della prestazione principale. (Cassazione civile, Sez. II, sentenza n. 24819 del 16 settembre 2024)\n\n### Norma 3\n- **source_id**: `020a8e28-7f19-d502-f90d-7c2e56a3c704` ← USA QUESTO ESATTO VALORE\n- **urn**: N/A\n- **testo**:\nL'obbligazione alternativa presuppone l'originario concorso di due o più prestazioni, in posizione di parità e dedotte in modo disgiuntivo, nessuna delle quali può essere adempiuta prima dell'indispensabile scelta di una di esse, rimessa alla volontà di una delle parti e che diventa irrevocabile con la dichiarazione comunicata alla controparte; l'obbligazione facoltativa, invece, ha ad oggetto una prestazione principale, unica e determinata fin dall'origine, nonché, accanto a questa, una prestazione facoltativa, dovuta in via subordinata e secondaria, ove venga preferita dal creditore stesso e costituisca quindi l'oggetto di una sua specifica ed univoca opzione, esercitabile fino al momento in cui non vi sia stato l'adempimento della prestazione principale. (Cassazione civile, Sez. II, sentenza n. 24819 del 16 settembre 2024)",
+      "response": "```json\n{\n    \"interpretation\": \"L'interpretazione giurisprudenziale delle fonti delle obbligazioni si concentra sulla distinzione tra la fonte negoziale o legale del diritto e la promessa di pagamento o ricognizione di debito, che non costituiscono autonome fonti di obbligazione ma hanno un effetto meramente confermativo. La giurisprudenza evidenzia che, in caso di inadempimento, il creditore deve provare solo la fonte del suo diritto (negoziale o legale), mentre l'onere di provare l'adempimento ricade sul debitore. Inoltre, vengono delineate le caratteristiche di specifiche tipologie di obbligazioni, come quelle alternative e facoltative, e la natura di istituti come l'espromissione e la cessione di crediti futuri.\",\n    \"legal_basis\": [\n        {\n            \"source_type\": \"jurisprudence\",\n            \"source_id\": \"9eee5a97-3fe5-c6f4-3209-430ed834707b\",\n            \"citation\": \"Cassazione civile, Sez. I, sentenza n. 22361 del 25 ottobre 2007\",\n            \"excerpt\": \"In tema di prova dell'inadempimento di una obbligazione, il creditore che agisca per il risarcimento del danno deve provare solo la fonte (negoziale o legale) del suo diritto, limitandosi alla mera allegazione della circostanza dell'inadempimento della controparte, mentre è il debitore convenuto ad essere gravato dell'onere di provare il proprio adempimento\",\n            \"relevance\": \"Questo precedente è fondamentale per definire l'onere della prova in caso di inadempimento e chiarisce che la 'fonte' del diritto può essere negoziale o legale, indicando implicitamente le principali categorie di fonti delle obbligazioni.\"\n        },\n        {\n            \"source_type\": \"norm\",\n            \"source_id\": \"3bbc941a-1fd3-d428-ee03-d00f999c2557\",\n            \"citation\": \"N/A\",\n            \"excerpt\": \"La promessa di pagamento, al pari della ricognizione di debito, non costituisce autonoma fonte di obbligazione, ma ha soltanto effetto confermativo di un preesistente rapporto fondamentale, venendo ad operarsi, in forza dell'art. 1988 c.c., un'astrazione meramente processuale della \\\"causa debendi\\\", comportante una semplice \\\"relevatio ab onere probandi\\\" per la quale il destinatario della promessa è dispensato dall'onere di provare l'esistenza del rapporto fondamentale, che si presume fino a prova contraria e che, oltre ad essere preesistente, può anche nascere contemporaneamente alla dichiarazione di promessa (o trovarsi \\\"in itinere\\\" al momento di questa), ma della cui esistenza o validità non può prescindersi sotto il profilo sostanziale, con il conseguente venir meno di ogni effetto vincolante della promessa stessa ove rimanga giudizialmente provato che il rapporto fondamentale non è mai sorto, o è invalido, o si è estinto, ovvero che esista una condizione ovvero un altro elemento attinente al rapporto fondamentale che possa comunque incidere sull'obbligazione derivante dal riconoscimento.\",\n            \"relevance\": \"Questa norma interpretativa chiarisce che promessa di pagamento e ricognizione di debito non sono fonti autonome di obbligazioni, ma presuppongono un rapporto fondamentale preesistente, definendo la loro natura e i loro effetti probatori.\"\n        },\n        {\n            \"source_type\": \"jurisprudence\",\n            \"source_id\": \"5a351e67-46aa-9257-477b-2f1c57b9b7a0\",\n            \"citation\": \"Cassazione civile, Sez. VI-2, ordinanza n. 21102 del 22 luglio 2021\",\n            \"excerpt\": \"Nell'espromissione, che si perfeziona verso il creditore, senza bisogno di un suo atto di accettazione, quando egli venga a conoscenza dell'impegno assunto dall'espromittente, la causa del contratto è costituita puramente e semplicemente dall'assunzione del debito altrui, essendo irrilevanti sia i rapporti interni intercorrenti tra il debitore e l'assuntore, sia le ragioni che hanno determinato l'intervento di quest'ultimo, essendo invece necessario che il terzo, presentandosi al creditore, non ponga a fondamento del proprio impegno un preesistente accordo con l'obbligato.\",\n            \"relevance\": \"Questo precedente descrive la natura e la causa dell'espromissione, che è una modalità di assunzione del debito altrui, e quindi una fonte di obbligazione per il terzo espromittente.\"\n        },\n        {\n            \"source_type\": \"jurisprudence\",\n            \"source_id\": \"20d7142c-773a-0759-98d1-582da22d3fd9\",\n            \"citation\": \"Cassazione civile, Sez. I, sentenza n. 31896 del 10 dicembre 2018\",\n            \"excerpt\": \"La cessione dei crediti futuri, ivi compresi quelli aventi causa risarcitoria, non ha natura meramente obbligatoria e vi si può procedere - quando nel negozio dispositivo sia individuata la fonte, oppure la stessa sia determinata o determinabile - senza che rilevi la probabilità della venuta in essere del credito ceduto, non esistendo una norma che vieta la disponibilità dei diritti futuri perché meramente eventuali, con la conseguenza che la venuta in essere del credito futuro integra un requisito di efficacia della cessione, ma non della sua validità.\",\n            \"relevance\": \"Questo precedente indica la cessione di crediti futuri come una possibile fonte di obbligazioni, purché la fonte del credito sia individuata o determinabile, e ne chiarisce la validità ed efficacia.\"\n        },\n        {\n            \"source_type\": \"jurisprudence\",\n            \"source_id\": \"ddbd2556-be3e-f3e4-cdb2-f3f1b73e1166\",\n            \"citation\": \"Cassazione civile, Sez. II, sentenza n. 24819 del 16 settembre 2024\",\n            \"excerpt\": \"L'obbligazione alternativa presuppone l'originario concorso di due o più prestazioni, in posizione di parità e dedotte in modo disgiuntivo, nessuna delle quali può essere adempiuta prima dell'indispensabile scelta di una di esse, rimessa alla volontà di una delle parti e che diventa irrevocabile con la dichiarazione comunicata alla controparte; l'obbligazione facoltativa, invece, ha ad oggetto una prestazione principale, unica e determinata fin dall'origine, nonché, accanto a questa, una prestazione facoltativa, dovuta in via subordinata e secondaria, ove venga preferita dal creditore stesso e costituisca quindi l'oggetto di una sua specifica ed univoca opzione, esercitabile fino al momento in cui non vi sia stato l'adempimento della prestazione principale.\",\n            \"relevance\": \"Questo precedente, pur non definendo direttamente le 'fonti' delle obbligazioni in senso lato, descrive due specifiche tipologie di obbligazioni (alternativa e facoltativa) che possono derivare da tali fonti, contribuendo a delineare il panorama delle obbligazioni stesse.\"\n        },\n        {\n            \"source_type\": \"norm\",\n            \"source_id\": \"020a8e28-7f19-d502-f90d-7c2e56a3c704\",\n            \"citation\": \"N/A\",\n            \"excerpt\": \"L'obbligazione alternativa presuppone l'originario concorso di due o più prestazioni, in posizione di parità e dedotte in modo disgiuntivo, nessuna delle quali può essere adempiuta prima dell'indispensabile scelta di una di esse, rimessa alla volontà di una delle parti e che diventa irrevocabile con la dichiarazione comunicata alla controparte; l'obbligazione facoltativa, invece, ha ad oggetto una prestazione principale, unica e determinata fin dall'origine, nonché, accanto a questa, una prestazione facoltativa, dovuta in via subordinata e secondaria, ove venga preferita dal creditore stesso e costituisca quindi l'oggetto di una sua specifica ed univoca opzione, esercitabile fino al momento in cui non vi sia stato l'adempimento della prestazione principale.\",\n            \"relevance\": \"Questa norma, identica al precedente giurisprudenziale ddbd2556-be3e-f3e4-cdb2-f3f1b73e1166, rafforza la definizione delle obbligazioni alternative e facoltative, che sono manifestazioni di obbligazioni derivanti da una fonte.\"\n        }\n    ],\n    \"reasoning_steps\": [\n        {\n            \"step_number\": 1,\n            \"description\": \"Identificazione delle fonti primarie delle obbligazioni attraverso l'onere della prova. La giurisprudenza stabilisce che il creditore deve provare la fonte (negoziale o legale) del suo diritto, indicando queste come le categorie principali di fonti.\",\n            \"sources\": [\"9eee5a97-3fe5-c6f4-3209-430ed834707b\"]\n        },\n        {\n            \"step_number\": 2,\n            \"description\": \"Distinzione tra fonti autonome di obbligazione e atti con effetto meramente confermativo. La promessa di pagamento e la ricognizione di debito non sono considerate fonti autonome, ma presuppongono un rapporto fondamentale preesistente.\",\n            \"sources\": [\"3bbc941a-1fd3-d428-ee03-d00f999c2557\"]\n        },\n        {\n            \"step_number\": 3,\n            \"description\": \"Analisi di specifiche fattispecie che generano obbligazioni. L'espromissione è riconosciuta come una fonte di obbligazione per il terzo che assume il debito altrui. La cessione di crediti futuri è un'altra fonte, purché la causa del credito sia determinata o determinabile.\",\n            \"sources\": [\"5a351e67-46aa-9257-477b-2f1c57b9b7a0\", \"20d7142c-773a-0759-98d1-582da22d3fd9\"]\n        },\n        {\n            \"step_number\": 4,\n            \"description\": \"Definizione di tipologie di obbligazioni che possono derivare dalle fonti. Sebbene non siano 'fonti' in senso stretto, le obbligazioni alternative e facoltative sono descritte come modalità di strutturazione delle prestazioni dovute, che originano da una fonte negoziale o legale.\",\n            \"sources\": [\"ddbd2556-be3e-f3e4-cdb2-f3f1b73e1166\", \"020a8e28-7f19-d502-f90d-7c2e56a3c704\"]\n        }\n    ],\n    \"confidence\": 0.8,\n    \"confidence_factors\": {\n        \"norm_clarity\": 0.8,\n        \"jurisprudence_alignment\": 0.9,\n        \"contextual_ambiguity\": 0.7,\n        \"source_availability\": 0.7\n    },\n    \"jurisprudential_trend\": \"Orientamento consolidato\",\n    \"key_precedents\": [\n        \"9eee5a97-3fe5-c6f4-3209-430ed834707b\",\n        \"3bbc941a-1fd3-d428-ee03-d00f999c2557\"\n    ],\n    \"limitations\": \"Le fonti recuperate non includono sentenze della Corte Costituzionale, Sezioni Unite della Cassazione, CGUE o CEDU direttamente pertinenti alla definizione generale delle 'fonti delle obbligazioni' secondo l'art. 1173 c.c. Le sentenze disponibili si concentrano su aspetti specifici delle obbligazioni (espromissione, cessione di crediti, onere della prova, promessa di pagamento) o sulla distinzione tra obbligazioni alternative e facoltative, piuttosto che fornire un elenco esaustivo o una classificazione delle fonti in senso ampio. La risposta si basa quindi sull'inferenza dalle fattispecie concrete e dalla distinzione tra ciò che è fonte e ciò che non lo è.\"\n}\n```",
+      "tokens": 0,
+      "latency_ms": 14046.632051467896,
+      "timestamp": "2025-12-21T13:54:17.619646"
+    },
+    {
+      "expert": "aggregation",
+      "prompt": "Sei un giurista esperto. Sintetizza le seguenti interpretazioni da diversi approcci ermeneutici in una risposta coerente e completa.\n\n## LITERAL (peso: 0.35)\nConfidenza: 1.00\nInterpretazione: Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.\nFonti: Art. 1173 c.c.\n\n## SYSTEMIC (peso: 0.25)\nConfidenza: 1.00\nInterpretazione: Le fonti delle obbligazioni, secondo l'ordinamento giuridico italiano, sono il contratto, il fatto illecito e ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento stesso. Questa disposizione stabilisce un principio fondamentale del diritto delle obbligazioni, indicando le categorie generali da cui possono scaturire i vincoli giuridici tra soggetti.\nFonti: Art. 1173 c.c. (Fonti delle obbligazioni).\n\n## PRINCIPLES (peso: 0.20)\nConfidenza: 0.90\nInterpretazione: L'interpretazione delle fonti delle obbligazioni, basata sui principi generali dell'ordinamento giuridico, rivela un sistema che, pur indicando esplicitamente il contratto e il fatto illecito, si apre a una concezione più ampia e atipica. La finalità è quella di garantire che ogni atto o fatto idoneo a produrre obbligazioni, in conformità con l'ordinamento giuridico, possa essere riconosciuto come tale, bilanciando la certezza del diritto con l'esigenza di tutelare interessi meritevoli e l'autonomia privata, seppur con limiti specifici per le promesse unilaterali.\nFonti: Norma 1, Norma 4, Norma 1\n\n## PRECEDENT (peso: 0.20)\nConfidenza: 0.80\nInterpretazione: L'interpretazione giurisprudenziale delle fonti delle obbligazioni si concentra sulla distinzione tra la fonte negoziale o legale del diritto e la promessa di pagamento o ricognizione di debito, che non costituiscono autonome fonti di obbligazione ma hanno un effetto meramente confermativo. La giurisprudenza evidenzia che, in caso di inadempimento, il creditore deve provare solo la fonte del suo diritto (negoziale o legale), mentre l'onere di provare l'adempimento ricade sul debitore. Inoltre, vengono delineate le caratteristiche di specifiche tipologie di obbligazioni, come quelle alternative e facoltative, e la natura di istituti come l'espromissione e la cessione di crediti futuri.\nFonti: Cassazione civile, Sez. I, sentenza n. 22361 del 25 ottobre 2007, N/A, Cassazione civile, Sez. VI-2, ordinanza n. 21102 del 22 luglio 2021\n\n\nProduci una SINTESI in italiano che:\n1. Integri le diverse prospettive\n2. Evidenzi eventuali divergenze\n3. Citi le fonti più rilevanti\n4. Sia chiara e utilizzabile",
+      "response": "L'articolo 1173 del Codice Civile italiano stabilisce le fonti delle obbligazioni, individuandole nel contratto, nel fatto illecito e in \"ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico\". Questa disposizione, pur nella sua apparente semplicità letterale, è il fulcro di un sistema interpretativo complesso che bilancia certezza del diritto e flessibilità.\n\n**Approccio Letterale e Sistematico:**\nL'interpretazione letterale e sistematica dell'Art. 1173 c.c. (Fonti: Art. 1173 c.c.) conferma che le obbligazioni possono derivare da tre categorie principali: il contratto, il fatto illecito e una clausola generale che include \"ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico\". Quest'ultima espressione è cruciale, poiché apre il sistema a fonti atipiche, purché riconosciute e conformi ai principi giuridici.\n\n**Approccio Principialistico:**\nL'interpretazione basata sui principi generali dell'ordinamento (Fonti: Norma 1, Norma 4) sottolinea come la clausola generale dell'Art. 1173 c.c. non sia una mera formula di chiusura, ma un'apertura a una concezione più ampia delle fonti delle obbligazioni. Essa permette di riconoscere come fonte di obbligazione ogni atto o fatto che, pur non rientrando nelle categorie tipiche di contratto o fatto illecito, sia idoneo a produrre vincoli giuridici in conformità con i principi dell'ordinamento. Questo approccio mira a bilanciare la certezza del diritto con l'esigenza di tutelare interessi meritevoli e l'autonomia privata, sebbene con limiti specifici per le promesse unilaterali.\n\n**Approccio Giurisprudenziale:**\nLa giurisprudenza (Fonti: Cassazione civile, Sez. I, sentenza n. 22361 del 25 ottobre 2007; Cassazione civile, Sez. VI-2, ordinanza n. 21102 del 22 luglio 2021) ha fornito chiarimenti essenziali, in particolare sulla distinzione tra la fonte negoziale o legale del diritto e la promessa di pagamento o ricognizione di debito. Quest'ultime non sono considerate autonome fonti di obbligazione, ma hanno un effetto meramente confermativo di un'obbligazione preesistente. Ciò significa che, in caso di inadempimento, il creditore deve provare la fonte originaria del suo diritto (contratto o fatto illecito), mentre l'onere di provare l'adempimento ricade sul debitore. La giurisprudenza ha anche delineato le caratteristiche di specifiche tipologie di obbligazioni (alternative e facoltative) e la natura di istituti come l'espromissione e la cessione di crediti futuri, contribuendo a definire i contorni applicativi della norma.\n\n**Sintesi e Coerenza:**\nIn sintesi, l'Art. 1173 c.c. non si limita a elencare le fonti tipiche delle obbligazioni, ma introduce una clausola di apertura che consente all'ordinamento di riconoscere nuove fonti, purché conformi ai principi generali. Questa flessibilità è temperata dalla giurisprudenza, che, pur riconoscendo la validità di atti o fatti atipici, ne delimita la portata, distinguendoli da mere promesse o ricognizioni di debito che non creano nuove obbligazioni ma si limitano a confermare quelle esistenti. Non emergono divergenze sostanziali tra gli approcci, ma piuttosto una complementarietà: l'interpretazione letterale e sistematica fornisce la base normativa, quella principialistica ne espande la portata in chiave assiologica, e quella giurisprudenziale ne definisce i confini applicativi e le implicazioni pratiche. L'obiettivo comune è garantire un sistema delle obbligazioni che sia al contempo certo, equo e adattabile alle mutevoli esigenze della società.",
+      "tokens": 0,
+      "latency_ms": 6051.440954208374,
+      "timestamp": "2025-12-21T13:54:23.672188"
+    }
+  ],
+  "tool_calls": [
+    {
+      "expert": "literal",
+      "tool": "semantic_search",
+      "params": {
+        "query": "Quali sono le fonti delle obbligazioni?",
+        "top_k": 5,
+        "source_types": [
+          "norma"
+        ],
+        "expert_type": "LiteralExpert",
+        "expected_source_types": [
+          "norma"
+        ]
+      },
+      "result_count": 5,
+      "latency_ms": 124.92203712463379,
+      "timestamp": "2025-12-21T13:53:44.550458"
+    },
+    {
+      "expert": "systemic",
+      "tool": "semantic_search",
+      "params": {
+        "query": "Quali sono le fonti delle obbligazioni?",
+        "top_k": 5,
+        "source_types": [
+          "norma"
+        ],
+        "expert_type": "SystemicExpert",
+        "expected_source_types": [
+          "norma"
+        ]
+      },
+      "result_count": 5,
+      "latency_ms": 97.75424003601074,
+      "timestamp": "2025-12-21T13:53:48.470269"
+    },
+    {
+      "expert": "principles",
+      "tool": "semantic_search",
+      "params": {
+        "query": "Quali sono le fonti delle obbligazioni?",
+        "top_k": 5,
+        "source_types": [
+          "ratio",
+          "spiegazione"
+        ],
+        "expert_type": "PrinciplesExpert",
+        "expected_source_types": [
+          "ratio",
+          "spiegazione"
+        ]
+      },
+      "result_count": 5,
+      "latency_ms": 121.75583839416504,
+      "timestamp": "2025-12-21T13:53:54.851676"
+    },
+    {
+      "expert": "principles",
+      "tool": "semantic_search",
+      "params": {
+        "query": "principi costituzionali Quali sono le fonti delle obbligazioni?",
+        "top_k": 3,
+        "source_types": [
+          "ratio",
+          "spiegazione"
+        ],
+        "expert_type": "PrinciplesExpert",
+        "expected_source_types": [
+          "ratio",
+          "spiegazione"
+        ]
+      },
+      "result_count": 3,
+      "latency_ms": 72.9970932006836,
+      "timestamp": "2025-12-21T13:53:54.924689"
+    },
+    {
+      "expert": "principles",
+      "tool": "semantic_search",
+      "params": {
+        "query": "diritti fondamentali Quali sono le fonti delle obbl",
+        "top_k": 3,
+        "source_types": [
+          "ratio",
+          "spiegazione"
+        ],
+        "expert_type": "PrinciplesExpert",
+        "expected_source_types": [
+          "ratio",
+          "spiegazione"
+        ]
+      },
+      "result_count": 3,
+      "latency_ms": 96.8010425567627,
+      "timestamp": "2025-12-21T13:53:55.021502"
+    },
+    {
+      "expert": "precedent",
+      "tool": "semantic_search",
+      "params": {
+        "query": "Quali sono le fonti delle obbligazioni?",
+        "top_k": 5,
+        "source_types": [
+          "massima"
+        ],
+        "expert_type": "PrecedentExpert",
+        "expected_source_types": [
+          "massima"
+        ]
+      },
+      "result_count": 5,
+      "latency_ms": 153.95522117614746,
+      "timestamp": "2025-12-21T13:54:03.422630"
+    },
+    {
+      "expert": "precedent",
+      "tool": "semantic_search",
+      "params": {
+        "query": "giurisprudenza cassazione Quali sono le fonti delle obbligazioni?",
+        "top_k": 3,
+        "source_types": [
+          "massima"
+        ],
+        "expert_type": "PrecedentExpert",
+        "expected_source_types": [
+          "massima"
+        ]
+      },
+      "result_count": 3,
+      "latency_ms": 73.760986328125,
+      "timestamp": "2025-12-21T13:54:03.496410"
+    },
+    {
+      "expert": "precedent",
+      "tool": "semantic_search",
+      "params": {
+        "query": "massima Quali sono le fonti delle obbligazioni?",
+        "top_k": 3,
+        "source_types": [
+          "massima"
+        ],
+        "expert_type": "PrecedentExpert",
+        "expected_source_types": [
+          "massima"
+        ]
+      },
+      "result_count": 3,
+      "latency_ms": 76.45177841186523,
+      "timestamp": "2025-12-21T13:54:03.572875"
+    }
+  ],
+  "expert_results": {
+    "literal": {
+      "interpretation": "Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.",
+      "confidence": 1.0,
+      "sources": [
+        {
+          "source_type": "norm",
+          "source_id": "8fb00cd7-18b2-b770-1387-5a611f269b84",
+          "citation": "Art. 1173 c.c.",
+          "excerpt": "Art. 1173. \n\n (Fonti delle obbligazioni). \n\n Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.",
+          "relevance": "Questa norma definisce esplicitamente le fonti delle obbligazioni, rispondendo direttamente alla domanda."
+        }
+      ],
+      "reasoning_steps": [
+        {
+          "step_number": 1,
+          "description": "Identificazione della norma che disciplina le fonti delle obbligazioni. Il titolo dell'articolo 1173 c.c. indica chiaramente l'oggetto della disposizione.",
+          "sources": [
+            "8fb00cd7-18b2-b770-1387-5a611f269b84"
+          ]
+        },
+        {
+          "step_number": 2,
+          "description": "Estrazione del significato proprio delle parole e della loro connessione dall'articolo 1173 c.c. Il testo è chiaro e non presenta ambiguità lessicali o sintattiche.",
+          "sources": [
+            "8fb00cd7-18b2-b770-1387-5a611f269b84"
+          ]
+        }
+      ],
+      "confidence_factors": {
+        "norm_clarity": 1.0,
+        "jurisprudence_alignment": 0.0,
+        "contextual_ambiguity": 1.0,
+        "source_availability": 1.0
+      },
+      "limitations": "Non è stato possibile considerare eventuali interpretazioni giurisprudenziali o dottrinali, né definizioni legali di termini come 'contratto' o 'fatto illecito', in quanto non presenti nelle fonti recuperate. Tuttavia, la chiarezza del testo normativo specifico rende superflua tale integrazione per rispondere alla domanda posta.",
+      "tokens_used": 0
+    },
+    "systemic": {
+      "interpretation": "Le fonti delle obbligazioni, secondo l'ordinamento giuridico italiano, sono il contratto, il fatto illecito e ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento stesso. Questa disposizione stabilisce un principio fondamentale del diritto delle obbligazioni, indicando le categorie generali da cui possono scaturire i vincoli giuridici tra soggetti.",
+      "confidence": 1.0,
+      "sources": [
+        {
+          "source_type": "norm",
+          "source_id": "8fb00cd7-18b2-b770-1387-5a611f269b84",
+          "citation": "Art. 1173 c.c. (Fonti delle obbligazioni).",
+          "excerpt": "Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.",
+          "relevance": "Questa è la norma principale che definisce esplicitamente le fonti delle obbligazioni."
+        }
+      ],
+      "reasoning_steps": [
+        {
+          "step_number": 1,
+          "description": "Identificazione della norma che definisce le fonti delle obbligazioni. L'Art. 1173 c.c. è la disposizione chiave che risponde direttamente alla domanda.",
+          "sources": [
+            "8fb00cd7-18b2-b770-1387-5a611f269b84"
+          ]
+        },
+        {
+          "step_number": 2,
+          "description": "Analisi della collocazione sistematica. L'Art. 1173 c.c. si trova all'inizio del Libro IV del Codice Civile, dedicato alle obbligazioni, fungendo da norma introduttiva e fondamentale per l'intera disciplina.",
+          "sources": [
+            "8fb00cd7-18b2-b770-1387-5a611f269b84"
+          ]
+        },
+        {
+          "step_number": 3,
+          "description": "Esclusione di altre norme recuperate. Le altre norme fornite (Art. 1285, 1282, 1230, 1209 c.c.) riguardano aspetti specifici delle obbligazioni (es. obbligazione alternativa, interessi, novazione, offerta reale) e non le loro fonti, pertanto non sono direttamente rilevanti per la domanda posta.",
+          "sources": [
+            "88c786a5-96cb-34d9-50e0-aee80c0f8aee",
+            "797ea1a2-fe1f-0f0d-c2e5-6017b5e7a038",
+            "0fc681bb-3ea0-eb5b-a770-ebd9973b7013",
+            "0f25182a-660f-46f4-8bd0-a7e4939a64d0"
+          ]
+        }
+      ],
+      "confidence_factors": {
+        "norm_clarity": 1.0,
+        "jurisprudence_alignment": 1.0,
+        "contextual_ambiguity": 1.0,
+        "source_availability": 1.0
+      },
+      "limitations": "Le fonti fornite sono sufficienti per rispondere alla domanda specifica sulle fonti delle obbligazioni. Non sono state fornite fonti relative a lavori preparatori o a specifiche modifiche legislative dell'Art. 1173 c.c., ma la norma è rimasta sostanzialmente invariata nella sua formulazione essenziale dal 1942. Non sono state fornite sentenze o dottrina, come richiesto dalla regola fondamentale.\n\nContesto storico: L'Art. 1173 del Codice Civile del 1942 riprende e modernizza la tripartizione delle fonti delle obbligazioni già presente nel diritto romano (contratto, quasi contratto, delitto, quasi delitto) e nel Codice Civile del 1865 (contratto, quasi contratto, delitto, quasi delitto, legge). La formulazione attuale, con la clausola generale \"ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico\", consente di includere fonti atipiche e di adattare la disciplina all'evoluzione sociale e giuridica, senza dover elencare tassativamente ogni singola fonte.\n\nPosizione sistematica: L'Art. 1173 c.c. è la norma di apertura del Titolo I del Libro IV del Codice Civile, intitolato \"Delle obbligazioni in generale\". La sua posizione topografica ne sottolinea il ruolo di principio generale e fondante per l'intera disciplina delle obbligazioni, stabilendo le categorie da cui esse possono sorgere prima di addentrarsi nella loro regolamentazione specifica.",
+      "tokens_used": 0
+    },
+    "principles": {
+      "interpretation": "L'interpretazione delle fonti delle obbligazioni, basata sui principi generali dell'ordinamento giuridico, rivela un sistema che, pur indicando esplicitamente il contratto e il fatto illecito, si apre a una concezione più ampia e atipica. La finalità è quella di garantire che ogni atto o fatto idoneo a produrre obbligazioni, in conformità con l'ordinamento giuridico, possa essere riconosciuto come tale, bilanciando la certezza del diritto con l'esigenza di tutelare interessi meritevoli e l'autonomia privata, seppur con limiti specifici per le promesse unilaterali.",
+      "confidence": 0.9,
+      "sources": [
+        {
+          "source_type": "norm",
+          "source_id": "269aaa7d-dddb-3c38-3dd4-48263cd2da86",
+          "citation": "Norma 1",
+          "excerpt": "Il codice all'art. 1173 indica come fonti delle obbligazioni il contratto, il fatto illecito o ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.",
+          "relevance": "Fornisce la base normativa esplicita per l'individuazione delle fonti delle obbligazioni, introducendo il concetto di 'atipicità' attraverso la clausola generale."
+        },
+        {
+          "source_type": "norm",
+          "source_id": "05ec36d9-0adf-dc19-862d-c784774935f1",
+          "citation": "Norma 4",
+          "excerpt": "L'ultima parte dell'articolo sancisce un principio innovativo per il codice civile del 1942: il principio della atipicità delle fonti dell'obbligazione. Il rinvio all'ordinamento giuridico implica rinvio non solo alla legge, la quale già contempla atti o fatti tipici produttivi di obbligazioni, ma anche ad atti o fatti non previsti in norme specifiche e, quindi, atipici.",
+          "relevance": "Chiarisce la portata della clausola generale dell'art. 1173, evidenziando il principio di atipicità e la possibilità di riconoscere fonti di obbligazione non espressamente previste dalla legge."
+        },
+        {
+          "source_type": "norm",
+          "source_id": "269aaa7d-dddb-3c38-3dd4-48263cd2da86",
+          "citation": "Norma 1",
+          "excerpt": "L'art. 1322 definisce in maniera assai ampia l'autonomia contrattuale, ammettendo che col contratto si possa realizzare qualunque interesse meritevole di tutela se­condo l'ordinamento giuridico.",
+          "relevance": "Sottolinea il principio dell'autonomia contrattuale come fonte primaria di obbligazioni, purché l'interesse sia meritevole di tutela secondo l'ordinamento."
+        },
+        {
+          "source_type": "principle",
+          "source_id": "269aaa7d-dddb-3c38-3dd4-48263cd2da86",
+          "citation": "Principio 1",
+          "excerpt": "Con la promessa unilaterale invece bisogna limitarsi ai casi ammessi dalla legge. Ma in questa modesta sfera di attività anche la promessa unilaterale se non è una fonte generale, è tuttavia fonte di obbligazione.",
+          "relevance": "Evidenzia il principio della tipicità delle promesse unilaterali, che, pur essendo fonti di obbligazione, sono soggette a un regime più rigoroso rispetto all'autonomia contrattuale."
+        }
+      ],
+      "reasoning_steps": [
+        {
+          "step_number": 1,
+          "description": "Identificazione delle fonti esplicite delle obbligazioni: contratto e fatto illecito, come indicato dall'art. 1173 c.c.",
+          "sources": [
+            "269aaa7d-dddb-3c38-3dd4-48263cd2da86"
+          ]
+        },
+        {
+          "step_number": 2,
+          "description": "Analisi della clausola generale 'ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico' per comprendere la portata della tipicità/atipicità delle fonti.",
+          "sources": [
+            "269aaa7d-dddb-3c38-3dd4-48263cd2da86"
+          ]
+        },
+        {
+          "step_number": 3,
+          "description": "Ricostruzione del principio di atipicità delle fonti delle obbligazioni, interpretando il rinvio all'ordinamento giuridico come inclusivo di atti o fatti non specificamente previsti dalla legge, ma riconosciuti come idonei a produrre obbligazioni.",
+          "sources": [
+            "05ec36d9-0adf-dc19-862d-c784774935f1"
+          ]
+        },
+        {
+          "step_number": 4,
+          "description": "Considerazione dell'autonomia contrattuale (art. 1322 c.c.) come principio fondamentale che consente la creazione di obbligazioni per interessi meritevoli di tutela, evidenziando la sua ampiezza rispetto ad altre fonti.",
+          "sources": [
+            "269aaa7d-dddb-3c38-3dd4-48263cd2da86"
+          ]
+        },
+        {
+          "step_number": 5,
+          "description": "Distinzione del regime delle promesse unilaterali, che, pur essendo fonti di obbligazione, sono soggette a un principio di tipicità e ammesse solo nei casi previsti dalla legge, bilanciando l'autonomia privata con la certezza del diritto.",
+          "sources": [
+            "269aaa7d-dddb-3c38-3dd4-48263cd2da86"
+          ]
+        }
+      ],
+      "confidence_factors": {
+        "norm_clarity": 0.9,
+        "jurisprudence_alignment": 0.8,
+        "contextual_ambiguity": 0.7,
+        "source_availability": 1.0
+      },
+      "limitations": "Non sono stati forniti lavori preparatori, relazioni illustrative o sentenze specifiche che avrebbero potuto arricchire l'analisi dell'intenzione del legislatore e l'interpretazione conforme alla giurisprudenza. La mancanza di riferimenti diretti a principi costituzionali o del diritto UE nelle fonti recuperate limita la possibilità di un'interpretazione conforme a tali livelli normativi, sebbene i principi generali dell'ordinamento siano stati utilizzati per guidare l'interpretazione.\n\nRatio legis: La finalità della disciplina sulle fonti delle obbligazioni è duplice: da un lato, fornire un quadro di riferimento chiaro per la nascita dei vincoli giuridici (contratto, fatto illecito); dall'altro, consentire all'ordinamento di adattarsi a nuove esigenze e forme di interazione sociale, riconoscendo come fonti di obbligazione anche atti o fatti atipici, purché conformi all'ordinamento giuridico e meritevoli di tutela. Questo bilanciamento mira a garantire la certezza del diritto e, al contempo, l'effettività della tutela degli interessi.\n\nQuadro costituzionale: Sebbene le fonti fornite non includano direttamente articoli costituzionali, il principio dell'autonomia contrattuale (art. 1322 c.c.) e la tutela degli interessi meritevoli di tutela, pur non esplicitamente costituzionalizzati in queste fonti, richiamano implicitamente principi come la libertà di iniziativa economica (art. 41 Cost.) e la tutela dei diritti inviolabili dell'uomo (art. 2 Cost.), che possono trovare espressione anche nella capacità dei privati di autoregolamentare i propri interessi attraverso obbligazioni, nei limiti dell'ordinamento giuridico.",
+      "tokens_used": 0
+    },
+    "precedent": {
+      "interpretation": "L'interpretazione giurisprudenziale delle fonti delle obbligazioni si concentra sulla distinzione tra la fonte negoziale o legale del diritto e la promessa di pagamento o ricognizione di debito, che non costituiscono autonome fonti di obbligazione ma hanno un effetto meramente confermativo. La giurisprudenza evidenzia che, in caso di inadempimento, il creditore deve provare solo la fonte del suo diritto (negoziale o legale), mentre l'onere di provare l'adempimento ricade sul debitore. Inoltre, vengono delineate le caratteristiche di specifiche tipologie di obbligazioni, come quelle alternative e facoltative, e la natura di istituti come l'espromissione e la cessione di crediti futuri.",
+      "confidence": 0.8,
+      "sources": [
+        {
+          "source_type": "jurisprudence",
+          "source_id": "9eee5a97-3fe5-c6f4-3209-430ed834707b",
+          "citation": "Cassazione civile, Sez. I, sentenza n. 22361 del 25 ottobre 2007",
+          "excerpt": "In tema di prova dell'inadempimento di una obbligazione, il creditore che agisca per il risarcimento del danno deve provare solo la fonte (negoziale o legale) del suo diritto, limitandosi alla mera allegazione della circostanza dell'inadempimento della controparte, mentre è il debitore convenuto ad essere gravato dell'onere di provare il proprio adempimento",
+          "relevance": "Questo precedente è fondamentale per definire l'onere della prova in caso di inadempimento e chiarisce che la 'fonte' del diritto può essere negoziale o legale, indicando implicitamente le principali categorie di fonti delle obbligazioni."
+        },
+        {
+          "source_type": "norm",
+          "source_id": "3bbc941a-1fd3-d428-ee03-d00f999c2557",
+          "citation": "N/A",
+          "excerpt": "La promessa di pagamento, al pari della ricognizione di debito, non costituisce autonoma fonte di obbligazione, ma ha soltanto effetto confermativo di un preesistente rapporto fondamentale, venendo ad operarsi, in forza dell'art. 1988 c.c., un'astrazione meramente processuale della \"causa debendi\", comportante una semplice \"relevatio ab onere probandi\" per la quale il destinatario della promessa è dispensato dall'onere di provare l'esistenza del rapporto fondamentale, che si presume fino a prova contraria e che, oltre ad essere preesistente, può anche nascere contemporaneamente alla dichiarazione di promessa (o trovarsi \"in itinere\" al momento di questa), ma della cui esistenza o validità non può prescindersi sotto il profilo sostanziale, con il conseguente venir meno di ogni effetto vincolante della promessa stessa ove rimanga giudizialmente provato che il rapporto fondamentale non è mai sorto, o è invalido, o si è estinto, ovvero che esista una condizione ovvero un altro elemento attinente al rapporto fondamentale che possa comunque incidere sull'obbligazione derivante dal riconoscimento.",
+          "relevance": "Questa norma interpretativa chiarisce che promessa di pagamento e ricognizione di debito non sono fonti autonome di obbligazioni, ma presuppongono un rapporto fondamentale preesistente, definendo la loro natura e i loro effetti probatori."
+        },
+        {
+          "source_type": "jurisprudence",
+          "source_id": "5a351e67-46aa-9257-477b-2f1c57b9b7a0",
+          "citation": "Cassazione civile, Sez. VI-2, ordinanza n. 21102 del 22 luglio 2021",
+          "excerpt": "Nell'espromissione, che si perfeziona verso il creditore, senza bisogno di un suo atto di accettazione, quando egli venga a conoscenza dell'impegno assunto dall'espromittente, la causa del contratto è costituita puramente e semplicemente dall'assunzione del debito altrui, essendo irrilevanti sia i rapporti interni intercorrenti tra il debitore e l'assuntore, sia le ragioni che hanno determinato l'intervento di quest'ultimo, essendo invece necessario che il terzo, presentandosi al creditore, non ponga a fondamento del proprio impegno un preesistente accordo con l'obbligato.",
+          "relevance": "Questo precedente descrive la natura e la causa dell'espromissione, che è una modalità di assunzione del debito altrui, e quindi una fonte di obbligazione per il terzo espromittente."
+        },
+        {
+          "source_type": "jurisprudence",
+          "source_id": "20d7142c-773a-0759-98d1-582da22d3fd9",
+          "citation": "Cassazione civile, Sez. I, sentenza n. 31896 del 10 dicembre 2018",
+          "excerpt": "La cessione dei crediti futuri, ivi compresi quelli aventi causa risarcitoria, non ha natura meramente obbligatoria e vi si può procedere - quando nel negozio dispositivo sia individuata la fonte, oppure la stessa sia determinata o determinabile - senza che rilevi la probabilità della venuta in essere del credito ceduto, non esistendo una norma che vieta la disponibilità dei diritti futuri perché meramente eventuali, con la conseguenza che la venuta in essere del credito futuro integra un requisito di efficacia della cessione, ma non della sua validità.",
+          "relevance": "Questo precedente indica la cessione di crediti futuri come una possibile fonte di obbligazioni, purché la fonte del credito sia individuata o determinabile, e ne chiarisce la validità ed efficacia."
+        },
+        {
+          "source_type": "jurisprudence",
+          "source_id": "ddbd2556-be3e-f3e4-cdb2-f3f1b73e1166",
+          "citation": "Cassazione civile, Sez. II, sentenza n. 24819 del 16 settembre 2024",
+          "excerpt": "L'obbligazione alternativa presuppone l'originario concorso di due o più prestazioni, in posizione di parità e dedotte in modo disgiuntivo, nessuna delle quali può essere adempiuta prima dell'indispensabile scelta di una di esse, rimessa alla volontà di una delle parti e che diventa irrevocabile con la dichiarazione comunicata alla controparte; l'obbligazione facoltativa, invece, ha ad oggetto una prestazione principale, unica e determinata fin dall'origine, nonché, accanto a questa, una prestazione facoltativa, dovuta in via subordinata e secondaria, ove venga preferita dal creditore stesso e costituisca quindi l'oggetto di una sua specifica ed univoca opzione, esercitabile fino al momento in cui non vi sia stato l'adempimento della prestazione principale.",
+          "relevance": "Questo precedente, pur non definendo direttamente le 'fonti' delle obbligazioni in senso lato, descrive due specifiche tipologie di obbligazioni (alternativa e facoltativa) che possono derivare da tali fonti, contribuendo a delineare il panorama delle obbligazioni stesse."
+        },
+        {
+          "source_type": "norm",
+          "source_id": "020a8e28-7f19-d502-f90d-7c2e56a3c704",
+          "citation": "N/A",
+          "excerpt": "L'obbligazione alternativa presuppone l'originario concorso di due o più prestazioni, in posizione di parità e dedotte in modo disgiuntivo, nessuna delle quali può essere adempiuta prima dell'indispensabile scelta di una di esse, rimessa alla volontà di una delle parti e che diventa irrevocabile con la dichiarazione comunicata alla controparte; l'obbligazione facoltativa, invece, ha ad oggetto una prestazione principale, unica e determinata fin dall'origine, nonché, accanto a questa, una prestazione facoltativa, dovuta in via subordinata e secondaria, ove venga preferita dal creditore stesso e costituisca quindi l'oggetto di una sua specifica ed univoca opzione, esercitabile fino al momento in cui non vi sia stato l'adempimento della prestazione principale.",
+          "relevance": "Questa norma, identica al precedente giurisprudenziale ddbd2556-be3e-f3e4-cdb2-f3f1b73e1166, rafforza la definizione delle obbligazioni alternative e facoltative, che sono manifestazioni di obbligazioni derivanti da una fonte."
+        }
+      ],
+      "reasoning_steps": [
+        {
+          "step_number": 1,
+          "description": "Identificazione delle fonti primarie delle obbligazioni attraverso l'onere della prova. La giurisprudenza stabilisce che il creditore deve provare la fonte (negoziale o legale) del suo diritto, indicando queste come le categorie principali di fonti.",
+          "sources": [
+            "9eee5a97-3fe5-c6f4-3209-430ed834707b"
+          ]
+        },
+        {
+          "step_number": 2,
+          "description": "Distinzione tra fonti autonome di obbligazione e atti con effetto meramente confermativo. La promessa di pagamento e la ricognizione di debito non sono considerate fonti autonome, ma presuppongono un rapporto fondamentale preesistente.",
+          "sources": [
+            "3bbc941a-1fd3-d428-ee03-d00f999c2557"
+          ]
+        },
+        {
+          "step_number": 3,
+          "description": "Analisi di specifiche fattispecie che generano obbligazioni. L'espromissione è riconosciuta come una fonte di obbligazione per il terzo che assume il debito altrui. La cessione di crediti futuri è un'altra fonte, purché la causa del credito sia determinata o determinabile.",
+          "sources": [
+            "5a351e67-46aa-9257-477b-2f1c57b9b7a0",
+            "20d7142c-773a-0759-98d1-582da22d3fd9"
+          ]
+        },
+        {
+          "step_number": 4,
+          "description": "Definizione di tipologie di obbligazioni che possono derivare dalle fonti. Sebbene non siano 'fonti' in senso stretto, le obbligazioni alternative e facoltative sono descritte come modalità di strutturazione delle prestazioni dovute, che originano da una fonte negoziale o legale.",
+          "sources": [
+            "ddbd2556-be3e-f3e4-cdb2-f3f1b73e1166",
+            "020a8e28-7f19-d502-f90d-7c2e56a3c704"
+          ]
+        }
+      ],
+      "confidence_factors": {
+        "norm_clarity": 0.8,
+        "jurisprudence_alignment": 0.9,
+        "contextual_ambiguity": 0.7,
+        "source_availability": 0.7
+      },
+      "limitations": "Le fonti recuperate non includono sentenze della Corte Costituzionale, Sezioni Unite della Cassazione, CGUE o CEDU direttamente pertinenti alla definizione generale delle 'fonti delle obbligazioni' secondo l'art. 1173 c.c. Le sentenze disponibili si concentrano su aspetti specifici delle obbligazioni (espromissione, cessione di crediti, onere della prova, promessa di pagamento) o sulla distinzione tra obbligazioni alternative e facoltative, piuttosto che fornire un elenco esaustivo o una classificazione delle fonti in senso ampio. La risposta si basa quindi sull'inferenza dalle fattispecie concrete e dalla distinzione tra ciò che è fonte e ciò che non lo è.\n\nTendenza giurisprudenziale: Orientamento consolidato\n\nPrecedenti chiave: 9eee5a97-3fe5-c6f4-3209-430ed834707b, 3bbc941a-1fd3-d428-ee03-d00f999c2557",
+      "tokens_used": 0
+    }
+  },
+  "aggregation": {
+    "prompt": "Sei un giurista esperto. Sintetizza le seguenti interpretazioni da diversi approcci ermeneutici in una risposta coerente e completa.\n\n## LITERAL (peso: 0.35)\nConfidenza: 1.00\nInterpretazione: Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.\nFonti: Art. 1173 c.c.\n\n## SYSTEMIC (peso: 0.25)\nConfidenza: 1.00\nInterpretazione: Le fonti delle obbligazioni, secondo l'ordinamento giuridico italiano, sono il contratto, il fatto illecito e ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento stesso. Questa disposizione stabilisce un principio fondamentale del diritto delle obbligazioni, indicando le categorie generali da cui possono scaturire i vincoli giuridici tra soggetti.\nFonti: Art. 1173 c.c. (Fonti delle obbligazioni).\n\n## PRINCIPLES (peso: 0.20)\nConfidenza: 0.90\nInterpretazione: L'interpretazione delle fonti delle obbligazioni, basata sui principi generali dell'ordinamento giuridico, rivela un sistema che, pur indicando esplicitamente il contratto e il fatto illecito, si apre a una concezione più ampia e atipica. La finalità è quella di garantire che ogni atto o fatto idoneo a produrre obbligazioni, in conformità con l'ordinamento giuridico, possa essere riconosciuto come tale, bilanciando la certezza del diritto con l'esigenza di tutelare interessi meritevoli e l'autonomia privata, seppur con limiti specifici per le promesse unilaterali.\nFonti: Norma 1, Norma 4, Norma 1\n\n## PRECEDENT (peso: 0.20)\nConfidenza: 0.80\nInterpretazione: L'interpretazione giurisprudenziale delle fonti delle obbligazioni si concentra sulla distinzione tra la fonte negoziale o legale del diritto e la promessa di pagamento o ricognizione di debito, che non costituiscono autonome fonti di obbligazione ma hanno un effetto meramente confermativo. La giurisprudenza evidenzia che, in caso di inadempimento, il creditore deve provare solo la fonte del suo diritto (negoziale o legale), mentre l'onere di provare l'adempimento ricade sul debitore. Inoltre, vengono delineate le caratteristiche di specifiche tipologie di obbligazioni, come quelle alternative e facoltative, e la natura di istituti come l'espromissione e la cessione di crediti futuri.\nFonti: Cassazione civile, Sez. I, sentenza n. 22361 del 25 ottobre 2007, N/A, Cassazione civile, Sez. VI-2, ordinanza n. 21102 del 22 luglio 2021\n\n\nProduci una SINTESI in italiano che:\n1. Integri le diverse prospettive\n2. Evidenzi eventuali divergenze\n3. Citi le fonti più rilevanti\n4. Sia chiara e utilizzabile",
+    "response": "L'articolo 1173 del Codice Civile italiano stabilisce le fonti delle obbligazioni, individuandole nel contratto, nel fatto illecito e in \"ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico\". Questa disposizione, pur nella sua apparente semplicità letterale, è il fulcro di un sistema interpretativo complesso che bilancia certezza del diritto e flessibilità.\n\n**Approccio Letterale e Sistematico:**\nL'interpretazione letterale e sistematica dell'Art. 1173 c.c. (Fonti: Art. 1173 c.c.) conferma che le obbligazioni possono derivare da tre categorie principali: il contratto, il fatto illecito e una clausola generale che include \"ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico\". Quest'ultima espressione è cruciale, poiché apre il sistema a fonti atipiche, purché riconosciute e conformi ai principi giuridici.\n\n**Approccio Principialistico:**\nL'interpretazione basata sui principi generali dell'ordinamento (Fonti: Norma 1, Norma 4) sottolinea come la clausola generale dell'Art. 1173 c.c. non sia una mera formula di chiusura, ma un'apertura a una concezione più ampia delle fonti delle obbligazioni. Essa permette di riconoscere come fonte di obbligazione ogni atto o fatto che, pur non rientrando nelle categorie tipiche di contratto o fatto illecito, sia idoneo a produrre vincoli giuridici in conformità con i principi dell'ordinamento. Questo approccio mira a bilanciare la certezza del diritto con l'esigenza di tutelare interessi meritevoli e l'autonomia privata, sebbene con limiti specifici per le promesse unilaterali.\n\n**Approccio Giurisprudenziale:**\nLa giurisprudenza (Fonti: Cassazione civile, Sez. I, sentenza n. 22361 del 25 ottobre 2007; Cassazione civile, Sez. VI-2, ordinanza n. 21102 del 22 luglio 2021) ha fornito chiarimenti essenziali, in particolare sulla distinzione tra la fonte negoziale o legale del diritto e la promessa di pagamento o ricognizione di debito. Quest'ultime non sono considerate autonome fonti di obbligazione, ma hanno un effetto meramente confermativo di un'obbligazione preesistente. Ciò significa che, in caso di inadempimento, il creditore deve provare la fonte originaria del suo diritto (contratto o fatto illecito), mentre l'onere di provare l'adempimento ricade sul debitore. La giurisprudenza ha anche delineato le caratteristiche di specifiche tipologie di obbligazioni (alternative e facoltative) e la natura di istituti come l'espromissione e la cessione di crediti futuri, contribuendo a definire i contorni applicativi della norma.\n\n**Sintesi e Coerenza:**\nIn sintesi, l'Art. 1173 c.c. non si limita a elencare le fonti tipiche delle obbligazioni, ma introduce una clausola di apertura che consente all'ordinamento di riconoscere nuove fonti, purché conformi ai principi generali. Questa flessibilità è temperata dalla giurisprudenza, che, pur riconoscendo la validità di atti o fatti atipici, ne delimita la portata, distinguendoli da mere promesse o ricognizioni di debito che non creano nuove obbligazioni ma si limitano a confermare quelle esistenti. Non emergono divergenze sostanziali tra gli approcci, ma piuttosto una complementarietà: l'interpretazione letterale e sistematica fornisce la base normativa, quella principialistica ne espande la portata in chiave assiologica, e quella giurisprudenziale ne definisce i confini applicativi e le implicazioni pratiche. L'obiettivo comune è garantire un sistema delle obbligazioni che sia al contempo certo, equo e adattabile alle mutevoli esigenze della società."
+  },
+  "final_synthesis": "L'articolo 1173 del Codice Civile italiano stabilisce le fonti delle obbligazioni, individuandole nel contratto, nel fatto illecito e in \"ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico\". Questa disposizione, pur nella sua apparente semplicità letterale, è il fulcro di un sistema interpretativo complesso che bilancia certezza del diritto e flessibilità.\n\n**Approccio Letterale e Sistematico:**\nL'interpretazione letterale e sistematica dell'Art. 1173 c.c. (Fonti: Art. 1173 c.c.) conferma che le obbligazioni possono derivare da tre categorie principali: il contratto, il fatto illecito e una clausola generale che include \"ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico\". Quest'ultima espressione è cruciale, poiché apre il sistema a fonti atipiche, purché riconosciute e conformi ai principi giuridici.\n\n**Approccio Principialistico:**\nL'interpretazione basata sui principi generali dell'ordinamento (Fonti: Norma 1, Norma 4) sottolinea come la clausola generale dell'Art. 1173 c.c. non sia una mera formula di chiusura, ma un'apertura a una concezione più ampia delle fonti delle obbligazioni. Essa permette di riconoscere come fonte di obbligazione ogni atto o fatto che, pur non rientrando nelle categorie tipiche di contratto o fatto illecito, sia idoneo a produrre vincoli giuridici in conformità con i principi dell'ordinamento. Questo approccio mira a bilanciare la certezza del diritto con l'esigenza di tutelare interessi meritevoli e l'autonomia privata, sebbene con limiti specifici per le promesse unilaterali.\n\n**Approccio Giurisprudenziale:**\nLa giurisprudenza (Fonti: Cassazione civile, Sez. I, sentenza n. 22361 del 25 ottobre 2007; Cassazione civile, Sez. VI-2, ordinanza n. 21102 del 22 luglio 2021) ha fornito chiarimenti essenziali, in particolare sulla distinzione tra la fonte negoziale o legale del diritto e la promessa di pagamento o ricognizione di debito. Quest'ultime non sono considerate autonome fonti di obbligazione, ma hanno un effetto meramente confermativo di un'obbligazione preesistente. Ciò significa che, in caso di inadempimento, il creditore deve provare la fonte originaria del suo diritto (contratto o fatto illecito), mentre l'onere di provare l'adempimento ricade sul debitore. La giurisprudenza ha anche delineato le caratteristiche di specifiche tipologie di obbligazioni (alternative e facoltative) e la natura di istituti come l'espromissione e la cessione di crediti futuri, contribuendo a definire i contorni applicativi della norma.\n\n**Sintesi e Coerenza:**\nIn sintesi, l'Art. 1173 c.c. non si limita a elencare le fonti tipiche delle obbligazioni, ma introduce una clausola di apertura che consente all'ordinamento di riconoscere nuove fonti, purché conformi ai principi generali. Questa flessibilità è temperata dalla giurisprudenza, che, pur riconoscendo la validità di atti o fatti atipici, ne delimita la portata, distinguendoli da mere promesse o ricognizioni di debito che non creano nuove obbligazioni ma si limitano a confermare quelle esistenti. Non emergono divergenze sostanziali tra gli approcci, ma piuttosto una complementarietà: l'interpretazione letterale e sistematica fornisce la base normativa, quella principialistica ne espande la portata in chiave assiologica, e quella giurisprudenziale ne definisce i confini applicativi e le implicazioni pratiche. L'obiettivo comune è garantire un sistema delle obbligazioni che sia al contempo certo, equo e adattabile alle mutevoli esigenze della società.",
+  "final_confidence": 0.9400000000000001,
+  "baseline": {
+    "response": "Certamente. Le fonti delle obbligazioni nel diritto civile italiano sono espressamente indicate dal Codice Civile.\n\n**1. Risposta alla domanda:**\n\nLe obbligazioni derivano principalmente da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.\n\n**2. Articoli di legge pertinenti:**\n\nL'articolo fondamentale che disciplina le fonti delle obbligazioni è l'**Art. 1173 del Codice Civile**, il quale recita:\n\n> \"Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.\"\n\n**3. Eventuali principi giuridici applicabili:**\n\nIl principio giuridico sotteso all'Art. 1173 c.c. è quello della **tipicità delle fonti delle obbligazioni**, sebbene con un'apertura alla atipicità. Se da un lato il legislatore individua esplicitamente le due fonti principali (contratto e fatto illecito), dall'altro lascia spazio a una categoria residuale e aperta (\"ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico\"). Questo significa che, oltre alle fonti nominate, possono esistere altre fonti di obbligazione, purché riconosciute e disciplinate dall'ordinamento giuridico.\n\nEsempi di queste \"altre fonti\" includono:\n\n*   **Promesse unilaterali** (Art. 1987 c.c. e ss.), come la promessa al pubblico.\n*   **Gestione di affari altrui** (Art. 2028 c.c. e ss.).\n*   **Pagamento dell'indebito** (Art. 2033 c.c. e ss.).\n*   **Arricchimento senza causa** (Art. 2041 c.c. e ss.).\n*   **Legge stessa**, che in alcuni casi impone direttamente obbligazioni (es. obbligo di mantenimento tra coniugi).\n\nIn sintesi, l'Art. 1173 c.c. fornisce una classificazione delle fonti delle obbligazioni che è al contempo tassativa nelle sue categorie principali e aperta per le altre ipotesi previste dalla legge.",
+    "latency_ms": 3177.9611110687256,
+    "sources_cited": [
+      "Art. 1987 c.c.",
+      "Art. 2041 c.c.",
+      "Art. 2033 c.c.",
+      "Art. 2028 c.c.",
+      "Art. 1173 c.c."
+    ],
+    "timestamp": "2025-12-21T13:54:26.851961"
+  },
+  "comparison": {
+    "expert_sources_count": 12,
+    "baseline_sources_count": 5,
+    "expert_sources": [
+      "Cassazione civile, Sez. II, sentenza n. 24819 del 16 settembre 2024",
+      "Norma 1",
+      "Cassazione civile, Sez. VI-2, ordinanza n. 21102 del 22 luglio 2021",
+      "Norma 4",
+      "Cassazione civile, Sez. I, sentenza n. 31896 del 10 dicembre 2018",
+      "N/A",
+      "Art. 1173 c.c. (Fonti delle obbligazioni).",
+      "Art. 1173 c.c.",
+      "Principio 1",
+      "Cassazione civile, Sez. I, sentenza n. 22361 del 25 ottobre 2007"
+    ],
+    "baseline_sources": [
+      "Art. 1987 c.c.",
+      "Art. 2041 c.c.",
+      "Art. 2033 c.c.",
+      "Art. 2028 c.c.",
+      "Art. 1173 c.c."
+    ],
+    "expert_grounded": true,
+    "baseline_grounded": false
+  },
+  "source_validation": {
+    "validated": [
+      {
+        "source_type": "norm",
+        "source_id": "8fb00cd7-18b2-b770-1387-5a611f269b84",
+        "citation": "Art. 1173 c.c.",
+        "excerpt": "Art. 1173. \n\n (Fonti delle obbligazioni). \n\n Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.",
+        "relevance": "Questa norma definisce esplicitamente le fonti delle obbligazioni, rispondendo direttamente alla domanda."
+      },
+      {
+        "source_type": "norm",
+        "source_id": "8fb00cd7-18b2-b770-1387-5a611f269b84",
+        "citation": "Art. 1173 c.c. (Fonti delle obbligazioni).",
+        "excerpt": "Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.",
+        "relevance": "Questa è la norma principale che definisce esplicitamente le fonti delle obbligazioni."
+      },
+      {
+        "source_type": "norm",
+        "source_id": "269aaa7d-dddb-3c38-3dd4-48263cd2da86",
+        "citation": "Norma 1",
+        "excerpt": "Il codice all'art. 1173 indica come fonti delle obbligazioni il contratto, il fatto illecito o ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico.",
+        "relevance": "Fornisce la base normativa esplicita per l'individuazione delle fonti delle obbligazioni, introducendo il concetto di 'atipicità' attraverso la clausola generale."
+      },
+      {
+        "source_type": "norm",
+        "source_id": "05ec36d9-0adf-dc19-862d-c784774935f1",
+        "citation": "Norma 4",
+        "excerpt": "L'ultima parte dell'articolo sancisce un principio innovativo per il codice civile del 1942: il principio della atipicità delle fonti dell'obbligazione. Il rinvio all'ordinamento giuridico implica rinvio non solo alla legge, la quale già contempla atti o fatti tipici produttivi di obbligazioni, ma anche ad atti o fatti non previsti in norme specifiche e, quindi, atipici.",
+        "relevance": "Chiarisce la portata della clausola generale dell'art. 1173, evidenziando il principio di atipicità e la possibilità di riconoscere fonti di obbligazione non espressamente previste dalla legge."
+      },
+      {
+        "source_type": "norm",
+        "source_id": "269aaa7d-dddb-3c38-3dd4-48263cd2da86",
+        "citation": "Norma 1",
+        "excerpt": "L'art. 1322 definisce in maniera assai ampia l'autonomia contrattuale, ammettendo che col contratto si possa realizzare qualunque interesse meritevole di tutela se­condo l'ordinamento giuridico.",
+        "relevance": "Sottolinea il principio dell'autonomia contrattuale come fonte primaria di obbligazioni, purché l'interesse sia meritevole di tutela secondo l'ordinamento."
+      },
+      {
+        "source_type": "principle",
+        "source_id": "269aaa7d-dddb-3c38-3dd4-48263cd2da86",
+        "citation": "Principio 1",
+        "excerpt": "Con la promessa unilaterale invece bisogna limitarsi ai casi ammessi dalla legge. Ma in questa modesta sfera di attività anche la promessa unilaterale se non è una fonte generale, è tuttavia fonte di obbligazione.",
+        "relevance": "Evidenzia il principio della tipicità delle promesse unilaterali, che, pur essendo fonti di obbligazione, sono soggette a un regime più rigoroso rispetto all'autonomia contrattuale."
+      },
+      {
+        "source_type": "jurisprudence",
+        "source_id": "9eee5a97-3fe5-c6f4-3209-430ed834707b",
+        "citation": "Cassazione civile, Sez. I, sentenza n. 22361 del 25 ottobre 2007",
+        "excerpt": "In tema di prova dell'inadempimento di una obbligazione, il creditore che agisca per il risarcimento del danno deve provare solo la fonte (negoziale o legale) del suo diritto, limitandosi alla mera allegazione della circostanza dell'inadempimento della controparte, mentre è il debitore convenuto ad essere gravato dell'onere di provare il proprio adempimento",
+        "relevance": "Questo precedente è fondamentale per definire l'onere della prova in caso di inadempimento e chiarisce che la 'fonte' del diritto può essere negoziale o legale, indicando implicitamente le principali categorie di fonti delle obbligazioni."
+      },
+      {
+        "source_type": "norm",
+        "source_id": "3bbc941a-1fd3-d428-ee03-d00f999c2557",
+        "citation": "N/A",
+        "excerpt": "La promessa di pagamento, al pari della ricognizione di debito, non costituisce autonoma fonte di obbligazione, ma ha soltanto effetto confermativo di un preesistente rapporto fondamentale, venendo ad operarsi, in forza dell'art. 1988 c.c., un'astrazione meramente processuale della \"causa debendi\", comportante una semplice \"relevatio ab onere probandi\" per la quale il destinatario della promessa è dispensato dall'onere di provare l'esistenza del rapporto fondamentale, che si presume fino a prova contraria e che, oltre ad essere preesistente, può anche nascere contemporaneamente alla dichiarazione di promessa (o trovarsi \"in itinere\" al momento di questa), ma della cui esistenza o validità non può prescindersi sotto il profilo sostanziale, con il conseguente venir meno di ogni effetto vincolante della promessa stessa ove rimanga giudizialmente provato che il rapporto fondamentale non è mai sorto, o è invalido, o si è estinto, ovvero che esista una condizione ovvero un altro elemento attinente al rapporto fondamentale che possa comunque incidere sull'obbligazione derivante dal riconoscimento.",
+        "relevance": "Questa norma interpretativa chiarisce che promessa di pagamento e ricognizione di debito non sono fonti autonome di obbligazioni, ma presuppongono un rapporto fondamentale preesistente, definendo la loro natura e i loro effetti probatori."
+      },
+      {
+        "source_type": "jurisprudence",
+        "source_id": "5a351e67-46aa-9257-477b-2f1c57b9b7a0",
+        "citation": "Cassazione civile, Sez. VI-2, ordinanza n. 21102 del 22 luglio 2021",
+        "excerpt": "Nell'espromissione, che si perfeziona verso il creditore, senza bisogno di un suo atto di accettazione, quando egli venga a conoscenza dell'impegno assunto dall'espromittente, la causa del contratto è costituita puramente e semplicemente dall'assunzione del debito altrui, essendo irrilevanti sia i rapporti interni intercorrenti tra il debitore e l'assuntore, sia le ragioni che hanno determinato l'intervento di quest'ultimo, essendo invece necessario che il terzo, presentandosi al creditore, non ponga a fondamento del proprio impegno un preesistente accordo con l'obbligato.",
+        "relevance": "Questo precedente descrive la natura e la causa dell'espromissione, che è una modalità di assunzione del debito altrui, e quindi una fonte di obbligazione per il terzo espromittente."
+      },
+      {
+        "source_type": "jurisprudence",
+        "source_id": "20d7142c-773a-0759-98d1-582da22d3fd9",
+        "citation": "Cassazione civile, Sez. I, sentenza n. 31896 del 10 dicembre 2018",
+        "excerpt": "La cessione dei crediti futuri, ivi compresi quelli aventi causa risarcitoria, non ha natura meramente obbligatoria e vi si può procedere - quando nel negozio dispositivo sia individuata la fonte, oppure la stessa sia determinata o determinabile - senza che rilevi la probabilità della venuta in essere del credito ceduto, non esistendo una norma che vieta la disponibilità dei diritti futuri perché meramente eventuali, con la conseguenza che la venuta in essere del credito futuro integra un requisito di efficacia della cessione, ma non della sua validità.",
+        "relevance": "Questo precedente indica la cessione di crediti futuri come una possibile fonte di obbligazioni, purché la fonte del credito sia individuata o determinabile, e ne chiarisce la validità ed efficacia."
+      },
+      {
+        "source_type": "jurisprudence",
+        "source_id": "ddbd2556-be3e-f3e4-cdb2-f3f1b73e1166",
+        "citation": "Cassazione civile, Sez. II, sentenza n. 24819 del 16 settembre 2024",
+        "excerpt": "L'obbligazione alternativa presuppone l'originario concorso di due o più prestazioni, in posizione di parità e dedotte in modo disgiuntivo, nessuna delle quali può essere adempiuta prima dell'indispensabile scelta di una di esse, rimessa alla volontà di una delle parti e che diventa irrevocabile con la dichiarazione comunicata alla controparte; l'obbligazione facoltativa, invece, ha ad oggetto una prestazione principale, unica e determinata fin dall'origine, nonché, accanto a questa, una prestazione facoltativa, dovuta in via subordinata e secondaria, ove venga preferita dal creditore stesso e costituisca quindi l'oggetto di una sua specifica ed univoca opzione, esercitabile fino al momento in cui non vi sia stato l'adempimento della prestazione principale.",
+        "relevance": "Questo precedente, pur non definendo direttamente le 'fonti' delle obbligazioni in senso lato, descrive due specifiche tipologie di obbligazioni (alternativa e facoltativa) che possono derivare da tali fonti, contribuendo a delineare il panorama delle obbligazioni stesse."
+      },
+      {
+        "source_type": "norm",
+        "source_id": "020a8e28-7f19-d502-f90d-7c2e56a3c704",
+        "citation": "N/A",
+        "excerpt": "L'obbligazione alternativa presuppone l'originario concorso di due o più prestazioni, in posizione di parità e dedotte in modo disgiuntivo, nessuna delle quali può essere adempiuta prima dell'indispensabile scelta di una di esse, rimessa alla volontà di una delle parti e che diventa irrevocabile con la dichiarazione comunicata alla controparte; l'obbligazione facoltativa, invece, ha ad oggetto una prestazione principale, unica e determinata fin dall'origine, nonché, accanto a questa, una prestazione facoltativa, dovuta in via subordinata e secondaria, ove venga preferita dal creditore stesso e costituisca quindi l'oggetto di una sua specifica ed univoca opzione, esercitabile fino al momento in cui non vi sia stato l'adempimento della prestazione principale.",
+        "relevance": "Questa norma, identica al precedente giurisprudenziale ddbd2556-be3e-f3e4-cdb2-f3f1b73e1166, rafforza la definizione delle obbligazioni alternative e facoltative, che sono manifestazioni di obbligazioni derivanti da una fonte."
+      }
+    ],
+    "hallucinated": [],
+    "validated_count": 12,
+    "hallucinated_count": 0,
+    "grounding_rate": 1.0
+  }
+}

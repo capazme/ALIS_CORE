@@ -1,0 +1,288 @@
+# =============================================================================
+# MERL-T Docker Compose - Production Deployment
+# =============================================================================
+#
+# Stack v3:
+#   - PostgreSQL: Bridge Table + RLCF data
+#   - FalkorDB: Legal Knowledge Graph (Cypher-compatible, 496x faster than Neo4j)
+#   - Qdrant: Vector embeddings for semantic search
+#   - Redis: Caching layer
+#   - Streamlit: Expert Debugger UI
+#   - Traefik: Reverse proxy with auto HTTPS (optional)
+#
+# Usage:
+#   Development: docker-compose -f docker-compose.dev.yml up -d
+#   Production:  docker-compose up -d
+#   With HTTPS:  docker-compose --profile https up -d
+#
+# Required .env file (see .env.example):
+#   - POSTGRES_PASSWORD
+#   - OPENROUTER_API_KEY
+#   - DOMAIN (for HTTPS)
+#
+# =============================================================================
+
+services:
+  # ===========================================================================
+  # DATABASE SERVICES
+  # ===========================================================================
+
+  # PostgreSQL: Bridge Table + RLCF authority/feedback
+  postgres:
+    image: postgres:15
+    container_name: merl-t-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-rlcf_prod}
+      POSTGRES_USER: ${POSTGRES_USER:-merl_t}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Optional: mount init scripts
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-merl_t} -d ${POSTGRES_DB:-rlcf_prod}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - merl-t-internal
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # FalkorDB: Legal Knowledge Graph (replaces Neo4j)
+  falkordb:
+    image: falkordb/falkordb:latest
+    container_name: merl-t-falkordb
+    ports:
+      - "${FALKORDB_PORT:-6380}:6379"
+      - "${FALKORDB_UI_PORT:-3001}:3000"  # FalkorDB Browser UI
+    volumes:
+      - falkordb_data:/var/lib/falkordb/data
+    environment:
+      # Production: more aggressive persistence
+      FALKORDB_ARGS: "--save 60 1 --save 300 10 --appendonly yes --appendfsync everysec --maxmemory ${FALKORDB_MAXMEMORY:-2gb} --maxmemory-policy noeviction"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6379", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - merl-t-internal
+    command: ["falkordb-server", "--loadmodule", "/usr/lib/redis/modules/libgraphdb.so"]
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+
+  # Redis: Caching layer
+  redis:
+    image: redis:7-alpine
+    container_name: merl-t-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: >
+      redis-server
+      --save 60 1
+      --save 300 10
+      --appendonly yes
+      --maxmemory ${REDIS_MAXMEMORY:-512mb}
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - merl-t-internal
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # Qdrant: Vector database for semantic search
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: merl-t-qdrant
+    ports:
+      - "${QDRANT_HTTP_PORT:-6333}:6333"
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    environment:
+      QDRANT__SERVICE__GRPC_PORT: "6334"
+      QDRANT__SERVICE__HTTP_PORT: "6333"
+      QDRANT__STORAGE__ON_DISK_PAYLOAD: "true"
+      QDRANT__CLUSTER__ENABLED: "false"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - merl-t-internal
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  # ===========================================================================
+  # APPLICATION SERVICES
+  # ===========================================================================
+
+  # Streamlit: Expert Debugger UI
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    container_name: merl-t-streamlit
+    ports:
+      - "${STREAMLIT_PORT:-8501}:8501"
+    environment:
+      # Database connections
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-rlcf_prod}
+      POSTGRES_USER: ${POSTGRES_USER:-merl_t}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+
+      FALKORDB_HOST: falkordb
+      FALKORDB_PORT: 6379
+      FALKORDB_GRAPH: ${FALKORDB_GRAPH:-merl_t_prod}
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: 6333
+      QDRANT_COLLECTION: ${QDRANT_COLLECTION:-merl_t_prod_chunks}
+
+      # AI Service
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?OPENROUTER_API_KEY is required}
+      AI_MODEL: ${AI_MODEL:-google/gemini-2.5-flash}
+
+      # App config
+      STREAMLIT_SERVER_PORT: 8501
+      STREAMLIT_SERVER_ADDRESS: 0.0.0.0
+      STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
+
+    volumes:
+      # Mount logs directory
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - merl-t-internal
+      - merl-t-external
+    depends_on:
+      postgres:
+        condition: service_healthy
+      falkordb:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  # ===========================================================================
+  # REVERSE PROXY (optional - for HTTPS)
+  # ===========================================================================
+
+  traefik:
+    image: traefik:v3.0
+    container_name: merl-t-traefik
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@example.com}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      # Redirect HTTP to HTTPS
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_letsencrypt:/letsencrypt
+    networks:
+      - merl-t-external
+    restart: unless-stopped
+    profiles:
+      - https
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH:-admin:$$apr1$$xyz$$hash}"
+
+  # Streamlit with Traefik labels (used when --profile https)
+  streamlit-https:
+    extends:
+      service: streamlit
+    container_name: merl-t-streamlit-https
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.streamlit.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.streamlit.entrypoints=websecure"
+      - "traefik.http.routers.streamlit.tls.certresolver=letsencrypt"
+      - "traefik.http.services.streamlit.loadbalancer.server.port=8501"
+    profiles:
+      - https
+
+# =============================================================================
+# VOLUMES
+# =============================================================================
+volumes:
+  postgres_data:
+    name: merl-t-postgres-data
+  falkordb_data:
+    name: merl-t-falkordb-data
+  redis_data:
+    name: merl-t-redis-data
+  qdrant_data:
+    name: merl-t-qdrant-data
+  traefik_letsencrypt:
+    name: merl-t-traefik-letsencrypt
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  # Internal network (databases + apps)
+  merl-t-internal:
+    name: merl-t-internal
+    driver: bridge
+    internal: true
+
+  # External network (exposed services)
+  merl-t-external:
+    name: merl-t-external
+    driver: bridge

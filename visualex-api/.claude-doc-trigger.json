@@ -1,0 +1,30 @@
+[
+  {
+    "timestamp": "2026-01-16 21:02:55",
+    "file": "visualex/utils/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: visualex/utils. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-16 21:03:37",
+    "file": "pyproject.toml",
+    "change_type": "core_change",
+    "context": "Core file modified: pyproject.toml. May require updating setup/installation docs.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-18 23:13:42",
+    "file": "tests/unit/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: tests/unit. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-18 23:13:43",
+    "file": "tests/integration/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: tests/integration. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/"
+  }
+]

@@ -1,0 +1,40 @@
+# Source files (only dist/ is published)
+src/
+*.ts
+*.tsx
+!dist/
+
+# Config files
+vite.config.ts
+tsconfig*.json
+tsup.config.ts
+
+# Development files
+index.html
+Dockerfile
+
+# Documentation
+PLUGIN.md
+USAGE.md
+
+# Tests
+tests/
+*.test.ts
+*.spec.ts
+
+# Build artifacts
+node_modules/
+.vite/
+.turbo/
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Misc
+*.log
+.DS_Store

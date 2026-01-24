@@ -1,0 +1,121 @@
+[
+  {
+    "timestamp": "2026-01-17 15:24:10",
+    "file": "pyproject.toml",
+    "change_type": "core_change",
+    "context": "Core file modified: pyproject.toml. May require updating setup/installation docs.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-17 15:25:57",
+    "file": "merlt/clients/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/clients. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-17 15:29:43",
+    "file": "merlt/clients/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/clients. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-17 15:31:08",
+    "file": "merlt/sources/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/sources. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-17 15:43:21",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-17 15:43:21",
+    "file": "merlt/api/graph_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/graph_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-17 15:52:29",
+    "file": "merlt/utils/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/utils. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-17 15:52:51",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-17 15:52:56",
+    "file": "merlt/api/graph_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/graph_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-17 15:54:04",
+    "file": "merlt/utils/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/utils. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-17 15:54:10",
+    "file": "merlt/utils/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/utils. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-17 16:12:23",
+    "file": "merlt/utils/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/utils. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-17 16:12:25",
+    "file": "merlt/utils/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/utils. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-17 16:12:57",
+    "file": "merlt/api/ingestion_api.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/ingestion_api.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-17 16:12:59",
+    "file": "merlt/api/enrichment_router.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: merlt/api/enrichment_router.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-18 23:11:30",
+    "file": "pyproject.toml",
+    "change_type": "core_change",
+    "context": "Core file modified: pyproject.toml. May require updating setup/installation docs.",
+    "project_docs": "README.md readme.md docs/"
+  },
+  {
+    "timestamp": "2026-01-18 23:12:47",
+    "file": "merlt/clients/__init__.py",
+    "change_type": "new_directory",
+    "context": "New directory structure: merlt/clients. Update architecture docs with new module organization.",
+    "project_docs": "README.md readme.md docs/"
+  }
+]

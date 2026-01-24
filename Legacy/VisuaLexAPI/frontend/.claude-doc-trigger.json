@@ -1,0 +1,380 @@
+[
+  {
+    "timestamp": "2026-01-06 08:59:15",
+    "file": "src/constants/merltTypes.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/constants/merltTypes.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 12:45:24",
+    "file": "src/components/features/merlt/ProposeEntityModal.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/ProposeEntityModal.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 20:20:22",
+    "file": "src/hooks/useValidationKeyboard.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/hooks/useValidationKeyboard.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 20:21:05",
+    "file": "src/hooks/useValidationState.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/hooks/useValidationState.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 20:21:55",
+    "file": "src/components/features/merlt/VoteWeightIndicator.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/VoteWeightIndicator.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 20:23:00",
+    "file": "src/components/features/merlt/ValidationBulkActionsBar.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/ValidationBulkActionsBar.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 20:23:52",
+    "file": "src/components/features/merlt/VoteHistoryModal.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/VoteHistoryModal.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 20:24:20",
+    "file": "src/components/features/merlt/ValidationKeyboardHelpModal.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/ValidationKeyboardHelpModal.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 20:25:44",
+    "file": "src/components/features/merlt/ValidationCard.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/ValidationCard.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 20:26:18",
+    "file": "src/components/features/merlt/SkipQueuePanel.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/SkipQueuePanel.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 20:28:44",
+    "file": "src/components/features/merlt/MerltInspectorPanel.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/MerltInspectorPanel.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 20:38:03",
+    "file": "src/components/features/merlt/VoteWeightIndicator.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/VoteWeightIndicator.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:23:44",
+    "file": "src/hooks/useProfile.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/hooks/useProfile.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:24:31",
+    "file": "src/components/features/merlt/profile/AuthorityOverview.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/profile/AuthorityOverview.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:25:10",
+    "file": "src/components/features/merlt/profile/AuthorityBreakdown.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/profile/AuthorityBreakdown.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:25:41",
+    "file": "src/components/features/merlt/profile/ContributionStats.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/profile/ContributionStats.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:26:27",
+    "file": "src/components/features/merlt/profile/DomainHeatmap.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/profile/DomainHeatmap.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:28:23",
+    "file": "src/components/features/merlt/profile/RLCFExplainer.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/profile/RLCFExplainer.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:28:57",
+    "file": "src/components/features/merlt/profile/ProfilePage.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/profile/ProfilePage.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:29:03",
+    "file": "src/components/features/merlt/profile/index.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/components/features/merlt/profile/index.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:33:32",
+    "file": "src/pages/SettingsPage.tsx",
+    "change_type": "new_module",
+    "context": "New file created: src/pages/SettingsPage.tsx. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:33:41",
+    "file": "src/pages/ProfilePageWrapper.tsx",
+    "change_type": "new_module",
+    "context": "New file created: src/pages/ProfilePageWrapper.tsx. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 21:39:56",
+    "file": "src/components/features/merlt/profile/ActivityTimeline.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/profile/ActivityTimeline.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 23:38:22",
+    "file": "src/hooks/useSubgraph.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/hooks/useSubgraph.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-06 23:40:30",
+    "file": "src/components/features/bulletin/KnowledgeGraphExplorer.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/bulletin/KnowledgeGraphExplorer.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-07 11:22:17",
+    "file": "src/utils/graphLabels.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/utils/graphLabels.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-07 11:55:29",
+    "file": "src/components/features/bulletin/KnowledgeGraphExplorer.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/bulletin/KnowledgeGraphExplorer.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-07 12:37:09",
+    "file": "src/components/features/merlt/ReportNodeIssueModal.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/ReportNodeIssueModal.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-07 13:24:30",
+    "file": "src/components/features/merlt/IssueList.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/IssueList.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-07 13:36:22",
+    "file": "src/components/features/merlt/IssueSidebar.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/IssueSidebar.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-07 23:47:51",
+    "file": "src/components/features/workspace/GraphViewContent.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/workspace/GraphViewContent.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-08 01:04:34",
+    "file": "src/services/pipelineService.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/services/pipelineService.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-08 01:05:10",
+    "file": "src/hooks/usePipelineMonitoring.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/hooks/usePipelineMonitoring.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-08 01:05:42",
+    "file": "src/components/features/merlt/monitoring/PipelineStatsPanel.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/monitoring/PipelineStatsPanel.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-08 01:06:32",
+    "file": "src/components/features/merlt/monitoring/PipelineRunCard.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/monitoring/PipelineRunCard.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-08 01:07:17",
+    "file": "src/components/features/merlt/monitoring/PipelineMonitoringDashboard.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/monitoring/PipelineMonitoringDashboard.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-08 01:07:24",
+    "file": "src/components/features/merlt/monitoring/index.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/components/features/merlt/monitoring/index.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-08 08:42:16",
+    "file": "src/components/features/merlt/ExpertCompareView.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/ExpertCompareView.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-08 09:30:31",
+    "file": "src/components/features/merlt/CitationCorrectionDrawer.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/CitationCorrectionDrawer.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-08 17:27:54",
+    "file": "src/components/features/merlt/CitationCorrectionCard.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/CitationCorrectionCard.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-08 18:53:48",
+    "file": "src/utils/domContext.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/utils/domContext.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-09 00:57:27",
+    "file": "src/services/dashboardService.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/services/dashboardService.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-09 00:57:57",
+    "file": "src/services/statisticsService.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/services/statisticsService.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-09 00:58:32",
+    "file": "src/services/rlcfService.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/services/rlcfService.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:00:25",
+    "file": "src/components/features/merlt/dashboard/AcademicDashboard.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/dashboard/AcademicDashboard.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:01:09",
+    "file": "src/components/features/merlt/dashboard/tabs/OverviewTab.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/dashboard/tabs/OverviewTab.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:02:05",
+    "file": "src/components/features/merlt/dashboard/tabs/ArchitectureTab.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/dashboard/tabs/ArchitectureTab.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:03:43",
+    "file": "src/components/features/merlt/dashboard/tabs/RLCFTab.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/dashboard/tabs/RLCFTab.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:04:48",
+    "file": "src/components/features/merlt/dashboard/tabs/ExpertsTab.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/dashboard/tabs/ExpertsTab.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:05:47",
+    "file": "src/components/features/merlt/dashboard/tabs/StatisticsTab.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/dashboard/tabs/StatisticsTab.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:05:54",
+    "file": "src/components/features/merlt/dashboard/tabs/PipelineTab.tsx",
+    "change_type": "ui_component",
+    "context": "New UI component: src/components/features/merlt/dashboard/tabs/PipelineTab.tsx. Document in component docs if this is a reusable component.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:06:00",
+    "file": "src/components/features/merlt/dashboard/tabs/index.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/components/features/merlt/dashboard/tabs/index.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:06:05",
+    "file": "src/components/features/merlt/dashboard/index.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/components/features/merlt/dashboard/index.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-09 01:07:15",
+    "file": "src/services/expertMetricsService.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/services/expertMetricsService.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  }
+]

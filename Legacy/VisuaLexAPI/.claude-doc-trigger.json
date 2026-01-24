@@ -1,0 +1,100 @@
+[
+  {
+    "timestamp": "2026-01-06 08:53:42",
+    "file": "visualex_api/services/brocardi_scraper.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: visualex_api/services/brocardi_scraper.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/architecture.md docs/ CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 18:19:36",
+    "file": "visualex_api/services/normattiva_scraper.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: visualex_api/services/normattiva_scraper.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/architecture.md docs/ CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 18:22:51",
+    "file": "visualex_api/tools/text_op.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: visualex_api/tools/text_op.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/architecture.md docs/ CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-08 18:23:56",
+    "file": "visualex_api/services/normattiva_scraper.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: visualex_api/services/normattiva_scraper.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/architecture.md docs/ CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-23 20:20:01",
+    "file": "visualex_api/tools/ordinals.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: visualex_api/tools/ordinals.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/architecture.md docs/ CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-23 20:37:44",
+    "file": "visualex_api/tools/treextractor.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: visualex_api/tools/treextractor.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/architecture.md docs/ CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-23 20:37:57",
+    "file": "visualex_api/tools/treextractor.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: visualex_api/tools/treextractor.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/architecture.md docs/ CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-23 20:40:03",
+    "file": "visualex_api/tools/treextractor.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: visualex_api/tools/treextractor.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/architecture.md docs/ CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-23 20:42:32",
+    "file": "visualex_api/tools/norma.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: visualex_api/tools/norma.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/architecture.md docs/ CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-23 20:42:52",
+    "file": "visualex_api/services/normattiva.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: visualex_api/services/normattiva.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/architecture.md docs/ CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-23 20:46:00",
+    "file": "visualex_api/services/brocardi.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: visualex_api/services/brocardi.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/architecture.md docs/ CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-23 20:46:20",
+    "file": "visualex_api/services/base.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: visualex_api/services/base.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/architecture.md docs/ CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-23 20:56:28",
+    "file": "visualex_api/tools/treextractor.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: visualex_api/tools/treextractor.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/architecture.md docs/ CLAUDE.md"
+  },
+  {
+    "timestamp": "2026-01-23 20:56:40",
+    "file": "visualex_api/tools/treextractor.py",
+    "change_type": "api_change",
+    "context": "API/route file modified: visualex_api/tools/treextractor.py. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md docs/architecture.md docs/ CLAUDE.md"
+  }
+]

@@ -1,0 +1,354 @@
+{
+  "version": "1.0.0",
+  "generated": "2026-01-18",
+  "description": "Mapping of all MERLT imports in Legacy/VisuaLexAPI/frontend that need to be migrated to plugin architecture",
+  "source_path": "Legacy/VisuaLexAPI/frontend/src",
+
+  "summary": {
+    "total_files": 34,
+    "total_components": 17,
+    "total_hooks": 4,
+    "total_services": 1,
+    "total_types": 100,
+    "estimated_effort_days": 17
+  },
+
+  "plugin_slots_required": [
+    {
+      "slot": "article-sidebar",
+      "description": "Right sidebar in article view for MERLT inspector panel",
+      "components": ["MerltInspectorPanel"],
+      "priority": "high"
+    },
+    {
+      "slot": "article-toolbar",
+      "description": "Toolbar above article content for MERLT actions",
+      "components": ["MerltToolbarButton"],
+      "priority": "medium"
+    },
+    {
+      "slot": "article-content-overlay",
+      "description": "Floating overlay for citation correction",
+      "components": ["CitationCorrectionCard", "ProposeEntityDrawer", "ProposeRelationDrawer"],
+      "priority": "high"
+    },
+    {
+      "slot": "profile-tabs",
+      "description": "Additional tabs in user profile for MERLT stats",
+      "components": ["ProfilePage", "AuthorityOverview", "AuthorityBreakdown", "ContributionStats", "DomainHeatmap", "ActivityTimeline"],
+      "priority": "medium"
+    },
+    {
+      "slot": "admin-dashboard",
+      "description": "Admin dashboard panels for MERLT monitoring",
+      "components": ["PipelineMonitoringDashboard", "AcademicDashboard"],
+      "priority": "medium"
+    },
+    {
+      "slot": "bulletin-board",
+      "description": "Bulletin board / community features",
+      "components": ["IssueList", "IssueSidebar", "KnowledgeGraphExplorer"],
+      "priority": "medium"
+    },
+    {
+      "slot": "graph-explorer",
+      "description": "Knowledge graph explorer component",
+      "components": ["KnowledgeGraphExplorer", "GraphViewContent"],
+      "priority": "low"
+    },
+    {
+      "slot": "dossier-actions",
+      "description": "Dossier page actions for training set export",
+      "components": ["DossierTrainingExport"],
+      "priority": "low"
+    }
+  ],
+
+  "events_to_emit": [
+    { "event": "article:viewed", "source": "ArticleTabContent", "description": "When user opens an article" },
+    { "event": "article:text-selected", "source": "SelectionPopup", "description": "When user selects text in article" },
+    { "event": "enrichment:requested", "source": "MerltInspectorPanel", "description": "When user requests article enrichment" },
+    { "event": "entity:validated", "source": "ValidationCard", "description": "When user votes on an entity" },
+    { "event": "relation:validated", "source": "ValidationCard", "description": "When user votes on a relation" },
+    { "event": "citation:detected", "source": "CitationPreviewPopup", "description": "When citation is detected in text" },
+    { "event": "graph:node-clicked", "source": "KnowledgeGraphExplorer", "description": "When user clicks a graph node" },
+    { "event": "issue:reported", "source": "ReportNodeIssueModal", "description": "When user reports an issue" }
+  ],
+
+  "files_to_migrate": {
+    "high_priority": [
+      {
+        "file": "components/features/search/ArticleTabContent.tsx",
+        "imports": [
+          { "type": "hook", "name": "useMerltArticleStatus", "from": "../../../hooks/useMerltArticleStatus" },
+          { "type": "component", "name": "MerltInspectorPanel", "from": "../merlt/MerltInspectorPanel" },
+          { "type": "component", "name": "ProposeEntityDrawer", "from": "../merlt/ProposeEntityDrawer" },
+          { "type": "component", "name": "ProposeRelationDrawer", "from": "../merlt/ProposeRelationDrawer" },
+          { "type": "component", "name": "CitationCorrectionCard", "from": "../merlt/CitationCorrectionCard" },
+          { "type": "service", "name": "merltService", "from": "../../../services/merltService" }
+        ],
+        "migration_strategy": "Replace MERLT components with PluginSlot, emit events via EventBus",
+        "effort": "high",
+        "notes": "Main integration point - requires EventBus for article:viewed, article:text-selected"
+      }
+    ],
+    "medium_priority": [
+      {
+        "file": "pages/AdminPage.tsx",
+        "imports": [
+          { "type": "component", "name": "PipelineMonitoringDashboard", "from": "../components/features/merlt/monitoring" },
+          { "type": "component", "name": "AcademicDashboard", "from": "../components/features/merlt/dashboard" }
+        ],
+        "migration_strategy": "Replace with PluginSlot name='admin-dashboard'",
+        "effort": "medium"
+      },
+      {
+        "file": "pages/ProfilePageWrapper.tsx",
+        "imports": [
+          { "type": "component", "name": "ProfilePage", "from": "../components/features/merlt/profile" }
+        ],
+        "migration_strategy": "Replace with PluginSlot name='profile-tabs'",
+        "effort": "medium"
+      },
+      {
+        "file": "components/features/bulletin/BulletinBoardPage.tsx",
+        "imports": [
+          { "type": "component", "name": "IssueList", "from": "../merlt/IssueList" }
+        ],
+        "migration_strategy": "Replace with PluginSlot name='bulletin-board'",
+        "effort": "medium"
+      },
+      {
+        "file": "components/features/bulletin/KnowledgeGraphExplorer.tsx",
+        "imports": [
+          { "type": "component", "name": "ReportNodeIssueModal", "from": "../merlt/ReportNodeIssueModal" },
+          { "type": "type", "name": "EdgeReportData", "from": "../merlt/ReportNodeIssueModal" },
+          { "type": "type", "name": "SubgraphNode", "from": "../../../types/merlt" },
+          { "type": "type", "name": "SubgraphEdge", "from": "../../../types/merlt" }
+        ],
+        "migration_strategy": "Move to plugin, expose via graph-explorer slot",
+        "effort": "medium"
+      },
+      {
+        "file": "components/features/workspace/GraphViewContent.tsx",
+        "imports": [
+          { "type": "type", "name": "SubgraphNode", "from": "../../../types/merlt" }
+        ],
+        "migration_strategy": "Move to plugin or make types shared",
+        "effort": "low"
+      },
+      {
+        "file": "components/features/dossier/DossierPage.tsx",
+        "imports": [
+          { "type": "service", "name": "exportDossierTrainingSet", "from": "../../../services/merltService" },
+          { "type": "service", "name": "loadDossierTrainingSet", "from": "../../../services/merltService" },
+          { "type": "type", "name": "DossierArticleData", "from": "../../../types/merlt" }
+        ],
+        "migration_strategy": "Replace with PluginSlot name='dossier-actions'",
+        "effort": "medium"
+      }
+    ],
+    "low_priority": [
+      {
+        "file": "store/useEnrichmentStore.ts",
+        "imports": [
+          { "type": "service", "name": "merltService", "from": "../services/merltService" },
+          { "type": "service", "name": "requestLiveEnrichmentStreaming", "from": "../services/merltService" },
+          { "type": "type", "name": "PendingEntity", "from": "../types/merlt" },
+          { "type": "type", "name": "PendingRelation", "from": "../types/merlt" }
+        ],
+        "migration_strategy": "Move entirely to plugin, expose via context",
+        "effort": "high",
+        "notes": "Store should be part of plugin internal state"
+      },
+      {
+        "file": "hooks/useProfile.ts",
+        "imports": [
+          { "type": "service", "name": "getUserProfile", "from": "../services/merltService" },
+          { "type": "type", "name": "ProfileResponse", "from": "../types/merlt" },
+          { "type": "type", "name": "AuthorityTier", "from": "../types/merlt" },
+          { "type": "type", "name": "LegalDomain", "from": "../types/merlt" }
+        ],
+        "migration_strategy": "Move entirely to plugin",
+        "effort": "medium"
+      },
+      {
+        "file": "hooks/useSubgraph.ts",
+        "imports": [
+          { "type": "service", "name": "merltService", "from": "../services/merltService" },
+          { "type": "type", "name": "SubgraphNode", "from": "../types/merlt" },
+          { "type": "type", "name": "SubgraphEdge", "from": "../types/merlt" }
+        ],
+        "migration_strategy": "Move entirely to plugin",
+        "effort": "medium"
+      },
+      {
+        "file": "hooks/useMerltArticleStatus.ts",
+        "imports": [
+          { "type": "service", "name": "merltService", "from": "../services/merltService" },
+          { "type": "type", "name": "multiple", "from": "../types/merlt" }
+        ],
+        "migration_strategy": "Move entirely to plugin, expose status via slot props",
+        "effort": "high"
+      },
+      {
+        "file": "hooks/useValidationState.ts",
+        "imports": [
+          { "type": "type", "name": "PendingEntity", "from": "../types/merlt" },
+          { "type": "type", "name": "PendingRelation", "from": "../types/merlt" },
+          { "type": "type", "name": "VoteType", "from": "../types/merlt" }
+        ],
+        "migration_strategy": "Move entirely to plugin",
+        "effort": "medium"
+      },
+      {
+        "file": "constants/merltTypes.ts",
+        "imports": [
+          { "type": "type", "name": "EntityType", "from": "../types/merlt" },
+          { "type": "type", "name": "RelationType", "from": "../types/merlt" }
+        ],
+        "migration_strategy": "Move entirely to plugin",
+        "effort": "low"
+      },
+      {
+        "file": "utils/graphLabels.ts",
+        "imports": [
+          { "type": "type", "name": "SubgraphNode", "from": "../types/merlt" }
+        ],
+        "migration_strategy": "Move entirely to plugin",
+        "effort": "low"
+      },
+      {
+        "file": "services/merltService.ts",
+        "imports": [
+          { "type": "type", "name": "multiple (100+)", "from": "../types/merlt" }
+        ],
+        "migration_strategy": "Move entirely to plugin, becomes plugin's internal service",
+        "effort": "high",
+        "notes": "Core service with 40+ API methods"
+      },
+      {
+        "file": "types/merlt.ts",
+        "imports": [],
+        "migration_strategy": "Move entirely to plugin, no longer exported from platform",
+        "effort": "medium",
+        "notes": "Contains all MERLT-specific types"
+      }
+    ],
+    "merlt_components_to_move": [
+      "components/features/merlt/MerltInspectorPanel.tsx",
+      "components/features/merlt/ValidationCard.tsx",
+      "components/features/merlt/ProposeEntityDrawer.tsx",
+      "components/features/merlt/ProposeRelationDrawer.tsx",
+      "components/features/merlt/ProposeEntityModal.tsx",
+      "components/features/merlt/ProposeRelationModal.tsx",
+      "components/features/merlt/EditEntityDrawer.tsx",
+      "components/features/merlt/EditRelationDrawer.tsx",
+      "components/features/merlt/CitationCorrectionCard.tsx",
+      "components/features/merlt/CitationCorrectionDrawer.tsx",
+      "components/features/merlt/IssueSidebar.tsx",
+      "components/features/merlt/IssueList.tsx",
+      "components/features/merlt/ReportNodeIssueModal.tsx",
+      "components/features/merlt/SkipQueuePanel.tsx",
+      "components/features/merlt/ValidationBulkActionsBar.tsx",
+      "components/features/merlt/ValidationKeyboardHelpModal.tsx",
+      "components/features/merlt/VoteHistoryModal.tsx",
+      "components/features/merlt/VoteWeightIndicator.tsx",
+      "components/features/merlt/profile/ProfilePage.tsx",
+      "components/features/merlt/profile/AuthorityOverview.tsx",
+      "components/features/merlt/profile/AuthorityBreakdown.tsx",
+      "components/features/merlt/profile/ContributionStats.tsx",
+      "components/features/merlt/profile/DomainHeatmap.tsx",
+      "components/features/merlt/profile/ActivityTimeline.tsx",
+      "components/features/merlt/profile/RLCFExplainer.tsx",
+      "components/features/merlt/monitoring/",
+      "components/features/merlt/dashboard/"
+    ]
+  },
+
+  "migration_order": [
+    {
+      "phase": 1,
+      "name": "Core Platform Infrastructure",
+      "tasks": [
+        "Implement PluginRegistry with feature-based loading",
+        "Implement EventBus with typed events",
+        "Create PluginSlot component",
+        "Create PluginProvider context"
+      ],
+      "status": "completed"
+    },
+    {
+      "phase": 2,
+      "name": "MERLT Plugin Scaffold",
+      "tasks": [
+        "Configure Vite build for plugin mode",
+        "Create plugin entry point (index.ts)",
+        "Setup plugin manifest",
+        "Create plugin types"
+      ],
+      "status": "completed"
+    },
+    {
+      "phase": 3,
+      "name": "ArticleTabContent Migration",
+      "tasks": [
+        "Add PluginSlot to article-sidebar position",
+        "Add PluginSlot to article-content-overlay position",
+        "Emit article:viewed event on mount",
+        "Emit article:text-selected on selection",
+        "Remove direct MERLT component imports"
+      ],
+      "status": "pending"
+    },
+    {
+      "phase": 4,
+      "name": "Profile/Admin Migration",
+      "tasks": [
+        "Add PluginSlot to profile-tabs",
+        "Add PluginSlot to admin-dashboard",
+        "Remove ProfilePage MERLT import",
+        "Remove AdminPage MERLT imports"
+      ],
+      "status": "pending"
+    },
+    {
+      "phase": 5,
+      "name": "Bulletin/Graph Migration",
+      "tasks": [
+        "Add PluginSlot to bulletin-board",
+        "Add PluginSlot to graph-explorer",
+        "Move KnowledgeGraphExplorer to plugin",
+        "Remove BulletinBoardPage MERLT import"
+      ],
+      "status": "pending"
+    },
+    {
+      "phase": 6,
+      "name": "Service/Store Migration",
+      "tasks": [
+        "Move merltService to plugin",
+        "Move useEnrichmentStore to plugin",
+        "Move all hooks to plugin",
+        "Move types/merlt.ts to plugin"
+      ],
+      "status": "pending"
+    },
+    {
+      "phase": 7,
+      "name": "Cleanup",
+      "tasks": [
+        "Remove components/features/merlt/ directory from platform",
+        "Remove types/merlt.ts from platform",
+        "Remove services/merltService.ts from platform",
+        "Update platform package.json (remove MERLT deps)"
+      ],
+      "status": "pending"
+    }
+  ],
+
+  "refactoring_example": {
+    "before": "// ArticleTabContent.tsx\nimport { MerltInspectorPanel } from '../merlt/MerltInspectorPanel';\n\n// In render:\n<MerltInspectorPanel\n  isOpen={showMerltPanel}\n  onClose={() => setShowMerltPanel(false)}\n  userId={user?.id || ''}\n  tipoAtto={norma_data.tipo_atto}\n  ...\n/>",
+    "after": "// ArticleTabContent.tsx\nimport { PluginSlot, EventBus } from '@/lib/plugins';\n\nuseEffect(() => {\n  EventBus.emit('article:viewed', { urn, articleId: norma_data.numero_articolo });\n}, [urn]);\n\n// In render:\n<PluginSlot\n  name=\"article-sidebar\"\n  props={{ urn, articleId: norma_data.numero_articolo }}\n  fallback={null}  // Nothing shown if plugin not loaded\n/>"
+  }
+}

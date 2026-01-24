@@ -1,0 +1,122 @@
+# Workflow Status Template
+
+# This tracks progress through BMM methodology Analysis, Planning, and Solutioning phases.
+# Implementation phase is tracked separately in sprint-status.yaml
+
+# STATUS DEFINITIONS:
+# ==================
+# Initial Status (before completion):
+#   - required: Must be completed to progress
+#   - optional: Can be completed but not required
+#   - recommended: Strongly suggested but not required
+#   - conditional: Required only if certain conditions met (e.g., if_has_ui)
+#
+# Completion Status:
+#   - {file-path}: File created/found (e.g., "docs/product-brief.md")
+#   - skipped: Optional/conditional workflow that was skipped
+
+generated: "2026-01-23"
+project: "ALIS_CORE"
+project_type: "software"
+selected_track: "enterprise"
+field_type: "brownfield"
+workflow_path: "enterprise-brownfield.yaml"
+
+# Discovery Options Selected
+discovery_options:
+  brainstorm_requested: true
+  research_requested: true
+  product_brief_requested: false
+
+workflow_status:
+  # Phase 0: Documentation (Prerequisite for Brownfield)
+  - phase: 0
+    name: "Documentation"
+    workflows:
+      - id: "document-project"
+        status: "docs/project-documentation/index.md"
+        agent: "analyst"
+        command: "/bmad:bmm:workflows:document-project"
+        purpose: "Understand existing codebase before planning"
+        completed: "2026-01-23"
+        outputs:
+          - "docs/project-documentation/index.md"
+          - "docs/project-documentation/00-project-overview.md"
+          - "docs/project-documentation/01-architecture.md"
+          - "docs/project-documentation/02-merlt-experts.md"
+          - "docs/project-documentation/03-rlcf.md"
+
+  # Phase 1: Analysis (Optional Discovery Workflows)
+  - phase: 1
+    name: "Analysis"
+    workflows:
+      - id: "brainstorm-project"
+        status: "_bmad-output/analysis/brainstorming-session-2026-01-23.md"
+        selected: true
+        agent: "analyst"
+        command: "/bmad:core:workflows:brainstorming"
+        completed: "2026-01-23"
+        key_decisions:
+          - "3-repo consolidation (alis-ml, alis-api, alis-web)"
+          - "Sequential expert execution (Art. 12 compliant)"
+          - "Framework open, models proprietary"
+      - id: "research"
+        status: "_bmad-output/planning-artifacts/research/technical-vector-space-legal-interpretation-research-2026-01-23.md"
+        selected: true
+        agent: "analyst"
+        command: "/bmad:bmm:workflows:research"
+        completed: "2026-01-23"
+        research_type: "technical"
+        key_findings:
+          - "GraphRAG (2024-2025) validates FalkorDB+Qdrant architecture"
+          - "Civil law gap in Legal AI = thesis opportunity"
+          - "RLCF as first computational implementation of Ehrlich's living law"
+          - "Neuro-symbolic with external structure (Art. 12) avoids explainability gap"
+
+  # Phase 2: Planning
+  - phase: 2
+    name: "Planning"
+    workflows:
+      - id: "prd"
+        status: "required"
+        agent: "pm"
+        command: "/bmad:bmm:workflows:prd"
+        output: "Product Requirements Document with FRs and NFRs"
+      - id: "create-ux-design"
+        status: "conditional"
+        condition: "if_has_ui"
+        agent: "ux-designer"
+        command: "/bmad:bmm:workflows:create-ux-design"
+
+  # Phase 3: Solutioning
+  - phase: 3
+    name: "Solutioning"
+    workflows:
+      - id: "create-architecture"
+        status: "required"
+        agent: "architect"
+        command: "/bmad:bmm:workflows:create-architecture"
+        output: "System architecture document"
+      - id: "create-epics-and-stories"
+        status: "required"
+        agent: "pm"
+        command: "/bmad:bmm:workflows:create-epics-and-stories"
+      - id: "test-design"
+        status: "optional"
+        agent: "tea"
+        command: "/bmad:bmm:workflows:testarch-test-design"
+        output: "System-level testability review"
+      - id: "implementation-readiness"
+        status: "required"
+        agent: "architect"
+        command: "/bmad:bmm:workflows:check-implementation-readiness"
+
+  # Phase 4: Implementation
+  - phase: 4
+    name: "Implementation"
+    workflows:
+      - id: "sprint-planning"
+        status: "required"
+        agent: "sm"
+        command: "/bmad:bmm:workflows:sprint-planning"
+        note: "Creates sprint plan - subsequent work tracked there"

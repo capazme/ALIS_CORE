@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "merlt-models"
+version = "0.1.0"
+description = "Proprietary trained models for MERL-T framework"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Proprietary"}
+authors = [
+    {name = "VisuaLex"}
+]
+
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+torch = [
+    "torch>=2.0.0",
+    "safetensors>=0.3.0",
+]
+full = [
+    "merlt>=0.1.0",
+    "torch>=2.0.0",
+    "safetensors>=0.3.0",
+]
+
+[project.urls]
+Homepage = "https://visualex.com"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["merlt_models*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.yaml", "*.yml"]

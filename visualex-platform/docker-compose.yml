@@ -1,0 +1,69 @@
+services:
+  frontend:
+    build:
+      context: ..
+      dockerfile: visualex-platform/frontend/Dockerfile
+      args:
+        VITE_API_URL: "/api"
+        VITE_PYTHON_API_URL: "http://localhost:5000"
+        VITE_MERLT_ENABLED: "${VITE_MERLT_ENABLED:-false}"
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_URL=/api
+      - VITE_PYTHON_API_URL=http://localhost:5000
+      - VITE_MERLT_ENABLED=${VITE_MERLT_ENABLED:-false}
+    depends_on:
+      - backend
+      - python-api
+    volumes:
+      - ./frontend:/app/visualex-platform/frontend
+      - /app/visualex-platform/frontend/node_modules
+
+  backend:
+    build:
+      context: ..
+      dockerfile: visualex-platform/backend/Dockerfile
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://visualex:visualex@postgres:5432/visualex?schema=public
+      - JWT_SECRET=dev-secret
+      - MERLT_ENABLED=${MERLT_ENABLED:-false}
+      - MERLT_API_URL=${MERLT_API_URL:-http://merlt-api:8000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app/visualex-platform/backend
+      - /app/visualex-platform/backend/node_modules
+
+  python-api:
+    build:
+      context: ../visualex-api
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  postgres:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-visualex}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-visualex}
+      - POSTGRES_DB=${POSTGRES_DB:-visualex}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U visualex -d visualex"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:

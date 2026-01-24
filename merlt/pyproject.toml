@@ -1,0 +1,113 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "merlt"
+version = "0.1.0"
+description = "Multi-Expert Reinforcement Learning from AI Feedback for Legal Text Analysis"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "MERL-T Contributors"}
+]
+keywords = [
+    "legal",
+    "nlp",
+    "machine-learning",
+    "reinforcement-learning",
+    "ai-feedback",
+    "italian-law",
+    "knowledge-graph",
+    "multi-expert"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
+]
+
+dependencies = [
+    # Core scraping - installed from local copy in Docker
+    # "visualex>=0.1.0",  # Uncomment when published to PyPI
+
+    # ML/AI
+    "torch>=2.0.0",
+    "transformers>=4.30.0",
+    "sentence-transformers>=2.2.0",
+
+    # Data processing
+    "pydantic>=2.0.0",
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+
+    # API
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+
+    # Database
+    "sqlalchemy>=2.0.0",
+    "asyncpg>=0.28.0",
+
+    # Graph database
+    "falkordb>=1.0.0",
+
+    # Vector database
+    "qdrant-client>=1.7.0",
+
+    # Utilities
+    "structlog>=23.0.0",
+    "tenacity>=8.2.0",
+    "httpx>=0.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-httpx>=0.22.0",  # For mocking HTTP requests
+    "respx>=0.20.0",  # Alternative HTTP mocking
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+    # Local visualex for development - install with: pip install -e ../visualex-api
+    # "visualex @ file://../visualex-api",  # Uncomment if using pip local path
+]
+training = [
+    "wandb>=0.15.0",
+    "tensorboard>=2.13.0",
+    "accelerate>=0.20.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/merlt/merlt"
+Documentation = "https://merlt.readthedocs.io"
+Repository = "https://github.com/merlt/merlt"
+Issues = "https://github.com/merlt/merlt/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["merlt*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
