@@ -1,0 +1,46 @@
+{
+  "generated_at": "2026-01-25T17:15:00.000000",
+  "source": "LIVE",
+  "status": "live",
+  "database": "FalkorDB (merl_t_legal)",
+  "note": "Sample dataset for demonstration - full dataset (27,740 nodes) requires complete ingestion pipeline",
+
+  "summary": {
+    "total_nodes": 16,
+    "total_relations": 18,
+    "avg_degree": 2.25,
+    "coverage": "4 articoli (sample Art. 1453-1456)"
+  },
+
+  "nodes_by_type": {
+    "Concetto": 5,
+    "Articolo": 4,
+    "Comma": 4,
+    "Libro": 1,
+    "Codice": 1,
+    "Titolo": 1
+  },
+
+  "relations_by_type": {
+    "CONTIENE": 14,
+    "DEFINISCE": 3,
+    "TRATTA": 1
+  },
+
+  "hierarchy": {
+    "Codice Civile": {
+      "Libro IV - Delle obbligazioni": {
+        "Titolo V - Della risoluzione del contratto": {
+          "articles": ["1453", "1454", "1455", "1456"]
+        }
+      }
+    }
+  },
+
+  "comparison_with_full_dataset": {
+    "full_dataset_nodes": 27740,
+    "full_dataset_relations": 43935,
+    "sample_percentage": "0.06%",
+    "source": "EXP-014 documented values"
+  }
+}

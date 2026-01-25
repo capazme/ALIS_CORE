@@ -1,0 +1,118 @@
+{
+  "timestamp": "2026-01-25T14:47:19.605784",
+  "graph_name": "merl_t_dev (documented)",
+  "connection_info": {
+    "host": "localhost",
+    "port": 6380,
+    "status": "fallback"
+  },
+  "total_nodes": 27740,
+  "total_relations": 43935,
+  "nodes_by_type": [
+    {
+      "node_type": "Norma",
+      "count": 12500,
+      "percentage": 45.1,
+      "example_ids": []
+    },
+    {
+      "node_type": "Articolo",
+      "count": 8200,
+      "percentage": 29.6,
+      "example_ids": []
+    },
+    {
+      "node_type": "Comma",
+      "count": 4100,
+      "percentage": 14.8,
+      "example_ids": []
+    },
+    {
+      "node_type": "Concetto",
+      "count": 1800,
+      "percentage": 6.5,
+      "example_ids": []
+    },
+    {
+      "node_type": "Principio",
+      "count": 650,
+      "percentage": 2.3,
+      "example_ids": []
+    },
+    {
+      "node_type": "Sentenza",
+      "count": 490,
+      "percentage": 1.8,
+      "example_ids": []
+    }
+  ],
+  "relations_by_type": [
+    {
+      "relation_type": "contiene",
+      "count": 18500,
+      "percentage": 42.1
+    },
+    {
+      "relation_type": "rinvia",
+      "count": 8700,
+      "percentage": 19.8
+    },
+    {
+      "relation_type": "modifica",
+      "count": 6200,
+      "percentage": 14.1
+    },
+    {
+      "relation_type": "definisce",
+      "count": 4100,
+      "percentage": 9.3
+    },
+    {
+      "relation_type": "interpreta",
+      "count": 3200,
+      "percentage": 7.3
+    },
+    {
+      "relation_type": "abroga",
+      "count": 1800,
+      "percentage": 4.1
+    },
+    {
+      "relation_type": "bilancia",
+      "count": 1435,
+      "percentage": 3.3
+    }
+  ],
+  "connectivity": {
+    "avg_degree": 3.17,
+    "max_degree": 156,
+    "min_degree": 0,
+    "num_isolated_nodes": 342,
+    "top_hubs": [
+      {
+        "urn": "urn:nir:stato:codice.civile:1942-03-16;262",
+        "label": "Codice Civile",
+        "degree": 156
+      },
+      {
+        "urn": "urn:nir:stato:costituzione:1947-12-27",
+        "label": "Costituzione",
+        "degree": 134
+      },
+      {
+        "urn": "urn:nir:stato:codice.penale:1930-10-19;1398",
+        "label": "Codice Penale",
+        "degree": 98
+      }
+    ]
+  },
+  "legal_sources_coverage": {
+    "Codice Civile": 2560,
+    "Costituzione": 139,
+    "Codice Penale": 734,
+    "Codice Procedura Civile": 840,
+    "Leggi Ordinarie": 7200,
+    "Decreti Legislativi": 1027
+  },
+  "collection_duration_ms": 0
+}

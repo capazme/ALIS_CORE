@@ -1,0 +1,590 @@
+{
+  "generated_at": "2026-01-25T14:48:31.695492",
+  "source_experiment": "EXP-020_scientific_evaluation",
+  "total_traces": 9,
+  "traces": [
+    {
+      "query": "Come funziona la risoluzione per inadempimento?",
+      "timestamp": "2025-12-21T12:18:41.963403",
+      "total_latency_ms": 50327.1267414093,
+      "routing": {
+        "query_type": "general",
+        "expert_weights": {
+          "literal": 0.35,
+          "systemic": 0.25,
+          "principles": 0.2,
+          "precedent": 0.2
+        },
+        "confidence": 0.5,
+        "reasoning": "Query classificata come 'general'. Expert principali: literal (0.35)"
+      },
+      "expert_traces": [
+        {
+          "expert_name": "literal",
+          "interpretation": "La risoluzione del contratto per inadempimento si verifica quando una delle parti non adempie le proprie obbligazioni. In tal caso, il contratto non produce più effetti. La parte che ha adempiuto o è ...",
+          "confidence": 1.0,
+          "sources_count": 5,
+          "source_types": [
+            "norm"
+          ],
+          "latency_ms": 10027.224063873291
+        },
+        {
+          "expert_name": "systemic",
+          "interpretation": "La risoluzione per inadempimento di un contratto a prestazioni corrispettive avviene quando una delle parti non adempie le sue obbligazioni. Essa può essere richiesta giudizialmente, a meno che non si...",
+          "confidence": 0.9,
+          "sources_count": 7,
+          "source_types": [
+            "norm"
+          ],
+          "latency_ms": 14035.566806793213
+        },
+        {
+          "expert_name": "principles",
+          "interpretation": "Errore nell'analisi teleologica: Expecting value: line 1 column 1 (char 0)...",
+          "confidence": 0.0,
+          "sources_count": 0,
+          "source_types": [],
+          "latency_ms": 1441.2801265716553
+        },
+        {
+          "expert_name": "precedent",
+          "interpretation": "L'interpretazione giurisprudenziale della risoluzione per inadempimento, basandosi sulle fonti fornite, evidenzia che essa è un rimedio sinallagmatico che presuppone un inadempimento di non scarsa imp...",
+          "confidence": 0.9,
+          "sources_count": 4,
+          "source_types": [
+            "jurisprudence"
+          ],
+          "latency_ms": 11105.148315429688
+        }
+      ],
+      "final_confidence": 0.755,
+      "final_synthesis_length": 4428,
+      "sources_total": 16
+    },
+    {
+      "query": "Come funziona la risoluzione per inadempimento?",
+      "timestamp": "2025-12-21T12:51:05.324165",
+      "total_latency_ms": 60167.271852493286,
+      "routing": {
+        "query_type": "general",
+        "expert_weights": {
+          "literal": 0.35,
+          "systemic": 0.25,
+          "principles": 0.2,
+          "precedent": 0.2
+        },
+        "confidence": 0.5,
+        "reasoning": "Query classificata come 'general'. Expert principali: literal (0.35)"
+      },
+      "expert_traces": [
+        {
+          "expert_name": "literal",
+          "interpretation": "La risoluzione per inadempimento è un rimedio disponibile nei contratti con prestazioni corrispettive, quando uno dei contraenti non adempie le sue obbligazioni. La parte non inadempiente può sceglier...",
+          "confidence": 0.9,
+          "sources_count": 5,
+          "source_types": [
+            "norm"
+          ],
+          "latency_ms": 11324.332237243652
+        },
+        {
+          "expert_name": "systemic",
+          "interpretation": "La risoluzione per inadempimento è un rimedio previsto per i contratti a prestazioni corrispettive, che consente alla parte non inadempiente di sciogliere il vincolo contrattuale quando l'altra parte ...",
+          "confidence": 0.9,
+          "sources_count": 5,
+          "source_types": [
+            "norm",
+            "comment"
+          ],
+          "latency_ms": 13042.479753494263
+        },
+        {
+          "expert_name": "principles",
+          "interpretation": "La risoluzione per inadempimento è un rimedio contrattuale che consente alla parte non inadempiente di sciogliere il vincolo contrattuale in presenza di un inadempimento dell'altra parte. Essa mira a ...",
+          "confidence": 0.9,
+          "sources_count": 7,
+          "source_types": [
+            "principle",
+            "norm"
+          ],
+          "latency_ms": 12687.211036682129
+        },
+        {
+          "expert_name": "precedent",
+          "interpretation": "La risoluzione per inadempimento è un rimedio contrattuale che scioglie il vincolo negoziale a causa della mancata o inesatta esecuzione di una prestazione. Essa ha generalmente effetto retroattivo tr...",
+          "confidence": 0.9,
+          "sources_count": 6,
+          "source_types": [
+            "jurisprudence"
+          ],
+          "latency_ms": 9889.789342880249
+        }
+      ],
+      "final_confidence": 0.9,
+      "final_synthesis_length": 4639,
+      "sources_total": 23
+    },
+    {
+      "query": "Come funziona la risoluzione per inadempimento?",
+      "timestamp": "2025-12-21T13:25:19.215797",
+      "total_latency_ms": 58996.60801887512,
+      "routing": {
+        "query_type": "general",
+        "expert_weights": {
+          "literal": 0.35,
+          "systemic": 0.25,
+          "principles": 0.2,
+          "precedent": 0.2
+        },
+        "confidence": 0.5,
+        "reasoning": "Query classificata come 'general'. Expert principali: literal (0.35)"
+      },
+      "expert_traces": [
+        {
+          "expert_name": "literal",
+          "interpretation": "La risoluzione per inadempimento è un rimedio disponibile nei contratti con prestazioni corrispettive, quando uno dei contraenti non adempie le sue obbligazioni. La parte non inadempiente può sceglier...",
+          "confidence": 0.9,
+          "sources_count": 4,
+          "source_types": [
+            "norm"
+          ],
+          "latency_ms": 9134.007692337036
+        },
+        {
+          "expert_name": "systemic",
+          "interpretation": "La risoluzione per inadempimento è un rimedio previsto per i contratti a prestazioni corrispettive, che consente alla parte non inadempiente di sciogliere il vincolo contrattuale quando l'altra parte ...",
+          "confidence": 0.9,
+          "sources_count": 5,
+          "source_types": [
+            "norm"
+          ],
+          "latency_ms": 14407.185792922974
+        },
+        {
+          "expert_name": "principles",
+          "interpretation": "La risoluzione per inadempimento è un rimedio contrattuale volto a sciogliere il vincolo negoziale nei contratti a prestazioni corrispettive, quando una delle parti non adempie le proprie obbligazioni...",
+          "confidence": 0.9,
+          "sources_count": 6,
+          "source_types": [
+            "principle",
+            "norm"
+          ],
+          "latency_ms": 12357.622146606445
+        },
+        {
+          "expert_name": "precedent",
+          "interpretation": "La risoluzione per inadempimento è un rimedio contrattuale che scioglie il vincolo negoziale a causa della mancata o inesatta esecuzione di una delle prestazioni. I suoi effetti sono retroattivi tra l...",
+          "confidence": 0.9,
+          "sources_count": 5,
+          "source_types": [
+            "norm",
+            "jurisprudence"
+          ],
+          "latency_ms": 9870.895147323608
+        }
+      ],
+      "final_confidence": 0.9,
+      "final_synthesis_length": 4621,
+      "sources_total": 20
+    },
+    {
+      "query": "Quali sono le fonti delle obbligazioni?",
+      "timestamp": "2025-12-21T13:54:26.863685",
+      "total_latency_ms": 47866.942167282104,
+      "routing": {
+        "query_type": "general",
+        "expert_weights": {
+          "literal": 0.35,
+          "systemic": 0.25,
+          "principles": 0.2,
+          "precedent": 0.2
+        },
+        "confidence": 0.5,
+        "reasoning": "Query classificata come 'general'. Expert principali: literal (0.35)"
+      },
+      "expert_traces": [
+        {
+          "expert_name": "literal",
+          "interpretation": "Le obbligazioni derivano da contratto, da fatto illecito, o da ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento giuridico....",
+          "confidence": 1.0,
+          "sources_count": 1,
+          "source_types": [
+            "norm"
+          ],
+          "latency_ms": 3810.001850128174
+        },
+        {
+          "expert_name": "systemic",
+          "interpretation": "Le fonti delle obbligazioni, secondo l'ordinamento giuridico italiano, sono il contratto, il fatto illecito e ogni altro atto o fatto idoneo a produrle in conformità dell'ordinamento stesso. Questa di...",
+          "confidence": 1.0,
+          "sources_count": 1,
+          "source_types": [
+            "norm"
+          ],
+          "latency_ms": 6246.871709823608
+        },
+        {
+          "expert_name": "principles",
+          "interpretation": "L'interpretazione delle fonti delle obbligazioni, basata sui principi generali dell'ordinamento giuridico, rivela un sistema che, pur indicando esplicitamente il contratto e il fatto illecito, si apre...",
+          "confidence": 0.9,
+          "sources_count": 4,
+          "source_types": [
+            "principle",
+            "norm"
+          ],
+          "latency_ms": 8233.011960983276
+        },
+        {
+          "expert_name": "precedent",
+          "interpretation": "L'interpretazione giurisprudenziale delle fonti delle obbligazioni si concentra sulla distinzione tra la fonte negoziale o legale del diritto e la promessa di pagamento o ricognizione di debito, che n...",
+          "confidence": 0.8,
+          "sources_count": 6,
+          "source_types": [
+            "norm",
+            "jurisprudence"
+          ],
+          "latency_ms": 14046.632051467896
+        }
+      ],
+      "final_confidence": 0.9400000000000001,
+      "final_synthesis_length": 3544,
+      "sources_total": 12
+    },
+    {
+      "query": "Come funziona la risoluzione per inadempimento?",
+      "timestamp": "2025-12-21T19:50:14.405732",
+      "total_latency_ms": 67000.95319747925,
+      "routing": {
+        "query_type": "general",
+        "expert_weights": {
+          "literal": 0.35,
+          "systemic": 0.25,
+          "principles": 0.2,
+          "precedent": 0.2
+        },
+        "confidence": 0.5,
+        "reasoning": "Query classificata come 'general'. Expert principali: literal (0.35)"
+      },
+      "expert_traces": [
+        {
+          "expert_name": "literal",
+          "interpretation": "La risoluzione per inadempimento è un meccanismo che si applica nei contratti con prestazioni corrispettive quando uno dei contraenti non adempie le sue obbligazioni. In tal caso, l'altro contraente p...",
+          "confidence": 0.9,
+          "sources_count": 5,
+          "source_types": [
+            "norm"
+          ],
+          "latency_ms": 9339.911937713623
+        },
+        {
+          "expert_name": "systemic",
+          "interpretation": "La risoluzione per inadempimento è un rimedio previsto per i contratti a prestazioni corrispettive, che consente alla parte non inadempiente di sciogliere il vincolo contrattuale quando l'altra parte ...",
+          "confidence": 0.9,
+          "sources_count": 5,
+          "source_types": [
+            "norma"
+          ],
+          "latency_ms": 13127.42304801941
+        },
+        {
+          "expert_name": "principles",
+          "interpretation": "La risoluzione per inadempimento è un meccanismo che consente a una delle parti di un contratto di sciogliersi dal vincolo contrattuale a fronte dell'inadempimento dell'altra parte. Questo istituto si...",
+          "confidence": 0.9,
+          "sources_count": 5,
+          "source_types": [
+            "norm"
+          ],
+          "latency_ms": 9592.607021331787
+        },
+        {
+          "expert_name": "precedent",
+          "interpretation": "La risoluzione per inadempimento, in presenza di una caparra confirmatoria, presenta diverse sfaccettature a seconda della scelta della parte non inadempiente. Se la risoluzione è già stata ottenuta, ...",
+          "confidence": 0.9,
+          "sources_count": 5,
+          "source_types": [
+            "jurisprudence"
+          ],
+          "latency_ms": 11013.650894165039
+        }
+      ],
+      "final_confidence": 0.9,
+      "final_synthesis_length": 4690,
+      "sources_total": 20
+    },
+    {
+      "query": "Qual è la responsabilità del vettore nel contratto di trasporto?",
+      "timestamp": "2025-12-21T20:21:33.783418",
+      "total_latency_ms": 60827.06880569458,
+      "routing": {
+        "query_type": "general",
+        "expert_weights": {
+          "literal": 0.35,
+          "systemic": 0.25,
+          "principles": 0.2,
+          "precedent": 0.2
+        },
+        "confidence": 0.5,
+        "reasoning": "Query classificata come 'general'. Expert principali: literal (0.35)"
+      },
+      "expert_traces": [
+        {
+          "expert_name": "literal",
+          "interpretation": "La responsabilità del vettore nel contratto di trasporto si articola in diverse fattispecie. Per quanto riguarda il trasporto di persone, il vettore risponde dei sinistri che colpiscono la persona del...",
+          "confidence": 0.9,
+          "sources_count": 4,
+          "source_types": [
+            "norm"
+          ],
+          "latency_ms": 7258.634090423584
+        },
+        {
+          "expert_name": "systemic",
+          "interpretation": "La responsabilità del vettore nel contratto di trasporto si articola in modo diverso a seconda che si tratti di trasporto di persone o di cose. Nel trasporto di persone, il vettore risponde dei sinist...",
+          "confidence": 0.9,
+          "sources_count": 5,
+          "source_types": [
+            "norm"
+          ],
+          "latency_ms": 8866.786003112793
+        },
+        {
+          "expert_name": "principles",
+          "interpretation": "La responsabilità del vettore nel contratto di trasporto si configura come una responsabilità di natura contrattuale, che varia a seconda che si tratti di trasporto di persone o di cose. Nel trasporto...",
+          "confidence": 0.9,
+          "sources_count": 5,
+          "source_types": [
+            "principle",
+            "norm"
+          ],
+          "latency_ms": 12160.338878631592
+        },
+        {
+          "expert_name": "precedent",
+          "interpretation": "La responsabilità del vettore nel contratto di trasporto varia a seconda che si tratti di trasporto di persone o di cose, e si estende anche ai casi in cui il vettore si avvalga di subvettori o agisca...",
+          "confidence": 0.9,
+          "sources_count": 6,
+          "source_types": [
+            "jurisprudence"
+          ],
+          "latency_ms": 11204.926252365112
+        }
+      ],
+      "final_confidence": 0.9,
+      "final_synthesis_length": 4745,
+      "sources_total": 20
+    },
+    {
+      "query": "Qual è la responsabilità del vettore nel contratto di trasporto? Come si differenzia dalla responsabilità tipica?",
+      "timestamp": "2025-12-21T22:54:00.878270",
+      "total_latency_ms": 58108.444929122925,
+      "routing": {
+        "query_type": "general",
+        "expert_weights": {
+          "literal": 0.35,
+          "systemic": 0.25,
+          "principles": 0.2,
+          "precedent": 0.2
+        },
+        "confidence": 0.5,
+        "reasoning": "Query classificata come 'general'. Expert principali: literal (0.35)"
+      },
+      "expert_traces": [
+        {
+          "expert_name": "literal",
+          "interpretation": "La responsabilità del vettore nel contratto di trasporto si manifesta in diverse forme. Per il trasporto di persone, il vettore risponde dei sinistri che colpiscono il viaggiatore durante il viaggio e...",
+          "confidence": 0.9,
+          "sources_count": 6,
+          "source_types": [
+            "norm"
+          ],
+          "latency_ms": 9952.226161956787
+        },
+        {
+          "expert_name": "systemic",
+          "interpretation": "La responsabilità del vettore nel contratto di trasporto si configura come una responsabilità di tipo contrattuale, caratterizzata da un regime probatorio particolarmente rigoroso a carico del vettore...",
+          "confidence": 0.9,
+          "sources_count": 5,
+          "source_types": [
+            "norma"
+          ],
+          "latency_ms": 9334.152936935425
+        },
+        {
+          "expert_name": "principles",
+          "interpretation": "La responsabilità del vettore nel contratto di trasporto, sia di persone che di cose, è di natura contrattuale e si distingue per la sua gravità e per un onere della prova alleggerito per il danneggia...",
+          "confidence": 0.9,
+          "sources_count": 6,
+          "source_types": [
+            "principle",
+            "norm"
+          ],
+          "latency_ms": 10423.414945602417
+        },
+        {
+          "expert_name": "precedent",
+          "interpretation": "La responsabilità del vettore nel contratto di trasporto è di natura contrattuale e si configura come una presunzione di responsabilità. In particolare, nel trasporto di persone, il vettore è responsa...",
+          "confidence": 0.9,
+          "sources_count": 7,
+          "source_types": [
+            "jurisprudence"
+          ],
+          "latency_ms": 13543.648958206177
+        }
+      ],
+      "final_confidence": 0.9,
+      "final_synthesis_length": 3517,
+      "sources_total": 24
+    },
+    {
+      "query": "Qual è la responsabilità del vettore nel contratto di trasporto?",
+      "timestamp": "2025-12-22T11:14:51.387842",
+      "total_latency_ms": 52271.669149398804,
+      "routing": {
+        "query_type": "general",
+        "expert_weights": {
+          "literal": 0.35,
+          "systemic": 0.25,
+          "principles": 0.2,
+          "precedent": 0.2
+        },
+        "confidence": 0.5,
+        "reasoning": "Query classificata come 'general'. Expert principali: literal (0.35)"
+      },
+      "expert_traces": [
+        {
+          "expert_name": "literal",
+          "interpretation": "...",
+          "confidence": 0.0,
+          "sources_count": 0,
+          "source_types": [],
+          "latency_ms": 7175.541162490845
+        },
+        {
+          "expert_name": "systemic",
+          "interpretation": "...",
+          "confidence": 0.0,
+          "sources_count": 0,
+          "source_types": [],
+          "latency_ms": 13138.334274291992
+        },
+        {
+          "expert_name": "principles",
+          "interpretation": "...",
+          "confidence": 0.0,
+          "sources_count": 0,
+          "source_types": [],
+          "latency_ms": 11379.214763641357
+        },
+        {
+          "expert_name": "precedent",
+          "interpretation": "...",
+          "confidence": 0.0,
+          "sources_count": 0,
+          "source_types": [],
+          "latency_ms": 10665.985107421875
+        }
+      ],
+      "final_confidence": 0.0,
+      "final_synthesis_length": 0,
+      "sources_total": 0
+    },
+    {
+      "query": "Qual è la responsabilità del vettore nel contratto di trasporto?",
+      "timestamp": "2025-12-22T11:20:12.272974",
+      "total_latency_ms": 64468.096017837524,
+      "routing": {
+        "query_type": "general",
+        "expert_weights": {
+          "literal": 0.35,
+          "systemic": 0.25,
+          "principles": 0.2,
+          "precedent": 0.2
+        },
+        "confidence": 0.5,
+        "reasoning": "Query classificata come 'general'. Expert principali: literal (0.35)"
+      },
+      "expert_traces": [
+        {
+          "expert_name": "literal",
+          "interpretation": "La responsabilità del vettore nel contratto di trasporto si manifesta in diverse forme. Per quanto riguarda il trasporto di persone, il vettore risponde dei sinistri che colpiscono il viaggiatore dura...",
+          "confidence": 0.9,
+          "sources_count": 4,
+          "source_types": [
+            "norm"
+          ],
+          "latency_ms": 10115.765571594238
+        },
+        {
+          "expert_name": "systemic",
+          "interpretation": "La responsabilità del vettore nel contratto di trasporto si articola in diverse fattispecie, a seconda che si tratti di trasporto di persone o di cose. In generale, il vettore è responsabile per i dan...",
+          "confidence": 0.9,
+          "sources_count": 4,
+          "source_types": [
+            "norm"
+          ],
+          "latency_ms": 14581.196308135986
+        },
+        {
+          "expert_name": "principles",
+          "interpretation": "L'interpretazione teleologica della responsabilità del vettore nel contratto di trasporto rivela un sistema normativo volto a tutelare il bene giuridico dell'integrità e della corretta esecuzione dell...",
+          "confidence": 0.9,
+          "sources_count": 4,
+          "source_types": [
+            "norm"
+          ],
+          "latency_ms": 13781.435012817383
+        },
+        {
+          "expert_name": "precedent",
+          "interpretation": "La giurisprudenza di legittimità, in tema di contratto di trasporto di merci, stabilisce che il vettore principale che si avvale di un subvettore per l'esecuzione del trasporto, risponde direttamente ...",
+          "confidence": 0.9,
+          "sources_count": 3,
+          "source_types": [
+            "jurisprudence"
+          ],
+          "latency_ms": 8857.458353042603
+        }
+      ],
+      "final_confidence": 0.9,
+      "final_synthesis_length": 4241,
+      "sources_total": 15
+    }
+  ],
+  "statistics": {
+    "total_traces": 9,
+    "latency": {
+      "mean_ms": 57781.5756532881,
+      "min_ms": 47866.942167282104,
+      "max_ms": 67000.95319747925
+    },
+    "confidence": {
+      "mean": 0.7883333333333334,
+      "min": 0.0,
+      "max": 0.9400000000000001
+    },
+    "sources_per_query": {
+      "mean": 16.666666666666668,
+      "total": 150
+    },
+    "expert_performance": {
+      "literal": {
+        "mean_confidence": 0.8222222222222223,
+        "mean_sources": 3.7777777777777777
+      },
+      "systemic": {
+        "mean_confidence": 0.8111111111111111,
+        "mean_sources": 4.111111111111111
+      },
+      "principles": {
+        "mean_confidence": 0.7,
+        "mean_sources": 4.111111111111111
+      },
+      "precedent": {
+        "mean_confidence": 0.788888888888889,
+        "mean_sources": 4.666666666666667
+      }
+    },
+    "source_grounding_rate": 0.8888888888888888
+  }
+}

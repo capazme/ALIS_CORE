@@ -1,0 +1,61 @@
+# A/B Simulation Configuration
+# RLCF vs Baseline Comparison
+
+simulation:
+  name: "RLCF Authority Weighting A/B Test"
+  version: "1.0"
+  date: "2025-01-25"
+
+parameters:
+  # Number of synthetic users
+  num_users: 100
+
+  # Number of evaluation tasks
+  num_tasks: 50
+
+  # Simulation iterations
+  num_iterations: 20
+
+  # Pareto distribution alpha for authority scores
+  # Lower alpha = more inequality (few experts, many novices)
+  authority_alpha: 2.0
+
+  # Base noise level for ratings
+  # Higher authority users have proportionally less noise
+  noise_level: 0.2
+
+  # Rating scale range
+  ground_truth_range:
+    min: 1.0
+    max: 5.0
+
+  # Random seed for reproducibility
+  random_seed: 42
+
+conditions:
+  condition_a:
+    name: "RLCF (Authority-Weighted)"
+    aggregation: "weighted"
+    formula: "R = Σ(rating × authority) / Σ(authority)"
+
+  condition_b:
+    name: "Baseline (Uniform)"
+    aggregation: "uniform"
+    formula: "R = (1/N) × Σ(rating)"
+
+metrics:
+  primary:
+    - final_accuracy
+    - convergence_iteration
+  secondary:
+    - avg_error
+    - error_variance
+  improvement:
+    - accuracy_improvement_percent
+    - error_reduction_percent
+    - variance_reduction_percent
+
+expected_outcomes:
+  hypothesis: "RLCF outperforms baseline due to expertise weighting"
+  expected_accuracy_improvement: ">5%"
+  expected_variance_reduction: ">10%"

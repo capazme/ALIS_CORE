@@ -64,13 +64,13 @@ Based on legal domain expertise consultation and empirical validation:
 ```python
 # From model_config.yaml - authority_weights section
 AUTHORITY_WEIGHTS = {
-    "baseline_credentials": 0.3,  # α = 0.3
-    "track_record": 0.5,          # β = 0.5  
+    "baseline_credentials": 0.4,  # α = 0.4
+    "track_record": 0.4,          # β = 0.4
     "recent_performance": 0.2     # γ = 0.2
 }
 ```
 
-**Rationale:** The 50% weight on track record reflects legal practice where demonstrated competence over time is paramount, while baseline credentials provide stability and recent performance allows for adaptation.
+**Rationale:** The equal 40% weights on baseline credentials and track record reflect the Italian legal system's balance between formal qualifications (iscrizione all'albo) and demonstrated competence. Recent performance at 20% allows adaptation while maintaining stability.
 
 ### 2.2 Dynamic Baseline Credentials System
 

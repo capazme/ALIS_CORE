@@ -1,0 +1,173 @@
+{
+  "generated_at": "2026-01-25T15:00:16.469569",
+  "source_file": "/Users/gabrielerizzo/Downloads/ALIS_CORE/empirical-evidence/merl-t/expert-pipeline-trace/pipeline_traces.json",
+  "traces_analyzed": 9,
+  "analysis": {
+    "pipeline_total": {
+      "count": 9,
+      "mean_ms": 57781.58,
+      "std_dev_ms": 6427.32,
+      "min_ms": 47866.94,
+      "max_ms": 67000.95,
+      "p50_ms": 58996.61,
+      "p95_ms": 65987.81,
+      "p99_ms": 66798.32
+    },
+    "by_expert": {
+      "literal": {
+        "count": 9,
+        "mean_ms": 8681.96,
+        "std_dev_ms": 2267.42,
+        "min_ms": 3810.0,
+        "max_ms": 11324.33,
+        "p50_ms": 9339.91,
+        "p95_ms": 10840.91,
+        "p99_ms": 11227.65
+      },
+      "systemic": {
+        "count": 9,
+        "mean_ms": 11864.44,
+        "std_dev_ms": 2960.39,
+        "min_ms": 6246.87,
+        "max_ms": 14581.2,
+        "p50_ms": 13127.42,
+        "p95_ms": 14511.59,
+        "p99_ms": 14567.28
+      },
+      "principles": {
+        "count": 9,
+        "mean_ms": 10228.46,
+        "std_dev_ms": 3706.37,
+        "min_ms": 1441.28,
+        "max_ms": 13781.44,
+        "p50_ms": 11379.21,
+        "p95_ms": 13343.75,
+        "p99_ms": 13693.9
+      },
+      "precedent": {
+        "count": 9,
+        "mean_ms": 11133.13,
+        "std_dev_ms": 1690.24,
+        "min_ms": 8857.46,
+        "max_ms": 14046.63,
+        "p50_ms": 11013.65,
+        "p95_ms": 13845.44,
+        "p99_ms": 14006.39
+      }
+    },
+    "expert_contributions_pct": {
+      "literal": 15.03,
+      "systemic": 20.53,
+      "principles": 17.7,
+      "precedent": 19.27
+    },
+    "insights": {
+      "slowest_expert": "systemic",
+      "slowest_expert_mean_ms": 11864.44,
+      "fastest_expert": "literal",
+      "fastest_expert_mean_ms": 8681.96,
+      "latency_spread_ms": 19134.01
+    }
+  },
+  "trace_details": [
+    {
+      "query": "Come funziona la risoluzione per inadempimento?...",
+      "timestamp": "2025-12-21T12:18:41.963403",
+      "total_latency_ms": 50327.13,
+      "experts": {
+        "literal": 10027.22,
+        "systemic": 14035.57,
+        "principles": 1441.28,
+        "precedent": 11105.15
+      }
+    },
+    {
+      "query": "Come funziona la risoluzione per inadempimento?...",
+      "timestamp": "2025-12-21T12:51:05.324165",
+      "total_latency_ms": 60167.27,
+      "experts": {
+        "literal": 11324.33,
+        "systemic": 13042.48,
+        "principles": 12687.21,
+        "precedent": 9889.79
+      }
+    },
+    {
+      "query": "Come funziona la risoluzione per inadempimento?...",
+      "timestamp": "2025-12-21T13:25:19.215797",
+      "total_latency_ms": 58996.61,
+      "experts": {
+        "literal": 9134.01,
+        "systemic": 14407.19,
+        "principles": 12357.62,
+        "precedent": 9870.9
+      }
+    },
+    {
+      "query": "Quali sono le fonti delle obbligazioni?...",
+      "timestamp": "2025-12-21T13:54:26.863685",
+      "total_latency_ms": 47866.94,
+      "experts": {
+        "literal": 3810.0,
+        "systemic": 6246.87,
+        "principles": 8233.01,
+        "precedent": 14046.63
+      }
+    },
+    {
+      "query": "Come funziona la risoluzione per inadempimento?...",
+      "timestamp": "2025-12-21T19:50:14.405732",
+      "total_latency_ms": 67000.95,
+      "experts": {
+        "literal": 9339.91,
+        "systemic": 13127.42,
+        "principles": 9592.61,
+        "precedent": 11013.65
+      }
+    },
+    {
+      "query": "Qual è la responsabilità del vettore nel contratto...",
+      "timestamp": "2025-12-21T20:21:33.783418",
+      "total_latency_ms": 60827.07,
+      "experts": {
+        "literal": 7258.63,
+        "systemic": 8866.79,
+        "principles": 12160.34,
+        "precedent": 11204.93
+      }
+    },
+    {
+      "query": "Qual è la responsabilità del vettore nel contratto...",
+      "timestamp": "2025-12-21T22:54:00.878270",
+      "total_latency_ms": 58108.44,
+      "experts": {
+        "literal": 9952.23,
+        "systemic": 9334.15,
+        "principles": 10423.41,
+        "precedent": 13543.65
+      }
+    },
+    {
+      "query": "Qual è la responsabilità del vettore nel contratto...",
+      "timestamp": "2025-12-22T11:14:51.387842",
+      "total_latency_ms": 52271.67,
+      "experts": {
+        "literal": 7175.54,
+        "systemic": 13138.33,
+        "principles": 11379.21,
+        "precedent": 10665.99
+      }
+    },
+    {
+      "query": "Qual è la responsabilità del vettore nel contratto...",
+      "timestamp": "2025-12-22T11:20:12.272974",
+      "total_latency_ms": 64468.1,
+      "experts": {
+        "literal": 10115.77,
+        "systemic": 14581.2,
+        "principles": 13781.44,
+        "precedent": 8857.46
+      }
+    }
+  ]
+}

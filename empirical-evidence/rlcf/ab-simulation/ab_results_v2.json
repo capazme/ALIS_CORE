@@ -1,0 +1,284 @@
+{
+  "timestamp": "2026-01-25T16:38:53.972487",
+  "config": {
+    "num_users": 100,
+    "num_tasks": 100,
+    "num_trials": 30,
+    "raters_per_task": [
+      5,
+      20
+    ],
+    "ground_truth_range": [
+      1.0,
+      5.0
+    ],
+    "base_noise_std": 1.5,
+    "authority_noise_factor": 0.95,
+    "pareto_alpha": 1.3,
+    "random_seed": 42
+  },
+  "num_trials": 30,
+  "rlcf_mae_mean": 0.12862012577474502,
+  "rlcf_mae_std": 0.011654183298716684,
+  "rlcf_mae_ci95": [
+    0.12426887083384351,
+    0.13297138071564651
+  ],
+  "baseline_mae_mean": 0.13926144531352883,
+  "baseline_mae_std": 0.012001669078970479,
+  "baseline_mae_ci95": [
+    0.13478045161878527,
+    0.14374243900827238
+  ],
+  "improvement_mean": 7.665651738476003,
+  "improvement_std": 1.354003255670838,
+  "improvement_ci95": [
+    7.160115382540772,
+    8.171188094411233
+  ],
+  "rlcf_wins": 30,
+  "baseline_wins": 0,
+  "ties": 0,
+  "trials": [
+    {
+      "trial_id": 0,
+      "rlcf_mae": 0.10955904818240822,
+      "baseline_mae": 0.1200713349866615,
+      "rlcf_rmse": 0.1442069981201665,
+      "baseline_rmse": 0.15728418312988315,
+      "improvement_mae": 8.755034501299644
+    },
+    {
+      "trial_id": 1,
+      "rlcf_mae": 0.12364228217765169,
+      "baseline_mae": 0.13759818191028328,
+      "rlcf_rmse": 0.16716162035371276,
+      "baseline_rmse": 0.18321861251154464,
+      "improvement_mae": 10.142503003223625
+    },
+    {
+      "trial_id": 2,
+      "rlcf_mae": 0.11102583538005655,
+      "baseline_mae": 0.1195391093548509,
+      "rlcf_rmse": 0.13604079518183484,
+      "baseline_rmse": 0.14669131005408464,
+      "improvement_mae": 7.121747870416844
+    },
+    {
+      "trial_id": 3,
+      "rlcf_mae": 0.13361928145071633,
+      "baseline_mae": 0.14236893757563537,
+      "rlcf_rmse": 0.1632535126623596,
+      "baseline_rmse": 0.17641763125555757,
+      "improvement_mae": 6.14576204185739
+    },
+    {
+      "trial_id": 4,
+      "rlcf_mae": 0.11215784084079247,
+      "baseline_mae": 0.12383245339465505,
+      "rlcf_rmse": 0.13866987980037598,
+      "baseline_rmse": 0.15292138367662114,
+      "improvement_mae": 9.427748731308338
+    },
+    {
+      "trial_id": 5,
+      "rlcf_mae": 0.13691379768677472,
+      "baseline_mae": 0.14855256236366846,
+      "rlcf_rmse": 0.16743332676820744,
+      "baseline_rmse": 0.18166201290448808,
+      "improvement_mae": 7.834778809402905
+    },
+    {
+      "trial_id": 6,
+      "rlcf_mae": 0.13261981091418362,
+      "baseline_mae": 0.14558739769683318,
+      "rlcf_rmse": 0.17589615974594958,
+      "baseline_rmse": 0.19020551998279644,
+      "improvement_mae": 8.907080549411889
+    },
+    {
+      "trial_id": 7,
+      "rlcf_mae": 0.12155224528688967,
+      "baseline_mae": 0.12984224832739136,
+      "rlcf_rmse": 0.15076743556190791,
+      "baseline_rmse": 0.16217736962287063,
+      "improvement_mae": 6.384673053102732
+    },
+    {
+      "trial_id": 8,
+      "rlcf_mae": 0.12366134346135002,
+      "baseline_mae": 0.1348086641066161,
+      "rlcf_rmse": 0.16063351644770177,
+      "baseline_rmse": 0.172056951006578,
+      "improvement_mae": 8.268994221654774
+    },
+    {
+      "trial_id": 9,
+      "rlcf_mae": 0.14640333720310572,
+      "baseline_mae": 0.1583887454951007,
+      "rlcf_rmse": 0.1899335625725314,
+      "baseline_rmse": 0.20343348106316786,
+      "improvement_mae": 7.567083288986414
+    },
+    {
+      "trial_id": 10,
+      "rlcf_mae": 0.12659194966181897,
+      "baseline_mae": 0.138633635343914,
+      "rlcf_rmse": 0.15525716546583493,
+      "baseline_rmse": 0.16924412217568593,
+      "improvement_mae": 8.6859770013408
+    },
+    {
+      "trial_id": 11,
+      "rlcf_mae": 0.14417531820838872,
+      "baseline_mae": 0.14995498671560573,
+      "rlcf_rmse": 0.17785483267553556,
+      "baseline_rmse": 0.18677688165078957,
+      "improvement_mae": 3.854268960176914
+    },
+    {
+      "trial_id": 12,
+      "rlcf_mae": 0.13607211764929275,
+      "baseline_mae": 0.14790318491934115,
+      "rlcf_rmse": 0.16868546464104162,
+      "baseline_rmse": 0.18280712016614137,
+      "improvement_mae": 7.999197094031789
+    },
+    {
+      "trial_id": 13,
+      "rlcf_mae": 0.129888394448391,
+      "baseline_mae": 0.14353553052911308,
+      "rlcf_rmse": 0.1577630967647833,
+      "baseline_rmse": 0.17341917060591142,
+      "improvement_mae": 9.507845221608072
+    },
+    {
+      "trial_id": 14,
+      "rlcf_mae": 0.13481511219387715,
+      "baseline_mae": 0.1469358798842992,
+      "rlcf_rmse": 0.16798041018644297,
+      "baseline_rmse": 0.18243467790640328,
+      "improvement_mae": 8.249018347299678
+    },
+    {
+      "trial_id": 15,
+      "rlcf_mae": 0.10539759800571809,
+      "baseline_mae": 0.11446060733099164,
+      "rlcf_rmse": 0.15495298899482415,
+      "baseline_rmse": 0.16420602658306815,
+      "improvement_mae": 7.918016107555312
+    },
+    {
+      "trial_id": 16,
+      "rlcf_mae": 0.11351636548953824,
+      "baseline_mae": 0.12057652814882912,
+      "rlcf_rmse": 0.15015248026246614,
+      "baseline_rmse": 0.16046663428717076,
+      "improvement_mae": 5.855337492033635
+    },
+    {
+      "trial_id": 17,
+      "rlcf_mae": 0.13126227443836042,
+      "baseline_mae": 0.14321403913957498,
+      "rlcf_rmse": 0.1637790216979986,
+      "baseline_rmse": 0.18112166228457405,
+      "improvement_mae": 8.345386229604552
+    },
+    {
+      "trial_id": 18,
+      "rlcf_mae": 0.12691229254953904,
+      "baseline_mae": 0.13862028047801497,
+      "rlcf_rmse": 0.15804119226570518,
+      "baseline_rmse": 0.1702614614116125,
+      "improvement_mae": 8.446085874377388
+    },
+    {
+      "trial_id": 19,
+      "rlcf_mae": 0.13301404800155095,
+      "baseline_mae": 0.14501240218762357,
+      "rlcf_rmse": 0.17637782078544914,
+      "baseline_rmse": 0.19578658109930325,
+      "improvement_mae": 8.274019328738937
+    },
+    {
+      "trial_id": 20,
+      "rlcf_mae": 0.1382400690186388,
+      "baseline_mae": 0.14683954168615565,
+      "rlcf_rmse": 0.18652485674247227,
+      "baseline_rmse": 0.19495428336218223,
+      "improvement_mae": 5.856373949938323
+    },
+    {
+      "trial_id": 21,
+      "rlcf_mae": 0.1260236429930664,
+      "baseline_mae": 0.13627038108987635,
+      "rlcf_rmse": 0.1588859940888708,
+      "baseline_rmse": 0.1704990722275771,
+      "improvement_mae": 7.519416923074264
+    },
+    {
+      "trial_id": 22,
+      "rlcf_mae": 0.1417351913190212,
+      "baseline_mae": 0.1539662601136843,
+      "rlcf_rmse": 0.17878960424850343,
+      "baseline_rmse": 0.19392466370663702,
+      "improvement_mae": 7.943992914832135
+    },
+    {
+      "trial_id": 23,
+      "rlcf_mae": 0.14667261700409195,
+      "baseline_mae": 0.15672540261856568,
+      "rlcf_rmse": 0.1834371935991038,
+      "baseline_rmse": 0.19874909347866107,
+      "improvement_mae": 6.414266893886976
+    },
+    {
+      "trial_id": 24,
+      "rlcf_mae": 0.12117832790861698,
+      "baseline_mae": 0.13201189377076694,
+      "rlcf_rmse": 0.14703188936662,
+      "baseline_rmse": 0.1608081045858794,
+      "improvement_mae": 8.2065074234614
+    },
+    {
+      "trial_id": 25,
+      "rlcf_mae": 0.1105821458660548,
+      "baseline_mae": 0.12151283638746357,
+      "rlcf_rmse": 0.1454277596960718,
+      "baseline_rmse": 0.15727406331323568,
+      "improvement_mae": 8.995502735657057
+    },
+    {
+      "trial_id": 26,
+      "rlcf_mae": 0.13279849704053695,
+      "baseline_mae": 0.143520029884027,
+      "rlcf_rmse": 0.16630425517978473,
+      "baseline_rmse": 0.1793486160309734,
+      "improvement_mae": 7.470408731208959
+    },
+    {
+      "trial_id": 27,
+      "rlcf_mae": 0.1421638078491216,
+      "baseline_mae": 0.15364258297149577,
+      "rlcf_rmse": 0.17887048304002937,
+      "baseline_rmse": 0.191845708314324,
+      "improvement_mae": 7.47108965520564
+    },
+    {
+      "trial_id": 28,
+      "rlcf_mae": 0.1257721204195771,
+      "baseline_mae": 0.13509830203378245,
+      "rlcf_rmse": 0.15390130576119826,
+      "baseline_rmse": 0.16750650249321683,
+      "improvement_mae": 6.903255980133083
+    },
+    {
+      "trial_id": 29,
+      "rlcf_mae": 0.14063706059322018,
+      "baseline_mae": 0.1488194189610434,
+      "rlcf_rmse": 0.17882676610076687,
+      "baseline_rmse": 0.18766449703919405,
+      "improvement_mae": 5.498179219450602
+    }
+  ]
+}

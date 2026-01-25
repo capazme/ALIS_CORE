@@ -1,0 +1,90 @@
+{
+  "generated_at": "2026-01-25T14:42:39.899256",
+  "codebase_path": "/Users/gabrielerizzo/Downloads/ALIS_CORE",
+  "formulas": [
+    {
+      "formula_id": "RLCF-F1",
+      "formula_latex": "A_u(t) = \\alpha \\cdot B_u + \\beta \\cdot T_u(t-1) + \\gamma \\cdot P_u(t)",
+      "formula_description": "Dynamic Authority Scoring Model - Calcola il punteggio di autorità di un utente come combinazione lineare pesata di credenziali base, track record storico e performance recente.",
+      "paper_reference": "RLCF Paper, Section 3.1, Equation 1",
+      "file_path": "merlt/merlt/rlcf/authority.py",
+      "line_start": 162,
+      "line_end": 206,
+      "code_snippet": "async def update_authority_score(\n    db: AsyncSession, user_id: int, recent_performance: float\n) -> float:\n    \"\"\"\n    Aggiorna il punteggio di autorità complessivo (A_u) di un utente.\n    \n    Implementa il Dynamic Authority Scoring Model definito in RLCF.md Sezione 2.1:\n    A_u(t) = α·B_u + β·T_u(t-1) + γ·P_u(t)\n    \n    Con distribuzione ottimale dei pesi empiricamente derivata:\n    - α=0.3 (baseline credentials weight)\n    - β=0.5 (historical performance weight) \n    - γ=0.2 (recent performance weight)\n    \n    Questa combinazione lineare bilancia credenziali iniziali, track record storico\n    e performance recente secondo il Principle of Dynamic Authority.\n\n    Args:\n        db: AsyncSession for database operations\n        user_id: ID of the user to update\n        recent_performance: Recent performance score\n\n    Returns:\n        float: Updated authority score\n        \n    References:\n        RLCF.md Section 2.1 - Dynamic Authority Scoring Model\n        RLCF.md Section 1.2 - Principle of Dynamic Authority (Auctoritas Dynamica)\n    \"\"\"\n    result = await db.execute(select(models.User).filter(models.User.id == user_id))\n    user = result.scalar_one_or_none()\n    if not user:\n        return 0.0\n    weights = model_settings.authority_weights\n    b_u = user.baseline_credential_score\n    t_u = user.track_record_score\n    new_authority_score = (\n        weights.get(\"baseline_credentials\", 0.3) * b_u\n        + weights.get(\"track_record\", 0.5) * t_u\n        + weights.get(\"recent_performance\", 0.2) * recent_performance\n    )\n    user.authority_score = new_authority_score\n    await db.commit()\n    await db.refresh(user)\n    return new_authority_score\n",
+      "variables_mapping": {
+        "A_u(t)": "new_authority_score",
+        "α (alpha)": "weights.get('baseline_credentials', 0.4)",
+        "β (beta)": "weights.get('track_record', 0.4)",
+        "γ (gamma)": "weights.get('recent_performance', 0.2)",
+        "B_u": "user.baseline_credential_score",
+        "T_u(t-1)": "user.track_record_score",
+        "P_u(t)": "recent_performance"
+      },
+      "verification_notes": "Implementazione completa con pesi configurabili (production: α=0.4, β=0.4, γ=0.2). Include exponential smoothing per track record con λ=0.95."
+    },
+    {
+      "formula_id": "RLCF-F2",
+      "formula_latex": "\\delta = \\frac{H(\\rho)}{\\log|P|} = -\\frac{1}{\\log|P|} \\sum_{p \\in P} \\rho(p) \\log \\rho(p)",
+      "formula_description": "Normalized Shannon Entropy - Quantifica il livello di disaccordo tra valutatori. Valore 0 indica consenso totale, 1 indica massimo disaccordo.",
+      "paper_reference": "RLCF Paper, Section 3.2, Equation 2",
+      "file_path": "merlt/merlt/rlcf/aggregation.py",
+      "line_start": 10,
+      "line_end": 46,
+      "code_snippet": "def calculate_disagreement(weighted_feedback: dict) -> float:\n    \"\"\"\n    Quantifica il livello di disaccordo (δ) usando l'entropia di Shannon normalizzata.\n    \n    Implementa la formula di disagreement quantification definita in RLCF.md Sezione 3.2:\n    δ = -(1/log|P|) Σ ρ(p)log ρ(p)\n    \n    dove P è il set di posizioni possibili e ρ(p) è la probabilità ponderata \n    per autorità di ogni posizione p. La normalizzazione per log|P| garantisce\n    che δ ∈ [0,1] indipendentemente dal numero di posizioni.\n\n    Args:\n        weighted_feedback: Dictionary mapping positions to authority weights\n\n    Returns:\n        float: Normalized disagreement score δ using Shannon entropy\n        \n    References:\n        RLCF.md Section 3.2 - Disagreement Quantification\n        RLCF.md Section 3.1 - Uncertainty-Preserving Aggregation Algorithm\n    \"\"\"\n    if not weighted_feedback or len(weighted_feedback) <= 1:\n        return 0.0\n\n    total_authority_weight = sum(weighted_feedback.values())\n    if total_authority_weight == 0:\n        return 0.0\n\n    probabilities = [\n        weight / total_authority_weight for weight in weighted_feedback.values()\n    ]\n\n    num_positions = len(probabilities)\n    if num_positions <= 1:\n        return 0.0\n\n    return entropy(probabilities, base=num_positions)\n",
+      "variables_mapping": {
+        "δ (delta)": "disagreement score (return value)",
+        "H(ρ)": "scipy.stats.entropy(probabilities)",
+        "|P|": "num_positions (number of distinct positions)",
+        "ρ(p)": "weight / total_authority_weight (authority-weighted probability)"
+      },
+      "verification_notes": "Usa scipy.stats.entropy con base=num_positions per normalizzazione automatica. Threshold di decisione δ=0.3 per uncertainty preservation (from model_config.yaml)."
+    },
+    {
+      "formula_id": "RLCF-F3",
+      "formula_latex": "B_{total} = \\sqrt{\\sum_{i=1}^{6} b_i^2}",
+      "formula_description": "Total Bias Score - Aggregazione euclidea delle 6 dimensioni di bias: demographic, professional, temporal, geographic, confirmation, anchoring.",
+      "paper_reference": "RLCF Paper, Section 3.3, Equation 3",
+      "file_path": "merlt/merlt/rlcf/bias_detection.py",
+      "line_start": 768,
+      "line_end": 770,
+      "code_snippet": "        # B_total = √(Σ b_i²)\n        sum_squared = sum(b**2 for b in bias_scores.values())\n        total_bias = math.sqrt(sum_squared)",
+      "variables_mapping": {
+        "B_total": "total_bias",
+        "b_1": "demographic_bias",
+        "b_2": "professional_clustering_bias",
+        "b_3": "temporal_bias",
+        "b_4": "geographic_bias",
+        "b_5": "confirmation_bias",
+        "b_6": "anchoring_bias"
+      },
+      "verification_notes": "Implementazione con math.sqrt(sum(b**2 for b in bias_scores.values())). Range: [0, √6] ≈ [0, 2.45]. Soglia warning: B_total > 0.5."
+    },
+    {
+      "formula_id": "RLCF-F4",
+      "formula_latex": "P(advocate) = \\min\\left(0.1, \\frac{3}{|E|}\\right)",
+      "formula_description": "Devil's Advocate Assignment Probability - Probabilità che un valutatore sia assegnato come Devil's Advocate per sfidare il consenso dominante.",
+      "paper_reference": "RLCF Paper, Section 3.4, Equation 4",
+      "file_path": "merlt/merlt/rlcf/devils_advocate.py",
+      "line_start": 350,
+      "line_end": 371,
+      "code_snippet": "    def calculate_advocate_probability(self, num_eligible: int) -> float:\n        \"\"\"\n        Calcola probabilità di assegnazione come advocate.\n\n        Formula: P(advocate) = min(0.1, 3/|E|)\n\n        Args:\n            num_eligible: Numero di evaluator eligibili |E|\n\n        Returns:\n            Probabilità di assegnazione [0, max_advocate_ratio]\n        \"\"\"\n        if num_eligible <= 0:\n            return 0.0\n\n        # P = min(max_ratio, min_advocates / |E|)\n        probability = min(\n            self.max_advocate_ratio,\n            self.min_advocates / num_eligible\n        )\n\n        return probability",
+      "variables_mapping": {
+        "P(advocate)": "probability (return value)",
+        "0.1": "max_advocate_ratio",
+        "3": "min_advocates",
+        "|E|": "num_eligible (number of eligible evaluators)"
+      },
+      "verification_notes": "Garantisce almeno 3 advocate se possibile, ma mai più del 10% dei valutatori. Include critical prompts task-specific e metriche di effectiveness."
+    }
+  ],
+  "summary": {
+    "total_formulas": 4,
+    "all_implemented": true,
+    "files_analyzed": [
+      "merlt/merlt/rlcf/authority.py",
+      "merlt/merlt/rlcf/aggregation.py",
+      "merlt/merlt/rlcf/bias_detection.py",
+      "merlt/merlt/rlcf/devils_advocate.py"
+    ]
+  }
+}

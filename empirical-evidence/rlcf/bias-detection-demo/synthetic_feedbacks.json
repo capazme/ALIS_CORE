@@ -1,0 +1,752 @@
+[
+  {
+    "feedback_id": "FB000",
+    "user_id": "U023",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 4.77,
+    "timestamp": "2026-01-18T15:42:45.201067",
+    "user_profile": {
+      "user_id": "U023",
+      "profession": "praticante",
+      "region": "lazio",
+      "experience_years": 23,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB001",
+    "user_id": "U029",
+    "task_id": "DEMO_TASK",
+    "position": "incorrect",
+    "rating": 1.18,
+    "timestamp": "2026-01-18T17:42:45.201067",
+    "user_profile": {
+      "user_id": "U029",
+      "profession": "praticante",
+      "region": "veneto",
+      "experience_years": 6,
+      "specialization": "lavoro"
+    }
+  },
+  {
+    "feedback_id": "FB002",
+    "user_id": "U026",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 5.31,
+    "timestamp": "2026-01-18T20:42:45.201067",
+    "user_profile": {
+      "user_id": "U026",
+      "profession": "accademico",
+      "region": "campania",
+      "experience_years": 15,
+      "specialization": "amministrativo"
+    }
+  },
+  {
+    "feedback_id": "FB003",
+    "user_id": "U012",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 5.38,
+    "timestamp": "2026-01-19T01:42:45.201067",
+    "user_profile": {
+      "user_id": "U012",
+      "profession": "magistrato",
+      "region": "lombardia",
+      "experience_years": 14,
+      "specialization": "penale"
+    }
+  },
+  {
+    "feedback_id": "FB004",
+    "user_id": "U010",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 4.96,
+    "timestamp": "2026-01-19T04:42:45.201067",
+    "user_profile": {
+      "user_id": "U010",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 1,
+      "specialization": "lavoro"
+    }
+  },
+  {
+    "feedback_id": "FB005",
+    "user_id": "U008",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 4.76,
+    "timestamp": "2026-01-19T07:42:45.201067",
+    "user_profile": {
+      "user_id": "U008",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 7,
+      "specialization": "penale"
+    }
+  },
+  {
+    "feedback_id": "FB006",
+    "user_id": "U018",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 4.72,
+    "timestamp": "2026-01-19T09:42:45.201067",
+    "user_profile": {
+      "user_id": "U018",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 13,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB007",
+    "user_id": "U004",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 5.36,
+    "timestamp": "2026-01-19T11:42:45.201067",
+    "user_profile": {
+      "user_id": "U004",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 22,
+      "specialization": "lavoro"
+    }
+  },
+  {
+    "feedback_id": "FB008",
+    "user_id": "U004",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 3.1,
+    "timestamp": "2026-01-19T15:42:45.201067",
+    "user_profile": {
+      "user_id": "U004",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 22,
+      "specialization": "lavoro"
+    }
+  },
+  {
+    "feedback_id": "FB009",
+    "user_id": "U012",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 2.75,
+    "timestamp": "2026-01-19T19:42:45.201067",
+    "user_profile": {
+      "user_id": "U012",
+      "profession": "magistrato",
+      "region": "lombardia",
+      "experience_years": 14,
+      "specialization": "penale"
+    }
+  },
+  {
+    "feedback_id": "FB010",
+    "user_id": "U017",
+    "task_id": "DEMO_TASK",
+    "position": "incorrect",
+    "rating": 1.18,
+    "timestamp": "2026-01-19T20:42:45.201067",
+    "user_profile": {
+      "user_id": "U017",
+      "profession": "magistrato",
+      "region": "lazio",
+      "experience_years": 25,
+      "specialization": "amministrativo"
+    }
+  },
+  {
+    "feedback_id": "FB011",
+    "user_id": "U003",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 3.25,
+    "timestamp": "2026-01-20T01:42:45.201067",
+    "user_profile": {
+      "user_id": "U003",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 5,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB012",
+    "user_id": "U024",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 2.79,
+    "timestamp": "2026-01-20T02:42:45.201067",
+    "user_profile": {
+      "user_id": "U024",
+      "profession": "avvocato",
+      "region": "veneto",
+      "experience_years": 8,
+      "specialization": "amministrativo"
+    }
+  },
+  {
+    "feedback_id": "FB013",
+    "user_id": "U005",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 5.38,
+    "timestamp": "2026-01-20T07:42:45.201067",
+    "user_profile": {
+      "user_id": "U005",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 3,
+      "specialization": "lavoro"
+    }
+  },
+  {
+    "feedback_id": "FB014",
+    "user_id": "U008",
+    "task_id": "DEMO_TASK",
+    "position": "incorrect",
+    "rating": 1.01,
+    "timestamp": "2026-01-20T08:42:45.201067",
+    "user_profile": {
+      "user_id": "U008",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 7,
+      "specialization": "penale"
+    }
+  },
+  {
+    "feedback_id": "FB015",
+    "user_id": "U003",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 3.34,
+    "timestamp": "2026-01-20T12:42:45.201067",
+    "user_profile": {
+      "user_id": "U003",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 5,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB016",
+    "user_id": "U016",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 2.87,
+    "timestamp": "2026-01-20T14:42:45.201067",
+    "user_profile": {
+      "user_id": "U016",
+      "profession": "magistrato",
+      "region": "campania",
+      "experience_years": 9,
+      "specialization": "penale"
+    }
+  },
+  {
+    "feedback_id": "FB017",
+    "user_id": "U005",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 5.42,
+    "timestamp": "2026-01-20T19:42:45.201067",
+    "user_profile": {
+      "user_id": "U005",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 3,
+      "specialization": "lavoro"
+    }
+  },
+  {
+    "feedback_id": "FB018",
+    "user_id": "U019",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 2.52,
+    "timestamp": "2026-01-20T21:42:45.201067",
+    "user_profile": {
+      "user_id": "U019",
+      "profession": "notaio",
+      "region": "campania",
+      "experience_years": 20,
+      "specialization": "amministrativo"
+    }
+  },
+  {
+    "feedback_id": "FB019",
+    "user_id": "U029",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 2.74,
+    "timestamp": "2026-01-21T00:42:45.201067",
+    "user_profile": {
+      "user_id": "U029",
+      "profession": "praticante",
+      "region": "veneto",
+      "experience_years": 6,
+      "specialization": "lavoro"
+    }
+  },
+  {
+    "feedback_id": "FB020",
+    "user_id": "U007",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 2.59,
+    "timestamp": "2026-01-21T02:42:45.201067",
+    "user_profile": {
+      "user_id": "U007",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 1,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB021",
+    "user_id": "U015",
+    "task_id": "DEMO_TASK",
+    "position": "incorrect",
+    "rating": 1.27,
+    "timestamp": "2026-01-21T07:42:45.201067",
+    "user_profile": {
+      "user_id": "U015",
+      "profession": "magistrato",
+      "region": "lazio",
+      "experience_years": 23,
+      "specialization": "commerciale"
+    }
+  },
+  {
+    "feedback_id": "FB022",
+    "user_id": "U004",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 2.67,
+    "timestamp": "2026-01-21T10:42:45.201067",
+    "user_profile": {
+      "user_id": "U004",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 22,
+      "specialization": "lavoro"
+    }
+  },
+  {
+    "feedback_id": "FB023",
+    "user_id": "U016",
+    "task_id": "DEMO_TASK",
+    "position": "incorrect",
+    "rating": 1.46,
+    "timestamp": "2026-01-21T12:42:45.201067",
+    "user_profile": {
+      "user_id": "U016",
+      "profession": "magistrato",
+      "region": "campania",
+      "experience_years": 9,
+      "specialization": "penale"
+    }
+  },
+  {
+    "feedback_id": "FB024",
+    "user_id": "U029",
+    "task_id": "DEMO_TASK",
+    "position": "incorrect",
+    "rating": 1.19,
+    "timestamp": "2026-01-21T16:42:45.201067",
+    "user_profile": {
+      "user_id": "U029",
+      "profession": "praticante",
+      "region": "veneto",
+      "experience_years": 6,
+      "specialization": "lavoro"
+    }
+  },
+  {
+    "feedback_id": "FB025",
+    "user_id": "U022",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 3.5,
+    "timestamp": "2026-01-21T18:42:45.201067",
+    "user_profile": {
+      "user_id": "U022",
+      "profession": "notaio",
+      "region": "veneto",
+      "experience_years": 20,
+      "specialization": "amministrativo"
+    }
+  },
+  {
+    "feedback_id": "FB026",
+    "user_id": "U020",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 4.95,
+    "timestamp": "2026-01-21T22:42:45.201067",
+    "user_profile": {
+      "user_id": "U020",
+      "profession": "avvocato",
+      "region": "veneto",
+      "experience_years": 15,
+      "specialization": "lavoro"
+    }
+  },
+  {
+    "feedback_id": "FB027",
+    "user_id": "U007",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 4.52,
+    "timestamp": "2026-01-22T00:42:45.201067",
+    "user_profile": {
+      "user_id": "U007",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 1,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB028",
+    "user_id": "U017",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 4.51,
+    "timestamp": "2026-01-22T02:42:45.201067",
+    "user_profile": {
+      "user_id": "U017",
+      "profession": "magistrato",
+      "region": "lazio",
+      "experience_years": 25,
+      "specialization": "amministrativo"
+    }
+  },
+  {
+    "feedback_id": "FB029",
+    "user_id": "U022",
+    "task_id": "DEMO_TASK",
+    "position": "incorrect",
+    "rating": 0.73,
+    "timestamp": "2026-01-22T05:42:45.201067",
+    "user_profile": {
+      "user_id": "U022",
+      "profession": "notaio",
+      "region": "veneto",
+      "experience_years": 20,
+      "specialization": "amministrativo"
+    }
+  },
+  {
+    "feedback_id": "FB030",
+    "user_id": "U028",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 4.57,
+    "timestamp": "2026-01-22T09:42:45.201067",
+    "user_profile": {
+      "user_id": "U028",
+      "profession": "notaio",
+      "region": "veneto",
+      "experience_years": 30,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB031",
+    "user_id": "U007",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 4.71,
+    "timestamp": "2026-01-22T12:42:45.201067",
+    "user_profile": {
+      "user_id": "U007",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 1,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB032",
+    "user_id": "U004",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 3.08,
+    "timestamp": "2026-01-22T16:42:45.201067",
+    "user_profile": {
+      "user_id": "U004",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 22,
+      "specialization": "lavoro"
+    }
+  },
+  {
+    "feedback_id": "FB033",
+    "user_id": "U007",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 2.69,
+    "timestamp": "2026-01-22T18:42:45.201067",
+    "user_profile": {
+      "user_id": "U007",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 1,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB034",
+    "user_id": "U003",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 2.92,
+    "timestamp": "2026-01-22T21:42:45.201067",
+    "user_profile": {
+      "user_id": "U003",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 5,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB035",
+    "user_id": "U014",
+    "task_id": "DEMO_TASK",
+    "position": "incorrect",
+    "rating": 1.17,
+    "timestamp": "2026-01-22T23:42:45.201067",
+    "user_profile": {
+      "user_id": "U014",
+      "profession": "magistrato",
+      "region": "lombardia",
+      "experience_years": 9,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB036",
+    "user_id": "U020",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 5.23,
+    "timestamp": "2026-01-23T03:42:45.201067",
+    "user_profile": {
+      "user_id": "U020",
+      "profession": "avvocato",
+      "region": "veneto",
+      "experience_years": 15,
+      "specialization": "lavoro"
+    }
+  },
+  {
+    "feedback_id": "FB037",
+    "user_id": "U025",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 2.69,
+    "timestamp": "2026-01-23T05:42:45.201067",
+    "user_profile": {
+      "user_id": "U025",
+      "profession": "avvocato",
+      "region": "lazio",
+      "experience_years": 28,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB038",
+    "user_id": "U017",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 2.68,
+    "timestamp": "2026-01-23T09:42:45.201067",
+    "user_profile": {
+      "user_id": "U017",
+      "profession": "magistrato",
+      "region": "lazio",
+      "experience_years": 25,
+      "specialization": "amministrativo"
+    }
+  },
+  {
+    "feedback_id": "FB039",
+    "user_id": "U014",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 4.94,
+    "timestamp": "2026-01-23T11:42:45.201067",
+    "user_profile": {
+      "user_id": "U014",
+      "profession": "magistrato",
+      "region": "lombardia",
+      "experience_years": 9,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB040",
+    "user_id": "U027",
+    "task_id": "DEMO_TASK",
+    "position": "incorrect",
+    "rating": 0.55,
+    "timestamp": "2026-01-23T14:42:45.201067",
+    "user_profile": {
+      "user_id": "U027",
+      "profession": "magistrato",
+      "region": "campania",
+      "experience_years": 12,
+      "specialization": "penale"
+    }
+  },
+  {
+    "feedback_id": "FB041",
+    "user_id": "U017",
+    "task_id": "DEMO_TASK",
+    "position": "incorrect",
+    "rating": 1.43,
+    "timestamp": "2026-01-23T17:42:45.201067",
+    "user_profile": {
+      "user_id": "U017",
+      "profession": "magistrato",
+      "region": "lazio",
+      "experience_years": 25,
+      "specialization": "amministrativo"
+    }
+  },
+  {
+    "feedback_id": "FB042",
+    "user_id": "U027",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 4.99,
+    "timestamp": "2026-01-23T21:42:45.201067",
+    "user_profile": {
+      "user_id": "U027",
+      "profession": "magistrato",
+      "region": "campania",
+      "experience_years": 12,
+      "specialization": "penale"
+    }
+  },
+  {
+    "feedback_id": "FB043",
+    "user_id": "U006",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 2.66,
+    "timestamp": "2026-01-23T23:42:45.201067",
+    "user_profile": {
+      "user_id": "U006",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 14,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB044",
+    "user_id": "U000",
+    "task_id": "DEMO_TASK",
+    "position": "incorrect",
+    "rating": 1.43,
+    "timestamp": "2026-01-24T03:42:45.201067",
+    "user_profile": {
+      "user_id": "U000",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 21,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB045",
+    "user_id": "U025",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 5.2,
+    "timestamp": "2026-01-24T06:42:45.201067",
+    "user_profile": {
+      "user_id": "U025",
+      "profession": "avvocato",
+      "region": "lazio",
+      "experience_years": 28,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB046",
+    "user_id": "U023",
+    "task_id": "DEMO_TASK",
+    "position": "incorrect",
+    "rating": 1.22,
+    "timestamp": "2026-01-24T10:42:45.201067",
+    "user_profile": {
+      "user_id": "U023",
+      "profession": "praticante",
+      "region": "lazio",
+      "experience_years": 23,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB047",
+    "user_id": "U004",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 5.47,
+    "timestamp": "2026-01-24T11:42:45.201067",
+    "user_profile": {
+      "user_id": "U004",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 22,
+      "specialization": "lavoro"
+    }
+  },
+  {
+    "feedback_id": "FB048",
+    "user_id": "U018",
+    "task_id": "DEMO_TASK",
+    "position": "partially_correct",
+    "rating": 3.25,
+    "timestamp": "2026-01-24T14:42:45.201067",
+    "user_profile": {
+      "user_id": "U018",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 13,
+      "specialization": "civile"
+    }
+  },
+  {
+    "feedback_id": "FB049",
+    "user_id": "U001",
+    "task_id": "DEMO_TASK",
+    "position": "correct",
+    "rating": 5.0,
+    "timestamp": "2026-01-24T18:42:45.201067",
+    "user_profile": {
+      "user_id": "U001",
+      "profession": "avvocato",
+      "region": "lombardia",
+      "experience_years": 1,
+      "specialization": "amministrativo"
+    }
+  }
+]

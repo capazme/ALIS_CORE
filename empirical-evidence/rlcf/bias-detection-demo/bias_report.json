@@ -1,0 +1,81 @@
+{
+  "task_id": "DEMO_TASK",
+  "timestamp": "2026-01-25T14:42:45.201341",
+  "num_feedbacks_analyzed": 50,
+  "bias_scores": {
+    "demographic": 0.489,
+    "professional": 0.22,
+    "temporal": 0.08,
+    "geographic": 0.133,
+    "confirmation": 0.0,
+    "anchoring": 0.033
+  },
+  "total_bias_score": 0.559,
+  "bias_level": "medium",
+  "formula_used": "B_total = sqrt(sum(b_i^2))",
+  "dimension_details": [
+    {
+      "dimension": "demographic",
+      "score": 0.489,
+      "details": "Analyzed 5 professional groups",
+      "contributing_factors": [
+        "praticante: 5 feedbacks",
+        "accademico: 1 feedbacks",
+        "magistrato: 13 feedbacks",
+        "avvocato: 27 feedbacks",
+        "notaio: 4 feedbacks"
+      ]
+    },
+    {
+      "dimension": "professional",
+      "score": 0.22,
+      "details": "HHI concentration index: 0.376",
+      "contributing_factors": [
+        "praticante: 5 (10.0%)",
+        "accademico: 1 (2.0%)",
+        "magistrato: 13 (26.0%)",
+        "avvocato: 27 (54.0%)",
+        "notaio: 4 (8.0%)"
+      ]
+    },
+    {
+      "dimension": "temporal",
+      "score": 0.08,
+      "details": "Distribution shift between first and second half",
+      "contributing_factors": [
+        "First half: {'correct': 0.36, 'incorrect': 0.24, 'partially_correct': 0.4}",
+        "Second half: {'partially_correct': 0.32, 'correct': 0.44, 'incorrect': 0.24}"
+      ]
+    },
+    {
+      "dimension": "geographic",
+      "score": 0.133,
+      "details": "Geographic HHI: 0.350",
+      "contributing_factors": [
+        "lazio: 9 (18.0%)",
+        "veneto: 9 (18.0%)",
+        "campania: 6 (12.0%)",
+        "lombardia: 26 (52.0%)"
+      ]
+    },
+    {
+      "dimension": "confirmation",
+      "score": 0.0,
+      "details": "Confirmation rate: 7/25",
+      "contributing_factors": [
+        "Users with multiple feedbacks: 16"
+      ]
+    },
+    {
+      "dimension": "anchoring",
+      "score": 0.033,
+      "details": "Anchor position: correct, follow rate: 35.56%",
+      "contributing_factors": [
+        "Followers: 16/45"
+      ]
+    }
+  ],
+  "mitigation_recommendations": [
+    "Nessuna mitigazione urgente necessaria - bias entro limiti accettabili"
+  ]
+}
