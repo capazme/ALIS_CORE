@@ -41,8 +41,8 @@ class QualificationType(str, Enum):
 class AuthorityBreakdown(BaseModel):
     """Breakdown dei componenti dell'authority (formula RLCF)."""
 
-    baseline: float = Field(..., description="B_u - Baseline da qualifiche (peso 0.3)")
-    track_record: float = Field(..., description="T_u - Track Record storico (peso 0.5)")
+    baseline: float = Field(..., description="B_u - Baseline da qualifiche (peso 0.4)")
+    track_record: float = Field(..., description="T_u - Track Record storico (peso 0.4)")
     level_authority: float = Field(..., description="P_u - Performance recente (peso 0.2)")
 
 

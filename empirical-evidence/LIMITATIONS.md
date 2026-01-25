@@ -224,5 +224,5 @@ Lo scopo è fornire una base onesta per:
 
 ---
 
-**Autori**: Allega, Puzio
+**Autori**: Allega, Puzio, Rizzo
 **Revisione**: 2026-01-25

@@ -1,7 +1,7 @@
 # Evidenze Empiriche - MERL-T e RLCF
 
 **Data generazione**: 2026-01-25
-**Autori**: Allega, Puzio
+**Autori**: Allega, Puzio, Rizzo
 **Repository**: ALIS_CORE
 
 ---

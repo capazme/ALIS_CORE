@@ -133,14 +133,14 @@
 
 ### Tabella 2.2: Authority Score Components
 
-| Componente | Simbolo | Peso Default | Range | Descrizione |
-|------------|---------|--------------|-------|-------------|
-| **Base Authority** | B_u | α = 0.3 | [0, 1] | Credenziali verificate |
-| **Temporal Activity** | T_u(t) | β = 0.4 | [0, 1] | Frequenza contributi recenti |
-| **Peer Recognition** | P_u(t) | γ = 0.3 | [0, 1] | Upvotes da altri esperti |
-| **Totale** | A_u(t) | 1.0 | [0, 1] | Score composito |
+| Componente | Simbolo | Peso | Range | Descrizione |
+|------------|---------|------|-------|-------------|
+| **Base Authority** | B_u | α = 0.4 | [0, 1] | Credenziali verificate (iscrizione albo, titoli) |
+| **Track Record** | T_u(t) | β = 0.4 | [0, 1] | Performance storica (con decay esponenziale) |
+| **Recent Performance** | P_u(t) | γ = 0.2 | [0, 1] | Performance ultimi 30 giorni |
+| **Totale** | A_u(t) | 1.0 | [0, 1] | Score composito finale |
 
-**Interpretazione**: Il peso maggiore su T_u(t) (0.4) privilegia contributi recenti, evitando che autorità storiche dominino senza partecipazione attiva. I pesi sono configurabili per domini diversi (es. legale potrebbe aumentare B_u per credenziali formali).
+**Interpretazione**: I pesi uguali su B_u e T_u (entrambi 0.4) bilanciano credenziali formali e competenza dimostrata - riflettendo il sistema legale italiano dove sia l'iscrizione all'albo che l'esperienza pratica contano. Il peso minore su P_u (0.2) permette adattamento senza volatilità eccessiva.
 
 ---
 
@@ -318,5 +318,5 @@
 
 ---
 
-**Autori**: Allega, Puzio
+**Autori**: Allega, Puzio, Rizzo
 **Generato**: 2026-01-25

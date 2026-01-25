@@ -1,6 +1,6 @@
 The Knowledge Commoditization Paradox: Theoretical and Practical Challenges of AI-Driven Value Extraction in Information-Intensive Organizations
 
-Daniele Allega1*, Guglielmo Puzio2
+Daniele Allega1*, Guglielmo Puzio2, Gabriele Rizzo3
 
 1 Mercatorum University, Piazza Mattei, 10, 00186 Roma RM, Italy
 
@@ -8,11 +8,17 @@ https://orcid.org/0009-0006-5359-6102
 
 e-mail: dallega@luiss.it, daniele.allega@studenti.unimercatorum.it
 
-2 LUISS “Guido Carli” University, Viale Romania, 32, 00197 Roma RM, Italy
+2 LUISS "Guido Carli" University, Viale Romania, 32, 00197 Roma RM, Italy
 
 https://orcid.org/0009-0001-4366-2632
 
 e-mail: guglielmo.puzio@studenti.luiss.it
+
+3 LUISS "Guido Carli" University, Viale Romania, 32, 00197 Roma RM, Italy
+
+https://orcid.org/0009-0002-3388-9961
+
+e-mail: gabriele.rizzo@studenti.luiss.it
 
 *  Corresponding author
 
