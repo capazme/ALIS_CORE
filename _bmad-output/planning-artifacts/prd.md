@@ -1,7 +1,9 @@
 ---
-stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation', 'step-07-project-type', 'step-08-scoping', 'step-09-functional', 'step-10-nonfunctional', 'step-11-polish', 'step-12-complete']
+stepsCompleted: ['step-01-init', 'step-02-discovery', 'step-03-success', 'step-04-journeys', 'step-05-domain', 'step-06-innovation', 'step-07-project-type', 'step-08-scoping', 'step-09-functional', 'step-10-nonfunctional', 'step-11-polish', 'step-12-complete', 'edit-rlcf-feedback-architecture', 'edit-system-component-specification', 'edit-f8-bridge-quality-feedback']
 workflowStatus: 'complete'
 completedAt: '2026-01-24'
+lastEditedAt: '2026-01-24'
+editReason: 'Added F8: Bridge Quality Feedback for TraversalPolicy learning and path virtuosi'
 inputDocuments:
   - _bmad-output/planning-artifacts/research/technical-vector-space-legal-interpretation-research-2026-01-23.md
   - _bmad-output/analysis/brainstorming-session-2026-01-23.md
@@ -10,6 +12,7 @@ inputDocuments:
   - docs/project-documentation/01-architecture.md
   - docs/project-documentation/02-merlt-experts.md
   - docs/project-documentation/03-rlcf.md
+  - _bmad-output/planning-artifacts/ux-design-specification.md
 workflowType: 'prd'
 documentCounts:
   briefs: 0
@@ -49,9 +52,13 @@ classification:
 
 **Value Proposition:** Tracciabilità completa del ragionamento giuridico, utilizzabile in atti legali.
 
+**UX Paradigm:** IDE per Giuristi - ALIS adotta il modello dell'Integrated Development Environment come metafora guida. Come VS Code trasforma la scrittura di codice, ALIS trasforma il lavoro giuridico con: Command Palette, Peek Definition (hover su citazioni), Split View (confronto norme), Problems Panel (conflitti normativi), e keyboard-first design.
+
 **Target:** Thesis defense Maggio 2026 | ~20 utenti associazione | 1k+ norme nel Knowledge Graph
 
 **Workflow Integrato:** Browse (VisuaLex) → Analyze (MERL-T) → Feedback (RLCF) → Learn
+
+**4-Profile System:** ⚡ Consultazione Rapida | 📖 Ricerca Assistita | 🔍 Analisi Esperta | 🎓 Contributore Attivo
 
 ---
 
@@ -434,6 +441,424 @@ If innovation doesn't validate:
 1. **RLCF fallback:** "Authority weighting is a configurable extension to RLHF for domain-expert contexts"
 2. **Isomorphism fallback:** "Vector distance provides a computational proxy for textual interpretation distance"
 3. **Living law fallback:** "RLCF enables observation of interpretive drift in feedback patterns"
+
+---
+
+## RLCF Feedback Architecture
+
+> *Reference: UX Design Specification `_bmad-output/planning-artifacts/ux-design-specification.md`*
+
+### Feedback Points Overview
+
+ALIS implements **8 distinct feedback collection points** along the MERL-T pipeline, each targeting a specific trainable component:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           RLCF FEEDBACK FLOW                                     │
+│                                                                                  │
+│  ┌─────────┐    ┌─────────┐    ┌─────────────────────┐    ┌─────────┐          │
+│  │ PROMPT  │───▶│   NER   │───▶│       ROUTER        │───▶│ EXPERTS │          │
+│  └─────────┘    └────┬────┘    └──────────┬──────────┘    └────┬────┘          │
+│                      │                    │                     │               │
+│                   [F1]                 [F2]              [F3-F6]                │
+│                                                                │               │
+│                                                                ▼               │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │                         RETRIEVAL LAYER                                   │  │
+│  │  ┌──────────┐         ┌──────────────┐         ┌──────────┐              │  │
+│  │  │  Qdrant  │◀───────▶│ Bridge Table │◀───────▶│ FalkorDB │              │  │
+│  │  │ (chunks) │         │   [F8] ⭐    │         │ (graph)  │              │  │
+│  │  └──────────┘         └──────────────┘         └──────────┘              │  │
+│  └──────────────────────────────────────────────────────────────────────────┘  │
+│                                                                │               │
+│                                                                ▼               │
+│                                                         ┌─────────┐           │
+│                                                         │ SYNTH   │           │
+│                                                         └────┬────┘           │
+│                                                              │                │
+│                                                           [F7]               │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Feedback Points Summary
+
+| # | Point | Component | What It Validates | Training Target |
+|---|-------|-----------|-------------------|-----------------|
+| **F1** | NER Recognition | Citation Parser | Accuracy of norm citation extraction | SpaCy NER model |
+| **F2** | Router Decision | Expert Router | Correctness of Expert selection | Router classifier |
+| **F3** | Literal Expert | LiteralExpert | Quality of textual analysis | Expert prompt/weights |
+| **F4** | Systemic Expert | SystemicExpert | Quality of systemic connections | Expert prompt/weights |
+| **F5** | Teleological Expert | TeleologicalExpert | Quality of principles analysis | Expert prompt/weights |
+| **F6** | Precedent Expert | PrecedentExpert | Quality of jurisprudence analysis | Expert prompt/weights |
+| **F7** | Synthesizer | Synthesizer | Quality of final aggregation | Aggregation weights |
+| **F8** | Bridge Quality | Bridge Table | Quality of chunk↔node mapping | TraversalPolicy weights |
+
+### F1: NER Recognition Feedback
+
+**Position:** `PROMPT → [NER] → ROUTER`
+
+**Purpose:** Validate accuracy of legal citation recognition (e.g., "art. 1453 c.c.")
+
+| Aspect | Specification |
+|--------|---------------|
+| **Feedback Types** | `confirmation`, `correction`, `annotation`, `rejection` |
+| **Data Collected** | selected_text, context_window, detected_urn, confidence, correct_urn (if correction) |
+| **Training Output** | SpaCy NER training samples with authority-weighted labels |
+| **Weight Factor** | 0.3 × A_u(t) |
+
+**Visibility by Profile:**
+
+| Profile | UI | Interaction |
+|---------|-----|-------------|
+| ⚡ Consultazione | None | - |
+| 📖 Ricerca | Confidence tooltip | [✓] only |
+| 🔍 Analisi | Badge + tooltip | [✓✗] post-output |
+| 🎓 Contributore | Inline prominent | [✓✗+] + stats |
+
+### F2: Router Decision Feedback
+
+**Position:** `NER → [ROUTER] → Expert Selection`
+
+**Purpose:** Validate correctness of Expert selection for query type
+
+| Aspect | Specification |
+|--------|---------------|
+| **Feedback Types** | `correct`, `missing_expert`, `unnecessary_expert`, `wrong_type` |
+| **Data Collected** | query_embedding, detected_query_type, experts_activated, experts_skipped, suggested_experts |
+| **Training Output** | Router classifier samples |
+| **Weight Factor** | 0.4 × A_u(t) |
+
+**Visibility:** Only 🎓 Contributore (requires domain expertise to evaluate routing decisions)
+
+### F3-F6: Expert Output Feedback
+
+**Position:** `ROUTER → [EXPERT] → SYNTHESIZER`
+
+**Purpose:** Validate quality of individual Expert reasoning
+
+| Aspect | Specification |
+|--------|---------------|
+| **Feedback Types** | `accurate_complete` (+1.0), `correct_incomplete` (+0.5), `partially_wrong` (-0.5), `misleading` (-1.0) |
+| **Data Collected** | expert_id, reasoning_text, sources_cited, confidence, feedback_detail, suggested_correction |
+| **Training Output** | Expert fine-tuning samples |
+| **Weight Factor** | 0.5 × A_u(t) |
+
+**Expert-Specific Focus:**
+
+| Expert | Validation Focus |
+|--------|------------------|
+| F3: Literal | "Is the textual meaning correct?" |
+| F4: Systemic | "Are the related norms pertinent?" |
+| F5: Teleological | "Is the teleological interpretation grounded?" |
+| F6: Precedent | "Are the cited precedents relevant and current?" |
+
+**Visibility by Profile:**
+
+| Profile | UI | Granularity |
+|---------|-----|-------------|
+| ⚡ Consultazione | Not visible | - |
+| 📖 Ricerca | Summary only | No feedback |
+| 🔍 Analisi | Accordion expand | [👍👎💬] |
+| 🎓 Contributore | Always expanded | 4-level rating + correction |
+
+### F7: Synthesizer Output Feedback
+
+**Position:** `[4 Experts] → [SYNTHESIZER] → OUTPUT`
+
+**Purpose:** Validate quality of final synthesis and Expert aggregation
+
+| Aspect | Specification |
+|--------|---------------|
+| **Feedback Types** | `correct_integration`, `overweight_expert`, `underweight_expert`, `contradictions`, `incomplete` |
+| **Data Collected** | synthesis_text, expert_weights_used, sources_aggregated, weight_adjustment, usability_in_brief |
+| **Training Output** | Aggregation weight adjustment |
+| **Weight Factor** | 0.6 × A_u(t) (highest - final output) |
+
+**Special Field: Usability in Legal Brief**
+
+| Value | Meaning | Signal Strength |
+|-------|---------|-----------------|
+| `yes` | Can cite in legal document | Strong positive |
+| `with_changes` | Needs minor edits | Moderate positive |
+| `no` | Not suitable for citation | Strong negative |
+
+**Visibility by Profile:**
+
+| Profile | UI | Feedback |
+|---------|-----|----------|
+| ⚡ Consultazione | Not available | - |
+| 📖 Ricerca | Basic synthesis | [👍👎] simple |
+| 🔍 Analisi | Synthesis + sources | [👍👎💬] |
+| 🎓 Contributore | Synthesis + weights | Full evaluation + usability |
+
+### F8: Bridge Quality Feedback ⭐ NEW
+
+**Position:** `RETRIEVAL LAYER (Qdrant ↔ Bridge Table ↔ FalkorDB)`
+
+**Purpose:** Validate quality of chunk-to-graph mappings and train Expert-specific traversal preferences ("path virtuosi")
+
+#### Architectural Role
+
+F8 addresses a critical gap: when Expert output is poor, is it due to bad reasoning (F3-F6) or bad retrieval (F8)?
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                     TRI-LAYER ARCHITECTURE & F8 ROLE                             │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  ┌──────────────────┐     PUBBLICO / CONDIVISO                                  │
+│  │    FalkorDB      │     • Struttura normativa (nodi, relazioni)               │
+│  │   (Knowledge     │     • Asset unico per community                           │
+│  │     Graph)       │     • NO testi, solo URN e metadati                       │
+│  └────────┬─────────┘                                                           │
+│           │                                                                      │
+│           │  graph_node_urn                                                      │
+│           ▼                                                                      │
+│  ┌──────────────────┐     GUIDA / POLICY LAYER  ◀──── F8 TRAINS THIS           │
+│  │   Bridge Table   │     • Mapping chunk_id ↔ graph_node_urn                   │
+│  │   (PostgreSQL)   │     • expert_affinity per Expert                          │
+│  │                  │     • Learned traversal preferences                        │
+│  └────────┬─────────┘                                                           │
+│           │                                                                      │
+│           │  chunk_id + expert_affinity                                          │
+│           ▼                                                                      │
+│  ┌──────────────────┐     PRIVATO / CUSTOM                                      │
+│  │     Qdrant       │     • Testi completi (chunks + embeddings)                │
+│  │   (Vector DB)    │     • Può essere proprietario / multi-tenant              │
+│  └──────────────────┘                                                           │
+│                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Expert-Specific Traversal Weights
+
+Each Expert has different affinities for edge types in the Knowledge Graph:
+
+| Edge Type | LiteralExpert | SystemicExpert | PrinciplesExpert | PrecedentExpert |
+|-----------|---------------|----------------|------------------|-----------------|
+| `DEFINISCE` | **1.0** | 0.3 | 0.4 | 0.3 |
+| `RIFERIMENTO` | 0.5 | **1.0** | 0.7 | 0.5 |
+| `MODIFICA` | 0.4 | **0.9** | 0.5 | 0.4 |
+| `CITATO_DA` | 0.3 | 0.6 | 0.5 | **1.0** |
+| `PRINCIPIO` | 0.2 | 0.5 | **1.0** | 0.4 |
+| `ATTUA` | 0.3 | 0.7 | **0.9** | 0.5 |
+
+**F8 feedback updates these weights** to crystallize "path virtuosi" per Expert.
+
+#### Feedback Collection
+
+| Aspect | Specification |
+|--------|---------------|
+| **Feedback Types** | `relevant_source`, `irrelevant_source`, `missing_source`, `wrong_relation_type` |
+| **Data Collected** | chunk_ids_used, graph_nodes_traversed, edge_types_followed, expert_type, relevance_rating |
+| **Training Output** | TraversalPolicy weight updates via PolicyGradientTrainer |
+| **Weight Factor** | 0.4 × A_u(t) |
+
+#### Collection Modes
+
+**Mode 1: Implicit (All Profiles)**
+
+```
+IF user gives 👎 on F7 (Synthesizer)
+   AND F3-F6 (Expert outputs) are rated positively
+   → Infer negative signal on F8 (retrieval was the problem)
+
+IF user gives 👍 on F7
+   AND specific Expert contributed heavily
+   → Reinforce that Expert's traversal weights for used edge types
+```
+
+**Mode 2: Explicit (🎓 Contributore only)**
+
+| UI Element | Action | Signal |
+|------------|--------|--------|
+| "Fonti usate" panel | Rate source relevance (1-5⭐) | Direct F8 feedback |
+| "Fonte mancante" button | Suggest missing source | Positive training sample |
+| "Relazione errata" flag | Correct relation type | Relation classifier training |
+
+#### Training Pipeline
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                        F8 TRAINING LOOP                                          │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  1. Expert executes query                                                        │
+│     └─▶ Uses current traversal_weights to select edges                          │
+│                                                                                  │
+│  2. Bridge Table provides chunk_ids for selected graph_node_urns                │
+│     └─▶ Filtered by expert_affinity threshold                                   │
+│                                                                                  │
+│  3. Expert produces response using retrieved chunks                              │
+│                                                                                  │
+│  4. User provides feedback                                                       │
+│     ├─▶ F3-F6: Expert quality                                                   │
+│     ├─▶ F7: Synthesis quality                                                   │
+│     └─▶ F8: Source relevance (explicit or inferred)                             │
+│                                                                                  │
+│  5. RLCF aggregates with authority weighting                                    │
+│     └─▶ R = Σ(feedback_i × A_u(t)) / Σ(A_u(t))                                 │
+│                                                                                  │
+│  6. PolicyGradientTrainer updates TraversalPolicy                               │
+│     └─▶ ∇J(θ) = E[∇log π(edge|state,θ) · R]                                    │
+│                                                                                  │
+│  7. New traversal_weights saved to Bridge Table (expert_affinity)               │
+│                                                                                  │
+│  8. Next query uses updated weights → "Path virtuosi" crystallized              │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Storage Schema Extension
+
+```sql
+-- expert_affinity già presente in Qdrant payload
+-- Bridge Table extension per learned weights (Growth phase)
+
+ALTER TABLE bridge_table ADD COLUMN IF NOT EXISTS expert_affinity JSONB DEFAULT '{
+  "literal": 0.5,
+  "systemic": 0.5,
+  "principles": 0.5,
+  "precedent": 0.5
+}';
+
+ALTER TABLE bridge_table ADD COLUMN IF NOT EXISTS feedback_count INTEGER DEFAULT 0;
+ALTER TABLE bridge_table ADD COLUMN IF NOT EXISTS last_feedback_at TIMESTAMP;
+
+-- Index per retrieval veloce
+CREATE INDEX IF NOT EXISTS idx_bridge_expert_affinity
+ON bridge_table USING GIN (expert_affinity);
+```
+
+#### MVP vs Growth Implementation
+
+| Aspect | MVP (Thesis) | Growth (Post-Thesis) |
+|--------|--------------|----------------------|
+| **Collection Mode** | Implicit only | Implicit + Explicit |
+| **Storage** | `expert_affinity` in Qdrant payload | + Bridge Table extension |
+| **UI** | None (behind the scenes) | "Fonti usate" panel for 🎓 |
+| **Training** | Correlation-based inference | Direct PolicyGradientTrainer |
+
+#### Visibility by Profile
+
+| Profile | UI | Interaction |
+|---------|-----|-------------|
+| ⚡ Consultazione | None | Implicit only |
+| 📖 Ricerca | None | Implicit only |
+| 🔍 Analisi | "Fonti" collapsed | View only |
+| 🎓 Contributore | "Fonti usate" panel | Rate + suggest + correct |
+
+#### Value Proposition
+
+| Beneficio | Per Chi | Come |
+|-----------|---------|------|
+| **Isolamento failure** | Sistema | Distingue errori retrieval da errori reasoning |
+| **Path virtuosi** | Experts | Ogni Expert impara quali edge seguire |
+| **Asset separation** | Organizzazioni | Grafo pubblico, testi privati, Bridge impara |
+| **Retrieval quality** | Utenti | Risposte più accurate nel tempo |
+
+### Authority Weighting Formula
+
+All feedback is weighted by user authority (RLCF Pillar I):
+
+```
+A_u(t) = α·B_u + β·T_u(t) + γ·P_u(t)
+
+where:
+  α = 0.3  (baseline credentials weight)
+  β = 0.5  (track record weight)
+  γ = 0.2  (recent performance weight)
+  λ = 0.95 (exponential decay factor)
+
+B_u = Baseline credentials (qualification, years of experience)
+T_u(t) = Track record with exponential smoothing
+P_u(t) = Recent performance (last N feedback)
+```
+
+### Feedback × Profile Matrix
+
+| Feedback | ⚡ Consult | 📖 Ricerca | 🔍 Analisi | 🎓 Contrib |
+|----------|-----------|------------|------------|------------|
+| F1: NER | - | [✓] | [✓✗] | [✓✗+] granular |
+| F2: Router | - | - | - | Full evaluation |
+| F3: Literal | - | - | [👍👎💬] | 4-level rating |
+| F4: Systemic | - | - | [👍👎💬] | 4-level rating |
+| F5: Teleological | - | - | [👍👎💬] | 4-level rating |
+| F6: Precedent | - | - | [👍👎💬] | 4-level rating |
+| F7: Synthesizer | - | [👍👎] | [👍👎💬] | Eval + usability |
+| **F8: Bridge** | *(implicit)* | *(implicit)* | View fonti | Rate + suggest |
+
+### Training Pipeline Integration
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  FEEDBACK COLLECTION          AGGREGATION              TRAINING                  │
+│  ───────────────────────────────────────────────────────────────────────────────│
+│                                                                                  │
+│  F1 feedback ──┐                                  ┌──▶ Train NER                │
+│                │     ┌─────────────────┐          │                              │
+│  F2 feedback ──┼────▶│ Authority-      │──────────┼──▶ Train Router             │
+│                │     │ Weighted        │          │                              │
+│  F3-F6 feedback┼────▶│ Aggregation     │──────────┼──▶ Train Experts            │
+│                │     │ (per component) │          │                              │
+│  F7 feedback ──┼────▶│               │──────────┼──▶ Adjust Gating Weights     │
+│                │     │                 │          │                              │
+│  F8 feedback ──┘     └─────────────────┘          └──▶ Train TraversalPolicy ⭐ │
+│       ▲                                                      │                   │
+│       │                                                      ▼                   │
+│       │                                           ┌─────────────────────┐        │
+│       └───────────────────────────────────────────│ Update expert_     │        │
+│         (implicit: inferred from F7↔F3-F6)        │ affinity in Bridge │        │
+│                                                   └─────────────────────┘        │
+│                                                                                  │
+│  Buffer: 100 samples minimum before training trigger                             │
+│  Frequency: Weekly batch or on-demand for critical corrections                   │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Devil's Advocate Integration
+
+When consensus is high (δ < 0.2), the Devil's Advocate system activates:
+
+| Profile | Devil's Advocate Visibility |
+|---------|----------------------------|
+| ⚡ Consultazione | Never |
+| 📖 Ricerca | Never |
+| 🔍 Analisi | Collapsed, opt-in |
+| 🎓 Contributore | Expanded, feedback required |
+
+**Devil's Advocate Feedback Types:**
+- "Valid and underrepresented" → Increase alternative weight
+- "Technically correct but outdated" → Keep as historical
+- "Misleading or incorrect" → Decrease weight, flag for review
+- "Cannot evaluate" → No impact (epistemic honesty)
+
+### Data Persistence
+
+| Data Type | Storage | Retention |
+|-----------|---------|-----------|
+| Raw feedback | PostgreSQL (Feedback table) | 7 years |
+| Aggregated weights | Redis + PostgreSQL | Permanent |
+| Training samples | Export buffer | Until processed |
+| User authority | PostgreSQL (User table) | Permanent |
+| Audit trail | Append-only log | 7 years |
+
+### Functional Requirements (Feedback-Specific)
+
+- **FR-F1:** System can collect NER confirmation/correction feedback inline
+- **FR-F2:** System can collect Router decision feedback from high-authority users
+- **FR-F3-F6:** System can collect Expert output feedback with 4-level granularity
+- **FR-F7:** System can collect Synthesizer feedback including usability assessment
+- **FR-F8:** System can collect Bridge quality feedback (source relevance rating)
+- **FR-F8a:** System can infer F8 implicitly from F7↔F3-F6 correlation
+- **FR-F8b:** System can display "Fonti usate" panel to 🎓 Contributore
+- **FR-F8c:** System can update expert_affinity weights based on F8 feedback
+- **FR-F8d:** System can train TraversalPolicy via PolicyGradientTrainer
+- **FR-F9:** System can weight all feedback by user authority score
+- **FR-F10:** System can aggregate feedback per component for training
+- **FR-F11:** System can trigger training pipeline when buffer threshold reached
+- **FR-F12:** System can display Devil's Advocate for high-consensus responses
+- **FR-F13:** System can collect Devil's Advocate evaluation feedback
 
 ---
 
@@ -834,4 +1259,810 @@ The MVP must achieve two goals:
 | **NFR-C2:** GDPR Art. 17 | Right to erasure implemented | MVP | Legal requirement |
 | **NFR-C3:** GDPR Art. 20 | Data portability in 30 days | MVP | Legal requirement |
 | **NFR-C4:** GDPR Art. 89 | Research exemption documented | MVP | Thesis data usage |
+
+---
+
+## System Component Specification
+
+> *Mappatura completa di tutti i componenti del sistema: agenti, database, funzioni e relazioni.*
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              PRESENTATION LAYER                                  │
+│  ┌────────────────────────────────────────────────────────────────────────────┐ │
+│  │  VISUALEX-PLATFORM (React 19 + Vite 7)                                     │ │
+│  │    ├── SearchBar        → Query input + NER highlighting                   │ │
+│  │    ├── ArticleViewer    → Norm display + annotations                       │ │
+│  │    ├── GraphView        → Knowledge graph visualization (Reagraph)         │ │
+│  │    ├── DossierManager   → Document collection management                   │ │
+│  │    └── PluginSlot[8]    → MERL-T integration points                        │ │
+│  │                                                                             │ │
+│  │  VISUALEX-MERLT (Plugin)                                                   │ │
+│  │    ├── ExpertPanels     → 4 Expert response views                          │ │
+│  │    ├── RLCFPanel        → Feedback collection UI                           │ │
+│  │    └── TraceViewer      → Reasoning visualization                          │ │
+│  └────────────────────────────────────────────────────────────────────────────┘ │
+│                                      │                                           │
+└──────────────────────────────────────│───────────────────────────────────────────┘
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              APPLICATION LAYER                                   │
+│                                                                                  │
+│  ┌──────────────────┐  ┌──────────────────────────┐  ┌────────────────────────┐ │
+│  │ PLATFORM BACKEND │  │       MERL-T API         │  │    VISUALEX-API        │ │
+│  │   (Express 5)    │  │      (FastAPI)           │  │      (Quart)           │ │
+│  │                  │  │                          │  │                        │ │
+│  │ • Auth (JWT)     │  │ • NER                    │  │ • Normattiva scraper   │ │
+│  │ • User CRUD      │  │ • Expert Router          │  │ • Brocardi scraper     │ │
+│  │ • Dossier CRUD   │  │ • 4 Experts              │  │ • EUR-Lex scraper      │ │
+│  │ • Preferences    │  │ • Gating Network         │  │ • URN generation       │ │
+│  │                  │  │ • Synthesizer            │  │                        │ │
+│  │  Port: 3001      │  │ • RLCF Orchestrator      │  │  Port: 5000            │ │
+│  └────────┬─────────┘  │                          │  └───────────┬────────────┘ │
+│           │            │  Port: 8000              │               │              │
+│           │            └────────────┬─────────────┘               │              │
+└───────────│─────────────────────────│────────────────────────────│──────────────┘
+            │                         │                             │
+            ▼                         ▼                             ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                DATA LAYER                                        │
+│                                                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐ │
+│  │  PostgreSQL  │  │   FalkorDB   │  │    Qdrant    │  │        Redis         │ │
+│  │   Port 5432  │  │   Port 6379  │  │   Port 6333  │  │     Port 6380        │ │
+│  │              │  │              │  │              │  │                      │ │
+│  │  • Users     │  │  • Norme     │  │  • legal_    │  │  • Session cache     │ │
+│  │  • Dossiers  │  │  • Articoli  │  │    chunks    │  │  • Expert response   │ │
+│  │  • Feedback  │  │  • Sentenze  │  │  • case_law  │  │    cache             │ │
+│  │  • RLCF Data │  │  • Concetti  │  │              │  │  • Rate limiting     │ │
+│  │  • Audit     │  │  • Relations │  │  Embeddings  │  │  • KG query cache    │ │
+│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────────────┘ │
+│                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Agent Catalog
+
+#### A1: NER (Named Entity Recognition)
+
+| Aspect | Specification |
+|--------|---------------|
+| **Location** | `merlt/merlt/ner/` |
+| **Purpose** | Extract legal citations from user queries (e.g., "art. 1453 c.c.") |
+| **Canon** | Pre-processing for Art. 12 Preleggi |
+| **Technology** | SpaCy + custom legal NER model |
+| **Inputs** | Raw query text |
+| **Outputs** | `entities: Dict[str, List[str]]` with `norm_references`, `legal_concepts` |
+| **DB Dependencies** | None (stateless extraction) |
+| **Trainable** | Yes - via F1 feedback (SpaCy training samples) |
+| **RLCF Integration** | F1 feedback point, weight factor 0.3 × A_u(t) |
+
+**Tools:**
+- `extract_entities(text)` → Entity list with confidence scores
+- `resolve_urn(citation)` → Canonical URN
+
+---
+
+#### A2: Expert Router
+
+| Aspect | Specification |
+|--------|---------------|
+| **Location** | `merlt/merlt/experts/router.py` |
+| **Purpose** | Determine which Experts to invoke based on query characteristics |
+| **Canon** | Meta-level: decides Art. 12 sequencing |
+| **Technology** | Rule-based + Neural classifier (optional) |
+| **Inputs** | `ExpertContext` with query embedding + entities |
+| **Outputs** | `RoutingDecision` with experts list + weights + reasoning |
+| **DB Dependencies** | None (uses query embedding) |
+| **Trainable** | Yes - via F2 feedback (Router classifier) |
+| **RLCF Integration** | F2 feedback point, weight factor 0.4 × A_u(t) |
+
+**Decision Logic:**
+```python
+# Query Type → Expert Selection
+"definition"     → LiteralExpert (high weight)
+"relationship"   → SystemicExpert (high weight)
+"intent/why"     → PrinciplesExpert (high weight)
+"case/precedent" → PrecedentExpert (high weight)
+"complex"        → All experts (balanced weights)
+```
+
+---
+
+#### A3: LiteralExpert
+
+| Aspect | Specification |
+|--------|---------------|
+| **Location** | `merlt/merlt/experts/literal.py` |
+| **Purpose** | Textual analysis - "significato proprio delle parole" |
+| **Canon** | Art. 12, comma I - Literal interpretation |
+| **Technology** | ReAct pattern + LLM reasoning |
+| **Inputs** | `ExpertContext` |
+| **Outputs** | `ExpertResponse` with interpretation, sources, reasoning trace |
+| **DB Dependencies** | Qdrant (semantic_search), FalkorDB (definitions) |
+| **Trainable** | Yes - via F3 feedback (prompt/weights) |
+| **RLCF Integration** | F3 feedback point, weight factor 0.5 × A_u(t) |
+
+**Tools:**
+| Tool | Purpose | DB |
+|------|---------|-----|
+| `semantic_search` | Vector search for definitions | Qdrant |
+| `definition_lookup` | Legal terminology | FalkorDB |
+
+**Traversal Weights:**
+```yaml
+DEFINISCE: 1.0   # Definitions
+CONTIENE: 0.8    # Contains
+RELATED_TO: 0.5  # Related concepts
+```
+
+---
+
+#### A4: SystemicExpert
+
+| Aspect | Specification |
+|--------|---------------|
+| **Location** | `merlt/merlt/experts/systemic.py` |
+| **Purpose** | Normative context - "connessione di esse" |
+| **Canon** | Art. 12, comma I + Art. 14 (historical) |
+| **Technology** | ReAct pattern + Graph traversal + LLM |
+| **Inputs** | `ExpertContext` |
+| **Outputs** | `ExpertResponse` with systemic connections |
+| **DB Dependencies** | FalkorDB (graph traversal), Qdrant (context) |
+| **Trainable** | Yes - via F4 feedback |
+| **RLCF Integration** | F4 feedback point, weight factor 0.5 × A_u(t) |
+
+**Tools:**
+| Tool | Purpose | DB |
+|------|---------|-----|
+| `graph_search` | Knowledge graph traversal | FalkorDB |
+| `semantic_search` | Context retrieval | Qdrant |
+| `norm_hierarchy` | Hierarchical lookup | FalkorDB |
+
+**Traversal Weights:**
+```yaml
+RIFERIMENTO: 1.0  # References
+MODIFICA: 0.9     # Modifications
+DEROGA: 0.8       # Derogations
+ABROGA: 0.7       # Abrogations
+CITATO_DA: 0.6    # Cited by
+```
+
+---
+
+#### A5: PrinciplesExpert (Teleological)
+
+| Aspect | Specification |
+|--------|---------------|
+| **Location** | `merlt/merlt/experts/principles.py` |
+| **Purpose** | Legislative intent - "intenzione del legislatore" |
+| **Canon** | Art. 12, comma II - Teleological interpretation |
+| **Technology** | ReAct pattern + Constitutional search + LLM |
+| **Inputs** | `ExpertContext` |
+| **Outputs** | `ExpertResponse` with principles, ratio legis |
+| **DB Dependencies** | FalkorDB (constitutional), Qdrant (travaux) |
+| **Trainable** | Yes - via F5 feedback |
+| **RLCF Integration** | F5 feedback point, weight factor 0.5 × A_u(t) |
+
+**Tools:**
+| Tool | Purpose | DB |
+|------|---------|-----|
+| `constitutional_search` | Constitutional provisions | FalkorDB |
+| `travaux_preparatoires` | Legislative history | Qdrant |
+| `principle_extraction` | Core principle ID | LLM |
+
+**Traversal Weights:**
+```yaml
+ATTUA: 1.0         # Implements
+PRINCIPIO: 0.9     # Principle relations
+DEROGA: 0.7        # Derogations
+COSTITUZIONALE: 0.8 # Constitutional
+```
+
+---
+
+#### A6: PrecedentExpert
+
+| Aspect | Specification |
+|--------|---------------|
+| **Location** | `merlt/merlt/experts/precedent.py` |
+| **Purpose** | Jurisprudential practice - case law interpretation |
+| **Canon** | Jurisprudential canon (complementary) |
+| **Technology** | ReAct pattern + Citation network + LLM |
+| **Inputs** | `ExpertContext` |
+| **Outputs** | `ExpertResponse` with precedents, massime |
+| **DB Dependencies** | Qdrant (case_law), FalkorDB (citation network) |
+| **Trainable** | Yes - via F6 feedback |
+| **RLCF Integration** | F6 feedback point, weight factor 0.5 × A_u(t) |
+
+**Tools:**
+| Tool | Purpose | DB |
+|------|---------|-----|
+| `case_law_search` | Jurisprudence search | Qdrant |
+| `semantic_search` | Similar cases | Qdrant |
+| `citation_network` | Citation analysis | FalkorDB |
+
+**Traversal Weights:**
+```yaml
+CITATO_DA: 1.0  # Cited by
+APPLICA: 0.9    # Applies
+INTERPRETA: 0.8 # Interprets
+CONFERMA: 0.7   # Confirms
+OVERRULE: 0.5   # Overrules
+```
+
+---
+
+#### A7: GatingNetwork
+
+| Aspect | Specification |
+|--------|---------------|
+| **Location** | `merlt/merlt/experts/gating.py` |
+| **Purpose** | Combine Expert responses using learned weights |
+| **Canon** | Meta-level aggregation |
+| **Technology** | PyTorch MLP (optional) or heuristic |
+| **Inputs** | List[ExpertResponse] + ExpertContext |
+| **Outputs** | `AggregatedResponse` with weights, agreement score |
+| **DB Dependencies** | None (uses Expert outputs) |
+| **Trainable** | Yes - via RLCF policy gradient |
+| **RLCF Integration** | Trained by aggregated feedback |
+
+**Aggregation Formula:**
+```
+final_weight[expert] = base_weight × confidence × agreement_factor
+```
+
+---
+
+#### A8: AdaptiveSynthesizer
+
+| Aspect | Specification |
+|--------|---------------|
+| **Location** | `merlt/merlt/experts/synthesizer.py` |
+| **Purpose** | Produce final user-facing response |
+| **Canon** | User output layer |
+| **Technology** | LLM synthesis with structured template |
+| **Inputs** | `AggregatedResponse` + ExpertResponses |
+| **Outputs** | Final synthesis text + source list |
+| **DB Dependencies** | None |
+| **Trainable** | Yes - via F7 feedback (aggregation weights) |
+| **RLCF Integration** | F7 feedback point, weight factor 0.6 × A_u(t) |
+
+**Synthesis Modes:**
+- `WEIGHTED_CONSENSUS` - Weight by confidence and agreement
+- `EXPERT_SELECTED` - Best single expert
+- `UNANIMOUS` - Only where all agree
+- `ENSEMBLE` - Include all perspectives
+
+---
+
+#### A9: RLCF Orchestrator
+
+| Aspect | Specification |
+|--------|---------------|
+| **Location** | `merlt/merlt/rlcf/orchestrator.py` |
+| **Purpose** | Coordinate feedback collection, aggregation, and training |
+| **Technology** | Python async orchestration |
+| **Inputs** | Feedback from F1-F7 points |
+| **Outputs** | Training triggers, policy updates |
+| **DB Dependencies** | PostgreSQL (feedback storage), Redis (buffers) |
+| **Components** | AuthorityScoring, BiasDetection, PolicyGradient, TrainingScheduler |
+
+**Sub-components:**
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `AuthorityService` | `authority.py` | Calculate A_u(t) scores |
+| `BiasDetector` | `bias_detection.py` | 6-dimensional bias analysis |
+| `PolicyGradientTrainer` | `policy_gradient.py` | REINFORCE for gating |
+| `ReActPPOTrainer` | `react_ppo_trainer.py` | PPO for expert reasoning |
+| `DevilsAdvocate` | `devils_advocate.py` | Consensus challenge |
+| `TrainingScheduler` | `training_scheduler.py` | Batch training orchestration |
+
+---
+
+#### A10: MultiExpertOrchestrator
+
+| Aspect | Specification |
+|--------|---------------|
+| **Location** | `merlt/merlt/experts/orchestrator.py` |
+| **Purpose** | Coordinate Expert execution for a single query |
+| **Technology** | Python asyncio with parallel execution |
+| **Inputs** | `ExpertContext` |
+| **Outputs** | `OrchestratorResult` with all Expert responses + synthesis |
+| **DB Dependencies** | Indirect via Experts |
+| **Configuration** | `OrchestratorConfig` (parallel, timeout, min_experts, synthesis_mode) |
+
+**Execution Flow:**
+```
+1. Router decides which Experts
+2. Experts execute (parallel or sequential per Art. 12)
+3. GatingNetwork aggregates
+4. Synthesizer produces output
+5. ExecutionTrace recorded for RLCF
+```
+
+---
+
+### Database Catalog
+
+#### DB1: PostgreSQL
+
+| Aspect | Specification |
+|--------|---------------|
+| **Port** | 5432 |
+| **Purpose** | Primary relational storage for users, feedback, audit |
+| **ORM** | Prisma (Platform), SQLAlchemy (RLCF) |
+| **Consumers** | Platform Backend, RLCF Orchestrator |
+
+**Schemas:**
+
+**Platform Schema (Prisma):**
+```sql
+User (
+  id UUID PRIMARY KEY,
+  email VARCHAR UNIQUE,
+  password_hash VARCHAR,
+  authority_score FLOAT,
+  consent_level ENUM('basic', 'learning', 'research'),
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+)
+
+Dossier (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES User,
+  name VARCHAR,
+  articles JSONB,  -- Array of URNs
+  created_at TIMESTAMP
+)
+
+Preference (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES User,
+  theme VARCHAR,
+  language VARCHAR,
+  profile ENUM('consultazione', 'ricerca', 'analisi', 'contributore')
+)
+```
+
+**RLCF Schema (SQLAlchemy):**
+```sql
+rlcf_traces (
+  id UUID PRIMARY KEY,
+  query_id VARCHAR,
+  expert_type VARCHAR,
+  execution_data JSONB,
+  created_at TIMESTAMP
+)
+
+rlcf_feedback (
+  id UUID PRIMARY KEY,
+  trace_id UUID REFERENCES rlcf_traces,
+  user_id UUID,
+  feedback_point ENUM('F1'...'F7'),
+  rating FLOAT,
+  feedback_type VARCHAR,
+  feedback_data JSONB,
+  authority_weight FLOAT,
+  created_at TIMESTAMP
+)
+
+user_authority (
+  id UUID PRIMARY KEY,
+  user_id UUID,
+  domain VARCHAR,
+  baseline FLOAT,      -- B_u
+  track_record FLOAT,  -- T_u(t)
+  performance FLOAT,   -- P_u(t)
+  score FLOAT,         -- A_u(t) computed
+  updated_at TIMESTAMP
+)
+
+policy_checkpoints (
+  id UUID PRIMARY KEY,
+  policy_name VARCHAR,  -- 'gating', 'traversal', 'ner'
+  weights_blob BYTEA,
+  metrics JSONB,
+  created_at TIMESTAMP
+)
+
+audit_log (
+  id BIGSERIAL PRIMARY KEY,
+  query_hash VARCHAR,
+  response_hash VARCHAR,
+  model_version VARCHAR,
+  user_id_hash VARCHAR,
+  timestamp TIMESTAMP,
+  immutable BOOLEAN DEFAULT TRUE
+)
+```
+
+**Retention:** 7 years for audit_log, permanent for user/authority
+
+---
+
+#### DB2: FalkorDB (Knowledge Graph)
+
+| Aspect | Specification |
+|--------|---------------|
+| **Port** | 6379 (Redis protocol) |
+| **Purpose** | Legal knowledge graph with norms, relationships, concepts |
+| **Query Language** | Cypher |
+| **Consumers** | SystemicExpert, PrinciplesExpert, PrecedentExpert, NormViewer |
+
+**Node Types:**
+
+| Node | Properties | Example |
+|------|------------|---------|
+| `Norma` | urn, title, tipo, vigenza, last_modified | `urn:nir:stato:legge:2005-02-19;82` |
+| `Articolo` | urn, numero, rubrica, testo, vigente | `art. 1453 c.c.` |
+| `Comma` | numero, testo | Comma 1, Art. 1453 |
+| `Definizione` | termine, definizione, fonte | "Contratto" |
+| `Concetto` | nome, categoria | "Risoluzione per inadempimento" |
+| `Sentenza` | numero, data, organo, massima | Cass. 12345/2020 |
+| `Massima` | testo, principio | Legal maxim |
+
+**Edge Types:**
+
+| Edge | From → To | Purpose |
+|------|-----------|---------|
+| `RIFERIMENTO` | Articolo → Articolo | Cross-reference |
+| `MODIFICA` | Norma → Articolo | Modification |
+| `MODIFICATO_DA` | Articolo → Norma | Modified by |
+| `DEROGA` | Articolo → Articolo | Derogation |
+| `ABROGA` | Norma → Articolo | Abrogation |
+| `CITATO_DA` | Articolo → Sentenza | Cited by case |
+| `DEFINISCE` | Definizione → Concetto | Defines |
+| `ATTUA` | Articolo → Articolo | Implements |
+| `PRINCIPIO` | Articolo → Concetto | Principle relation |
+| `CONTIENE` | Norma → Articolo | Contains |
+| `COSTITUZIONALE` | Articolo → Articolo | Constitutional link |
+
+**Example Queries:**
+```cypher
+-- Get norm with all references
+MATCH (a:Articolo {urn: $urn})-[r:RIFERIMENTO|CITATO_DA]-(b)
+RETURN a, r, b LIMIT 20
+
+-- Get modification history
+MATCH (n:Norma)-[m:MODIFICA]->(a:Articolo {urn: $urn})
+RETURN n.urn, m.data, m.tipo ORDER BY m.data DESC
+
+-- Find constitutional principles
+MATCH (a:Articolo {urn: $urn})-[:ATTUA|PRINCIPIO*1..3]-(c:Concetto)
+WHERE c.categoria = 'costituzionale'
+RETURN DISTINCT c
+```
+
+**Temporal Versioning:**
+- Each Articolo has `versions[]` with `valid_from`, `valid_to`
+- Query with `as_of_date` parameter for historical state
+
+---
+
+#### DB3: Qdrant (Vector Database)
+
+| Aspect | Specification |
+|--------|---------------|
+| **Port** | 6333 (REST), 6334 (gRPC) |
+| **Purpose** | Semantic search via embeddings |
+| **Consumers** | All Experts (semantic_search), NER (context) |
+
+**Collections:**
+
+**`legal_chunks`** - Document chunks with embeddings
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Chunk identifier |
+| `vector` | Float[768] | text-embedding-3-small |
+| `chunk_id` | String | Unique chunk reference |
+| `article_urn` | String | Parent article URN |
+| `text` | String | Chunk text content |
+| `source_type` | Enum | `norm`, `jurisprudence`, `doctrine` |
+| `expert_affinity` | Object | Per-expert relevance scores |
+
+**Expert Affinity Structure:**
+```json
+{
+  "literal": 0.8,
+  "systemic": 0.6,
+  "principles": 0.4,
+  "precedent": 0.3
+}
+```
+
+**`case_law`** - Jurisprudence embeddings
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Case identifier |
+| `vector` | Float[768] | Embedding |
+| `case_id` | String | Case reference (e.g., Cass. 12345/2020) |
+| `massima` | String | Legal maxim text |
+| `article_refs` | String[] | Referenced article URNs |
+| `date` | Date | Decision date |
+
+**Search Patterns:**
+```python
+# Semantic search for definitions (LiteralExpert)
+qdrant.search(
+    collection="legal_chunks",
+    query_vector=query_embedding,
+    query_filter={"source_type": "norm"},
+    limit=10
+)
+
+# Case law search (PrecedentExpert)
+qdrant.search(
+    collection="case_law",
+    query_vector=query_embedding,
+    query_filter={"article_refs": {"$contains": article_urn}},
+    limit=5
+)
+```
+
+---
+
+#### DB4: Redis
+
+| Aspect | Specification |
+|--------|---------------|
+| **Port** | 6380 |
+| **Purpose** | Caching, sessions, rate limiting |
+| **Consumers** | All application services |
+
+**Data Structures:**
+
+| Key Pattern | Type | TTL | Purpose |
+|-------------|------|-----|---------|
+| `session:{user_id}` | Hash | 24h | User session data |
+| `cache:expert:{urn}:{expert}` | String (JSON) | Until norm update | Expert response cache |
+| `cache:kg:{query_hash}` | String (JSON) | 1h | KG query cache |
+| `ratelimit:{user_id}` | Counter | 1min | Rate limiting |
+| `buffer:rlcf:{feedback_point}` | List | - | Feedback buffer before aggregation |
+| `warmstart:{urn}` | String (JSON) | Permanent | Pre-computed top norms |
+
+**Caching Strategy:**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     CACHE INVALIDATION                           │
+├─────────────────────────────────────────────────────────────────┤
+│  Trigger                      │ Action                           │
+├───────────────────────────────┼──────────────────────────────────┤
+│  Norm modified in KG          │ Delete cache:expert:{urn}:*      │
+│  Policy checkpoint updated    │ Delete cache:expert:*            │
+│  User authority changed       │ No cache impact (real-time)      │
+│  New feedback collected       │ Buffer, don't invalidate         │
+└───────────────────────────────┴──────────────────────────────────┘
+```
+
+---
+
+### Component Relationships
+
+#### Agent → Database Dependencies
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         AGENT → DATABASE DEPENDENCIES                            │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│   ┌─────────────┐                                                               │
+│   │    NER      │ ─────────────────────────────────────────────────▶ (none)    │
+│   └─────────────┘                                                               │
+│                                                                                  │
+│   ┌─────────────┐                                                               │
+│   │   Router    │ ─────────────────────────────────────────────────▶ (none)    │
+│   └─────────────┘                                                               │
+│                                                                                  │
+│   ┌─────────────┐         ┌──────────┐    ┌──────────┐                         │
+│   │  Literal    │ ───────▶│  Qdrant  │    │ FalkorDB │◀────────┐               │
+│   │  Expert     │         │(semantic)│    │  (defn)  │         │               │
+│   └─────────────┘         └──────────┘    └──────────┘         │               │
+│                                                                 │               │
+│   ┌─────────────┐         ┌──────────┐    ┌──────────┐         │               │
+│   │  Systemic   │ ───────▶│  Qdrant  │───▶│ FalkorDB │─────────┤               │
+│   │  Expert     │         │(context) │    │ (graph)  │         │               │
+│   └─────────────┘         └──────────┘    └──────────┘         │               │
+│                                                                 │               │
+│   ┌─────────────┐         ┌──────────┐    ┌──────────┐         │               │
+│   │ Principles  │ ───────▶│  Qdrant  │───▶│ FalkorDB │─────────┤               │
+│   │  Expert     │         │(travaux) │    │(constit) │         │               │
+│   └─────────────┘         └──────────┘    └──────────┘         │               │
+│                                                                 │               │
+│   ┌─────────────┐         ┌──────────┐    ┌──────────┐         │               │
+│   │ Precedent   │ ───────▶│  Qdrant  │───▶│ FalkorDB │─────────┘               │
+│   │  Expert     │         │(case_law)│    │(citation)│                         │
+│   └─────────────┘         └──────────┘    └──────────┘                         │
+│                                                                                  │
+│   ┌─────────────┐                                                               │
+│   │   Gating    │ ─────────────────────────────────────────────────▶ (none)    │
+│   └─────────────┘                                                               │
+│                                                                                  │
+│   ┌─────────────┐                                                               │
+│   │ Synthesizer │ ─────────────────────────────────────────────────▶ (none)    │
+│   └─────────────┘                                                               │
+│                                                                                  │
+│   ┌─────────────┐         ┌──────────┐    ┌──────────┐                         │
+│   │    RLCF     │ ───────▶│PostgreSQL│───▶│  Redis   │                         │
+│   │Orchestrator │         │(feedback)│    │ (buffer) │                         │
+│   └─────────────┘         └──────────┘    └──────────┘                         │
+│                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Data Flow: Query → Response
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           QUERY → RESPONSE FLOW                                  │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  1. USER QUERY                                                                   │
+│     │                                                                            │
+│     ▼                                                                            │
+│  2. NER ──────────────────────────────────────────────────────────▶ entities    │
+│     │                                                                            │
+│     ▼                                                                            │
+│  3. EMBEDDING ────────────────────────────────────────────────────▶ vector      │
+│     │                                                                            │
+│     ▼                                                                            │
+│  4. ROUTER ───────────────────────────────────────────────────────▶ expert_list │
+│     │                                                                            │
+│     ▼                                                                            │
+│  5. EXPERTS (parallel)                                                           │
+│     │                                                                            │
+│     ├──▶ LiteralExpert                                                          │
+│     │       ├── semantic_search(Qdrant) ─────────────────▶ chunks               │
+│     │       ├── definition_lookup(FalkorDB) ─────────────▶ definitions          │
+│     │       └── LLM reasoning ───────────────────────────▶ ExpertResponse       │
+│     │                                                                            │
+│     ├──▶ SystemicExpert                                                         │
+│     │       ├── graph_search(FalkorDB) ──────────────────▶ relations            │
+│     │       ├── semantic_search(Qdrant) ─────────────────▶ context              │
+│     │       └── LLM reasoning ───────────────────────────▶ ExpertResponse       │
+│     │                                                                            │
+│     ├──▶ PrinciplesExpert                                                       │
+│     │       ├── constitutional_search(FalkorDB) ─────────▶ principles           │
+│     │       ├── travaux(Qdrant) ─────────────────────────▶ history              │
+│     │       └── LLM reasoning ───────────────────────────▶ ExpertResponse       │
+│     │                                                                            │
+│     └──▶ PrecedentExpert                                                        │
+│             ├── case_law_search(Qdrant) ─────────────────▶ cases                │
+│             ├── citation_network(FalkorDB) ──────────────▶ citations            │
+│             └── LLM reasoning ───────────────────────────▶ ExpertResponse       │
+│                                                                                  │
+│     │                                                                            │
+│     ▼                                                                            │
+│  6. GATING NETWORK ──────────────────────────────────────▶ weighted_responses   │
+│     │                                                                            │
+│     ▼                                                                            │
+│  7. SYNTHESIZER ─────────────────────────────────────────▶ final_response       │
+│     │                                                                            │
+│     ▼                                                                            │
+│  8. CACHE (Redis) ◀──────────────────────────────────────── cache:expert:{urn}  │
+│     │                                                                            │
+│     ▼                                                                            │
+│  9. EXECUTION TRACE ─────────────────────────────────────▶ PostgreSQL           │
+│     │                                                                            │
+│     ▼                                                                            │
+│ 10. USER RESPONSE                                                                │
+│                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### RLCF Training Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           RLCF TRAINING FLOW                                     │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  1. FEEDBACK COLLECTION                                                          │
+│     │                                                                            │
+│     ├── F1 (NER) ─────────────────▶ Redis buffer:rlcf:f1                        │
+│     ├── F2 (Router) ──────────────▶ Redis buffer:rlcf:f2                        │
+│     ├── F3-F6 (Experts) ──────────▶ Redis buffer:rlcf:f3..f6                    │
+│     └── F7 (Synthesizer) ─────────▶ Redis buffer:rlcf:f7                        │
+│                                                                                  │
+│  2. AUTHORITY WEIGHTING                                                          │
+│     │                                                                            │
+│     └── AuthorityService.calculate(user_id) ────▶ A_u(t) = α·B + β·T + γ·P     │
+│                                                                                  │
+│  3. AGGREGATION (per component)                                                  │
+│     │                                                                            │
+│     └── weighted_feedback = Σ(feedback_i × authority_i) / Σ(authority_i)        │
+│                                                                                  │
+│  4. BIAS DETECTION                                                               │
+│     │                                                                            │
+│     └── BiasDetector.analyze(aggregated) ────▶ 6 dimensions checked             │
+│           ├── AUTHORITY_SKEW                                                     │
+│           ├── TEMPORAL                                                           │
+│           ├── DOMAIN                                                             │
+│           ├── POSITION                                                           │
+│           ├── CONFIRMATION                                                       │
+│           └── ANCHORING                                                          │
+│                                                                                  │
+│  5. TRAINING TRIGGER (buffer >= 100 samples)                                     │
+│     │                                                                            │
+│     ├── F1 ─────────▶ SpaCy NER training                                        │
+│     ├── F2 ─────────▶ Router classifier update                                  │
+│     ├── F3-F6 ──────▶ Expert prompt/weight adjustment                           │
+│     └── F7 ─────────▶ Gating weight update (PolicyGradient)                     │
+│                                                                                  │
+│  6. CHECKPOINT                                                                   │
+│     │                                                                            │
+│     └── PolicyManager.save() ────▶ PostgreSQL policy_checkpoints                │
+│                                                                                  │
+│  7. CACHE INVALIDATION                                                           │
+│     │                                                                            │
+│     └── Redis DEL cache:expert:* ────▶ Force recomputation with new policy      │
+│                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Service Port Summary
+
+| Service | Port | Protocol | Purpose |
+|---------|------|----------|---------|
+| Platform Frontend | 5173 | HTTP | React dev server / Nginx prod |
+| Platform Backend | 3001 | HTTP | Express API |
+| MERL-T API | 8000 | HTTP | FastAPI - main analysis |
+| VisuaLex API | 5000 | HTTP | Quart - scraping |
+| PostgreSQL | 5432 | TCP | Relational DB |
+| FalkorDB | 6379 | Redis | Knowledge Graph |
+| Qdrant REST | 6333 | HTTP | Vector search |
+| Qdrant gRPC | 6334 | gRPC | Vector search (high perf) |
+| Redis | 6380 | Redis | Cache/sessions |
+
+---
+
+### File Structure Reference
+
+```
+ALIS_CORE/
+├── visualex-platform/           # Presentation Layer
+│   ├── frontend/               # React 19 + Vite
+│   │   └── src/
+│   │       ├── components/     # UI components
+│   │       └── store/          # Zustand state
+│   └── backend/                # Express 5
+│       └── src/
+│           ├── routes/         # API routes
+│           └── services/       # Business logic
+│
+├── merlt/                       # Application Layer (ML)
+│   └── merlt/
+│       ├── experts/            # A3-A8: Expert agents
+│       │   ├── base.py
+│       │   ├── literal.py
+│       │   ├── systemic.py
+│       │   ├── principles.py
+│       │   ├── precedent.py
+│       │   ├── router.py       # A2
+│       │   ├── gating.py       # A7
+│       │   ├── synthesizer.py  # A8
+│       │   └── orchestrator.py # A10
+│       ├── ner/                # A1: NER
+│       └── rlcf/               # A9: RLCF
+│           ├── authority.py
+│           ├── bias_detection.py
+│           ├── policy_gradient.py
+│           ├── orchestrator.py
+│           └── persistence.py
+│
+├── visualex-api/                # Application Layer (Scraping)
+│   └── src/
+│       ├── scrapers/           # Normattiva, Brocardi, EUR-Lex
+│       └── parsers/            # URN generation
+│
+└── docker-compose.yml           # Data Layer orchestration
 

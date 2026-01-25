@@ -78,38 +78,141 @@ workflow_status:
     name: "Planning"
     workflows:
       - id: "prd"
-        status: "required"
+        status: "_bmad-output/planning-artifacts/prd.md"
         agent: "pm"
         command: "/bmad:bmm:workflows:prd"
-        output: "Product Requirements Document with FRs and NFRs"
+        completed: "2026-01-24"
+        last_edited: "2026-01-24"
+        outputs:
+          - "_bmad-output/planning-artifacts/prd.md"
+        edits:
+          - date: "2026-01-24"
+            reason: "Integrated RLCF Feedback Architecture (7 feedback points)"
+            sections_added:
+              - "RLCF Feedback Architecture"
+              - "IDE per Giuristi paradigm reference"
+              - "4-Profile System reference"
+          - date: "2026-01-24"
+            reason: "Added System Component Specification with full agent, database, and relationship mapping"
+            sections_added:
+              - "System Component Specification"
+              - "Agent Catalog (A1-A10)"
+              - "Database Catalog (DB1-DB4)"
+              - "Component Relationships"
+              - "Data Flow Diagrams"
+          - date: "2026-01-24"
+            reason: "Added F8: Bridge Quality Feedback for TraversalPolicy learning"
+            sections_added:
+              - "F8: Bridge Quality Feedback"
+              - "Tri-Layer Architecture diagram"
+              - "Expert-Specific Traversal Weights table"
+              - "F8 Training Loop diagram"
+              - "MVP vs Growth Implementation"
+            key_decisions:
+              - "F8 validates chunk↔node mapping quality"
+              - "TraversalPolicy learns 'path virtuosi' per Expert"
+              - "Implicit collection for all profiles, explicit for 🎓 Contributore"
+              - "Separazione: Grafo pubblico, Testi privati, Bridge impara"
       - id: "create-ux-design"
-        status: "conditional"
+        status: "_bmad-output/planning-artifacts/ux-design-specification.md"
         condition: "if_has_ui"
         agent: "ux-designer"
         command: "/bmad:bmm:workflows:create-ux-design"
+        completed: "2026-01-24"
+        outputs:
+          - "_bmad-output/planning-artifacts/ux-design-specification.md"
+        key_decisions:
+          - "IDE per Giuristi - Paradigma UX (Command Palette, Peek, Split View)"
+          - "4-Profile System (Consultazione, Ricerca, Analisi, Contributore)"
+          - "Progressive Loading Pattern (3 livelli)"
+          - "Summary + Accordion per MERL-T trace"
+          - "Feedback Adattivo per Profilo"
+          - "Earned Opt-In per upgrade profilo"
+          - "NER via RLCF - Two-Tier Architecture (rules + ML)"
+          - "Devil's Advocate - Preserva pluralismo interpretativo (RLCF Pillar IV)"
+        sections_completed:
+          - "Executive Summary"
+          - "Conceptual Framework: IDE per Giuristi"
+          - "Core UX Decisions (7)"
+          - "Interaction Patterns"
+          - "Visual Design System"
+          - "Validation & Handoff"
 
   # Phase 3: Solutioning
   - phase: 3
     name: "Solutioning"
     workflows:
       - id: "create-architecture"
-        status: "required"
+        status: "_bmad-output/planning-artifacts/architecture.md"
         agent: "architect"
         command: "/bmad:bmm:workflows:create-architecture"
-        output: "System architecture document"
+        completed: "2026-01-24"
+        outputs:
+          - "_bmad-output/planning-artifacts/architecture.md"
+        adrs:
+          - "ADR-001: Circuit Breaker Strategy"
+          - "ADR-002: GDPR Consent Management"
+          - "ADR-003: API Versioning Strategy"
+          - "ADR-004: Audit Trail (7-Year Retention)"
+          - "ADR-005: Warm-Start Caching Strategy"
       - id: "create-epics-and-stories"
-        status: "required"
+        status: "_bmad-output/planning-artifacts/epics.md"
         agent: "pm"
         command: "/bmad:bmm:workflows:create-epics-and-stories"
+        completed: "2026-01-25"
+        outputs:
+          - "_bmad-output/planning-artifacts/epics.md"
+        epic_count: 10
+        story_count: 64
+        mvp_epics: 8
+        post_thesis_epics: 2
+        key_decisions:
+          - "Epic 2 split into 2a/2b/2c for manageability"
+          - "Circuit breaker moved to Epic 4 (MVP critical)"
+          - "Gold standard regression in Epic 4"
+          - "Scope: Libro IV C.C. only (~800 articles)"
+          - "Brownfield: every story references Legacy code"
+          - "F8 Bridge with source_type-aware expert_affinity"
+        party_mode_discussion: true
+        stories_by_epic:
+          epic_1: 6
+          epic_2a: 4
+          epic_2b: 5
+          epic_2c: 4
+          epic_3: 8
+          epic_4: 12
+          epic_5: 5
+          epic_6: 10
+          epic_7: 6
+          epic_8: 4
       - id: "test-design"
-        status: "optional"
+        status: "_bmad-output/planning-artifacts/test-design-system.md"
         agent: "tea"
         command: "/bmad:bmm:workflows:testarch-test-design"
-        output: "System-level testability review"
+        completed: "2026-01-24"
+        outputs:
+          - "_bmad-output/planning-artifacts/test-design-system.md"
+        key_findings:
+          - "5 high-risk ASRs identified (traceability, consent, audit, performance, degradation)"
+          - "6 testability concerns flagged (LLM non-determinism, distributed complexity, RLCF loop, 7-year audit, F8 bridge, legacy migration)"
+          - "80+ legacy tests need migration (prioritized P0/P1)"
+          - "Test pyramid: 65% unit, 25% integration, 10% E2E"
+          - "k6 for performance, Playwright for E2E, testcontainers for DB isolation"
       - id: "implementation-readiness"
-        status: "required"
+        status: "_bmad-output/planning-artifacts/implementation-readiness-report-2026-01-25.md"
         agent: "architect"
         command: "/bmad:bmm:workflows:check-implementation-readiness"
+        completed: "2026-01-25"
+        outputs:
+          - "_bmad-output/planning-artifacts/implementation-readiness-report-2026-01-25.md"
+        key_findings:
+          - "All 4 documents validated (PRD, Architecture, Epics, UX)"
+          - "63 FRs with 100% epic coverage"
+          - "28 NFRs with measurable targets"
+          - "64 stories across 10 epics"
+          - "5 ADRs documented"
+          - "No critical issues found"
+        verdict: "READY FOR IMPLEMENTATION"
 
   # Phase 4: Implementation
   - phase: 4
