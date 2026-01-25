@@ -156,9 +156,35 @@ workflow_status:
           - "ADR-004: Audit Trail (7-Year Retention)"
           - "ADR-005: Warm-Start Caching Strategy"
       - id: "create-epics-and-stories"
-        status: "required"
+        status: "_bmad-output/planning-artifacts/epics.md"
         agent: "pm"
         command: "/bmad:bmm:workflows:create-epics-and-stories"
+        completed: "2026-01-25"
+        outputs:
+          - "_bmad-output/planning-artifacts/epics.md"
+        epic_count: 10
+        story_count: 64
+        mvp_epics: 8
+        post_thesis_epics: 2
+        key_decisions:
+          - "Epic 2 split into 2a/2b/2c for manageability"
+          - "Circuit breaker moved to Epic 4 (MVP critical)"
+          - "Gold standard regression in Epic 4"
+          - "Scope: Libro IV C.C. only (~800 articles)"
+          - "Brownfield: every story references Legacy code"
+          - "F8 Bridge with source_type-aware expert_affinity"
+        party_mode_discussion: true
+        stories_by_epic:
+          epic_1: 6
+          epic_2a: 4
+          epic_2b: 5
+          epic_2c: 4
+          epic_3: 8
+          epic_4: 12
+          epic_5: 5
+          epic_6: 10
+          epic_7: 6
+          epic_8: 4
       - id: "test-design"
         status: "_bmad-output/planning-artifacts/test-design-system.md"
         agent: "tea"
@@ -173,9 +199,20 @@ workflow_status:
           - "Test pyramid: 65% unit, 25% integration, 10% E2E"
           - "k6 for performance, Playwright for E2E, testcontainers for DB isolation"
       - id: "implementation-readiness"
-        status: "required"
+        status: "_bmad-output/planning-artifacts/implementation-readiness-report-2026-01-25.md"
         agent: "architect"
         command: "/bmad:bmm:workflows:check-implementation-readiness"
+        completed: "2026-01-25"
+        outputs:
+          - "_bmad-output/planning-artifacts/implementation-readiness-report-2026-01-25.md"
+        key_findings:
+          - "All 4 documents validated (PRD, Architecture, Epics, UX)"
+          - "63 FRs with 100% epic coverage"
+          - "28 NFRs with measurable targets"
+          - "64 stories across 10 epics"
+          - "5 ADRs documented"
+          - "No critical issues found"
+        verdict: "READY FOR IMPLEMENTATION"
 
   # Phase 4: Implementation
   - phase: 4
