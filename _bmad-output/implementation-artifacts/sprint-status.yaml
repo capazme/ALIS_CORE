@@ -1,0 +1,163 @@
+# generated: 2026-01-25
+# project: ALIS_CORE
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-01-25
+project: ALIS_CORE
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  # ============================================
+  # Epic 1: Foundation & User Identity
+  # ============================================
+  epic-1: backlog
+  1-1-user-registration: backlog
+  1-2-user-login: backlog
+  1-3-profile-setup: backlog
+  1-4-consent-configuration: backlog
+  1-5-authority-score-display: backlog
+  1-6-data-export-erasure: backlog
+  epic-1-retrospective: optional
+
+  # ============================================
+  # Epic 2a: Scraping & URN Pipeline
+  # ============================================
+  epic-2a: backlog
+  2a-1-normattiva-scraper-integration: backlog
+  2a-2-brocardi-scraper-integration: backlog
+  2a-3-eurlex-scraper-integration: backlog
+  2a-4-urn-canonicalization-pipeline: backlog
+  epic-2a-retrospective: optional
+
+  # ============================================
+  # Epic 2b: Graph Building
+  # ============================================
+  epic-2b: backlog
+  2b-1-graph-schema-setup: backlog
+  2b-2-norm-node-ingestion: backlog
+  2b-3-relation-extraction-creation: backlog
+  2b-4-temporal-versioning: backlog
+  2b-5-manual-ingest-trigger: backlog
+  epic-2b-retrospective: optional
+
+  # ============================================
+  # Epic 2c: Vector & Bridge Table
+  # ============================================
+  epic-2c: backlog
+  2c-1-text-chunking-pipeline: backlog
+  2c-2-embedding-generation: backlog
+  2c-3-qdrant-collection-setup: backlog
+  2c-4-bridge-table-population: backlog
+  epic-2c-retrospective: optional
+
+  # ============================================
+  # Epic 3: Norm Browsing & Search
+  # ============================================
+  epic-3: backlog
+  3-1-norm-hierarchical-browser: backlog
+  3-2-article-viewer: backlog
+  3-3-search-by-keyword-urn: backlog
+  3-4-citation-highlighting-linking: backlog
+  3-5-cross-references-panel: backlog
+  3-6-historical-versions-timeline: backlog
+  3-7-modification-detection-alert: backlog
+  3-8-kg-coverage-dashboard: backlog
+  epic-3-retrospective: optional
+
+  # ============================================
+  # Epic 4: MERL-T Analysis Pipeline
+  # ============================================
+  epic-4: backlog
+  4-1-ner-pipeline-integration: backlog
+  4-2-expert-router: backlog
+  4-3-literalexpert-implementation: backlog
+  4-4-systemicexpert-implementation: backlog
+  4-5-principlesexpert-implementation: backlog
+  4-6-precedentexpert-implementation: backlog
+  4-7-gating-network: backlog
+  4-8-synthesizer: backlog
+  4-9-circuit-breaker-implementation: backlog
+  4-10-llm-provider-abstraction: backlog
+  4-11-expert-pipeline-status-ui: backlog
+  4-12-gold-standard-regression: backlog
+  epic-4-retrospective: optional
+
+  # ============================================
+  # Epic 5: Traceability & Source Verification
+  # ============================================
+  epic-5: backlog
+  5-1-reasoning-trace-storage: backlog
+  5-2-trace-viewer-ui: backlog
+  5-3-source-navigation: backlog
+  5-4-temporal-validity-check: backlog
+  5-5-citation-export: backlog
+  epic-5-retrospective: optional
+
+  # ============================================
+  # Epic 6: RLCF Feedback Collection
+  # ============================================
+  epic-6: backlog
+  6-1-feedback-data-model: backlog
+  6-2-ner-feedback-f1: backlog
+  6-3-expert-output-feedback-f3-f6: backlog
+  6-4-synthesizer-feedback-f7: backlog
+  6-5-bridge-quality-feedback-f8: backlog
+  6-6-fonti-usate-panel: backlog
+  6-7-feedback-history: backlog
+  6-8-pii-anonymization: backlog
+  6-9-audit-trail: backlog
+  6-10-synthetic-feedback-generator: backlog
+  epic-6-retrospective: optional
+
+  # ============================================
+  # Epic 7: Authority & Learning Loop
+  # ============================================
+  epic-7: backlog
+  7-1-authority-score-computation: backlog
+  7-2-router-feedback-f2: backlog
+  7-3-feedback-aggregation: backlog
+  7-4-training-buffer-trigger: backlog
+  7-5-expert-affinity-update-f8c: backlog
+  7-6-traversalpolicy-training-f8d: backlog
+  epic-7-retrospective: optional
+
+  # ============================================
+  # Epic 8: Research & Academic Support
+  # ============================================
+  epic-8: backlog
+  8-1-policy-evolution-dashboard: backlog
+  8-2-dataset-export: backlog
+  8-3-query-reproducibility: backlog
+  8-4-devils-advocate: backlog
+  epic-8-retrospective: optional
