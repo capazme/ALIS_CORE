@@ -3,6 +3,7 @@ import { Layout } from './components/layout/Layout';
 import { SearchPage } from './pages/SearchPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import { DossierPage } from './components/features/dossier/DossierPage';
 import { HistoryView } from './components/features/history/HistoryView';
 import { EnvironmentPage } from './components/features/environments/EnvironmentPage';
@@ -23,6 +24,7 @@ function App() {
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
 
         {/* Protected app routes with layout */}
         <Route

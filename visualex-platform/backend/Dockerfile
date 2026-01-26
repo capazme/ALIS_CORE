@@ -1,22 +1,29 @@
+# ============================================================================
 # VisuaLex Platform - Backend
 # Express + TypeScript + Prisma
+# ============================================================================
 
 # Build stage
 FROM node:20-bullseye-slim AS builder
+
+ARG MERLT_ENABLED=false
 
 WORKDIR /app
 
 # Install OpenSSL and ca-certificates for Prisma
 RUN apt-get update && apt-get install -y openssl ca-certificates wget && rm -rf /var/lib/apt/lists/*
 
-# Copy MERL-T backend package and build it
-COPY visualex-merlt/backend/package*.json ./visualex-merlt/backend/
-COPY visualex-merlt/backend/tsconfig.json ./visualex-merlt/backend/
-COPY visualex-merlt/backend/tsup.config.ts ./visualex-merlt/backend/
-COPY visualex-merlt/backend/src ./visualex-merlt/backend/src
+# Copy and build MERL-T backend package (if enabled and exists)
+COPY visualex-merlt/backend/package*.json ./visualex-merlt/backend/ 2>/dev/null || true
+COPY visualex-merlt/backend/tsconfig.json ./visualex-merlt/backend/ 2>/dev/null || true
+COPY visualex-merlt/backend/tsup.config.ts ./visualex-merlt/backend/ 2>/dev/null || true
+COPY visualex-merlt/backend/src ./visualex-merlt/backend/src 2>/dev/null || true
 
-WORKDIR /app/visualex-merlt/backend
-RUN npm install && npm run build
+RUN if [ -f "./visualex-merlt/backend/package.json" ]; then \
+      cd visualex-merlt/backend && npm install && npm run build; \
+    else \
+      echo "MERL-T backend not found, skipping..."; \
+    fi
 
 WORKDIR /app/visualex-platform/backend
 
@@ -33,12 +40,15 @@ COPY visualex-platform/backend/prisma ./prisma/
 RUN npx prisma generate
 
 # Copy source code
-COPY visualex-platform/backend . .
+COPY visualex-platform/backend/src ./src/
+COPY visualex-platform/backend/tsconfig.json ./
 
 # Build TypeScript
 RUN npm run build
 
+# ============================================================================
 # Production stage
+# ============================================================================
 FROM node:20-bullseye-slim
 
 WORKDIR /app
@@ -46,17 +56,21 @@ WORKDIR /app
 # Install OpenSSL and ca-certificates for Prisma
 RUN apt-get update && apt-get install -y openssl ca-certificates wget && rm -rf /var/lib/apt/lists/*
 
-# Install only production dependencies
-COPY visualex-merlt/backend/package*.json ./visualex-merlt/backend/
-COPY visualex-merlt/backend/tsconfig.json ./visualex-merlt/backend/
-COPY visualex-merlt/backend/tsup.config.ts ./visualex-merlt/backend/
-COPY visualex-merlt/backend/src ./visualex-merlt/backend/src
+# Copy and build MERL-T in production stage (if exists)
+COPY visualex-merlt/backend/package*.json ./visualex-merlt/backend/ 2>/dev/null || true
+COPY visualex-merlt/backend/tsconfig.json ./visualex-merlt/backend/ 2>/dev/null || true
+COPY visualex-merlt/backend/tsup.config.ts ./visualex-merlt/backend/ 2>/dev/null || true
+COPY visualex-merlt/backend/src ./visualex-merlt/backend/src 2>/dev/null || true
 
-WORKDIR /app/visualex-merlt/backend
-RUN npm install && npm run build
+RUN if [ -f "./visualex-merlt/backend/package.json" ]; then \
+      cd visualex-merlt/backend && npm install && npm run build; \
+    else \
+      echo "MERL-T backend not found, skipping..."; \
+    fi
 
 WORKDIR /app/visualex-platform/backend
 
+# Copy package files and install production dependencies
 COPY visualex-platform/backend/package*.json ./
 RUN npm install --only=production
 
@@ -83,7 +97,7 @@ EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget -q --spider http://localhost:3001/health || exit 1
+    CMD wget -q --spider http://localhost:3001/api/health || exit 1
 
 # Run migrations and start
 CMD ["sh", "-c", "npx prisma migrate deploy --schema ./prisma/schema.prisma && node dist/index.js"]

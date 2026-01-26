@@ -7,6 +7,7 @@ import { createMerltRouter } from '@visualex/merlt-backend';
 import { config } from './config';
 import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth';
+import invitationRoutes from './routes/invitations';
 import adminRoutes from './routes/admin';
 import folderRoutes from './routes/folders';
 import bookmarkRoutes from './routes/bookmarks';
@@ -64,6 +65,7 @@ if (config.merlt.enabled) {
   }));
 }
 app.use('/api', authRoutes);
+app.use('/api', invitationRoutes);
 app.use('/api', adminRoutes);
 app.use('/api', folderRoutes);
 app.use('/api', bookmarkRoutes);

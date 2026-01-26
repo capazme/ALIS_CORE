@@ -54,5 +54,47 @@
     "change_type": "new_module",
     "context": "New file created: src/features/admin/featureFlags.ts. Consider documenting its purpose in README.md or appropriate docs.",
     "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-25 23:47:07",
+    "file": "src/controllers/invitationController.ts",
+    "change_type": "api_change",
+    "context": "API/route file modified: src/controllers/invitationController.ts. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-25 23:47:14",
+    "file": "src/routes/invitations.ts",
+    "change_type": "api_change",
+    "context": "API/route file modified: src/routes/invitations.ts. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-25 23:47:44",
+    "file": "src/controllers/authController.ts",
+    "change_type": "api_change",
+    "context": "API/route file modified: src/controllers/authController.ts. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-25 23:48:04",
+    "file": "src/controllers/authController.ts",
+    "change_type": "api_change",
+    "context": "API/route file modified: src/controllers/authController.ts. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-25 23:48:29",
+    "file": "src/services/emailService.ts",
+    "change_type": "new_module",
+    "context": "New file created: src/services/emailService.ts. Consider documenting its purpose in README.md or appropriate docs.",
+    "project_docs": "README.md readme.md"
+  },
+  {
+    "timestamp": "2026-01-25 23:48:40",
+    "file": "src/routes/auth.ts",
+    "change_type": "api_change",
+    "context": "API/route file modified: src/routes/auth.ts. Update API documentation if endpoints changed.",
+    "project_docs": "README.md readme.md"
   }
 ]

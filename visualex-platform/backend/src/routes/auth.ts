@@ -20,6 +20,10 @@ router.post('/auth/register', authLimiter, authController.register);
 router.post('/auth/login', authLimiter, authController.login);
 router.post('/auth/refresh', authController.refresh);
 
+// Email verification routes
+router.get('/auth/verify-email/:token', authController.verifyEmail);
+router.post('/auth/resend-verification', authLimiter, authController.resendVerificationEmail);
+
 // Protected routes
 router.get('/auth/me', authenticate, authController.getCurrentUser);
 router.put('/auth/change-password', authenticate, authController.changePassword);

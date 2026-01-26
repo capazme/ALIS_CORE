@@ -7,9 +7,12 @@
 // ============================================================================
 
 export interface UserRegisterRequest {
+  invitation_token: string;
   email: string;
   username: string;
   password: string;
+  name?: string;
+  role?: 'member' | 'researcher';
 }
 
 export interface UserLoginRequest {
@@ -25,7 +28,46 @@ export interface TokenResponse {
 
 export interface RegisterResponse {
   message: string;
-  pending_approval: boolean;
+  verification_pending: boolean;
+}
+
+// ============================================================================
+// Invitation Types
+// ============================================================================
+
+export interface InvitationValidateResponse {
+  valid: boolean;
+  email?: string;
+  expires_at: string;
+  inviter?: {
+    username: string;
+  };
+}
+
+export interface InvitationCreateRequest {
+  email?: string;
+}
+
+export interface InvitationResponse {
+  id: string;
+  token: string;
+  email?: string;
+  expires_at: string;
+  used_at?: string;
+  created_at: string;
+}
+
+export interface VerifyEmailResponse {
+  message: string;
+  verified: boolean;
+}
+
+export interface ResendVerificationRequest {
+  email: string;
+}
+
+export interface ResendVerificationResponse {
+  message: string;
 }
 
 export interface UserResponse {

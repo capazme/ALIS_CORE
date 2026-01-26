@@ -1,21 +1,29 @@
+# ============================================================================
 # VisuaLex Platform - Frontend
 # React + Vite + TypeScript + Tailwind
+# ============================================================================
 
 # Build stage
 FROM node:20-alpine AS builder
 
+# Build arguments for Vite (baked into the bundle at build time)
+ARG VITE_API_URL=/api
+ARG VITE_PYTHON_API_URL=/api
 ARG VITE_MERLT_ENABLED=false
 
 WORKDIR /app
 
-# Copy MERL-T frontend package and build it
-COPY visualex-merlt/frontend/package*.json ./visualex-merlt/frontend/
-COPY visualex-merlt/frontend/tsconfig*.json ./visualex-merlt/frontend/
-COPY visualex-merlt/frontend/tsup.config.ts ./visualex-merlt/frontend/
-COPY visualex-merlt/frontend/src ./visualex-merlt/frontend/src
+# Copy and build MERL-T frontend package (if exists and enabled)
+COPY visualex-merlt/frontend/package*.json ./visualex-merlt/frontend/ 2>/dev/null || true
+COPY visualex-merlt/frontend/tsconfig*.json ./visualex-merlt/frontend/ 2>/dev/null || true
+COPY visualex-merlt/frontend/tsup.config.ts ./visualex-merlt/frontend/ 2>/dev/null || true
+COPY visualex-merlt/frontend/src ./visualex-merlt/frontend/src 2>/dev/null || true
 
-WORKDIR /app/visualex-merlt/frontend
-RUN if [ "$VITE_MERLT_ENABLED" = "true" ]; then npm install && npm run build:lib; else echo "Skipping MERL-T frontend build"; fi
+RUN if [ "$VITE_MERLT_ENABLED" = "true" ] && [ -f "./visualex-merlt/frontend/package.json" ]; then \
+      cd visualex-merlt/frontend && npm install && npm run build:lib; \
+    else \
+      echo "MERL-T frontend skipped (disabled or not found)"; \
+    fi
 
 WORKDIR /app/visualex-platform/frontend
 
@@ -26,12 +34,15 @@ COPY visualex-platform/frontend/package*.json ./
 RUN npm install
 
 # Copy source code
-COPY visualex-platform/frontend . .
+COPY visualex-platform/frontend/index.html ./
+COPY visualex-platform/frontend/vite.config.ts ./
+COPY visualex-platform/frontend/tailwind.config.js ./
+COPY visualex-platform/frontend/postcss.config.js ./
+COPY visualex-platform/frontend/tsconfig*.json ./
+COPY visualex-platform/frontend/src ./src/
+COPY visualex-platform/frontend/public ./public/ 2>/dev/null || true
 
-# Build arguments for API URLs
-ARG VITE_API_URL=http://localhost:3001
-ARG VITE_PYTHON_API_URL=http://localhost:5000
-
+# Set Vite environment variables
 ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_PYTHON_API_URL=$VITE_PYTHON_API_URL
 ENV VITE_MERLT_ENABLED=$VITE_MERLT_ENABLED
@@ -39,13 +50,15 @@ ENV VITE_MERLT_ENABLED=$VITE_MERLT_ENABLED
 # Build the application (skip type checking in Docker)
 RUN npm run build:docker
 
-# Production stage
+# ============================================================================
+# Production stage - Nginx
+# ============================================================================
 FROM nginx:alpine
 
 # Add curl for healthcheck
 RUN apk add --no-cache curl
 
-# Copy custom nginx config
+# Custom nginx config with API proxying
 COPY <<EOF /etc/nginx/conf.d/default.conf
 server {
     listen 80;

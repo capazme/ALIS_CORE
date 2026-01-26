@@ -9,6 +9,9 @@ import type {
   UserResponse,
   ChangePasswordRequest,
   RegisterResponse,
+  VerifyEmailResponse,
+  ResendVerificationRequest,
+  ResendVerificationResponse,
 } from '../types/api';
 
 /**
@@ -75,4 +78,18 @@ export const getAccessToken = (): string | null => {
  */
 export const getRefreshToken = (): string | null => {
   return localStorage.getItem('refresh_token');
+};
+
+/**
+ * Verify email with token
+ */
+export const verifyEmail = async (token: string): Promise<VerifyEmailResponse> => {
+  return get<VerifyEmailResponse>(`/auth/verify-email/${token}`);
+};
+
+/**
+ * Resend verification email
+ */
+export const resendVerificationEmail = async (data: ResendVerificationRequest): Promise<ResendVerificationResponse> => {
+  return post<ResendVerificationResponse>('/auth/resend-verification', data);
 };

@@ -1,25 +1,35 @@
+# ============================================================================
+# VisuaLex Platform - Docker Compose Configuration
+# ============================================================================
+# Usage:
+#   Development:  docker compose up
+#   Production:   docker compose -f docker-compose.yml -f docker-compose.prod.yml up
+#   With MERL-T:  MERLT_ENABLED=true docker compose up
+# ============================================================================
+
 services:
+  # --------------------------------------------------------------------------
+  # Frontend - React/Vite served via Nginx
+  # --------------------------------------------------------------------------
   frontend:
     build:
       context: ..
       dockerfile: visualex-platform/frontend/Dockerfile
       args:
+        # Vite build-time variables (baked into the bundle)
         VITE_API_URL: "/api"
-        VITE_PYTHON_API_URL: "http://localhost:5000"
+        VITE_PYTHON_API_URL: "/api"
         VITE_MERLT_ENABLED: "${VITE_MERLT_ENABLED:-false}"
     ports:
       - "5173:80"
-    environment:
-      - VITE_API_URL=/api
-      - VITE_PYTHON_API_URL=http://localhost:5000
-      - VITE_MERLT_ENABLED=${VITE_MERLT_ENABLED:-false}
     depends_on:
       - backend
       - python-api
-    volumes:
-      - ./frontend:/app/visualex-platform/frontend
-      - /app/visualex-platform/frontend/node_modules
+    restart: unless-stopped
 
+  # --------------------------------------------------------------------------
+  # Backend - Express/TypeScript/Prisma
+  # --------------------------------------------------------------------------
   backend:
     build:
       context: ..
@@ -28,18 +38,19 @@ services:
       - "3001:3001"
     env_file:
       - .env
+      - .env.docker
     environment:
-      - DATABASE_URL=postgresql://visualex:visualex@postgres:5432/visualex?schema=public
-      - JWT_SECRET=dev-secret
-      - MERLT_ENABLED=${MERLT_ENABLED:-false}
+      # Explicit overrides for Docker networking
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-visualex}:${POSTGRES_PASSWORD:-visualex}@postgres:5432/${POSTGRES_DB:-visualex}
       - MERLT_API_URL=${MERLT_API_URL:-http://merlt-api:8000}
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - ./backend:/app/visualex-platform/backend
-      - /app/visualex-platform/backend/node_modules
+    restart: unless-stopped
 
+  # --------------------------------------------------------------------------
+  # Python API - VisuaLex Scrapers (Normattiva, Brocardi, EUR-Lex)
+  # --------------------------------------------------------------------------
   python-api:
     build:
       context: ../visualex-api
@@ -48,9 +59,13 @@ services:
       - "5000:5000"
     environment:
       - PYTHONUNBUFFERED=1
+    restart: unless-stopped
 
+  # --------------------------------------------------------------------------
+  # PostgreSQL Database
+  # --------------------------------------------------------------------------
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
     ports:
       - "5432:5432"
     environment:
@@ -60,10 +75,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U visualex -d visualex"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-visualex} -d ${POSTGRES_DB:-visualex}"]
       interval: 5s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
 
+# ============================================================================
+# Volumes
+# ============================================================================
 volumes:
   postgres_data:
+    name: visualex_postgres_data

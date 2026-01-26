@@ -17,7 +17,9 @@ model User {
   email       String    @unique
   username    String    @unique
   password    String
-  isActive    Boolean   @default(true) @map("is_active")
+  name        String?
+  role        String    @default("member") // member, researcher, admin
+  isActive    Boolean   @default(false) @map("is_active") // Changed default to false for invitation flow
   isVerified  Boolean   @default(false) @map("is_verified")
   isAdmin     Boolean   @default(false) @map("is_admin")
   isMerltEnabled Boolean @default(false) @map("is_merlt_enabled")
@@ -41,6 +43,10 @@ model User {
   sharedEnvironmentLikes   SharedEnvironmentLike[]
   sharedEnvironmentReports SharedEnvironmentReport[]
   suggestionsMade          EnvironmentSuggestion[]   @relation("SuggestionsMade")
+
+  // Invitations & Email Verification
+  invitationsSent     Invitation[]        @relation("InvitationsSent")
+  emailVerification   EmailVerification?
 
   @@map("users")
 }
@@ -450,4 +456,44 @@ model UserFeature {
   @@index([userId])
   @@index([featureId])
   @@map("user_features")
+}
+
+// ============================================
+// INVITATIONS (Member Onboarding)
+// ============================================
+
+model Invitation {
+  id        String    @id @default(uuid())
+  email     String?   // Target email (optional - can be open invitation)
+  token     String    @unique
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  inviterId String    @map("inviter_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  // Relationships
+  inviter   User      @relation("InvitationsSent", fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([inviterId])
+  @@index([expiresAt])
+  @@map("invitations")
+}
+
+// ============================================
+// EMAIL VERIFICATION
+// ============================================
+
+model EmailVerification {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relationships
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@map("email_verifications")
 }
