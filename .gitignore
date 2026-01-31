@@ -16,3 +16,21 @@ download/
 .idea/
 .vscode/
 *.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/Tool folders
+.claude/
+.cursor/
+.gemini/
+.trae/
+
+# Docker local config
+.docker/
+
+# Binary documents (not versioned)
+*.docx
+*.xlsx
+*.pptx
