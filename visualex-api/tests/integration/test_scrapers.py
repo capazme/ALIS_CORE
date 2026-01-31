@@ -13,7 +13,7 @@ class TestNormattivaScraper:
     @pytest.fixture
     def mock_http_client(self):
         """Mock HTTP client for scraper tests."""
-        with patch("visualex.utils.http_client.get_http_client") as mock:
+        with patch("visualex.utils.sys_op.http_client") as mock:
             client = AsyncMock()
             mock.return_value = client
             yield client
@@ -34,7 +34,7 @@ class TestNormattivaScraper:
             </div>
         </html>
         """
-        mock_http_client.get.return_value = mock_response
+        mock_http_client.request.return_value = mock_response
 
         scraper = NormattivaScraper()
         norma = Norma(tipo_atto="codice civile")
@@ -56,7 +56,7 @@ class TestNormattivaScraper:
 
         mock_response = MagicMock()
         mock_response.status_code = 404
-        mock_http_client.get.return_value = mock_response
+        mock_http_client.request.return_value = mock_response
 
         scraper = NormattivaScraper()
         norma = Norma(tipo_atto="codice civile")
@@ -76,7 +76,7 @@ class TestBrocardiScraper:
     @pytest.fixture
     def mock_http_client(self):
         """Mock HTTP client for scraper tests."""
-        with patch("visualex.utils.http_client.get_http_client") as mock:
+        with patch("visualex.utils.sys_op.http_client") as mock:
             client = AsyncMock()
             mock.return_value = client
             yield client
@@ -97,7 +97,7 @@ class TestBrocardiScraper:
             </div>
         </html>
         """
-        mock_http_client.get.return_value = mock_response
+        mock_http_client.request.return_value = mock_response
 
         scraper = BrocardiScraper()
         norma = Norma(tipo_atto="codice civile")
@@ -119,7 +119,7 @@ class TestBrocardiScraper:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.text = "<html><body>Article found</body></html>"
-        mock_http_client.get.return_value = mock_response
+        mock_http_client.request.return_value = mock_response
 
         scraper = BrocardiScraper()
         norma = Norma(tipo_atto="codice civile")
