@@ -17,7 +17,7 @@ export const config = {
 
   jwt: {
     secret: process.env.JWT_SECRET!, // Validated above
-    accessExpiry: process.env.JWT_ACCESS_EXPIRY || '30m',
+    accessExpiry: process.env.JWT_ACCESS_EXPIRY || '1h', // AC1: 1 hour expiry
     refreshExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
   },
 
@@ -36,4 +36,9 @@ export const config = {
     enabled: process.env.MERLT_ENABLED === 'true',
   },
 
+  // Consent IP hashing (GDPR compliance)
+  consentIpSalt: process.env.CONSENT_IP_SALT || 'consent-ip-salt-change-in-production',
+
+  // Legacy alias for backwards compatibility
+  jwtSecret: process.env.JWT_SECRET!,
 };

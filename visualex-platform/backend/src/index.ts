@@ -3,10 +3,10 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import 'express-async-errors';
-import { createMerltRouter } from '@visualex/merlt-backend';
 import { config } from './config';
 import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth';
+import profileRoutes from './routes/profile';
 import adminRoutes from './routes/admin';
 import folderRoutes from './routes/folders';
 import bookmarkRoutes from './routes/bookmarks';
@@ -16,6 +16,9 @@ import dossierRoutes from './routes/dossiers';
 import feedbackRoutes from './routes/feedback';
 import historyRoutes from './routes/history';
 import sharedEnvironmentRoutes from './routes/sharedEnvironments';
+import consentRoutes from './routes/consent';
+import authorityRoutes from './routes/authority';
+import privacyRoutes from './routes/privacy';
 
 const app = express();
 
@@ -28,13 +31,15 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false, // Allow embedding resources
 }));
 
-// Global rate limiting: 100 requests per minute per IP
+// Global rate limiting: 100 requests per minute per IP (disabled in test mode)
+const isTestEnv = process.env.NODE_ENV === 'test' || process.env.E2E_TEST === 'true';
 const globalLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 100,
+  max: isTestEnv ? 0 : 100, // 0 = disabled in test mode
   message: { detail: 'Too many requests, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => isTestEnv, // Skip rate limiting entirely in test mode
 });
 app.use(globalLimiter);
 
@@ -57,13 +62,22 @@ app.get('/api/health', (_req, res) => {
 });
 
 // Routes
+// MERL-T routes are loaded dynamically only if enabled and package exists
 if (config.merlt.enabled) {
-  app.use('/api/merlt', createMerltRouter({
-    apiUrl: config.merlt.apiUrl,
-    enabled: config.merlt.enabled,
-  }));
+  import('@visualex/merlt-backend')
+    .then(({ createMerltRouter }) => {
+      app.use('/api/merlt', createMerltRouter({
+        apiUrl: config.merlt.apiUrl,
+        enabled: config.merlt.enabled,
+      }));
+      console.log('[MERL-T] Routes enabled');
+    })
+    .catch(() => {
+      console.log('[MERL-T] Package not available, skipping routes');
+    });
 }
 app.use('/api', authRoutes);
+app.use('/api', profileRoutes);
 app.use('/api', adminRoutes);
 app.use('/api', folderRoutes);
 app.use('/api', bookmarkRoutes);
@@ -73,6 +87,9 @@ app.use('/api', dossierRoutes);
 app.use('/api', feedbackRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api', sharedEnvironmentRoutes);
+app.use('/api', consentRoutes);
+app.use('/api', authorityRoutes);
+app.use('/api', privacyRoutes);
 
 // 404 handler
 app.use((_req, res) => {
@@ -82,9 +99,10 @@ app.use((_req, res) => {
 // Error handler (must be last)
 app.use(errorHandler);
 
-// Start server
-app.listen(config.port, () => {
-  console.log(`
+// Start server if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(config.port, () => {
+    console.log(`
 ╔═══════════════════════════════════════════════════════════╗
 ║                                                           ║
 ║  VisuaLex Platform Backend                               ║
@@ -105,7 +123,8 @@ app.listen(config.port, () => {
 ║  - History: http://localhost:${config.port}/api/history/*        ║
 ║  - Bulletin: http://localhost:${config.port}/api/shared-environments/*║
 ╚═══════════════════════════════════════════════════════════╝
-  `);
-});
+    `);
+  });
+}
 
 export default app;

@@ -3,7 +3,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import * as authService from '../services/authService';
-import type { UserResponse } from '../types/api';
+import type { UserResponse, ProfileType } from '../types/api';
 import { appStore } from '../store/useAppStore';
 
 interface AuthState {
@@ -45,11 +45,12 @@ export function useAuth() {
         if (!store.isDataLoaded && !store.isLoadingData) {
           store.fetchUserData();
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Failed to load user';
         setState({
           user: null,
           loading: false,
-          error: error.message || 'Failed to load user',
+          error: message,
           isAuthenticated: false,
         });
       }
@@ -79,11 +80,12 @@ export function useAuth() {
       });
 
       return currentUser;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Registration failed';
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: error.message || 'Registration failed',
+        error: message,
       }));
       throw error;
     }
@@ -110,11 +112,12 @@ export function useAuth() {
       appStore.getState().fetchUserData();
 
       return user;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Login failed';
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: error.message || 'Login failed',
+        error: message,
       }));
       throw error;
     }
@@ -155,11 +158,12 @@ export function useAuth() {
         }));
 
         return updatedUser;
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Password change failed';
         setState((prev) => ({
           ...prev,
           loading: false,
-          error: error.message || 'Password change failed',
+          error: message,
         }));
         throw error;
       }
@@ -178,6 +182,8 @@ export function useAuth() {
     ...state,
     isAdmin: state.user?.is_admin ?? false,
     isMerltEnabled: state.user?.is_merlt_enabled ?? false,
+    profileType: (state.user?.profile_type ?? 'assisted_research') as ProfileType,
+    authorityScore: state.user?.authority_score ?? 0,
     register,
     login,
     logout,

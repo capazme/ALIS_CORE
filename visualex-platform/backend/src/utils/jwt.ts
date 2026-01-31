@@ -1,10 +1,12 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { config } from '../config';
+import crypto from 'crypto';
 
 export interface TokenPayload {
   userId: string;
   email: string;
   type: 'access' | 'refresh';
+  jti?: string;
 }
 
 export const generateAccessToken = (userId: string, email: string): string => {
@@ -12,6 +14,7 @@ export const generateAccessToken = (userId: string, email: string): string => {
     userId,
     email,
     type: 'access',
+    jti: crypto.randomUUID(),
   };
 
   const options: SignOptions = {
@@ -26,6 +29,7 @@ export const generateRefreshToken = (userId: string, email: string): string => {
     userId,
     email,
     type: 'refresh',
+    jti: crypto.randomUUID(),
   };
 
   const options: SignOptions = {

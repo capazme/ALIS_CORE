@@ -1,7 +1,18 @@
-_bmad
-.cursor
-.DS_Store
-.claude
-.gemini
-.trae
-.docker
+# Existing ignores
+node_modules/
+dist/
+.env
+.env.local
+*.log
+
+# Test artifacts (generated)
+playwright-report/
+test-results/
+
+# Temp files
+download/
+
+# IDE
+.idea/
+.vscode/
+*.swp

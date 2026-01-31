@@ -12,19 +12,40 @@ datasource db {
 // USER MANAGEMENT
 // ============================================
 
+// Profile types for ALIS user experience levels
+enum ProfileType {
+  quick_consultation    // ⚡ Consultazione Rapida
+  assisted_research     // 📖 Ricerca Assistita
+  expert_analysis       // 🔍 Analisi Esperta
+  active_contributor    // 🎓 Contributore Attivo (requires authority ≥ 0.5)
+}
+
+// Consent levels for RLCF data participation (GDPR Art. 6)
+enum ConsentLevel {
+  basic      // No data collected beyond session
+  learning   // Anonymized queries + feedback for RLCF training
+  research   // Aggregated data available for academic analysis
+}
+
 model User {
-  id          String    @id @default(uuid())
-  email       String    @unique
-  username    String    @unique
-  password    String
-  isActive    Boolean   @default(true) @map("is_active")
-  isVerified  Boolean   @default(false) @map("is_verified")
-  isAdmin     Boolean   @default(false) @map("is_admin")
-  isMerltEnabled Boolean @default(false) @map("is_merlt_enabled")
-  loginCount  Int       @default(0) @map("login_count")
-  lastLoginAt DateTime? @map("last_login_at")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id             String       @id @default(uuid())
+  email          String       @unique
+  username       String       @unique
+  password       String
+  isActive       Boolean      @default(true) @map("is_active")
+  isVerified     Boolean      @default(false) @map("is_verified")
+  isAdmin        Boolean      @default(false) @map("is_admin")
+  isMerltEnabled Boolean      @default(false) @map("is_merlt_enabled")
+  profileType    ProfileType  @default(assisted_research) @map("profile_type")
+  authorityScore Float        @default(0.0) @map("authority_score")
+  loginCount     Int          @default(0) @map("login_count")
+  lastLoginAt    DateTime?    @map("last_login_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  // GDPR deletion (Art. 17)
+  deletionRequestedAt DateTime? @map("deletion_requested_at")
+  deletionReason      String?   @map("deletion_reason")
 
   // Relationships
   folders       Folder[]
@@ -35,6 +56,7 @@ model User {
   feedbacks     Feedback[]
   searchHistory SearchHistory[]
   features      UserFeature[]
+  preferences   UserPreferences?
 
   // Shared Environments (Bulletin Board)
   sharedEnvironments       SharedEnvironment[]
@@ -42,7 +64,113 @@ model User {
   sharedEnvironmentReports SharedEnvironmentReport[]
   suggestionsMade          EnvironmentSuggestion[]   @relation("SuggestionsMade")
 
+  // Tokens
+  refreshTokens RefreshToken[]
+
+  // Consent
+  consent UserConsent?
+
+  // Authority
+  authority UserAuthority?
+
   @@map("users")
+}
+
+// User preferences for UI customization
+model UserPreferences {
+  id                   String   @id @default(uuid())
+  userId               String   @unique @map("user_id")
+  theme                String   @default("system") // light, dark, system
+  language             String   @default("it") // it, en
+  notificationsEnabled Boolean  @default(true) @map("notifications_enabled")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+// ============================================
+// CONSENT MANAGEMENT (GDPR Art. 6, Art. 7)
+// ============================================
+
+// User consent record for RLCF participation
+model UserConsent {
+  id           String       @id @default(uuid())
+  userId       String       @unique @map("user_id")
+  consentLevel ConsentLevel @default(basic) @map("consent_level")
+  grantedAt    DateTime     @default(now()) @map("granted_at")
+  ipHash       String?      @map("ip_hash") // SHA-256 hashed IP for privacy
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_consents")
+}
+
+// Append-only audit log for consent changes (7-year retention per NFR-R5)
+// No UPDATE/DELETE permissions - immutable record
+model ConsentAuditLog {
+  id            String        @id @default(uuid())
+  userId        String        @map("user_id") // No FK - survives user deletion
+  previousLevel ConsentLevel? @map("previous_level")
+  newLevel      ConsentLevel  @map("new_level")
+  ipHash        String?       @map("ip_hash")
+  userAgent     String?       @map("user_agent")
+  changedAt     DateTime      @default(now()) @map("changed_at")
+
+  // Note: No foreign key to User - audit log must survive user deletion
+  // This table should have restricted permissions (INSERT only)
+
+  @@index([userId])
+  @@index([changedAt])
+  @@map("consent_audit_log")
+}
+
+// ============================================
+// AUTHORITY SCORE (RLCF Influence)
+// ============================================
+
+// User authority score breakdown for RLCF participation
+// Formula: A_u(t) = 0.3·B_u + 0.5·T_u(t) + 0.2·P_u(t)
+model UserAuthority {
+  id                String   @id @default(uuid())
+  userId            String   @unique @map("user_id")
+  baselineScore     Float    @default(0.1) @map("baseline_score")      // B: From profile/credentials (0.1-0.5)
+  trackRecordScore  Float    @default(0.0) @map("track_record_score")  // T: Historical feedback accuracy
+  recentPerformance Float    @default(0.0) @map("recent_performance")  // P: Last N feedback quality
+  computedScore     Float    @default(0.03) @map("computed_score")     // Weighted sum
+  feedbackCount     Int      @default(0) @map("feedback_count")        // Total feedbacks given
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_authority")
+}
+
+// ============================================
+// AUTHENTICATION
+// ============================================
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
 }
 
 // ============================================

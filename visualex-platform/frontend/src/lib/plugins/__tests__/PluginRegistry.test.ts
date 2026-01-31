@@ -33,6 +33,7 @@ const createMockPlugin = (overrides: Partial<Plugin> = {}): Plugin => {
 describe('PluginRegistry', () => {
   beforeEach(() => {
     // Clear registry state
+    PluginRegistry.reset();
     EventBus.clear();
   });
 
@@ -229,6 +230,7 @@ describe('EventBus', () => {
 
 describe('Plugin-EventBus Integration', () => {
   beforeEach(() => {
+    PluginRegistry.reset();
     EventBus.clear();
   });
 
@@ -267,6 +269,7 @@ describe('Plugin-EventBus Integration', () => {
 
 describe('Slot Components', () => {
   beforeEach(() => {
+    PluginRegistry.reset();
     EventBus.clear();
   });
 
