@@ -53,46 +53,46 @@ development_status:
   # ============================================
   # Epic 2a: Scraping & URN Pipeline
   # ============================================
-  epic-2a: in-progress
-  2a-1-normattiva-scraper-integration: review
-  2a-2-brocardi-scraper-integration: in-progress
-  2a-3-eurlex-scraper-integration: backlog
-  2a-4-urn-canonicalization-pipeline: backlog
+  epic-2a: done
+  2a-1-normattiva-scraper-integration: done
+  2a-2-brocardi-scraper-integration: done
+  2a-3-eurlex-scraper-integration: done
+  2a-4-urn-canonicalization-pipeline: done
   epic-2a-retrospective: optional
 
   # ============================================
   # Epic 2b: Graph Building
   # ============================================
-  epic-2b: backlog
-  2b-1-graph-schema-setup: backlog
-  2b-2-norm-node-ingestion: backlog
-  2b-3-relation-extraction-creation: backlog
-  2b-4-temporal-versioning: backlog
-  2b-5-manual-ingest-trigger: backlog
+  epic-2b: done
+  2b-1-graph-schema-setup: done
+  2b-2-norm-node-ingestion: done
+  2b-3-relation-extraction-creation: done
+  2b-4-temporal-versioning: done
+  2b-5-manual-ingest-trigger: done
   epic-2b-retrospective: optional
 
   # ============================================
   # Epic 2c: Vector & Bridge Table
   # ============================================
-  epic-2c: backlog
-  2c-1-text-chunking-pipeline: backlog
-  2c-2-embedding-generation: backlog
-  2c-3-qdrant-collection-setup: backlog
-  2c-4-bridge-table-population: backlog
+  epic-2c: done
+  2c-1-text-chunking-pipeline: done
+  2c-2-embedding-generation: done
+  2c-3-qdrant-collection-setup: done
+  2c-4-bridge-table-population: done
   epic-2c-retrospective: optional
 
   # ============================================
   # Epic 3: Norm Browsing & Search
   # ============================================
-  epic-3: backlog
+  epic-3: in-progress
   3-1-norm-hierarchical-browser: backlog
   3-2-article-viewer: backlog
-  3-3-search-by-keyword-urn: backlog
+  3-3-search-by-keyword-urn: done
   3-4-citation-highlighting-linking: backlog
-  3-5-cross-references-panel: backlog
-  3-6-historical-versions-timeline: backlog
-  3-7-modification-detection-alert: backlog
-  3-8-kg-coverage-dashboard: backlog
+  3-5-cross-references-panel: done
+  3-6-historical-versions-timeline: done
+  3-7-modification-detection-alert: done
+  3-8-kg-coverage-dashboard: done
   epic-3-retrospective: optional
 
   # ============================================
