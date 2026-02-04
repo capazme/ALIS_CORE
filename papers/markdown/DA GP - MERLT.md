@@ -1,6 +1,6 @@
 # MERL-T: a Multi-Expert architecture for trustworthy Artificial Legal Intelligence
 
-Daniele Allega1*, Guglielmo Puzio2
+Daniele Allega1*, Guglielmo Puzio2, Gabriele Rizzo3
 
 
 
@@ -12,11 +12,19 @@ e-mail: dallega@luiss.it, daniele.allega@studenti.unimercatorum.it
 
 
 
-2 LUISS “Guido Carli” University, Viale Romania, 32, 00197 Roma RM, Italy
+2 LUISS "Guido Carli" University, Viale Romania, 32, 00197 Roma RM, Italy
 
 https://orcid.org/0009-0001-4366-2632
 
 e-mail: guglielmo.puzio@studenti.luiss.it
+
+
+
+3 LUISS "Guido Carli" University, Viale Romania, 32, 00197 Roma RM, Italy
+
+https://orcid.org/0009-0002-3388-9961
+
+e-mail: gabriele.rizzo@studenti.luiss.it
 
 *  Corresponding author
 

@@ -1,6 +1,6 @@
 # Log Ragionamenti - Evidenze Empiriche MERL-T/RLCF
 
-**Data**: 2025-01-25
+**Data**: 2026-01-25
 **Scadenza**: Oggi
 **Partecipanti**: Team ALIS, Claude (AI Assistant)
 

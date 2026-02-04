@@ -196,8 +196,8 @@ async def update_authority_score(
     b_u = user.baseline_credential_score
     t_u = user.track_record_score
     new_authority_score = (
-        weights.get("baseline_credentials", 0.3) * b_u
-        + weights.get("track_record", 0.5) * t_u
+        weights.get("baseline_credentials", 0.4) * b_u
+        + weights.get("track_record", 0.4) * t_u
         + weights.get("recent_performance", 0.2) * recent_performance
     )
     user.authority_score = new_authority_score

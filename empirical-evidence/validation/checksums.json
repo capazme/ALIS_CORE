@@ -41,6 +41,7 @@
     "2026-01-25T22:20": "Bootstrap statistical analysis: 10,000 resamples, Cohen's d effect sizes, 95% CIs. A/B shows LARGE effect (d=0.900, power=93.6%)",
     "2026-01-25T22:52": "Added comprehensive documentation (TABLES_FOR_PAPERS.md, INTERPRETATIONS.md) and 10 publication-ready visualizations",
     "2026-01-25T23:15": "Enhanced INTERPRETATIONS.md: fixed bias dimensions (was Social→now Demographic), added complete glossary (16 acronyms, 10 statistical terms, 15 Italian legal terms, 7 KG relations)",
-    "2026-01-25T23:45": "Aligned RLCF authority weights to production config: α=0.4, β=0.4, γ=0.2 (was 0.3, 0.5, 0.2). Updated RLCF.md, formula_evidence.json, INTERPRETATIONS.md. Disagreement threshold confirmed as 0.3."
+    "2026-01-25T23:45": "Aligned RLCF authority weights to production config: α=0.4, β=0.4, γ=0.2 (was 0.3, 0.5, 0.2). Updated RLCF.md, formula_evidence.json, INTERPRETATIONS.md. Disagreement threshold confirmed as 0.3.",
+    "2026-01-26T00:30": "Final check: Added Gabriele Rizzo as author to all 4 papers. Fixed authority.py fallback defaults (both main and Legacy). Fixed extract_formulas.py, profile_models.py, implementation_proof.md. Fixed CHAT_LOG.md date."
   }
 }

@@ -95,14 +95,14 @@ def extract_authority_formula() -> FormulaEvidence:
         code_snippet=code,
         variables_mapping={
             "A_u(t)": "new_authority_score",
-            "α (alpha)": "weights.get('baseline_credentials', 0.3)",
-            "β (beta)": "weights.get('track_record', 0.5)",
+            "α (alpha)": "weights.get('baseline_credentials', 0.4)",
+            "β (beta)": "weights.get('track_record', 0.4)",
             "γ (gamma)": "weights.get('recent_performance', 0.2)",
             "B_u": "user.baseline_credential_score",
             "T_u(t-1)": "user.track_record_score",
             "P_u(t)": "recent_performance"
         },
-        verification_notes="Implementazione completa con pesi configurabili (default: α=0.3, β=0.5, γ=0.2). Include exponential smoothing per track record con λ=0.95."
+        verification_notes="Implementazione completa con pesi configurabili (production: α=0.4, β=0.4, γ=0.2). Include exponential smoothing per track record con λ=0.95."
     )
 
 def extract_entropy_formula() -> FormulaEvidence:
