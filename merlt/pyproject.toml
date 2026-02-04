@@ -111,3 +111,7 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_functions = "test_*"
+addopts = "-m 'not integration'"
+markers = [
+    "integration: marks tests as integration tests requiring external services (Normattiva, Brocardi, FalkorDB, Qdrant, PostgreSQL)",
+]

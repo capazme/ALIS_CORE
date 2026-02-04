@@ -153,7 +153,8 @@ class ModificationAlertService:
                 {"urn": urn, "cutoff_date": cutoff_date.isoformat()}
             )
 
-            if not result:
+            # Handle both None and empty list
+            if not result or len(result) == 0:
                 return None
 
             record = result[0]
@@ -214,7 +215,8 @@ class ModificationAlertService:
                 {"urn": urn, "as_of_date": as_of_date.isoformat()}
             )
 
-            if not result:
+            # Handle both None and empty list
+            if not result or len(result) == 0:
                 return None
 
             record = result[0]
@@ -230,7 +232,13 @@ class ModificationAlertService:
                     {"urn": urn, "as_of_date": as_of_date.isoformat()}
                 )
 
-                if not norm_result:
+                # Only return alert if there's actually a newer version
+                if not norm_result or len(norm_result) == 0:
+                    return None
+
+                # Verify the result has a date that's actually newer
+                latest_date = norm_result[0].get("latest_date") if norm_result else None
+                if not latest_date:
                     return None
 
                 return ModificationAlert(
@@ -272,7 +280,8 @@ class ModificationAlertService:
         try:
             result = await self.client.query(query, {"urn": urn})
 
-            if not result:
+            # Handle both None and empty list
+            if not result or len(result) == 0:
                 return None
 
             record = result[0]

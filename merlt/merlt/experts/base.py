@@ -93,6 +93,7 @@ class LegalSource:
     citation: str
     excerpt: str = ""
     relevance: str = ""
+    relevance_score: float = 0.0  # Normalized 0-1 score for ranking/training
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -100,7 +101,8 @@ class LegalSource:
             "source_id": self.source_id,
             "citation": self.citation,
             "excerpt": self.excerpt,
-            "relevance": self.relevance
+            "relevance": self.relevance,
+            "relevance_score": self.relevance_score,
         }
 
 
@@ -181,13 +183,61 @@ class ConfidenceFactors:
     jurisprudence_alignment: float = 0.5
     contextual_ambiguity: float = 0.5
     source_availability: float = 0.5
+    definition_coverage: float = 0.5
 
     def to_dict(self) -> Dict[str, float]:
         return {
-            "norm_clarity": self.norm_clarity,
-            "jurisprudence_alignment": self.jurisprudence_alignment,
-            "contextual_ambiguity": self.contextual_ambiguity,
-            "source_availability": self.source_availability
+            "norm_clarity": round(self.norm_clarity, 3),
+            "jurisprudence_alignment": round(self.jurisprudence_alignment, 3),
+            "contextual_ambiguity": round(self.contextual_ambiguity, 3),
+            "source_availability": round(self.source_availability, 3),
+            "definition_coverage": round(self.definition_coverage, 3),
+        }
+
+    def compute_overall(self) -> float:
+        """
+        Compute overall confidence from factors.
+
+        Ambiguity reduces confidence, others increase it.
+        """
+        positive = (
+            self.norm_clarity + self.source_availability +
+            self.definition_coverage + self.jurisprudence_alignment
+        ) / 4
+        penalty = self.contextual_ambiguity * 0.3
+        return max(0.0, min(1.0, positive - penalty))
+
+
+@dataclass
+class FeedbackHook:
+    """
+    F3-F7 Feedback hook per integrazione RLCF.
+
+    Permette agli utenti di fornire feedback sugli output degli Expert.
+
+    Attributes:
+        feedback_type: Tipo di feedback (F3=Literal, F4=Systemic, F5=Principles, F6=Precedent, F7=Gating)
+        expert_type: L'expert a cui si riferisce il feedback
+        response_id: ID univoco collegato alla risposta
+        enabled: Se la raccolta feedback è abilitata
+        correction_options: Scelte di correzione per ogni dimensione
+        context_snapshot: Snapshot del contesto per training (sources, confidence, etc.)
+    """
+    feedback_type: str  # F3, F4, F5, F6, F7
+    expert_type: str
+    response_id: str
+    enabled: bool = True
+    correction_options: Dict[str, List[str]] = field(default_factory=dict)
+    context_snapshot: Dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "feedback_type": self.feedback_type,
+            "expert_type": self.expert_type,
+            "response_id": self.response_id,
+            "enabled": self.enabled,
+            "correction_options": self.correction_options,
+            "context_snapshot": self.context_snapshot,
         }
 
 
@@ -198,45 +248,60 @@ class ExpertResponse:
 
     Attributes:
         expert_type: Tipo di expert (literal, systemic, principles, precedent)
+        section_header: Header italiano per UI display
         interpretation: Interpretazione principale (in italiano)
         legal_basis: Fonti giuridiche citate
         reasoning_steps: Passi del ragionamento
         confidence: Score di confidenza [0-1]
         confidence_factors: Breakdown della confidenza
         limitations: Cosa l'expert non ha potuto considerare
+        suggestions: Suggerimenti per chiarimento (se bassa confidenza)
         trace_id: ID per tracing
         execution_time_ms: Tempo di esecuzione
         tokens_used: Token LLM usati
+        feedback_hook: F3-F6 feedback hook per RLCF
     """
     expert_type: str
-    interpretation: str
+    section_header: str = ""
+    interpretation: str = ""
     legal_basis: List[LegalSource] = field(default_factory=list)
     reasoning_steps: List[ReasoningStep] = field(default_factory=list)
     confidence: float = 0.5
     confidence_factors: ConfidenceFactors = field(default_factory=ConfidenceFactors)
     limitations: str = ""
+    suggestions: str = ""
     trace_id: str = ""
     execution_time_ms: float = 0.0
     tokens_used: int = 0
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    metadata: Dict[str, Any] = field(default_factory=dict)  # Additional metadata (e.g., react_metrics)
+    feedback_hook: Optional[FeedbackHook] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         """Serializza in dizionario."""
-        return {
+        result = {
             "expert_type": self.expert_type,
+            "section_header": self.section_header,
             "interpretation": self.interpretation,
             "legal_basis": [lb.to_dict() for lb in self.legal_basis],
             "reasoning_steps": [rs.to_dict() for rs in self.reasoning_steps],
-            "confidence": self.confidence,
+            "confidence": round(self.confidence, 3),
             "confidence_factors": self.confidence_factors.to_dict(),
             "limitations": self.limitations,
+            "suggestions": self.suggestions,
             "trace_id": self.trace_id,
-            "execution_time_ms": self.execution_time_ms,
+            "execution_time_ms": round(self.execution_time_ms, 2),
             "tokens_used": self.tokens_used,
             "timestamp": self.timestamp,
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }
+        if self.feedback_hook:
+            result["feedback_hook"] = self.feedback_hook.to_dict()
+        return result
+
+    def is_low_confidence(self, threshold: float = 0.3) -> bool:
+        """Check if response has low confidence."""
+        return self.confidence < threshold
 
 
 class BaseExpert(ABC):
@@ -292,6 +357,10 @@ class BaseExpert(ABC):
         # ExecutionTrace per RLCF (inizializzato per ogni query)
         self._current_trace: Optional["ExecutionTrace"] = None
 
+        # Scientific tracing (pipeline observability)
+        self._llm_call_traces: list = []
+        self._tool_call_traces: list = []
+
         # Crea tool registry locale
         self._tool_registry = ToolRegistry()
         for tool in self.tools:
@@ -306,6 +375,92 @@ class BaseExpert(ABC):
             has_ai_service=self.ai_service is not None,
             has_policy_manager=self.policy_manager is not None
         )
+
+    async def _traced_llm_call(self, prompt: str, **kwargs) -> Any:
+        """Wrapper per chiamate LLM con tracing automatico."""
+        import time as _time
+        import uuid as _uuid
+
+        call_id = _uuid.uuid4().hex[:8]
+        started_at = datetime.now()
+        t0 = _time.perf_counter()
+        model = kwargs.get("model", getattr(self, "model", "unknown")) or "unknown"
+        temperature = kwargs.get("temperature", getattr(self, "temperature", None))
+
+        try:
+            response = await self.ai_service.generate_response_async(prompt, **kwargs)
+            duration_ms = (_time.perf_counter() - t0) * 1000
+
+            # Extract token usage from response or service
+            tokens_in, tokens_out = 0, 0
+            if isinstance(response, dict):
+                usage = response.get("usage", {})
+                tokens_in = usage.get("prompt_tokens", 0)
+                tokens_out = usage.get("completion_tokens", 0)
+            if tokens_in == 0 and hasattr(self.ai_service, 'get_last_usage'):
+                usage = self.ai_service.get_last_usage()
+                tokens_in = usage.get("prompt_tokens", 0)
+                tokens_out = usage.get("completion_tokens", 0)
+
+            self._llm_call_traces.append({
+                "call_id": call_id,
+                "model": model,
+                "prompt_summary": prompt[:200],
+                "started_at": started_at.isoformat(),
+                "completed_at": datetime.now().isoformat(),
+                "duration_ms": round(duration_ms, 2),
+                "tokens_input": tokens_in,
+                "tokens_output": tokens_out,
+                "temperature": temperature,
+                "response_summary": str(response.get("content", response) if isinstance(response, dict) else response)[:200],
+                "success": True,
+                "error": None,
+            })
+            return response
+        except Exception as e:
+            duration_ms = (_time.perf_counter() - t0) * 1000
+            self._llm_call_traces.append({
+                "call_id": call_id,
+                "model": model,
+                "prompt_summary": prompt[:200],
+                "started_at": started_at.isoformat(),
+                "completed_at": datetime.now().isoformat(),
+                "duration_ms": round(duration_ms, 2),
+                "tokens_input": 0,
+                "tokens_output": 0,
+                "temperature": temperature,
+                "response_summary": "",
+                "success": False,
+                "error": str(e)[:200],
+            })
+            raise
+
+    def collect_and_reset_traces(self) -> dict:
+        """Collect traces from LLM calls, tool objects, and ReAct history."""
+        # LLM traces
+        llm_calls = list(self._llm_call_traces)
+        self._llm_call_traces.clear()
+
+        # Tool traces — collected from TOOL OBJECTS, not self._tool_call_traces
+        tool_calls = []
+        if hasattr(self, '_tool_registry') and self._tool_registry:
+            for tool in self._tool_registry.get_all():
+                tool_calls.extend(tool.collect_and_reset_traces())
+
+        # ReAct steps — from ReActMixin._react_result
+        react_steps = []
+        if hasattr(self, '_react_result') and self._react_result:
+            for tao in self._react_result.history:
+                react_steps.append(tao.to_dict())
+            # Reset
+            self._react_result = None
+            self._react_history = []
+
+        return {
+            "llm_calls": llm_calls,
+            "tool_calls": tool_calls,
+            "react_steps": react_steps,
+        }
 
     def _load_config(self):
         """Carica configurazione da YAML."""
@@ -400,6 +555,9 @@ CHECKLIST:
     async def use_tool(self, tool_name: str, **kwargs) -> ToolResult:
         """
         Usa un tool registrato.
+
+        Tracing avviene automaticamente in BaseTool.__call__() e viene
+        raccolto da collect_and_reset_traces().
 
         Args:
             tool_name: Nome del tool
@@ -1127,6 +1285,12 @@ class ExpertWithTools(BaseExpert):
         """Chiama LLM con retry per JSON."""
         import asyncio
         import json
+        import time as _time
+        import uuid as _uuid
+
+        call_id = _uuid.uuid4().hex[:8]
+        call_started = datetime.now()
+        t0 = _time.perf_counter()
 
         for attempt in range(max_retries):
             try:
@@ -1140,10 +1304,22 @@ class ExpertWithTools(BaseExpert):
                 # Parse content
                 if isinstance(response, dict):
                     content = response.get("content", str(response))
-                    tokens = response.get("usage", {}).get("total_tokens", 0)
+                    usage = response.get("usage", {})
+                    tokens_in = usage.get("prompt_tokens", 0)
+                    tokens_out = usage.get("completion_tokens", 0)
+                    tokens = usage.get("total_tokens", tokens_in + tokens_out)
                 else:
                     content = str(response)
+                    tokens_in = 0
+                    tokens_out = 0
                     tokens = 0
+
+                # Fallback: read usage from ai_service if response didn't include it
+                if tokens_in == 0 and hasattr(self.ai_service, 'get_last_usage'):
+                    svc_usage = self.ai_service.get_last_usage()
+                    tokens_in = svc_usage.get("prompt_tokens", 0)
+                    tokens_out = svc_usage.get("completion_tokens", 0)
+                    tokens = svc_usage.get("total_tokens", tokens_in + tokens_out)
 
                 # Clean markdown fences
                 content = content.strip()
@@ -1158,14 +1334,62 @@ class ExpertWithTools(BaseExpert):
                 # Validate JSON
                 json.loads(content)
 
+                duration_ms = (_time.perf_counter() - t0) * 1000
+
+                # Record trace
+                self._llm_call_traces.append({
+                    "call_id": call_id,
+                    "model": self.model or "unknown",
+                    "prompt_summary": user_prompt[:200],
+                    "started_at": call_started.isoformat(),
+                    "completed_at": datetime.now().isoformat(),
+                    "duration_ms": round(duration_ms, 2),
+                    "tokens_input": tokens_in,
+                    "tokens_output": tokens_out,
+                    "temperature": self.temperature,
+                    "response_summary": content[:200],
+                    "success": True,
+                    "error": None,
+                })
+
                 return {"content": content, "tokens_used": tokens}
 
             except json.JSONDecodeError:
                 if attempt == max_retries - 1:
+                    duration_ms = (_time.perf_counter() - t0) * 1000
+                    self._llm_call_traces.append({
+                        "call_id": call_id,
+                        "model": self.model or "unknown",
+                        "prompt_summary": user_prompt[:200],
+                        "started_at": call_started.isoformat(),
+                        "completed_at": datetime.now().isoformat(),
+                        "duration_ms": round(duration_ms, 2),
+                        "tokens_input": 0,
+                        "tokens_output": 0,
+                        "temperature": self.temperature,
+                        "response_summary": "",
+                        "success": False,
+                        "error": "JSON decode failed after retries",
+                    })
                     raise
                 await asyncio.sleep(0.5 * (2 ** attempt))
 
             except Exception as e:
+                duration_ms = (_time.perf_counter() - t0) * 1000
+                self._llm_call_traces.append({
+                    "call_id": call_id,
+                    "model": self.model or "unknown",
+                    "prompt_summary": user_prompt[:200],
+                    "started_at": call_started.isoformat(),
+                    "completed_at": datetime.now().isoformat(),
+                    "duration_ms": round(duration_ms, 2),
+                    "tokens_input": 0,
+                    "tokens_output": 0,
+                    "temperature": self.temperature,
+                    "response_summary": "",
+                    "success": False,
+                    "error": str(e)[:200],
+                })
                 log.error(f"LLM call failed: {e}")
                 raise
 

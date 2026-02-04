@@ -69,6 +69,7 @@ class BrocardiSelectors:
     MAIN_CONTENT_CLASS = "panes-condensed panes-w-ads content-ext-guide content-mark"
     BROCARDI_CONTENT_CLASS = "brocardi-content"
     RATIO_CONTAINER_CLASS = "container-ratio"
+    CORPO_DEL_TESTO_CLASS = "corpoDelTesto"
     SPIEGAZIONE_CLASS = "spiegazione-articolo"
 
     # Massime

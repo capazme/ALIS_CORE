@@ -237,9 +237,9 @@ class CrossReferenceService:
         Returns:
             CrossReferenceGroup with outgoing references
         """
-        # Query for outgoing CITA edges
+        # Query for outgoing cita edges (lowercase to match schema)
         query = """
-            MATCH (n:Norma {urn: $urn})-[r:CITA]->(m:Norma)
+            MATCH (n:Norma {urn: $urn})-[r:cita]->(m:Norma)
             RETURN m.urn AS target_urn, m.rubrica AS title, type(r) AS rel_type,
                    r.contesto AS snippet
             ORDER BY m.urn
@@ -248,7 +248,7 @@ class CrossReferenceService:
         """
 
         count_query = """
-            MATCH (n:Norma {urn: $urn})-[:CITA]->(m:Norma)
+            MATCH (n:Norma {urn: $urn})-[:cita]->(m:Norma)
             RETURN count(m) AS cnt
         """
 
@@ -256,23 +256,29 @@ class CrossReferenceService:
         total_count = 0
 
         try:
-            # Get count
+            # Get count - handle both list and result_set returns
             count_result = await self.client.query(count_query, {"urn": urn})
-            if count_result.result_set:
-                total_count = count_result.result_set[0][0] or 0
+            count_rows = count_result if isinstance(count_result, list) else (
+                count_result.result_set if hasattr(count_result, "result_set") else []
+            )
+            if count_rows:
+                total_count = count_rows[0][0] or 0
 
             # Get references
             result = await self.client.query(
                 query, {"urn": urn, "limit": limit, "offset": offset}
             )
+            rows = result if isinstance(result, list) else (
+                result.result_set if hasattr(result, "result_set") else []
+            )
 
-            for row in result.result_set or []:
+            for row in rows or []:
                 if row[0]:  # Has target URN
                     references.append(
                         CrossReference(
                             urn=row[0],
                             title=row[1] or "Articolo",
-                            relationship=row[2] or "CITA",
+                            relationship=row[2] or "cita",
                             source_type="norm",
                             snippet=row[3],
                         )
@@ -306,9 +312,9 @@ class CrossReferenceService:
         Returns:
             CrossReferenceGroup with incoming references
         """
-        # Query for incoming CITA edges
+        # Query for incoming cita edges (lowercase to match schema)
         query = """
-            MATCH (m:Norma)-[r:CITA]->(n:Norma {urn: $urn})
+            MATCH (m:Norma)-[r:cita]->(n:Norma {urn: $urn})
             RETURN m.urn AS source_urn, m.rubrica AS title, type(r) AS rel_type,
                    r.contesto AS snippet
             ORDER BY m.urn
@@ -317,7 +323,7 @@ class CrossReferenceService:
         """
 
         count_query = """
-            MATCH (m:Norma)-[:CITA]->(n:Norma {urn: $urn})
+            MATCH (m:Norma)-[:cita]->(n:Norma {urn: $urn})
             RETURN count(m) AS cnt
         """
 
@@ -325,21 +331,28 @@ class CrossReferenceService:
         total_count = 0
 
         try:
+            # Handle both list and result_set returns
             count_result = await self.client.query(count_query, {"urn": urn})
-            if count_result.result_set:
-                total_count = count_result.result_set[0][0] or 0
+            count_rows = count_result if isinstance(count_result, list) else (
+                count_result.result_set if hasattr(count_result, "result_set") else []
+            )
+            if count_rows:
+                total_count = count_rows[0][0] or 0
 
             result = await self.client.query(
                 query, {"urn": urn, "limit": limit, "offset": offset}
             )
+            rows = result if isinstance(result, list) else (
+                result.result_set if hasattr(result, "result_set") else []
+            )
 
-            for row in result.result_set or []:
+            for row in rows or []:
                 if row[0]:
                     references.append(
                         CrossReference(
                             urn=row[0],
                             title=row[1] or "Articolo",
-                            relationship=row[2] or "CITA",
+                            relationship=row[2] or "cita",
                             source_type="norm",
                             snippet=row[3],
                         )
@@ -394,21 +407,28 @@ class CrossReferenceService:
         total_count = 0
 
         try:
+            # Handle both list and result_set returns
             count_result = await self.client.query(count_query, {"urn": urn})
-            if count_result.result_set:
-                total_count = count_result.result_set[0][0] or 0
+            count_rows = count_result if isinstance(count_result, list) else (
+                count_result.result_set if hasattr(count_result, "result_set") else []
+            )
+            if count_rows:
+                total_count = count_rows[0][0] or 0
 
             result = await self.client.query(
                 query, {"urn": urn, "limit": limit, "offset": offset}
             )
+            rows = result if isinstance(result, list) else (
+                result.result_set if hasattr(result, "result_set") else []
+            )
 
-            for row in result.result_set or []:
+            for row in rows or []:
                 if row[0]:
                     references.append(
                         CrossReference(
                             urn=row[0],
                             title=row[1] or "Norma",
-                            relationship=row[2] or "MODIFICA",
+                            relationship=row[2] or "modifica",
                             source_type="norm",
                             date=row[3],
                             snippet=row[4],
@@ -443,8 +463,9 @@ class CrossReferenceService:
         Returns:
             CrossReferenceGroup with jurisprudence
         """
+        # Query for jurisprudence (lowercase to match schema)
         query = """
-            MATCH (j:AttoGiudiziario)-[r:INTERPRETA]->(n:Norma {urn: $urn})
+            MATCH (j:AttoGiudiziario)-[r:interpreta]->(n:Norma {urn: $urn})
             RETURN j.node_id AS node_id, j.massima AS title, type(r) AS rel_type,
                    j.organo_emittente AS authority, j.data AS date,
                    j.massima AS snippet
@@ -454,7 +475,7 @@ class CrossReferenceService:
         """
 
         count_query = """
-            MATCH (j:AttoGiudiziario)-[:INTERPRETA]->(n:Norma {urn: $urn})
+            MATCH (j:AttoGiudiziario)-[:interpreta]->(n:Norma {urn: $urn})
             RETURN count(j) AS cnt
         """
 
@@ -462,15 +483,22 @@ class CrossReferenceService:
         total_count = 0
 
         try:
+            # Handle both list and result_set returns
             count_result = await self.client.query(count_query, {"urn": urn})
-            if count_result.result_set:
-                total_count = count_result.result_set[0][0] or 0
+            count_rows = count_result if isinstance(count_result, list) else (
+                count_result.result_set if hasattr(count_result, "result_set") else []
+            )
+            if count_rows:
+                total_count = count_rows[0][0] or 0
 
             result = await self.client.query(
                 query, {"urn": urn, "limit": limit, "offset": offset}
             )
+            rows = result if isinstance(result, list) else (
+                result.result_set if hasattr(result, "result_set") else []
+            )
 
-            for row in result.result_set or []:
+            for row in rows or []:
                 if row[0]:
                     # Truncate massima for title
                     title = row[1][:100] + "..." if row[1] and len(row[1]) > 100 else (row[1] or "Massima")
@@ -479,7 +507,7 @@ class CrossReferenceService:
                         CrossReference(
                             urn=row[0],  # node_id for jurisprudence
                             title=title,
-                            relationship=row[2] or "INTERPRETA",
+                            relationship=row[2] or "interpreta",
                             source_type="jurisprudence",
                             authority=row[3],
                             date=row[4],
@@ -526,8 +554,12 @@ class CrossReferenceService:
 
         try:
             result = await self.client.query(query, {"urn": urn, "limit": limit})
+            # Handle both list and result_set returns
+            rows = result if isinstance(result, list) else (
+                result.result_set if hasattr(result, "result_set") else []
+            )
 
-            for row in result.result_set or []:
+            for row in rows or []:
                 if row[0]:
                     node_type = row[3] or "Norma"
                     source_type = "norm"
@@ -540,7 +572,7 @@ class CrossReferenceService:
                         CrossReference(
                             urn=row[0],
                             title=row[1] or node_type,
-                            relationship=row[2] or "RELATED",
+                            relationship=row[2] or "related",
                             source_type=source_type,
                         )
                     )

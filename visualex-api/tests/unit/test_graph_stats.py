@@ -411,7 +411,7 @@ class TestStatsServiceIntegration:
 
     def test_cache_ttl_one_hour(self):
         """Test cache TTL is 1 hour (AC4)."""
-        assert KGStatsService._cache_ttl_seconds == 3600
+        assert KGStatsService.CACHE_TTL_SECONDS == 3600
 
     def test_cache_validity_check(self):
         """Test cache validity logic."""

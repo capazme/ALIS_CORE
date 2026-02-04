@@ -12,7 +12,7 @@ Ground truth verificato manualmente su Normattiva.it.
 
 import pytest
 from typing import List
-from visualex.scrapers.normattiva import NormattivaScraper, ScraperConfig, DocumentNotFoundError
+from visualex.scrapers.normattiva import NormattivaScraper, DocumentNotFoundError
 from visualex.models.norma import Norma, NormaVisitata
 
 
@@ -52,9 +52,8 @@ def validate_article_content(
 
 @pytest.fixture(scope="module")
 def scraper():
-    """Scraper con timeout aumentato per test integration."""
-    config = ScraperConfig(timeout=60)
-    return NormattivaScraper(config)
+    """Scraper per test integration."""
+    return NormattivaScraper()
 
 
 @pytest.mark.integration
@@ -287,13 +286,12 @@ class TestNormattivaRetry:
     """Test retry logic e configurazione."""
 
     @pytest.mark.asyncio
-    async def test_retry_config_applied(self):
-        """Verifica che la config sia applicata correttamente."""
-        config = ScraperConfig(timeout=120, max_concurrent=2)
-        test_scraper = NormattivaScraper(config)
+    async def test_scraper_initialized(self):
+        """Verifica che lo scraper sia inizializzato correttamente."""
+        test_scraper = NormattivaScraper()
 
-        assert test_scraper.config.timeout == 120
-        assert test_scraper.config.max_concurrent == 2
+        assert test_scraper.base_url == "https://www.normattiva.it/"
+        assert test_scraper.selectors is not None
 
     @pytest.mark.asyncio
     async def test_concurrent_requests(self, scraper):
@@ -344,6 +342,9 @@ class TestParseDestinazioneWithLLM:
 
     Verifica che la funzione usi structured output JSON
     e legga il modello dalla variabile d'ambiente LLM_PARSING_MODEL.
+
+    I testi di input usano formulazioni che il regex non riesce a parsare,
+    forzando il fallback LLM.
     """
 
     @pytest.mark.asyncio
@@ -351,7 +352,7 @@ class TestParseDestinazioneWithLLM:
         """Test che il modello LLM venga letto dalla variabile d'ambiente."""
         import os
         from unittest.mock import AsyncMock, patch
-        from visualex.scrapers.normattiva import parse_destinazione_with_llm, _get_llm_service
+        from merlt.pipeline.multivigenza import parse_destinazione_with_llm, _get_llm_service
 
         # Mock del servizio LLM
         mock_service = AsyncMock()
@@ -367,9 +368,9 @@ class TestParseDestinazioneWithLLM:
         _get_llm_service.cache_clear()
 
         try:
-            with patch("merlt.sources.normattiva._get_llm_service", return_value=mock_service):
+            with patch("merlt.pipeline.multivigenza._get_llm_service", return_value=mock_service):
                 result = await parse_destinazione_with_llm(
-                    "ha disposto l'abrogazione del comma 2 dell'art. 5"
+                    "ha disposto l'abrogazione del secondo capoverso della norma"
                 )
 
                 # Verifica risultato
@@ -394,7 +395,7 @@ class TestParseDestinazioneWithLLM:
         """Test che il modello di default sia mistral quando env non è impostato."""
         import os
         from unittest.mock import AsyncMock, patch
-        from visualex.scrapers.normattiva import parse_destinazione_with_llm, _get_llm_service
+        from merlt.pipeline.multivigenza import parse_destinazione_with_llm, _get_llm_service
 
         # Mock del servizio LLM
         mock_service = AsyncMock()
@@ -409,8 +410,8 @@ class TestParseDestinazioneWithLLM:
         _get_llm_service.cache_clear()
 
         try:
-            with patch("merlt.sources.normattiva._get_llm_service", return_value=mock_service):
-                await parse_destinazione_with_llm("abrogazione art. 5")
+            with patch("merlt.pipeline.multivigenza._get_llm_service", return_value=mock_service):
+                await parse_destinazione_with_llm("abrogazione della norma di riferimento")
 
                 # Verifica modello di default
                 call_kwargs = mock_service.generate_json_completion.call_args.kwargs
@@ -425,7 +426,7 @@ class TestParseDestinazioneWithLLM:
     async def test_structured_output_json_schema(self):
         """Test che venga usato generate_json_completion con schema JSON."""
         from unittest.mock import AsyncMock, patch
-        from visualex.scrapers.normattiva import parse_destinazione_with_llm, _get_llm_service
+        from merlt.pipeline.multivigenza import parse_destinazione_with_llm, _get_llm_service
 
         mock_service = AsyncMock()
         mock_service.generate_json_completion = AsyncMock(
@@ -435,9 +436,9 @@ class TestParseDestinazioneWithLLM:
         _get_llm_service.cache_clear()
 
         try:
-            with patch("merlt.sources.normattiva._get_llm_service", return_value=mock_service):
+            with patch("merlt.pipeline.multivigenza._get_llm_service", return_value=mock_service):
                 result = await parse_destinazione_with_llm(
-                    "modifica art. 10, comma 1, lettera a)"
+                    "modifica al testo normativo di riferimento"
                 )
 
                 # Verifica che generate_json_completion sia stato chiamato

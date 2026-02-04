@@ -86,6 +86,9 @@ class QATrace(Base):
     # Performance
     execution_time_ms = Column(Integer, nullable=True)
 
+    # Full scientific pipeline trace (JSON)
+    full_trace = Column(JSONB, nullable=True)
+
     # Timestamps
     created_at = Column(DateTime, nullable=False, server_default=func.now())
 

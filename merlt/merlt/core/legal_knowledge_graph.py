@@ -81,7 +81,7 @@ from merlt.pipeline.enrichment import (
 from merlt.pipeline.visualex import VisualexArticle, NormaMetadata
 
 # Sources
-from merlt.clients import NormattivaScraper, BrocardiScraper, NormaVisitata, Norma
+from merlt.clients import NormattivaScraper, BrocardiScraper, NormaVisitata, Norma, NormTree
 
 # TODO: Implement locally or copy from visualex-api
 # from merlt.utils.urngenerator import generate_urn

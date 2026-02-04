@@ -1,0 +1,540 @@
+{
+  "query": "Quali sono le conseguenze dell'inadempimento contrattuale secondo l'art. 1453 del codice civile?",
+  "synthesis_mode": "convergent",
+  "confidence": 0.934,
+  "synthesis_preview": "L'articolo 1453 del Codice Civile disciplina le conseguenze dell'inadempimento contrattuale nei contratti a prestazioni corrispettive, offrendo alla parte non inadempiente una duplice tutela.\n\n**Opzioni a disposizione della parte non inadempiente:**\n\n1.  **Chiedere l'adempimento del contratto:** La parte lesa può insistere affinché la controparte esegua la prestazione dovuta.\n2.  **Domandare la risoluzione del contratto:** In alternativa, può chiedere lo scioglimento del vincolo contrattuale.\n\n*",
+  "pipeline_trace": {
+    "trace_id": "20260204_161914_420901",
+    "query_text": "Quali sono le conseguenze dell'inadempimento contrattuale secondo l'art. 1453 del codice civile?",
+    "timestamp": "2026-02-04T16:19:14.420920",
+    "total_time_ms": 30331.26,
+    "total_tokens": 8206,
+    "stages": {
+      "ner": {
+        "time_ms": 0.84,
+        "entities": [
+          {
+            "text": "contratto",
+            "type": "LEGAL_CONCEPT"
+          },
+          {
+            "text": "inadempimento",
+            "type": "LEGAL_CONCEPT"
+          },
+          {
+            "text": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1453",
+            "type": "NORM_REFERENCE"
+          }
+        ],
+        "query_type": "interpretativo"
+      },
+      "routing": {
+        "time_ms": 6192.79,
+        "method": "neural",
+        "selected_experts": [
+          "systemic",
+          "literal"
+        ],
+        "gating_scores": {
+          "literal": 0.2256,
+          "systemic": 0.4383,
+          "principles": 0.1663,
+          "precedent": 0.1697
+        },
+        "neural_gating": {
+          "neural_used": true,
+          "neural_confidence": 0.4383,
+          "neural_weights": {
+            "literal": 0.2256,
+            "systemic": 0.4383,
+            "principles": 0.1663,
+            "precedent": 0.1697
+          },
+          "confidence_threshold": 0.3,
+          "expert_priors": {
+            "literal": 0.3499999940395355,
+            "systemic": 0.25,
+            "principles": 0.20000000298023224,
+            "precedent": 0.20000000298023224
+          },
+          "trained": false
+        }
+      },
+      "expert_executions": [
+        {
+          "expert_type": "systemic",
+          "started_at": "2026-02-04T16:19:20.614702",
+          "completed_at": "2026-02-04T16:19:33.604775",
+          "duration_ms": 12990.06,
+          "success": true,
+          "error": null,
+          "input_context": null,
+          "output": null,
+          "tokens_used": 5080,
+          "confidence": 0.9,
+          "circuit_breaker_state": "closed",
+          "skipped": false,
+          "skip_reason": null,
+          "llm_calls": [
+            {
+              "call_id": "25c6810f",
+              "model": "google/gemini-2.5-flash",
+              "prompt_summary": "Sei un esperto giuridico specializzato nell'INTERPRETAZIONE SISTEMATICA E STORICA.\n\nIl tuo approccio si basa su:\n- Art. 12, comma I, disp. prel. c.c.: \"...secondo la connessione di esse [parole]...\"\n-",
+              "started_at": "2026-02-04T16:19:20.812517",
+              "completed_at": "2026-02-04T16:19:33.604642",
+              "duration_ms": 12792.1,
+              "tokens_input": 2604,
+              "tokens_output": 2476,
+              "temperature": 0.3,
+              "response_summary": "```json\n{\n    \"interpretation\": \"L'articolo 1453 del Codice Civile disciplina le conseguenze dell'inadempimento contrattuale nei contratti a prestazioni corrispettive. In caso di inadempimento di una ",
+              "success": true,
+              "error": null
+            }
+          ],
+          "tool_calls": [
+            {
+              "call_id": "ba6d3c88",
+              "tool_name": "semantic_search",
+              "parameters": {
+                "query": "norme correlate articolo 1453 contratto inadempimento sistema normativo coordinamento",
+                "top_k": 5,
+                "expert_type": "SystemicExpert",
+                "source_types": [
+                  "norma"
+                ]
+              },
+              "started_at": "2026-02-04T16:19:20.614772",
+              "completed_at": "2026-02-04T16:19:20.776303",
+              "duration_ms": 161.52,
+              "success": true,
+              "result_summary": "{'query': 'norme correlate articolo 1453 contratto inadempimento sistema normativo coordinamento', 'results': [{'chunk_id': '2c9d704e-2aec-3fbc-0977-c1366b553722', 'text': \"Art. 1455. \\n\\n (Importanza",
+              "result_count": 5,
+              "result_metadata": {
+                "query": "norme correlate articolo 1453 contratto inadempimento sistema normativo coordinamento",
+                "top_k": 5,
+                "expert_type": "SystemicExpert",
+                "source_types": [
+                  "norma"
+                ],
+                "retrieval_alpha": 0.7,
+                "total_candidates": 15,
+                "chunks_after_reranking": 5,
+                "top_source_urns": [
+                  "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1455",
+                  "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1453",
+                  "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1459",
+                  "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1551",
+                  "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1454"
+                ],
+                "timestamp": "2026-02-04T16:19:20.776277"
+              },
+              "error": null
+            },
+            {
+              "call_id": "3697bdb7",
+              "tool_name": "graph_search",
+              "parameters": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1551",
+                "relation_types": [
+                  "DISCIPLINA",
+                  "modifica",
+                  "abroga",
+                  "interpreta",
+                  "IMPONE"
+                ],
+                "max_hops": 2,
+                "direction": "both"
+              },
+              "started_at": "2026-02-04T16:19:20.776482",
+              "completed_at": "2026-02-04T16:19:20.781601",
+              "duration_ms": 5.11,
+              "success": true,
+              "result_summary": "{'start_node': 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1551', 'nodes': [], 'edges': [], 'total_nodes': 0, 'total_edges': 0}",
+              "result_count": null,
+              "result_metadata": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1551",
+                "max_hops": 2,
+                "timestamp": "2026-02-04T16:19:20.781591"
+              },
+              "error": null
+            },
+            {
+              "call_id": "66f12b3f",
+              "tool_name": "graph_search",
+              "parameters": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1453",
+                "relation_types": [
+                  "DISCIPLINA",
+                  "modifica",
+                  "abroga",
+                  "interpreta",
+                  "IMPONE"
+                ],
+                "max_hops": 2,
+                "direction": "both"
+              },
+              "started_at": "2026-02-04T16:19:20.781618",
+              "completed_at": "2026-02-04T16:19:20.787294",
+              "duration_ms": 5.67,
+              "success": true,
+              "result_summary": "{'start_node': 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1453', 'nodes': [{'urn': 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942",
+              "result_count": null,
+              "result_metadata": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1453",
+                "max_hops": 2,
+                "timestamp": "2026-02-04T16:19:20.787283"
+              },
+              "error": null
+            },
+            {
+              "call_id": "a024be09",
+              "tool_name": "graph_search",
+              "parameters": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1455",
+                "relation_types": [
+                  "DISCIPLINA",
+                  "modifica",
+                  "abroga",
+                  "interpreta",
+                  "IMPONE"
+                ],
+                "max_hops": 2,
+                "direction": "both"
+              },
+              "started_at": "2026-02-04T16:19:20.787772",
+              "completed_at": "2026-02-04T16:19:20.796598",
+              "duration_ms": 8.82,
+              "success": true,
+              "result_summary": "{'start_node': 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1455', 'nodes': [{'urn': 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942",
+              "result_count": null,
+              "result_metadata": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1455",
+                "max_hops": 2,
+                "timestamp": "2026-02-04T16:19:20.796587"
+              },
+              "error": null
+            },
+            {
+              "call_id": "2c5360ab",
+              "tool_name": "graph_search",
+              "parameters": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1459",
+                "relation_types": [
+                  "DISCIPLINA",
+                  "modifica",
+                  "abroga",
+                  "interpreta",
+                  "IMPONE"
+                ],
+                "max_hops": 2,
+                "direction": "both"
+              },
+              "started_at": "2026-02-04T16:19:20.797057",
+              "completed_at": "2026-02-04T16:19:20.805523",
+              "duration_ms": 8.46,
+              "success": true,
+              "result_summary": "{'start_node': 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1459', 'nodes': [{'urn': 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942",
+              "result_count": null,
+              "result_metadata": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1459",
+                "max_hops": 2,
+                "timestamp": "2026-02-04T16:19:20.805510"
+              },
+              "error": null
+            },
+            {
+              "call_id": "8f123867",
+              "tool_name": "graph_search",
+              "parameters": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1454",
+                "relation_types": [
+                  "DISCIPLINA",
+                  "modifica",
+                  "abroga",
+                  "interpreta",
+                  "IMPONE"
+                ],
+                "max_hops": 2,
+                "direction": "both"
+              },
+              "started_at": "2026-02-04T16:19:20.806015",
+              "completed_at": "2026-02-04T16:19:20.811953",
+              "duration_ms": 5.93,
+              "success": true,
+              "result_summary": "{'start_node': 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1454', 'nodes': [{'urn': 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942",
+              "result_count": null,
+              "result_metadata": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1454",
+                "max_hops": 2,
+                "timestamp": "2026-02-04T16:19:20.811944"
+              },
+              "error": null
+            }
+          ],
+          "retrieval_trace": {
+            "vector_search_time_ms": 161.52,
+            "graph_enrichment_time_ms": 33.99,
+            "total_chunks_retrieved": 15,
+            "chunks_after_reranking": 5,
+            "alpha_used": 0.7,
+            "top_sources": [
+              "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1455",
+              "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1453",
+              "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1459",
+              "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1551",
+              "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1454"
+            ]
+          }
+        },
+        {
+          "expert_type": "literal",
+          "started_at": "2026-02-04T16:19:20.614852",
+          "completed_at": "2026-02-04T16:19:26.760401",
+          "duration_ms": 6145.54,
+          "success": true,
+          "error": null,
+          "input_context": null,
+          "output": null,
+          "tokens_used": 3126,
+          "confidence": 1.0,
+          "circuit_breaker_state": "closed",
+          "skipped": false,
+          "skip_reason": null,
+          "llm_calls": [
+            {
+              "call_id": "242b433f",
+              "model": "google/gemini-2.5-flash",
+              "prompt_summary": "Sei un esperto giuridico specializzato nell'INTERPRETAZIONE LETTERALE.\n\nIl tuo approccio si basa sull'art. 12, comma I, delle disposizioni preliminari al codice civile:\n\"Nell'applicare la legge non si",
+              "started_at": "2026-02-04T16:19:20.806603",
+              "completed_at": "2026-02-04T16:19:26.760244",
+              "duration_ms": 5953.62,
+              "tokens_input": 1995,
+              "tokens_output": 1131,
+              "temperature": 0.2,
+              "response_summary": "```json\n{\n    \"interpretation\": \"Secondo l'articolo 1453 del codice civile, in presenza di un inadempimento contrattuale in contratti con prestazioni corrispettive, la parte non inadempiente ha la fac",
+              "success": true,
+              "error": null
+            }
+          ],
+          "tool_calls": [
+            {
+              "call_id": "b4c7ddce",
+              "tool_name": "semantic_search",
+              "parameters": {
+                "query": "testo articolo 1453 contratto inadempimento definizione significato",
+                "top_k": 5,
+                "expert_type": "LiteralExpert",
+                "source_types": [
+                  "norma"
+                ]
+              },
+              "started_at": "2026-02-04T16:19:20.616543",
+              "completed_at": "2026-02-04T16:19:20.780401",
+              "duration_ms": 163.85,
+              "success": true,
+              "result_summary": "{'query': 'testo articolo 1453 contratto inadempimento definizione significato', 'results': [{'chunk_id': '2c9d704e-2aec-3fbc-0977-c1366b553722', 'text': \"Art. 1455. \\n\\n (Importanza dell'inadempiment",
+              "result_count": 5,
+              "result_metadata": {
+                "query": "testo articolo 1453 contratto inadempimento definizione significato",
+                "top_k": 5,
+                "expert_type": "LiteralExpert",
+                "source_types": [
+                  "norma"
+                ],
+                "retrieval_alpha": 0.7,
+                "total_candidates": 15,
+                "chunks_after_reranking": 5,
+                "top_source_urns": [
+                  "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1455",
+                  "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1453",
+                  "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1459",
+                  "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1454",
+                  "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1551"
+                ],
+                "timestamp": "2026-02-04T16:19:20.780379"
+              },
+              "error": null
+            },
+            {
+              "call_id": "0fa6a195",
+              "tool_name": "graph_search",
+              "parameters": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1551",
+                "relation_types": [
+                  "contiene",
+                  "DEFINISCE",
+                  "DISCIPLINA"
+                ],
+                "max_hops": 2
+              },
+              "started_at": "2026-02-04T16:19:20.780573",
+              "completed_at": "2026-02-04T16:19:20.787822",
+              "duration_ms": 7.25,
+              "success": true,
+              "result_summary": "{'start_node': 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1551', 'nodes': [{'urn': 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942",
+              "result_count": null,
+              "result_metadata": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1551",
+                "max_hops": 2,
+                "timestamp": "2026-02-04T16:19:20.787818"
+              },
+              "error": null
+            },
+            {
+              "call_id": "bd787ccc",
+              "tool_name": "graph_search",
+              "parameters": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1453",
+                "relation_types": [
+                  "contiene",
+                  "DEFINISCE",
+                  "DISCIPLINA"
+                ],
+                "max_hops": 2
+              },
+              "started_at": "2026-02-04T16:19:20.787875",
+              "completed_at": "2026-02-04T16:19:20.797140",
+              "duration_ms": 9.26,
+              "success": true,
+              "result_summary": "{'start_node': 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1453', 'nodes': [{'urn': 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942",
+              "result_count": null,
+              "result_metadata": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1453",
+                "max_hops": 2,
+                "timestamp": "2026-02-04T16:19:20.797135"
+              },
+              "error": null
+            },
+            {
+              "call_id": "d0d39679",
+              "tool_name": "graph_search",
+              "parameters": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1455",
+                "relation_types": [
+                  "contiene",
+                  "DEFINISCE",
+                  "DISCIPLINA"
+                ],
+                "max_hops": 2
+              },
+              "started_at": "2026-02-04T16:19:20.797583",
+              "completed_at": "2026-02-04T16:19:20.806115",
+              "duration_ms": 8.53,
+              "success": true,
+              "result_summary": "{'start_node': 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1455', 'nodes': [{'urn': 'https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942",
+              "result_count": null,
+              "result_metadata": {
+                "start_node": "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1455",
+                "max_hops": 2,
+                "timestamp": "2026-02-04T16:19:20.806110"
+              },
+              "error": null
+            }
+          ],
+          "retrieval_trace": {
+            "vector_search_time_ms": 163.85,
+            "graph_enrichment_time_ms": 25.04,
+            "total_chunks_retrieved": 15,
+            "chunks_after_reranking": 5,
+            "alpha_used": 0.7,
+            "top_sources": [
+              "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1455",
+              "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1453",
+              "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1459",
+              "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1454",
+              "https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:regio.decreto:1942-03-16;262:2~art1551"
+            ]
+          }
+        }
+      ],
+      "gating": {
+        "weights": {
+          "systemic": 0.4383,
+          "literal": 0.2256
+        },
+        "source": "hybrid"
+      },
+      "synthesis": {
+        "time_ms": 11147.27,
+        "mode": "convergent",
+        "confidence": 0.934,
+        "disagreement_analysis": {
+          "has_disagreement": false,
+          "disagreement_type": null,
+          "disagreement_level": null,
+          "intensity": 0.0,
+          "resolvability": 0.42336857318878174,
+          "confidence": 0.4964400827884674,
+          "conflicting_pairs": [
+            {
+              "expert_a": "principles",
+              "expert_b": "precedent",
+              "conflict_score": 0.5050151348114014,
+              "contention_point": null,
+              "excerpt_a": null,
+              "excerpt_b": null
+            }
+          ],
+          "pairwise_matrix": [
+            [
+              0.0,
+              0.4435538351535797,
+              0.47948798537254333,
+              0.45920172333717346
+            ],
+            [
+              0.4435538351535797,
+              0.0,
+              0.45319992303848267,
+              0.47513502836227417
+            ],
+            [
+              0.47948798537254333,
+              0.45319992303848267,
+              0.0,
+              0.5050151348114014
+            ],
+            [
+              0.45920172333717346,
+              0.47513502836227417,
+              0.5050151348114014,
+              0.0
+            ]
+          ]
+        }
+      }
+    },
+    "stage_times_ms": {
+      "ner": 0.84,
+      "routing": 6192.79,
+      "gating": 0.0,
+      "synthesis": 11147.27
+    }
+  },
+  "pipeline_metrics": {
+    "total_time_ms": 30331.26,
+    "ner_time_ms": 0.84,
+    "routing_time_ms": 6192.79,
+    "expert_times_ms": {
+      "systemic": 12990.06,
+      "literal": 6145.54
+    },
+    "gating_time_ms": 0.0,
+    "synthesis_time_ms": 11147.27,
+    "total_tokens": 8206,
+    "experts_activated": [
+      "systemic",
+      "literal"
+    ],
+    "experts_failed": [],
+    "experts_skipped": [],
+    "circuit_breaker_events": [],
+    "degraded": false,
+    "degradation_reason": null
+  },
+  "timing": {
+    "setup_ms": 81.9,
+    "pipeline_ms": 30333.9,
+    "total_ms": 30415.8
+  }
+}

@@ -72,13 +72,13 @@ class TestVisualexUserSync:
         """Test che synced_at sia impostato automaticamente."""
         from merlt.rlcf.authority_sync import VisualexUserSync
 
-        before = datetime.now()
+        before = datetime.now(timezone.utc)
         user = VisualexUserSync(
             visualex_user_id="v-1",
             merlt_user_id="m-1",
             qualification="studente",
         )
-        after = datetime.now()
+        after = datetime.now(timezone.utc)
 
         assert before <= user.synced_at <= after
 

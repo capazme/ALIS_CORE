@@ -526,6 +526,20 @@ class PredictionHeads:
             confidence=confidence,
         )
 
+    def to(self, device):
+        """Move all sub-heads and their nn.Module attributes to device."""
+        torch, nn_mod, _ = _get_torch()
+        for obj in [
+            self, self.cross_attention, self.binary_head, self.type_head,
+            self.level_head, self.intensity_head, self.resolvability_head,
+            self.pairwise_head,
+        ]:
+            for attr_name in list(vars(obj)):
+                attr = getattr(obj, attr_name)
+                if isinstance(attr, torch.nn.Module):
+                    setattr(obj, attr_name, attr.to(device))
+        return self
+
     def parameters(self):
         """Tutti i parametri trainabili."""
         params = []

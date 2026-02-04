@@ -367,7 +367,10 @@ class HybridSearchService:
 
         try:
             result = await self.falkor.query(query, {"urn": urn})
-            rows = result.result_set if hasattr(result, "result_set") else []
+            # Handle both list returns and result_set attribute
+            rows = result if isinstance(result, list) else (
+                result.result_set if hasattr(result, "result_set") else []
+            )
 
             if rows:
                 row = rows[0]
@@ -424,8 +427,8 @@ class HybridSearchService:
         # Escape special characters for full-text query
         escaped_query = self._escape_fulltext_query(request.query)
 
-        # Build source type filter
-        source_filter = ""
+        # Build source type filter - using parameterized approach for safety
+        source_labels = []
         if request.source_types:
             # Map source types to node labels
             label_map = {
@@ -434,16 +437,21 @@ class HybridSearchService:
                 "commentary": "Dottrina",
                 "doctrine": "Dottrina",
             }
-            labels = [label_map.get(st, st) for st in request.source_types if st in label_map]
-            if labels:
-                source_filter = f"AND labels(n)[0] IN {labels}"
+            source_labels = [label_map.get(st, st) for st in request.source_types if st in label_map]
 
-        # Query for norms (primary)
+        # Query for norms (primary) - use parameterized source filter
+        source_filter_clause = ""
+        if source_labels and "Norma" in source_labels:
+            source_filter_clause = "AND labels(n)[0] IN $source_labels"
+        elif source_labels and "Norma" not in source_labels:
+            # If filtering for non-norm types, skip norm query
+            source_filter_clause = "AND false"
+
         norm_query = f"""
             CALL db.idx.fulltext.queryNodes('Norma', 'testo_vigente', $query)
             YIELD node, score
             WITH node AS n, score
-            WHERE score > 0.1 {source_filter if 'Norma' in source_filter or not source_filter else ''}
+            WHERE score > 0.1 {source_filter_clause}
             RETURN n.urn AS urn, n.rubrica AS title, n.testo_vigente AS text,
                    'norm' AS source_type, score,
                    n.data_versione AS vigenza_dal, n.stato AS stato
@@ -452,11 +460,14 @@ class HybridSearchService:
         """
 
         try:
-            norm_result = await self.falkor.query(
-                norm_query,
-                {"query": escaped_query, "limit": request.limit * 2},
+            query_params = {"query": escaped_query, "limit": request.limit * 2}
+            if source_labels:
+                query_params["source_labels"] = source_labels
+            norm_result = await self.falkor.query(norm_query, query_params)
+            # Handle both list returns and result_set attribute
+            rows = norm_result if isinstance(norm_result, list) else (
+                norm_result.result_set if hasattr(norm_result, "result_set") else []
             )
-            rows = norm_result.result_set if hasattr(norm_result, "result_set") else []
 
             for row in rows:
                 if row[0]:  # Has URN
@@ -496,7 +507,10 @@ class HybridSearchService:
                     dottrina_query,
                     {"query": escaped_query, "limit": request.limit},
                 )
-                rows = dottrina_result.result_set if hasattr(dottrina_result, "result_set") else []
+                # Handle both list returns and result_set attribute
+                rows = dottrina_result if isinstance(dottrina_result, list) else (
+                    dottrina_result.result_set if hasattr(dottrina_result, "result_set") else []
+                )
 
                 for row in rows:
                     if row[0]:
@@ -544,14 +558,21 @@ class HybridSearchService:
 
             query_embedding = embedding_result.embedding
 
-            # Search Qdrant
+            # Search Qdrant - validate expert_type if provided
             source_types = request.source_types
+            expert_type = request.expert_type
+            # Validate expert_type against known values
+            valid_expert_types = {"literal", "systemic", "principles", "precedent", None}
+            if expert_type is not None and expert_type not in valid_expert_types:
+                logger.warning("Invalid expert_type '%s', ignoring", expert_type)
+                expert_type = None
+
             qdrant_results = self.qdrant.search(
                 query_embedding=query_embedding,
                 limit=request.limit * 2,
                 source_types=source_types,
                 min_authority=request.min_authority,
-                expert_type=request.expert_type,
+                expert_type=expert_type,
                 score_threshold=self.config.semantic_score_threshold,
             )
 
@@ -700,7 +721,8 @@ class HybridSearchService:
     def _escape_fulltext_query(self, query: str) -> str:
         """Escape special characters for FalkorDB full-text search."""
         # FalkorDB uses RedisSearch which has special characters
-        special_chars = r'@#$%^&*()[]{}|\\:";\'<>,.?/~`'
+        # Include '-' as it's a negative search operator in RedisSearch
+        special_chars = r'@#$%^&*()[]{}|\\:";\'<>,.?/~`-'
         escaped = query
         for char in special_chars:
             escaped = escaped.replace(char, f"\\{char}")

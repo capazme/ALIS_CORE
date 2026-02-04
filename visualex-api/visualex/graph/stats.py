@@ -190,10 +190,8 @@ class KGStatsService:
         "ha_versione": "Versioni",
     }
 
-    # Cache
-    _cache: Optional[KGStats] = None
-    _cache_time: Optional[datetime] = None
-    _cache_ttl_seconds: int = 3600  # 1 hour
+    # Cache TTL constant (class level is OK for constants)
+    CACHE_TTL_SECONDS: int = 3600  # 1 hour
 
     def __init__(self, client: "FalkorDBClient"):
         """
@@ -203,6 +201,10 @@ class KGStatsService:
             client: Connected FalkorDBClient instance
         """
         self.client = client
+        # Instance-level cache to avoid sharing between different service instances
+        self._cache: Optional[KGStats] = None
+        self._cache_time: Optional[datetime] = None
+        self._cache_ttl_seconds: int = self.CACHE_TTL_SECONDS
         logger.info("KGStatsService initialized")
 
     async def get_stats(self, use_cache: bool = True) -> KGStats:
@@ -395,55 +397,58 @@ class KGStatsService:
         Returns:
             CoverageMetrics with coverage percentages
         """
+        import asyncio
+
         metrics = CoverageMetrics()
 
+        # Define all queries
+        total_query = "MATCH (a:Norma) WHERE a.urn CONTAINS '~art' RETURN count(a) AS cnt"
+        brocardi_query = """
+            MATCH (a:Norma)
+            WHERE a.urn CONTAINS '~art'
+              AND (a.spiegazione IS NOT NULL OR a.ratio IS NOT NULL)
+            RETURN count(a) AS cnt
+        """
+        jurisprudence_query = """
+            MATCH (a:Norma)<-[:interpreta]-(j:AttoGiudiziario)
+            WHERE a.urn CONTAINS '~art'
+            RETURN count(DISTINCT a) AS cnt
+        """
+        libro_iv_query = """
+            MATCH (a:Norma)
+            WHERE a.urn STARTS WITH 'urn:nir:stato:regio.decreto:1942-03-16;262~art'
+            RETURN count(a) AS cnt
+        """
+
         try:
-            # Total articles
-            total_result = await self.client.query(
-                "MATCH (a:Norma) WHERE a.urn CONTAINS '~art' RETURN count(a) AS cnt",
-                {}
+            # Execute all queries in parallel for better performance
+            results = await asyncio.gather(
+                self.client.query(total_query, {}),
+                self.client.query(brocardi_query, {}),
+                self.client.query(jurisprudence_query, {}),
+                self.client.query(libro_iv_query, {}),
+                return_exceptions=True,
             )
-            if total_result:
+
+            # Process results
+            total_result = results[0] if not isinstance(results[0], Exception) else None
+            brocardi_result = results[1] if not isinstance(results[1], Exception) else None
+            jurisprudence_result = results[2] if not isinstance(results[2], Exception) else None
+            libro_iv_result = results[3] if not isinstance(results[3], Exception) else None
+
+            if total_result and len(total_result) > 0:
                 metrics.total_articles = total_result[0].get("cnt", 0)
 
-            # Articles with Brocardi enrichment (has commentary/spiegazione)
-            brocardi_result = await self.client.query(
-                """
-                MATCH (a:Norma)
-                WHERE a.urn CONTAINS '~art'
-                  AND (a.spiegazione IS NOT NULL OR a.ratio IS NOT NULL)
-                RETURN count(a) AS cnt
-                """,
-                {}
-            )
-            if brocardi_result:
+            if brocardi_result and len(brocardi_result) > 0:
                 metrics.articles_with_brocardi = brocardi_result[0].get("cnt", 0)
 
-            # Articles with jurisprudence links
-            jurisprudence_result = await self.client.query(
-                """
-                MATCH (a:Norma)<-[:interpreta]-(j:AttoGiudiziario)
-                WHERE a.urn CONTAINS '~art'
-                RETURN count(DISTINCT a) AS cnt
-                """,
-                {}
-            )
-            if jurisprudence_result:
+            if jurisprudence_result and len(jurisprudence_result) > 0:
                 metrics.articles_with_jurisprudence = jurisprudence_result[0].get("cnt", 0)
 
             # Libro IV coverage (arts 1321-2059 Codice Civile)
-            # Total articles in Libro IV
             libro_iv_total = 2059 - 1321 + 1  # ~739 articles
 
-            libro_iv_result = await self.client.query(
-                """
-                MATCH (a:Norma)
-                WHERE a.urn STARTS WITH 'urn:nir:stato:regio.decreto:1942-03-16;262~art'
-                RETURN count(a) AS cnt
-                """,
-                {}
-            )
-            if libro_iv_result:
+            if libro_iv_result and len(libro_iv_result) > 0:
                 libro_iv_count = libro_iv_result[0].get("cnt", 0)
                 # This is approximate - actual coverage should filter by article range
                 metrics.libro_iv_coverage_percent = min(

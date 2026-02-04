@@ -27,14 +27,26 @@ Esempio:
 
 import structlog
 import asyncio
+import time
 import numpy as np
 from typing import Dict, Any, Optional, List, Type
 from dataclasses import dataclass
 from datetime import datetime
 
-from merlt.experts.base import BaseExpert, ExpertContext, ExpertResponse
+from merlt.experts.base import BaseExpert, ExpertContext, ExpertResponse, FeedbackHook
 from merlt.experts.router import ExpertRouter, RoutingDecision
 from merlt.experts.synthesizer import AdaptiveSynthesizer, SynthesisConfig, SynthesisResult, SynthesisMode
+from merlt.experts.circuit_breaker import (
+    CircuitBreakerRegistry,
+    CircuitOpenError,
+    get_expert_circuit_breaker,
+    create_unavailable_response,
+)
+from merlt.experts.pipeline_types import (
+    PipelineTrace,
+    PipelineMetrics,
+    ExpertExecution,
+)
 
 # Import opzionale per HybridExpertRouter (neural gating)
 try:
@@ -54,6 +66,7 @@ from merlt.experts.principles import PrinciplesExpert
 from merlt.experts.precedent import PrecedentExpert
 from merlt.experts.query_analyzer import analyze_query, enrich_context
 from merlt.tools import BaseTool
+from merlt.tools.search import SemanticSearchTool
 from merlt.rlcf.execution_trace import ExecutionTrace, Action
 
 log = structlog.get_logger()
@@ -75,9 +88,11 @@ class OrchestratorConfig:
         automaticamente da AdaptiveSynthesizer tramite disagreement detection.
     """
     selection_threshold: float = 0.2
+    expert_weight_threshold: float = 0.1
     max_experts: int = 4
     parallel_execution: bool = True
     timeout_seconds: float = 30.0
+    enable_circuit_breaker: bool = True
 
 
 class MultiExpertOrchestrator:
@@ -158,7 +173,7 @@ class MultiExpertOrchestrator:
 
         # Router: preferisce HybridExpertRouter se disponibile
         self.hybrid_router = hybrid_router
-        self.router = router or ExpertRouter()
+        self.router = router or ExpertRouter(ai_service=ai_service)
 
         # Determina strategia di routing
         if self.hybrid_router is not None:
@@ -183,10 +198,17 @@ class MultiExpertOrchestrator:
         )
 
     def _init_experts(self):
-        """Inizializza tutti gli Expert."""
+        """Inizializza tutti gli Expert con tool instances separate.
+
+        Each expert gets its own cloned tool instances so that
+        collect_and_reset_traces() returns only that expert's traces.
+        The clones share backend references (retriever, graph_db, etc.)
+        but accumulate traces independently.
+        """
         for expert_type, expert_class in self.EXPERT_CLASSES.items():
+            expert_tools = [t.clone() for t in self.tools]
             self._experts[expert_type] = expert_class(
-                tools=self.tools,
+                tools=expert_tools,
                 ai_service=self.ai_service
             )
 
@@ -275,7 +297,8 @@ class MultiExpertOrchestrator:
         entities: Optional[Dict[str, List[str]]] = None,
         retrieved_chunks: Optional[List[Dict[str, Any]]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        return_trace: bool = False
+        return_trace: bool = False,
+        include_trace: bool = False
     ) -> SynthesisResult:
         """
         Processa una query attraverso il sistema multi-expert.
@@ -286,6 +309,7 @@ class MultiExpertOrchestrator:
             retrieved_chunks: Chunks già recuperati
             metadata: Metadati aggiuntivi
             return_trace: Se True, ritorna (result, trace) invece di solo result
+            include_trace: Se True, popola pipeline_trace nel risultato
 
         Returns:
             SynthesisResult con sintesi finale (o tuple se return_trace=True)
@@ -294,12 +318,14 @@ class MultiExpertOrchestrator:
             - disagreement_analysis: Analisi del disagreement
             - alternatives: Liste alternative (solo in divergent mode)
         """
-        import time
-        start_time = time.time()
+        start_time = time.perf_counter()
+
+        # Clear per-pipeline retrieval cache
+        SemanticSearchTool.clear_cache()
 
         trace_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 
-        # Inizializza ExecutionTrace
+        # Inizializza ExecutionTrace (RLCF)
         trace = ExecutionTrace(
             query_id=trace_id,
             metadata={
@@ -308,10 +334,20 @@ class MultiExpertOrchestrator:
             }
         )
 
+        # Inizializza PipelineTrace (scientific observability)
+        pipeline_trace = PipelineTrace(
+            trace_id=trace_id,
+            query_text=query,
+        ) if include_trace else None
+
+        pipeline_metrics = PipelineMetrics() if include_trace else None
+
         log.info(f"Processing query", query=query[:50], trace_id=trace_id)
 
-        # Step 1: Analizza query per estrarre entità
+        # Step 1: Analizza query per estrarre entità (NER stage)
+        ner_t0 = time.perf_counter()
         query_analysis = analyze_query(query)
+        ner_time_ms = (time.perf_counter() - ner_t0) * 1000
 
         log.info(
             "Query analyzed",
@@ -321,8 +357,21 @@ class MultiExpertOrchestrator:
             trace_id=trace_id
         )
 
+        if pipeline_trace is not None:
+            ner_entities = []
+            for concept in (query_analysis.legal_concepts or []):
+                ner_entities.append({"text": concept, "type": "LEGAL_CONCEPT"})
+            for ref in (query_analysis.norm_references or []):
+                ner_entities.append({"text": ref, "type": "NORM_REFERENCE"})
+            pipeline_trace.ner_result = {
+                "time_ms": round(ner_time_ms, 2),
+                "entities": ner_entities,
+                "query_type": query_analysis.query_type,
+            }
+            pipeline_trace.stage_times_ms["ner"] = ner_time_ms
+            pipeline_metrics.ner_time_ms = ner_time_ms
+
         # Step 2: Costruisci context con entità estratte
-        # Merge provided entities with extracted ones
         merged_entities = entities or {}
         if query_analysis.norm_references:
             merged_entities["norm_references"] = query_analysis.norm_references
@@ -348,14 +397,16 @@ class MultiExpertOrchestrator:
         )
 
         # Step 3: Routing - strategia basata su configurazione
+        routing_t0 = time.perf_counter()
         routing_used = "unknown"
         neural_confidence = None
+        gating_scores = {}
 
         if self._routing_strategy == "hybrid" and self.hybrid_router is not None:
-            # Hybrid routing: neural + regex fallback
             routing_decision = await self.hybrid_router.route(context)
-            routing_used = "neural" if routing_decision.neural_used else "regex_fallback"
+            routing_used = "neural" if routing_decision.neural_used else "llm_fallback"
             neural_confidence = routing_decision.neural_confidence
+            gating_scores = routing_decision.expert_weights or {}
 
             log.info(
                 "Hybrid routing decision",
@@ -365,7 +416,6 @@ class MultiExpertOrchestrator:
                 weights=routing_decision.expert_weights
             )
 
-            # Traccia azione di routing
             trace.add_action(Action(
                 action_type="routing",
                 parameters={
@@ -374,18 +424,17 @@ class MultiExpertOrchestrator:
                     "neural_confidence": routing_decision.neural_confidence,
                     "query_type": routing_decision.query_type,
                 },
-                log_prob=-0.1 if routing_decision.neural_used else -0.5,  # Neural routing ha log_prob più alto
+                log_prob=-0.1 if routing_decision.neural_used else -0.5,
             ))
 
-            # Seleziona Expert
             selected_experts = routing_decision.get_selected_experts(
                 threshold=self.config.selection_threshold
             )[:self.config.max_experts]
 
         elif self._routing_strategy == "neural_policy" and self.gating_policy and self.embedding_service:
-            # Neural routing con GatingPolicy (legacy)
             weights = await self._apply_gating_policy(context, trace)
             routing_used = "neural_policy"
+            gating_scores = weights
 
             log.info(
                 "Neural routing via GatingPolicy",
@@ -393,7 +442,6 @@ class MultiExpertOrchestrator:
                 trace_actions=trace.num_actions
             )
 
-            # Converti weights in selected_experts format
             selected_experts = [
                 (expert_type, weight)
                 for expert_type, weight in weights.items()
@@ -401,39 +449,59 @@ class MultiExpertOrchestrator:
             ][:self.config.max_experts]
 
             if not selected_experts:
-                # Fallback: seleziona top expert
                 top_expert = max(weights.items(), key=lambda x: x[1])
                 selected_experts = [top_expert]
 
         else:
-            # Traditional regex-based routing
             routing_decision = await self.router.route(context)
-            routing_used = "regex"
+            routing_used = getattr(self.router, '_last_method', 'regex')
+            gating_scores = routing_decision.expert_weights or {}
 
             log.info(
-                "Traditional routing decision",
+                "Routing decision",
                 query_type=routing_decision.query_type,
-                weights=routing_decision.expert_weights
+                weights=routing_decision.expert_weights,
+                method=routing_used,
             )
 
-            # Traccia azione di routing
             trace.add_action(Action(
                 action_type="routing",
                 parameters={
-                    "strategy": "regex",
+                    "strategy": routing_used,
                     "query_type": routing_decision.query_type,
                 },
-                log_prob=-0.5,
+                log_prob=-0.3 if routing_used == "llm" else -0.5,
             ))
 
-            # Step 4: Seleziona Expert
             selected_experts = routing_decision.get_selected_experts(
                 threshold=self.config.selection_threshold
             )[:self.config.max_experts]
 
             if not selected_experts:
-                # Fallback: usa tutti gli expert con peso uguale
                 selected_experts = [(exp, 1.0 / len(self._experts)) for exp in self._experts.keys()]
+
+        routing_time_ms = (time.perf_counter() - routing_t0) * 1000
+
+        if pipeline_trace is not None:
+            routing_trace = {
+                "time_ms": round(routing_time_ms, 2),
+                "method": routing_used,
+                "selected_experts": [e[0] for e in selected_experts],
+                "gating_scores": {k: round(v, 4) for k, v in gating_scores.items()} if gating_scores else {},
+            }
+            # Add neural gating details when hybrid routing is active
+            if self._routing_strategy == "hybrid" and hasattr(routing_decision, 'neural_confidence'):
+                routing_trace["neural_gating"] = {
+                    "neural_used": routing_decision.neural_used,
+                    "neural_confidence": round(routing_decision.neural_confidence, 4),
+                    "neural_weights": {k: round(v, 4) for k, v in routing_decision.neural_weights.items()} if routing_decision.neural_weights else {},
+                    "confidence_threshold": self.hybrid_router.confidence_threshold if self.hybrid_router else None,
+                    "expert_priors": self.hybrid_router.neural_gating.get_expert_priors() if self.hybrid_router else {},
+                    "trained": False,  # TODO: detect from checkpoint
+                }
+            pipeline_trace.routing_decision = routing_trace
+            pipeline_trace.stage_times_ms["routing"] = routing_time_ms
+            pipeline_metrics.routing_time_ms = routing_time_ms
 
         # Aggiorna metadata del trace con info routing
         trace.metadata["routing"] = {
@@ -444,25 +512,108 @@ class MultiExpertOrchestrator:
 
         log.info(f"Selected experts", experts=[e[0] for e in selected_experts])
 
-        # Step 5: Esegui Expert
+        # Step 5: Esegui Expert (con tracing)
+        expert_t0 = time.perf_counter()
         if self.config.parallel_execution:
-            responses = await self._run_experts_parallel(selected_experts, context)
+            results_with_timing = await self._run_experts_parallel(selected_experts, context)
         else:
-            responses = await self._run_experts_sequential(selected_experts, context)
+            results_with_timing = await self._run_experts_sequential(selected_experts, context)
 
-        # Step 6: Sintetizza con AdaptiveSynthesizer (disagreement detection)
-        weights = {exp: w for exp, w in selected_experts}
+        # Extract plain responses for downstream (synthesis etc.)
+        responses = [r[0] for r in results_with_timing]
+
+        # Collect traces from experts
+        if pipeline_trace is not None:
+            expert_executions = []
+            total_tokens = 0
+            for (expert_type, _), (resp, started_at, completed_at, measured_duration) in zip(selected_experts, results_with_timing):
+                expert = self._experts.get(expert_type)
+                if not expert:
+                    continue
+
+                # Collect traces from expert (LLM + tools + react)
+                expert_traces = expert.collect_and_reset_traces()
+
+                # Build retrieval_trace from tool calls
+                retrieval_trace = self._build_retrieval_trace(expert_traces["tool_calls"])
+
+                exec_entry = ExpertExecution(
+                    expert_type=expert_type,
+                    started_at=started_at,
+                    completed_at=completed_at,
+                    duration_ms=measured_duration,
+                    success=resp is not None and resp.confidence > 0.0,
+                    error=resp.limitations if resp and resp.confidence == 0.0 else None,
+                    input_context={
+                        "query": context.query_text[:200],
+                        "entities": {k: v[:3] if isinstance(v, list) else v for k, v in context.entities.items()} if context.entities else {},
+                    },
+                    output={
+                        "interpretation_preview": resp.interpretation[:300] if resp and resp.interpretation else "",
+                        "sources_count": len(resp.legal_basis) if resp and hasattr(resp, 'legal_basis') else 0,
+                    } if resp else None,
+                    tokens_used=resp.tokens_used if resp and hasattr(resp, 'tokens_used') else 0,
+                    confidence=resp.confidence if resp else 0.0,
+                    llm_calls=expert_traces.get("llm_calls", []),
+                    tool_calls=expert_traces.get("tool_calls", []),
+                    retrieval_trace=retrieval_trace,
+                    react_steps=expert_traces.get("react_steps", []),
+                )
+                expert_executions.append(exec_entry.to_dict())
+                total_tokens += exec_entry.tokens_used
+                pipeline_metrics.expert_times_ms[expert_type] = exec_entry.duration_ms
+                pipeline_metrics.experts_activated.append(expert_type)
+
+            pipeline_trace.expert_executions = expert_executions
+            pipeline_trace.total_tokens = total_tokens
+            pipeline_metrics.total_tokens = total_tokens
+
+        # Step 6: Gating weights (already computed by routing stage)
+        weights_dict = {exp: w for exp, w in selected_experts}
+
+        if pipeline_trace is not None:
+            pipeline_trace.gating_result = {
+                "weights": {k: round(v, 4) for k, v in weights_dict.items()},
+                "source": self._routing_strategy,
+            }
+            pipeline_trace.stage_times_ms["gating"] = 0.0
+            pipeline_metrics.gating_time_ms = 0.0
+
+        # Step 7: Sintetizza con AdaptiveSynthesizer (disagreement detection)
+        synthesis_t0 = time.perf_counter()
         synthesis_result = await self.synthesizer.synthesize(
             query=query,
             responses=responses,
-            weights=weights,
+            weights=weights_dict,
             trace_id=trace_id
         )
+        synthesis_time_ms = (time.perf_counter() - synthesis_t0) * 1000
 
-        # Calcola tempo di esecuzione
-        execution_time_ms = (time.time() - start_time) * 1000
+        # Calcola tempo di esecuzione totale
+        execution_time_ms = (time.perf_counter() - start_time) * 1000
 
-        # Aggiungi trace summary ai metadati
+        if pipeline_trace is not None:
+            # Synthesis stage
+            synthesis_stage = {
+                "time_ms": round(synthesis_time_ms, 2),
+                "mode": synthesis_result.mode.value,
+                "confidence": round(synthesis_result.confidence, 3),
+            }
+            if synthesis_result.disagreement_analysis:
+                pipeline_trace.disagreement_analysis = synthesis_result.disagreement_analysis.to_dict()
+            pipeline_trace.synthesis_result = synthesis_stage
+            pipeline_trace.stage_times_ms["synthesis"] = synthesis_time_ms
+            pipeline_metrics.synthesis_time_ms = synthesis_time_ms
+
+            # Finalize totals
+            pipeline_trace.total_time_ms = execution_time_ms
+            pipeline_metrics.total_time_ms = execution_time_ms
+
+            # Attach to synthesis_result metadata for downstream access
+            synthesis_result.metadata["pipeline_trace"] = pipeline_trace.to_dict()
+            synthesis_result.metadata["pipeline_metrics"] = pipeline_metrics.to_dict()
+
+        # Aggiungi trace summary ai metadati (RLCF)
         trace.metadata["synthesis_result"] = {
             "mode": synthesis_result.mode.value,
             "confidence": synthesis_result.confidence,
@@ -493,36 +644,76 @@ class MultiExpertOrchestrator:
         self,
         selected_experts: List[tuple],
         context: ExpertContext
-    ) -> List[ExpertResponse]:
-        """Esegue Expert in parallelo."""
-        async def run_with_timeout(expert_type: str) -> Optional[ExpertResponse]:
+    ) -> List[tuple]:
+        """Esegue Expert in parallelo con circuit breaker.
+
+        Returns:
+            List of (ExpertResponse, started_at, completed_at, duration_ms) tuples.
+        """
+        async def run_with_timeout(expert_type: str) -> Optional[tuple]:
             expert = self._experts.get(expert_type)
             if not expert:
                 return None
 
+            # Circuit breaker check
+            if self.config.enable_circuit_breaker:
+                cb = get_expert_circuit_breaker(expert_type)
+                if not cb.can_execute():
+                    log.warning(
+                        "expert_circuit_open",
+                        expert=expert_type,
+                        trace_id=context.trace_id,
+                    )
+                    resp = create_unavailable_response(
+                        expert_type, context.trace_id
+                    )
+                    now = datetime.now()
+                    return (resp, now, now, 0.0)
+
+            started_at = datetime.now()
+            t0 = time.perf_counter()
             try:
-                return await asyncio.wait_for(
+                response = await asyncio.wait_for(
                     expert.analyze(context),
                     timeout=self.config.timeout_seconds
                 )
+                duration_ms = (time.perf_counter() - t0) * 1000
+                completed_at = datetime.now()
+                # Record success for circuit breaker
+                if self.config.enable_circuit_breaker:
+                    cb = get_expert_circuit_breaker(expert_type)
+                    cb.record_success()
+                return (response, started_at, completed_at, duration_ms)
             except asyncio.TimeoutError:
+                duration_ms = (time.perf_counter() - t0) * 1000
+                completed_at = datetime.now()
                 log.warning(f"Expert {expert_type} timed out")
-                return ExpertResponse(
+                if self.config.enable_circuit_breaker:
+                    cb = get_expert_circuit_breaker(expert_type)
+                    cb.record_failure()
+                resp = ExpertResponse(
                     expert_type=expert_type,
-                    interpretation=f"Timeout durante l'analisi",
+                    interpretation="Timeout durante l'analisi",
                     confidence=0.0,
                     limitations="Timeout",
                     trace_id=context.trace_id
                 )
+                return (resp, started_at, completed_at, duration_ms)
             except Exception as e:
+                duration_ms = (time.perf_counter() - t0) * 1000
+                completed_at = datetime.now()
                 log.error(f"Expert {expert_type} failed: {e}")
-                return ExpertResponse(
+                if self.config.enable_circuit_breaker:
+                    cb = get_expert_circuit_breaker(expert_type)
+                    cb.record_failure()
+                resp = ExpertResponse(
                     expert_type=expert_type,
                     interpretation=f"Errore: {str(e)}",
                     confidence=0.0,
                     limitations=str(e),
                     trace_id=context.trace_id
                 )
+                return (resp, started_at, completed_at, duration_ms)
 
         tasks = [run_with_timeout(exp) for exp, _ in selected_experts]
         results = await asyncio.gather(*tasks)
@@ -533,33 +724,117 @@ class MultiExpertOrchestrator:
         self,
         selected_experts: List[tuple],
         context: ExpertContext
-    ) -> List[ExpertResponse]:
-        """Esegue Expert in sequenza."""
-        responses = []
+    ) -> List[tuple]:
+        """Esegue Expert in sequenza con circuit breaker.
+
+        Returns:
+            List of (ExpertResponse, started_at, completed_at, duration_ms) tuples.
+        """
+        results = []
 
         for expert_type, _ in selected_experts:
             expert = self._experts.get(expert_type)
             if not expert:
                 continue
 
+            # Circuit breaker check
+            if self.config.enable_circuit_breaker:
+                cb = get_expert_circuit_breaker(expert_type)
+                if not cb.can_execute():
+                    log.warning(
+                        "expert_circuit_open",
+                        expert=expert_type,
+                        trace_id=context.trace_id,
+                    )
+                    resp = create_unavailable_response(
+                        expert_type, context.trace_id
+                    )
+                    now = datetime.now()
+                    results.append((resp, now, now, 0.0))
+                    continue
+
+            started_at = datetime.now()
+            t0 = time.perf_counter()
             try:
                 response = await asyncio.wait_for(
                     expert.analyze(context),
                     timeout=self.config.timeout_seconds
                 )
-                responses.append(response)
+                duration_ms = (time.perf_counter() - t0) * 1000
+                completed_at = datetime.now()
+                if self.config.enable_circuit_breaker:
+                    cb = get_expert_circuit_breaker(expert_type)
+                    cb.record_success()
+                results.append((response, started_at, completed_at, duration_ms))
             except asyncio.TimeoutError:
+                duration_ms = (time.perf_counter() - t0) * 1000
+                completed_at = datetime.now()
                 log.warning(f"Expert {expert_type} timed out")
-                responses.append(ExpertResponse(
+                if self.config.enable_circuit_breaker:
+                    cb = get_expert_circuit_breaker(expert_type)
+                    cb.record_failure()
+                resp = ExpertResponse(
                     expert_type=expert_type,
                     interpretation="Timeout",
                     confidence=0.0,
                     trace_id=context.trace_id
-                ))
+                )
+                results.append((resp, started_at, completed_at, duration_ms))
             except Exception as e:
+                duration_ms = (time.perf_counter() - t0) * 1000
+                completed_at = datetime.now()
                 log.error(f"Expert {expert_type} failed: {e}")
+                if self.config.enable_circuit_breaker:
+                    cb = get_expert_circuit_breaker(expert_type)
+                    cb.record_failure()
+                resp = ExpertResponse(
+                    expert_type=expert_type,
+                    interpretation=f"Errore: {str(e)}",
+                    confidence=0.0,
+                    limitations=str(e),
+                    trace_id=context.trace_id
+                )
+                results.append((resp, started_at, completed_at, duration_ms))
 
-        return responses
+        return results
+
+    def _build_retrieval_trace(self, tool_calls: list) -> Optional[dict]:
+        """Build RetrievalTrace by aggregating data from tool calls."""
+        semantic_calls = [t for t in tool_calls if "semantic" in t.get("tool_name", "")]
+        graph_calls = [t for t in tool_calls if "graph" in t.get("tool_name", "")]
+
+        if not semantic_calls and not graph_calls:
+            return None
+
+        vector_time = sum(t.get("duration_ms", 0) for t in semantic_calls)
+        graph_time = sum(t.get("duration_ms", 0) for t in graph_calls)
+
+        # Aggregate across all semantic_search calls
+        alpha_used = 0.0
+        total_candidates = 0
+        total_after_reranking = 0
+        all_top_sources: list = []
+        seen_sources: set = set()
+
+        for tc in semantic_calls:
+            meta = tc.get("result_metadata", {})
+            if meta.get("retrieval_alpha"):
+                alpha_used = meta["retrieval_alpha"]
+            total_candidates += meta.get("total_candidates", 0)
+            total_after_reranking += meta.get("chunks_after_reranking", 0) or (tc.get("result_count", 0) or 0)
+            for urn in meta.get("top_source_urns", []):
+                if urn not in seen_sources:
+                    seen_sources.add(urn)
+                    all_top_sources.append(urn)
+
+        return {
+            "vector_search_time_ms": round(vector_time, 2),
+            "graph_enrichment_time_ms": round(graph_time, 2),
+            "total_chunks_retrieved": total_candidates,
+            "chunks_after_reranking": total_after_reranking,
+            "alpha_used": round(alpha_used, 3),
+            "top_sources": all_top_sources[:10],
+        }
 
     async def process_with_routing(
         self,

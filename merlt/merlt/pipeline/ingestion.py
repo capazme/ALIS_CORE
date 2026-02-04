@@ -31,17 +31,7 @@ from merlt.pipeline.chunking import StructuralChunker, Chunk, chunk_article
 from merlt.pipeline.visualex import VisualexArticle, NormaMetadata
 from merlt.models import BridgeMapping
 
-# TODO: Implement tree extraction locally
-# from merlt.utils.treextractor import NormTree, get_article_position
-
-# Placeholder classes for tree extraction
-class NormTree:
-    """Placeholder for NormTree. TODO: Implement locally."""
-    pass
-
-def get_article_position(*args, **kwargs):
-    """Placeholder for get_article_position. TODO: Implement locally."""
-    return None
+from merlt.clients import NormTree, get_article_position
 
 log = structlog.get_logger()
 

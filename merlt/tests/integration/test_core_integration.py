@@ -69,6 +69,7 @@ class TestImports:
 # Test FalkorDB Integration
 # ============================================================================
 
+@pytest.mark.integration
 class TestFalkorDBIntegration:
     """Test integrazione con FalkorDB reale."""
 
@@ -123,6 +124,7 @@ class TestFalkorDBIntegration:
 # Test Bridge Table Integration
 # ============================================================================
 
+@pytest.mark.integration
 class TestBridgeTableIntegration:
     """Test integrazione con Bridge Table (PostgreSQL) reale."""
 
@@ -193,6 +195,7 @@ class TestBridgeTableIntegration:
 # Test Scraper Integration
 # ============================================================================
 
+@pytest.mark.integration
 class TestScraperIntegration:
     """Test integrazione scrapers con siti reali."""
 
@@ -298,6 +301,7 @@ class TestPipelineIntegration:
 # Test Embedding Service Integration
 # ============================================================================
 
+@pytest.mark.integration
 class TestEmbeddingIntegration:
     """Test integrazione EmbeddingService."""
 
@@ -335,6 +339,7 @@ class TestEmbeddingIntegration:
 # Test LegalKnowledgeGraph Integration
 # ============================================================================
 
+@pytest.mark.integration
 class TestLegalKnowledgeGraphIntegration:
     """Test integrazione LegalKnowledgeGraph end-to-end."""
 

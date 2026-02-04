@@ -452,15 +452,19 @@ class TemporalQuery:
         Returns:
             VersionDiff with segments showing changes, or None if versions not found
         """
+        import asyncio
+
         parsed_date_a = self._parse_date(date_a)
         parsed_date_b = self._parse_date(date_b)
 
         if not parsed_date_a or not parsed_date_b:
             return None
 
-        # Get both versions
-        version_a = await self.get_norm_at_date(urn, parsed_date_a)
-        version_b = await self.get_norm_at_date(urn, parsed_date_b)
+        # Get both versions in parallel for better performance
+        version_a, version_b = await asyncio.gather(
+            self.get_norm_at_date(urn, parsed_date_a),
+            self.get_norm_at_date(urn, parsed_date_b),
+        )
 
         if not version_a or not version_b:
             return None

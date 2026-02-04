@@ -33,6 +33,7 @@ from merlt.experts.base import (
     LegalSource,
     ReasoningStep,
     ConfidenceFactors,
+    FeedbackHook,
 )
 from merlt.experts.react_mixin import ReActMixin
 from merlt.tools import BaseTool, SemanticSearchTool, GraphSearchTool
@@ -214,13 +215,32 @@ class LiteralExpert(BaseExpert, ReActMixin):
 
         return response
 
+    def _rewrite_search_query(self, context: ExpertContext) -> str:
+        """Rewrite query for literal interpretation focus.
+
+        Focuses on exact text, definitions, and term meanings.
+        Extracts article numbers and legal terms for targeted search.
+        """
+        query = context.query_text
+        # Extract article references for more focused search
+        articles = context.entities.get("article_numbers", [])
+        concepts = context.entities.get("legal_concepts", [])
+
+        if articles and concepts:
+            # Focus on the article text and key terms
+            return f"testo articolo {' '.join(articles)} {' '.join(concepts)} definizione significato"
+        elif articles:
+            return f"testo articolo {' '.join(articles)} disposizione normativa"
+        # Fallback: original query (will hit cache if systemic uses same)
+        return query
+
     async def _retrieve_sources(self, context: ExpertContext) -> List[Dict[str, Any]]:
         """
         Recupera fonti usando i tools disponibili.
 
         Flow:
         1. Usa chunks già recuperati se presenti
-        2. Semantic search per trovare norme rilevanti
+        2. Semantic search per trovare norme rilevanti (query rewritten for literal focus)
         3. Estrai URN dai risultati semantic search
         4. Graph search per espandere le relazioni (SEMPRE, non solo se norm_references)
         """
@@ -237,12 +257,14 @@ class LiteralExpert(BaseExpert, ReActMixin):
                     explored_urns.add(urn)
 
         # Step 2: Semantic search - SOLO norme per LiteralExpert (art. 12, I)
+        # Query rewritten to focus on exact text and definitions
+        search_query = self._rewrite_search_query(context)
         semantic_tool = self._tool_registry.get("semantic_search")
         semantic_results = []
         if semantic_tool:
             source_types = get_source_types_for_expert("LiteralExpert")
             result = await semantic_tool(
-                query=context.query_text,
+                query=search_query,
                 top_k=5,
                 expert_type="LiteralExpert",
                 source_types=source_types  # ["norma"] - significato proprio delle parole
@@ -308,8 +330,8 @@ class LiteralExpert(BaseExpert, ReActMixin):
         user_prompt = self._format_context_for_llm(context)
 
         try:
-            # Call LLM
-            response = await self.ai_service.generate_response_async(
+            # Call LLM (traced)
+            response = await self._traced_llm_call(
                 prompt=f"{system_prompt}\n\n{user_prompt}",
                 model=self.model,
                 temperature=self.temperature
@@ -322,6 +344,10 @@ class LiteralExpert(BaseExpert, ReActMixin):
             else:
                 content = str(response)
                 tokens = 0
+            # Fallback: read usage from ai_service
+            if tokens == 0 and hasattr(self.ai_service, 'get_last_usage'):
+                svc_usage = self.ai_service.get_last_usage()
+                tokens = svc_usage.get("total_tokens", 0)
 
             # Clean markdown
             content = content.strip()
@@ -446,14 +472,66 @@ class LiteralExpert(BaseExpert, ReActMixin):
             source_availability=cf_data.get("source_availability", 0.5)
         )
 
+        # Create F3 feedback hook for RLCF (LiteralExpert = F3)
+        confidence = data.get("confidence", 0.5)
+        interpretation = data.get("interpretation", "")
+        feedback_hook = None
+        if self.config.get("enable_f3_feedback", True):
+            feedback_hook = FeedbackHook(
+                feedback_type="F3",
+                expert_type=self.expert_type,
+                response_id=context.trace_id,
+                enabled=True,
+                correction_options={
+                    "interpretation_quality": [
+                        "excellent",
+                        "good",
+                        "fair",
+                        "poor",
+                    ],
+                    "source_relevance": [
+                        "all_relevant",
+                        "mostly_relevant",
+                        "some_irrelevant",
+                        "mostly_irrelevant",
+                    ],
+                    "confidence_calibration": [
+                        "well_calibrated",
+                        "overconfident",
+                        "underconfident",
+                    ],
+                    "textual_accuracy": [
+                        "faithful",
+                        "reasonable",
+                        "stretched",
+                        "incorrect",
+                    ],
+                    "missing_elements": [
+                        "none",
+                        "minor_details",
+                        "key_articles",
+                        "fundamental",
+                    ],
+                },
+                context_snapshot={
+                    "query": context.query_text[:200],
+                    "sources_count": len(legal_basis),
+                    "source_ids": [s.source_id for s in legal_basis[:5]],
+                    "confidence": confidence,
+                    "confidence_factors": confidence_factors.to_dict(),
+                    "interpretation_preview": interpretation[:300],
+                },
+            )
+
         return ExpertResponse(
             expert_type=self.expert_type,
-            interpretation=data.get("interpretation", ""),
+            interpretation=interpretation,
             legal_basis=legal_basis,
             reasoning_steps=reasoning_steps,
-            confidence=data.get("confidence", 0.5),
+            confidence=confidence,
             confidence_factors=confidence_factors,
             limitations=data.get("limitations", ""),
             trace_id=context.trace_id,
-            tokens_used=tokens
+            tokens_used=tokens,
+            feedback_hook=feedback_hook,
         )

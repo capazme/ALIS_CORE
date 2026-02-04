@@ -42,13 +42,22 @@ from merlt.experts.base import (
     LegalSource,
     ReasoningStep,
     ConfidenceFactors,
+    FeedbackHook,
 )
 from merlt.experts.literal import LiteralExpert
 from merlt.experts.systemic import SystemicExpert
 from merlt.experts.principles import PrinciplesExpert
 from merlt.experts.precedent import PrecedentExpert
 from merlt.experts.router import ExpertRouter, RoutingDecision
-from merlt.experts.gating import GatingNetwork, AggregatedResponse
+from merlt.experts.gating import (
+    GatingNetwork,
+    AggregatedResponse,
+    AggregationMethod,
+    GatingConfig as GatingNetworkConfig,
+    ExpertContribution,
+    DEFAULT_EXPERT_WEIGHTS,
+    USER_PROFILE_MODIFIERS,
+)
 from merlt.experts.orchestrator import MultiExpertOrchestrator, OrchestratorConfig
 from merlt.experts.react_mixin import ReActMixin, ReActResult, ThoughtActionObservation
 from merlt.experts.synthesizer import (
@@ -56,6 +65,19 @@ from merlt.experts.synthesizer import (
     SynthesisMode,
     SynthesisConfig,
     SynthesisResult,
+    UserProfile,
+    AccordionSection,
+)
+from merlt.experts.circuit_breaker import (
+    CircuitBreaker,
+    CircuitBreakerRegistry,
+    CircuitBreakerConfig,
+    CircuitOpenError,
+)
+from merlt.experts.pipeline_types import (
+    PipelineRequest,
+    PipelineTrace,
+    PipelineResult,
 )
 
 # Neural Gating (opzionale - richiede PyTorch)
@@ -88,6 +110,7 @@ __all__ = [
     "LegalSource",
     "ReasoningStep",
     "ConfidenceFactors",
+    "FeedbackHook",
     # Experts - 4 canoni ermeneutici delle Preleggi
     "LiteralExpert",      # Art. 12, I (significato proprio)
     "SystemicExpert",     # Art. 12, I (connessione) + Art. 14 (storico)
@@ -98,6 +121,11 @@ __all__ = [
     "RoutingDecision",
     "GatingNetwork",
     "AggregatedResponse",
+    "AggregationMethod",
+    "GatingNetworkConfig",
+    "ExpertContribution",
+    "DEFAULT_EXPERT_WEIGHTS",
+    "USER_PROFILE_MODIFIERS",
     "MultiExpertOrchestrator",
     "OrchestratorConfig",
     # ReAct Pattern
@@ -109,6 +137,17 @@ __all__ = [
     "SynthesisMode",
     "SynthesisConfig",
     "SynthesisResult",
+    "UserProfile",
+    "AccordionSection",
+    # Circuit Breaker
+    "CircuitBreaker",
+    "CircuitBreakerRegistry",
+    "CircuitBreakerConfig",
+    "CircuitOpenError",
+    # Pipeline Types
+    "PipelineRequest",
+    "PipelineTrace",
+    "PipelineResult",
     # Neural Gating (opzionale - disponibile se PyTorch installato)
     "NEURAL_GATING_AVAILABLE",
     "HybridExpertRouter",

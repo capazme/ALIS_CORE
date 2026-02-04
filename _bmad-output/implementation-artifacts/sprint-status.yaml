@@ -84,39 +84,41 @@ development_status:
   # ============================================
   # Epic 3: Norm Browsing & Search
   # ============================================
+  # Backend Complete - Frontend stories (3-1, 3-2, 3-4) pending in visualex-platform
   epic-3: in-progress
-  3-1-norm-hierarchical-browser: backlog
-  3-2-article-viewer: backlog
+  3-1-norm-hierarchical-browser: backlog  # Frontend - visualex-platform
+  3-2-article-viewer: backlog  # Frontend - visualex-platform
   3-3-search-by-keyword-urn: done
-  3-4-citation-highlighting-linking: backlog
+  3-4-citation-highlighting-linking: backlog  # Frontend + NER - visualex-platform
   3-5-cross-references-panel: done
   3-6-historical-versions-timeline: done
   3-7-modification-detection-alert: done
   3-8-kg-coverage-dashboard: done
-  epic-3-retrospective: optional
+  epic-3-retrospective: done  # Backend retrospective completed 2026-02-02
 
   # ============================================
   # Epic 4: MERL-T Analysis Pipeline
   # ============================================
-  epic-4: backlog
-  4-1-ner-pipeline-integration: backlog
-  4-2-expert-router: backlog
-  4-3-literalexpert-implementation: backlog
-  4-4-systemicexpert-implementation: backlog
-  4-5-principlesexpert-implementation: backlog
-  4-6-precedentexpert-implementation: backlog
-  4-7-gating-network: backlog
-  4-8-synthesizer: backlog
-  4-9-circuit-breaker-implementation: backlog
-  4-10-llm-provider-abstraction: backlog
+  epic-4: done
+  4-1-ner-pipeline-integration: done  # Completed 2026-02-02 - NER service with URN resolution
+  4-2-expert-router: done  # Completed 2026-02-02 - Query classification and Expert routing
+  4-3-literalexpert-implementation: done  # Completed 2026-02-02 - LiteralExpert with F3 feedback hook
+  4-4-systemicexpert-implementation: done  # Completed 2026-02-02 - SystemicExpert with F4 feedback hook, graph traversal, relation weights
+  4-5-principlesexpert-implementation: done  # Completed 2026-02-02 - PrinciplesExpert with F5 feedback, constitutional principles, immutable taxonomy
+  4-6-precedentexpert-implementation: done  # Completed 2026-02-02 - PrecedentExpert with F6 feedback, authority ranking, conflict detection, recency boost
+  4-7-gating-network: done  # Completed 2026-02-02 - GatingNetwork with 4 aggregation methods, F7 feedback, user profile support
+  4-8-synthesizer: done  # Completed 2026-02-02 - Synthesizer with profile-aware formatting, progressive disclosure, F7 feedback
+  4-9-circuit-breaker-implementation: done  # Completed 2026-02-02 - Circuit breaker with thread-safe registry, state callbacks, graceful degradation
+  4-10-llm-provider-abstraction: done  # Completed 2026-02-02 - Multi-provider support, failover, config-driven, per-Expert models
   4-11-expert-pipeline-status-ui: backlog
-  4-12-gold-standard-regression: backlog
-  epic-4-retrospective: optional
+  4-12-gold-standard-regression: done
+  epic-4-retrospective: done
 
   # ============================================
   # Epic 5: Traceability & Source Verification
   # ============================================
-  epic-5: backlog
+  epic-5: in-progress  # Started 2026-02-02 with Story 5.0
+  5-0-expert-pipeline-orchestrator: done  # Completed 2026-02-02 - Foundation for tracing, connects all Epic 4 components
   5-1-reasoning-trace-storage: backlog
   5-2-trace-viewer-ui: backlog
   5-3-source-navigation: backlog

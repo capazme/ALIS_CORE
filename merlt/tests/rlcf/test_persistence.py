@@ -17,6 +17,9 @@ from datetime import datetime, timedelta
 import numpy as np
 import torch
 
+# Schema uses PostgreSQL ARRAY type — requires real PostgreSQL
+pytestmark = pytest.mark.integration
+
 # Set SQLite for tests
 os.environ["RLCF_ASYNC_DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 

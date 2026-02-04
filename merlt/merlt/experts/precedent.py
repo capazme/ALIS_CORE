@@ -34,6 +34,7 @@ from merlt.experts.base import (
     LegalSource,
     ReasoningStep,
     ConfidenceFactors,
+    FeedbackHook,
 )
 from merlt.experts.react_mixin import ReActMixin
 from merlt.tools import BaseTool
@@ -233,13 +234,33 @@ class PrecedentExpert(BaseExpert, ReActMixin):
 
         return response
 
+    def _rewrite_search_query(self, context: ExpertContext) -> str:
+        """Rewrite query for precedent/jurisprudential focus.
+
+        Focuses on case law, court decisions, established
+        interpretation, and practical application.
+        """
+        concepts = context.entities.get("legal_concepts", [])
+        articles = context.entities.get("article_numbers", [])
+
+        if concepts and articles:
+            return (
+                f"giurisprudenza sentenza articolo {' '.join(articles)} "
+                f"{' '.join(concepts)} orientamento cassazione"
+            )
+        elif concepts:
+            return f"giurisprudenza {' '.join(concepts)} orientamento precedente massima"
+        elif articles:
+            return f"giurisprudenza articolo {' '.join(articles)} sentenza cassazione"
+        return context.query_text
+
     async def _retrieve_sources(self, context: ExpertContext) -> List[Dict[str, Any]]:
         """
         Recupera fonti usando i tools disponibili.
 
         Flow:
         1. Usa chunks già recuperati se presenti
-        2. Semantic search per trovare massime
+        2. Semantic search per trovare massime (query rewritten)
         3. Estrai URN dai risultati per graph expansion
         """
         sources = []
@@ -254,11 +275,12 @@ class PrecedentExpert(BaseExpert, ReActMixin):
                     self._extracted_urns.add(urn)
 
         # Semantic search - SOLO massime per PrecedentExpert (diritto vivente)
+        search_query = self._rewrite_search_query(context)
         semantic_tool = self._tool_registry.get("semantic_search")
         if semantic_tool:
             source_types = get_source_types_for_expert("PrecedentExpert")
             result = await semantic_tool(
-                query=context.query_text,
+                query=search_query,
                 top_k=5,
                 expert_type="PrecedentExpert",
                 source_types=source_types  # ["massima"] - prassi giurisprudenziale
@@ -398,7 +420,7 @@ class PrecedentExpert(BaseExpert, ReActMixin):
         user_prompt = self._format_context_for_llm(context)
 
         try:
-            response = await self.ai_service.generate_response_async(
+            response = await self._traced_llm_call(
                 prompt=f"{system_prompt}\n\n{user_prompt}",
                 model=self.model,
                 temperature=self.temperature
@@ -410,6 +432,10 @@ class PrecedentExpert(BaseExpert, ReActMixin):
             else:
                 content = str(response)
                 tokens = 0
+            # Fallback: read usage from ai_service
+            if tokens == 0 and hasattr(self.ai_service, 'get_last_usage'):
+                svc_usage = self.ai_service.get_last_usage()
+                tokens = svc_usage.get("total_tokens", 0)
 
             content = content.strip()
             if content.startswith("```json"):
@@ -552,14 +578,62 @@ class PrecedentExpert(BaseExpert, ReActMixin):
         if data.get("key_precedents"):
             limitations += f"\n\nPrecedenti chiave: {', '.join(data['key_precedents'])}"
 
+        # Create F6 feedback hook for RLCF (PrecedentExpert = F6)
+        confidence = data.get("confidence", 0.5)
+        interpretation = data.get("interpretation", "")
+        feedback_hook = None
+        if self.config.get("enable_f6_feedback", True):
+            feedback_hook = FeedbackHook(
+                feedback_type="F6",
+                expert_type=self.expert_type,
+                response_id=context.trace_id,
+                enabled=True,
+                correction_options={
+                    "case_relevance": [
+                        "all_relevant",
+                        "mostly_relevant",
+                        "some_irrelevant",
+                        "mostly_irrelevant",
+                    ],
+                    "jurisprudence_currency": [
+                        "current",
+                        "mostly_current",
+                        "outdated",
+                    ],
+                    "conflict_detection": [
+                        "correctly_detected",
+                        "missed_conflict",
+                        "false_conflict",
+                        "no_conflict",
+                    ],
+                    "hierarchy_respect": [
+                        "properly_weighted",
+                        "underweighted_supreme",
+                        "overweighted_merit",
+                    ],
+                    "confidence_calibration": [
+                        "well_calibrated",
+                        "overconfident",
+                        "underconfident",
+                    ],
+                },
+                context_snapshot={
+                    "query": context.query_text[:200],
+                    "sources_count": len(legal_basis),
+                    "confidence": confidence,
+                    "interpretation_preview": interpretation[:300],
+                },
+            )
+
         return ExpertResponse(
             expert_type=self.expert_type,
-            interpretation=data.get("interpretation", ""),
+            interpretation=interpretation,
             legal_basis=legal_basis,
             reasoning_steps=reasoning_steps,
-            confidence=data.get("confidence", 0.5),
+            confidence=confidence,
             confidence_factors=confidence_factors,
             limitations=limitations.strip(),
             trace_id=context.trace_id,
-            tokens_used=tokens
+            tokens_used=tokens,
+            feedback_hook=feedback_hook,
         )

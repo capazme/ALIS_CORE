@@ -16,6 +16,8 @@ from merlt.storage.bridge import BridgeTable, BridgeTableConfig
 from merlt.storage.bridge.bridge_builder import BridgeBuilder, insert_ingestion_result
 from merlt.pipeline.ingestion import BridgeMapping
 
+pytestmark = pytest.mark.integration
+
 
 @pytest_asyncio.fixture(scope="function")
 async def bridge_table():

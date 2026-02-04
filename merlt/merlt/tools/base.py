@@ -157,6 +157,9 @@ class BaseTool(ABC):
         if not self.description:
             raise ValueError("Tool must have a description")
 
+        # Scientific tracing
+        self._tool_call_traces: List[Dict[str, Any]] = []
+
         log.debug(f"Tool initialized: {self.name}")
 
     @property
@@ -205,19 +208,105 @@ class BaseTool(ABC):
 
         return None
 
+    @staticmethod
+    def _safe_param(v: Any, max_len: int = 200) -> Any:
+        """Serialize a parameter value for tracing, preserving JSON types."""
+        if v is None or isinstance(v, (bool, int, float)):
+            return v
+        if isinstance(v, (list, tuple)):
+            return [BaseTool._safe_param(item, max_len) for item in v]
+        if isinstance(v, dict):
+            return {k2: BaseTool._safe_param(v2, max_len) for k2, v2 in v.items()}
+        s = str(v)
+        return s[:max_len] if len(s) > max_len else s
+
+    def collect_and_reset_traces(self) -> List[Dict[str, Any]]:
+        """Collect and reset tool call traces."""
+        traces = list(self._tool_call_traces)
+        self._tool_call_traces.clear()
+        return traces
+
+    def clone(self) -> "BaseTool":
+        """Create a shallow copy with fresh trace list.
+
+        Shares backend references (retriever, graph_db, embeddings)
+        but each clone accumulates its own independent traces.
+        """
+        import copy
+        cloned = copy.copy(self)
+        cloned._tool_call_traces = []
+        return cloned
+
     async def __call__(self, **kwargs) -> ToolResult:
         """
-        Esegue il tool con validazione.
+        Esegue il tool con validazione e tracing.
 
         Shortcut per validate + execute.
         """
+        import time as _time
+        import uuid as _uuid
+
+        call_id = _uuid.uuid4().hex[:8]
+        started_at = datetime.now()
+        t0 = _time.perf_counter()
+
         error = self.validate_params(**kwargs)
         if error:
+            duration_ms = (_time.perf_counter() - t0) * 1000
+            self._tool_call_traces.append({
+                "call_id": call_id,
+                "tool_name": self.name,
+                "parameters": {k: self._safe_param(v) for k, v in kwargs.items()},
+                "started_at": started_at.isoformat(),
+                "completed_at": datetime.now().isoformat(),
+                "duration_ms": round(duration_ms, 2),
+                "success": False,
+                "result_summary": "",
+                "error": error[:200],
+            })
             return ToolResult.fail(error, tool_name=self.name)
 
         try:
-            return await self.execute(**kwargs)
+            result = await self.execute(**kwargs)
+            duration_ms = (_time.perf_counter() - t0) * 1000
+
+            result_count = None
+            if result.success and result.data is not None:
+                if isinstance(result.data, (list, tuple)):
+                    result_count = len(result.data)
+                elif isinstance(result.data, dict):
+                    if "results" in result.data:
+                        result_count = len(result.data["results"])
+                    elif "total_nodes" in result.data:
+                        result_count = result.data["total_nodes"]
+
+            self._tool_call_traces.append({
+                "call_id": call_id,
+                "tool_name": self.name,
+                "parameters": {k: self._safe_param(v) for k, v in kwargs.items()},
+                "started_at": started_at.isoformat(),
+                "completed_at": datetime.now().isoformat(),
+                "duration_ms": round(duration_ms, 2),
+                "success": result.success,
+                "result_summary": str(result.data)[:200] if result.data else "",
+                "result_count": result_count,
+                "result_metadata": result.metadata if result.metadata else {},
+                "error": result.error[:200] if result.error else None,
+            })
+            return result
         except Exception as e:
+            duration_ms = (_time.perf_counter() - t0) * 1000
+            self._tool_call_traces.append({
+                "call_id": call_id,
+                "tool_name": self.name,
+                "parameters": {k: self._safe_param(v) for k, v in kwargs.items()},
+                "started_at": started_at.isoformat(),
+                "completed_at": datetime.now().isoformat(),
+                "duration_ms": round(duration_ms, 2),
+                "success": False,
+                "result_summary": "",
+                "error": str(e)[:200],
+            })
             log.error(f"Tool {self.name} failed", error=str(e))
             return ToolResult.fail(str(e), tool_name=self.name)
 

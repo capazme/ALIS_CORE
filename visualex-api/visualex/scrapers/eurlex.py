@@ -1,4 +1,3 @@
-import os
 import re
 import structlog
 from playwright.async_api import async_playwright
@@ -12,6 +11,21 @@ from ..utils.selectors import EURLexSelectors
 # Configure structured logger
 log = structlog.get_logger()
 
+# Playwright configuration constants
+BROWSER_ARGS = ['--no-sandbox', '--disable-dev-shm-usage']
+VIEWPORT_WIDTH = 1920
+VIEWPORT_HEIGHT = 1080
+PAGE_TIMEOUT_MS = 30000
+MIN_VALID_HTML_LENGTH = 1000  # Minimum bytes for a valid EUR-Lex page
+USER_AGENT = (
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+    'AppleWebKit/537.36 (KHTML, like Gecko) '
+    'Chrome/120.0.0.0 Safari/537.36'
+)
+
+# Article detection pattern (matches Articolo N, Article N, Art. N)
+ARTICLE_PATTERN = re.compile(r'^Articolo\s+\d+|^Article\s+\d+|^Art\.\s+\d+', re.IGNORECASE)
+
 
 class EurlexScraper(BaseScraper):
     def __init__(self):
@@ -22,19 +36,19 @@ class EurlexScraper(BaseScraper):
 
     async def _fetch_with_playwright(self, url: str) -> str:
         """Fetch URL using Playwright to bypass CloudFront WAF protection."""
-        log.info(f"Consulting EUR-Lex with Playwright - URL: {url}")
+        log.info("Consulting EUR-Lex with Playwright", url=url)
         async with async_playwright() as p:
             browser = await p.chromium.launch(
                 headless=True,
-                args=['--no-sandbox', '--disable-dev-shm-usage']
+                args=BROWSER_ARGS
             )
             try:
                 context = await browser.new_context(
-                    viewport={'width': 1920, 'height': 1080},
-                    user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                    viewport={'width': VIEWPORT_WIDTH, 'height': VIEWPORT_HEIGHT},
+                    user_agent=USER_AGENT
                 )
                 page = await context.new_page()
-                await page.goto(url, wait_until='networkidle', timeout=30000)
+                await page.goto(url, wait_until='networkidle', timeout=PAGE_TIMEOUT_MS)
                 html = await page.content()
                 await context.close()
                 return html
@@ -45,14 +59,14 @@ class EurlexScraper(BaseScraper):
         """Override base request_document to use Playwright for WAF bypass."""
         try:
             html = await self._fetch_with_playwright(url)
-            if not html or len(html) < 1000:
+            if not html or len(html) < MIN_VALID_HTML_LENGTH:
                 raise DocumentNotFoundError(f"Document not found or empty at {url}", urn=url)
             log.debug("EUR-Lex document fetched successfully with Playwright")
             return html
         except DocumentNotFoundError:
             raise
         except Exception as e:
-            log.error(f"Error during EUR-Lex consultation: {e}")
+            log.error("Error during EUR-Lex consultation", error=str(e), url=url)
             raise NetworkError(f"Failed to fetch EUR-Lex document: {e}")
 
     def get_uri(self, act_type, year, num):
@@ -123,11 +137,11 @@ class EurlexScraper(BaseScraper):
 
         article_section = None
 
-        # Strategy 1: Look for <p class="ti-art"> (original selector)
+        # Strategy 1: Look for <p class="ti-art"> (EUR-Lex article title selector)
         for pattern in search_patterns:
-            article_section = soup.find(lambda tag: tag.name == 'p' and 'ti-art' in tag.get('class', []) and tag.get_text(strip=True).startswith(pattern))
+            article_section = soup.find(lambda tag: tag.name == 'p' and self.selectors.ARTICLE_CLASS in tag.get('class', []) and tag.get_text(strip=True).startswith(pattern))
             if article_section:
-                log.debug(f"Found article with ti-art class using pattern: {pattern}")
+                log.debug(f"Found article with {self.selectors.ARTICLE_CLASS} class using pattern: {pattern}")
                 break
 
         # Strategy 2: Look for any element with class containing 'art' or 'title'
@@ -147,7 +161,7 @@ class EurlexScraper(BaseScraper):
 
         # Strategy 4: Search in eli-subdivision divs (common EUR-Lex structure)
         if not article_section:
-            subdivisions = soup.find_all('div', class_=lambda c: c and 'eli-subdivision' in c)
+            subdivisions = soup.find_all('div', class_=lambda c: c and self.selectors.SUBDIVISION in c)
             for subdiv in subdivisions:
                 title_elem = subdiv.find(['p', 'span', 'div'], string=lambda s: s and any(s.strip().startswith(p) for p in search_patterns))
                 if title_elem:
@@ -166,16 +180,13 @@ class EurlexScraper(BaseScraper):
         full_text = [article_section.get_text(strip=True)]
         element = article_section.find_next_sibling()
 
-        # Detect end of article by finding next article
-        next_article_pattern = re.compile(r'^Articolo\s+\d+|^Article\s+\d+|^Art\.\s+\d+', re.IGNORECASE)
-
         while element:
             # Check if we've reached the next article
-            if element.name == 'p' and 'ti-art' in element.get('class', []):
-                log.debug("Next article section found (ti-art class), stopping extraction")
+            if element.name == 'p' and self.selectors.ARTICLE_CLASS in element.get('class', []):
+                log.debug("Next article section found", selector=self.selectors.ARTICLE_CLASS)
                 break
             elem_text = element.get_text(strip=True) if element.name else ''
-            if next_article_pattern.match(elem_text):
+            if ARTICLE_PATTERN.match(elem_text):
                 log.debug("Next article section found (text pattern), stopping extraction")
                 break
             if element.name in ['p', 'div', 'span']:

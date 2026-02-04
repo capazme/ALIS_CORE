@@ -27,6 +27,7 @@ from merlt.experts import (
     SynthesisResult,
     SynthesisMode,
 )
+from merlt.experts.gating import GatingConfig, AggregationMethod, ExpertContribution
 
 
 # ============================================================================
@@ -176,7 +177,15 @@ class TestAggregatedResponse:
         """Crea response aggregata."""
         response = AggregatedResponse(
             synthesis="Sintesi test",
-            expert_contributions={"literal": {"interpretation": "Test"}},
+            expert_contributions={
+                "literal": ExpertContribution(
+                    expert_type="literal",
+                    interpretation="Test",
+                    confidence=0.8,
+                    weight=1.0,
+                    weighted_confidence=0.8,
+                )
+            },
             confidence=0.8
         )
 
@@ -204,13 +213,13 @@ class TestGatingNetwork:
         """Inizializza con default."""
         gating = GatingNetwork()
 
-        assert gating.method == "weighted_average"
+        assert gating._config.method == AggregationMethod.WEIGHTED_AVERAGE
 
     def test_init_custom_method(self):
         """Inizializza con metodo custom."""
-        gating = GatingNetwork(method="ensemble")
+        gating = GatingNetwork(config=GatingConfig(method=AggregationMethod.ENSEMBLE))
 
-        assert gating.method == "ensemble"
+        assert gating._config.method == AggregationMethod.ENSEMBLE
 
     @pytest.mark.asyncio
     async def test_aggregate_empty(self):
@@ -281,7 +290,7 @@ class TestGatingNetwork:
     @pytest.mark.asyncio
     async def test_aggregate_best_confidence(self):
         """Aggrega con metodo best_confidence."""
-        gating = GatingNetwork(method="best_confidence")
+        gating = GatingNetwork(config=GatingConfig(method=AggregationMethod.BEST_CONFIDENCE))
 
         responses = [
             ExpertResponse(expert_type="literal", interpretation="Low", confidence=0.3),
@@ -297,7 +306,7 @@ class TestGatingNetwork:
     @pytest.mark.asyncio
     async def test_aggregate_ensemble(self):
         """Aggrega con metodo ensemble."""
-        gating = GatingNetwork(method="ensemble")
+        gating = GatingNetwork(config=GatingConfig(method=AggregationMethod.ENSEMBLE))
 
         responses = [
             ExpertResponse(expert_type="literal", interpretation="Letterale", confidence=0.8),
@@ -311,8 +320,8 @@ class TestGatingNetwork:
         )
 
         assert result.aggregation_method == "ensemble"
-        assert "LITERAL" in result.synthesis
-        assert "PRINCIPLES" in result.synthesis
+        assert "Literal" in result.synthesis
+        assert "Principles" in result.synthesis
 
     @pytest.mark.asyncio
     async def test_detect_conflicts(self):
