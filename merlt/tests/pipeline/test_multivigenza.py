@@ -9,7 +9,7 @@ Ground truth verificato manualmente su Normattiva.it (Dicembre 2025).
 
 import pytest
 from unittest.mock import AsyncMock, patch
-from visualex.models.norma import Modifica, TipoModifica, Norma, NormaVisitata
+from merlt.clients.models import Modifica, TipoModifica, Norma, NormaVisitata
 from merlt.pipeline.multivigenza import (
     parse_disposizione,
     parse_disposizione_with_llm,

@@ -96,7 +96,10 @@ apiClient.interceptors.response.use(
 /**
  * Generic GET request
  */
-export const get = async <T = any>(url: string, params?: any): Promise<T> => {
+export const get = async <T = unknown>(
+  url: string,
+  params?: Record<string, unknown>
+): Promise<T> => {
   const response = await apiClient.get<T>(url, { params });
   return response.data;
 };
@@ -107,9 +110,9 @@ export const get = async <T = any>(url: string, params?: any): Promise<T> => {
  * @param data - Request body
  * @param options - Optional config (e.g., timeout)
  */
-export const post = async <T = any>(
+export const post = async <T = unknown, D = unknown>(
   url: string,
-  data?: any,
+  data?: D,
   options?: { timeout?: number }
 ): Promise<T> => {
   const response = await apiClient.post<T>(url, data, {
@@ -121,7 +124,10 @@ export const post = async <T = any>(
 /**
  * Generic PUT request
  */
-export const put = async <T = any>(url: string, data?: any): Promise<T> => {
+export const put = async <T = unknown, D = unknown>(
+  url: string,
+  data?: D
+): Promise<T> => {
   const response = await apiClient.put<T>(url, data);
   return response.data;
 };
@@ -129,7 +135,10 @@ export const put = async <T = any>(url: string, data?: any): Promise<T> => {
 /**
  * Generic PATCH request
  */
-export const patch = async <T = any>(url: string, data?: any): Promise<T> => {
+export const patch = async <T = unknown, D = unknown>(
+  url: string,
+  data?: D
+): Promise<T> => {
   const response = await apiClient.patch<T>(url, data);
   return response.data;
 };
@@ -137,7 +146,7 @@ export const patch = async <T = any>(url: string, data?: any): Promise<T> => {
 /**
  * Generic DELETE request
  */
-export const del = async <T = any>(url: string): Promise<T> => {
+export const del = async <T = unknown>(url: string): Promise<T> => {
   const response = await apiClient.delete<T>(url);
   return response.data;
 };

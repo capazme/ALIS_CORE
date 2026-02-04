@@ -307,6 +307,8 @@ class NormaController:
         self.app.add_url_rule('/health', view_func=self.health, methods=['GET'])
         self.app.add_url_rule('/health/detailed', view_func=self.health_detailed, methods=['GET'])
         self.app.add_url_rule('/version', view_func=self.get_version, methods=['GET'])
+        # Admin endpoints
+        self.app.add_url_rule('/admin/ingest', view_func=self.admin_ingest, methods=['POST'])
 
 
     async def home(self):
@@ -996,6 +998,76 @@ class NormaController:
             },
             'changelog': changelog
         })
+
+    # ==================== Admin Endpoints ====================
+
+    async def admin_ingest(self):
+        """
+        Trigger manual ingestion of norms into the Knowledge Graph.
+
+        Request body:
+        {
+            "urn": "urn:nir:stato:regio.decreto:1942-03-16;262~art1453",  // Single article
+            // OR
+            "act_type": "codice civile",
+            "article_range": "1470-1490",  // Range
+            // OR
+            "act_type": "codice civile",
+            "articles": ["1453", "1454"]  // List
+        }
+        """
+        try:
+            data = await request.get_json()
+            log.info("Received data for admin_ingest", data=data)
+
+            # Import here to avoid circular imports and only when needed
+            from visualex.graph.admin import IngestService, IngestRequest
+            from visualex.graph.client import FalkorDBClient
+            from visualex.graph.config import FalkorDBConfig
+
+            # Build request
+            ingest_request = IngestRequest(
+                urn=data.get('urn'),
+                act_type=data.get('act_type'),
+                article_range=data.get('article_range'),
+                articles=data.get('articles'),
+                include_brocardi=data.get('include_brocardi', True),
+                force_refresh=data.get('force_refresh', False),
+            )
+
+            # Validate request
+            error = ingest_request.validate()
+            if error:
+                return jsonify({'error': error}), 400
+
+            # Create graph client
+            config = FalkorDBConfig()
+            async with FalkorDBClient(config) as client:
+                # Create ingest service
+                service = IngestService(
+                    client=client,
+                    normattiva_scraper=normattiva_scraper,
+                    brocardi_scraper=brocardi_scraper,
+                )
+
+                # Execute ingestion
+                result = await service.ingest(ingest_request)
+
+            log.info(
+                "Ingest job completed",
+                job_id=result.job_id,
+                status=result.status,
+                total=result.total,
+                succeeded=result.succeeded,
+                failed=result.failed,
+            )
+
+            status_code = 200 if result.status == "completed" else 207  # 207 = Multi-Status
+            return jsonify(result.to_dict()), status_code
+
+        except Exception as e:
+            log.error("Error in admin_ingest", error=str(e), exc_info=True)
+            return jsonify({'error': str(e)}), 500
 
     async def export_pdf(self):
         try:

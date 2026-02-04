@@ -70,6 +70,182 @@ export interface ResendVerificationResponse {
   message: string;
 }
 
+// Profile types for ALIS user experience levels
+export type ProfileType =
+  | 'quick_consultation'   // ⚡ Consultazione Rapida
+  | 'assisted_research'    // 📖 Ricerca Assistita
+  | 'expert_analysis'      // 🔍 Analisi Esperta
+  | 'active_contributor';  // 🎓 Contributore Attivo (requires authority ≥ 0.5)
+
+export interface UserPreferences {
+  theme: 'light' | 'dark' | 'system';
+  language: 'it' | 'en';
+  notifications_enabled: boolean;
+}
+
+export interface ProfileDescription {
+  type: ProfileType;
+  emoji: string;
+  name: string;
+  description: string;
+  available: boolean;
+  requiresAuthority?: number;
+}
+
+export interface ProfileResponse {
+  profile_type: ProfileType;
+  authority_score: number;
+  preferences: UserPreferences;
+  available_profiles: ProfileDescription[];
+}
+
+export interface UpdateProfileRequest {
+  profile_type: ProfileType;
+}
+
+export interface UpdatePreferencesRequest {
+  theme?: 'light' | 'dark' | 'system';
+  language?: 'it' | 'en';
+  notifications_enabled?: boolean;
+}
+
+// ============================================================================
+// Consent Types (GDPR Art. 6, Art. 7)
+// ============================================================================
+
+export type ConsentLevel = 'basic' | 'learning' | 'research';
+
+export interface ConsentLevelDescription {
+  level: ConsentLevel;
+  emoji: string;
+  name: string;
+  description: string;
+  dataCollected: string[];
+}
+
+export interface ConsentResponse {
+  consent_level: ConsentLevel;
+  granted_at: string;
+  available_levels: ConsentLevelDescription[];
+}
+
+export interface UpdateConsentRequest {
+  consent_level: ConsentLevel;
+}
+
+export interface UpdateConsentResponse {
+  message: string;
+  warning?: string;
+  consent_level: ConsentLevel;
+  granted_at: string;
+  is_downgrade: boolean;
+}
+
+export interface ConsentHistoryEntry {
+  id: string;
+  previous_level: ConsentLevel | null;
+  new_level: ConsentLevel;
+  changed_at: string;
+}
+
+export interface ConsentHistoryResponse {
+  history: ConsentHistoryEntry[];
+}
+
+// ============================================================================
+// Authority Types (RLCF Influence)
+// ============================================================================
+
+export interface AuthorityComponentDescription {
+  score: number;
+  weighted: number;
+  name: string;
+  description: string;
+  weight: number;
+  icon: string;
+}
+
+export interface AuthorityComponents {
+  baseline: AuthorityComponentDescription;
+  track_record: AuthorityComponentDescription;
+  recent_performance: AuthorityComponentDescription;
+}
+
+export interface AuthorityResponse {
+  authority_score: number;
+  feedback_count: number;
+  updated_at: string;
+  components: AuthorityComponents;
+  message?: string; // Message for new users
+}
+
+// ============================================================================
+// Privacy Types (GDPR Art. 17, Art. 20)
+// ============================================================================
+
+export interface PrivacyStatusResponse {
+  deletion_pending: boolean;
+  deletion_requested_at: string | null;
+  deletion_reason: string | null;
+  days_remaining: number | null;
+  account_active: boolean;
+  consent_level: ConsentLevel;
+}
+
+export interface DeleteAccountRequest {
+  password: string;
+  reason?: string;
+}
+
+export interface DeleteAccountResponse {
+  message: string;
+  deletion_requested_at: string;
+  grace_period_days: number;
+  warning: string;
+}
+
+export interface CancelDeletionResponse {
+  message: string;
+  account_status: string;
+}
+
+export interface DataExport {
+  exported_at: string;
+  gdpr_reference: string;
+  user: {
+    id: string;
+    email: string;
+    username: string;
+    profile_type: string;
+    is_verified: boolean;
+    created_at: string;
+    last_login_at: string | null;
+    login_count: number;
+  };
+  preferences: {
+    theme: string;
+    language: string;
+    notifications_enabled: boolean;
+  };
+  consent: {
+    current_level: string;
+    granted_at: string | null;
+    history: Array<{
+      previous_level: string | null;
+      new_level: string;
+      changed_at: string;
+    }>;
+  };
+  authority: {
+    score: number;
+    baseline: number;
+    track_record: number;
+    recent_performance: number;
+    feedback_count: number;
+    updated_at: string | null;
+  };
+}
+
 export interface UserResponse {
   id: string;
   email: string;
@@ -78,6 +254,10 @@ export interface UserResponse {
   is_verified: boolean;
   is_admin: boolean;
   is_merlt_enabled: boolean;
+  profile_type: ProfileType;
+  authority_score: number;
+  login_count?: number;
+  last_login_at?: string | null;
   created_at: string;
   updated_at?: string;
 }
@@ -188,7 +368,7 @@ export interface FolderBulkMove {
 
 export interface BookmarkCreate {
   norma_key: string;
-  norma_data: any; // JSON object
+  norma_data: Record<string, unknown>; // JSON object with norma data
   folder_id?: string;
   tags?: string[];
   notes?: string;
@@ -204,7 +384,7 @@ export interface BookmarkUpdate {
 export interface BookmarkResponse {
   id: string;
   normaKey: string;
-  normaData: any;
+  normaData: Record<string, unknown>;
   title?: string;
   folderId?: string;
   tags: string[];
@@ -298,5 +478,5 @@ export type Highlight = HighlightResponse;
 export interface APIError {
   status?: number;
   message: string;
-  data?: any;
+  data?: Record<string, unknown>;
 }

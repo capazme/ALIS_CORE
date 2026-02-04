@@ -217,9 +217,21 @@ export const resendVerificationEmail = async (req: Request, res: Response) => {
   res.json({ message: 'Verification email sent. Please check your inbox.' });
 };
 
+// Security logging helper
+const logSecurityEvent = (event: string, details: Record<string, unknown>) => {
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    event,
+    ...details,
+  };
+  // In production, this should use a proper logging framework (winston, pino, etc.)
+  console.log('[SECURITY]', JSON.stringify(logEntry));
+};
+
 // Login
 export const login = async (req: Request, res: Response) => {
   const { email, password } = loginSchema.parse(req.body);
+  const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
 
   // Find user
   const user = await prisma.user.findUnique({
@@ -227,6 +239,12 @@ export const login = async (req: Request, res: Response) => {
   });
 
   if (!user) {
+    // Log failed attempt - user not found (don't reveal this to client)
+    logSecurityEvent('LOGIN_FAILED', {
+      reason: 'user_not_found',
+      email,
+      ip: clientIp,
+    });
     throw new AppError(401, 'Invalid credentials');
   }
 
@@ -234,10 +252,24 @@ export const login = async (req: Request, res: Response) => {
   const isPasswordValid = await verifyPassword(password, user.password);
 
   if (!isPasswordValid) {
+    // Log failed attempt - invalid password
+    logSecurityEvent('LOGIN_FAILED', {
+      reason: 'invalid_password',
+      email,
+      userId: user.id,
+      ip: clientIp,
+    });
     throw new AppError(401, 'Invalid credentials');
   }
 
   if (!user.isActive) {
+    // Log failed attempt - account inactive
+    logSecurityEvent('LOGIN_FAILED', {
+      reason: 'account_inactive',
+      email,
+      userId: user.id,
+      ip: clientIp,
+    });
     throw new AppError(403, 'Il tuo account è in attesa di approvazione. Contatta un amministratore.');
   }
 
@@ -254,6 +286,26 @@ export const login = async (req: Request, res: Response) => {
   const accessToken = generateAccessToken(updatedUser.id, updatedUser.email);
   const refreshToken = generateRefreshToken(updatedUser.id, updatedUser.email);
 
+  // Create refresh token record
+  const refreshTokenExpiresAt = new Date();
+  refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7); // 7 days
+
+  await prisma.refreshToken.create({
+    data: {
+      token: refreshToken,
+      userId: updatedUser.id,
+      expiresAt: refreshTokenExpiresAt,
+    },
+  });
+
+  // Log successful login
+  logSecurityEvent('LOGIN_SUCCESS', {
+    email: updatedUser.email,
+    userId: updatedUser.id,
+    ip: clientIp,
+    loginCount: updatedUser.loginCount,
+  });
+
   res.json({
     access_token: accessToken,
     refresh_token: refreshToken,
@@ -266,6 +318,8 @@ export const login = async (req: Request, res: Response) => {
       is_verified: updatedUser.isVerified,
       is_admin: updatedUser.isAdmin,
       is_merlt_enabled: updatedUser.isMerltEnabled,
+      profile_type: updatedUser.profileType,
+      authority_score: updatedUser.authorityScore,
       created_at: updatedUser.createdAt,
       login_count: updatedUser.loginCount,
       last_login_at: updatedUser.lastLoginAt,
@@ -283,10 +337,28 @@ export const refresh = async (req: Request, res: Response) => {
     throw new AppError(401, 'Invalid refresh token');
   }
 
-  // Verify user still exists and is active
-  const user = await prisma.user.findUnique({
-    where: { id: payload.userId },
+  // Check if token exists in DB and is active
+  const storedToken = await prisma.refreshToken.findUnique({
+    where: { token: refresh_token },
+    include: { user: true },
   });
+
+  if (!storedToken) {
+    throw new AppError(401, 'Refresh token not found');
+  }
+
+  if (storedToken.revoked) {
+    // Token reuse detection - potential security event
+    // Could revoke all user tokens here
+    throw new AppError(401, 'Refresh token revoked');
+  }
+
+  if (new Date() > storedToken.expiresAt) {
+    throw new AppError(401, 'Refresh token expired');
+  }
+
+  // Verify user still exists and is active
+  const user = storedToken.user;
 
   if (!user || !user.isActive) {
     throw new AppError(401, 'User not found or inactive');
@@ -294,11 +366,29 @@ export const refresh = async (req: Request, res: Response) => {
 
   // Generate new tokens
   const accessToken = generateAccessToken(user.id, user.email);
-  const refreshToken = generateRefreshToken(user.id, user.email);
+  const newRefreshToken = generateRefreshToken(user.id, user.email);
+  const newRefreshTokenExpiresAt = new Date();
+  newRefreshTokenExpiresAt.setDate(newRefreshTokenExpiresAt.getDate() + 7);
+
+  // Rotate: Revoke old token, create new one
+  // Check transaction support
+  await prisma.$transaction([
+    prisma.refreshToken.update({
+      where: { id: storedToken.id },
+      data: { revoked: true },
+    }),
+    prisma.refreshToken.create({
+      data: {
+        token: newRefreshToken,
+        userId: user.id,
+        expiresAt: newRefreshTokenExpiresAt,
+      },
+    }),
+  ]);
 
   res.json({
     access_token: accessToken,
-    refresh_token: refreshToken,
+    refresh_token: newRefreshToken,
     token_type: 'Bearer',
   });
 };
@@ -317,6 +407,8 @@ export const getCurrentUser = async (req: Request, res: Response) => {
     is_verified: req.user.isVerified,
     is_admin: req.user.isAdmin,
     is_merlt_enabled: req.user.isMerltEnabled,
+    profile_type: req.user.profileType,
+    authority_score: req.user.authorityScore,
     created_at: req.user.createdAt,
     login_count: req.user.loginCount,
     last_login_at: req.user.lastLoginAt,

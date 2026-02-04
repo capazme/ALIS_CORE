@@ -24,6 +24,7 @@ Esempio:
 
 import structlog
 import re
+import json
 from typing import Dict, Any, Optional, List, Tuple
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -200,14 +201,44 @@ class ExpertRouter:
         },
     }
 
-    def __init__(self, config_path: Optional[Path] = None):
+    # Prompt template for LLM-based query classification
+    LLM_CLASSIFY_PROMPT = """\
+Classifica la seguente domanda giuridica in UNO dei seguenti tipi.
+Rispondi SOLO con un JSON valido, senza altro testo.
+
+Tipi disponibili:
+- "definitional": definizioni, "cos'è", "cosa si intende per"
+- "interpretive": interpretazione di norme, conseguenze giuridiche, significato di articoli
+- "procedural": procedure, termini, adempimenti, "come si fa"
+- "constitutional": diritti fondamentali, principi costituzionali
+- "jurisprudential": orientamenti giurisprudenziali, sentenze, massime, precedenti
+- "systemic": relazioni tra norme, evoluzione storica, coordinamento normativo
+- "teleological": ratio legis, finalità, scopo della norma, intenzione del legislatore
+
+Domanda: {query}
+
+Rispondi con: {{"type": "<tipo>", "confidence": <0.0-1.0>}}"""
+
+    def __init__(
+        self,
+        config_path: Optional[Path] = None,
+        ai_service: Any = None,
+        classification_model: str = "google/gemini-2.0-flash-001",
+        disable_regex: bool = False,
+    ):
         """
         Inizializza il router.
 
         Args:
             config_path: Path opzionale a config YAML
+            ai_service: Servizio AI per LLM-based classification (opzionale, fallback a regex)
+            classification_model: Modello per classificazione (default: gemini-2.0-flash)
+            disable_regex: Se True, non usa regex classification; se LLM fallisce usa "general"
         """
         self.config_path = config_path
+        self.ai_service = ai_service
+        self.classification_model = classification_model
+        self.disable_regex = disable_regex
         self.query_weights = self.DEFAULT_QUERY_WEIGHTS.copy()
 
         # Carica config da YAML se presente
@@ -219,7 +250,14 @@ class ExpertRouter:
             for query_type, patterns in self.QUERY_PATTERNS.items()
         }
 
-        log.info("ExpertRouter initialized")
+        # Tracks which method was last used (for trace reporting)
+        self._last_method: str = "regex"
+
+        if disable_regex:
+            routing_mode = "llm" if ai_service else "general"
+        else:
+            routing_mode = "llm+regex" if ai_service else "regex"
+        log.info("ExpertRouter initialized", mode=routing_mode)
 
     def _load_config(self):
         """Carica configurazione da YAML."""
@@ -239,6 +277,9 @@ class ExpertRouter:
         """
         Determina quali Expert invocare per la query.
 
+        Strategy: LLM classification first (if ai_service available),
+        regex fallback otherwise.
+
         Args:
             context: ExpertContext con la query
 
@@ -246,9 +287,24 @@ class ExpertRouter:
             RoutingDecision con pesi per ogni expert
         """
         query = context.query_text.lower()
+        self._last_method = "regex"
 
-        # Step 1: Identifica tipo di query
-        query_type, type_confidence = self._identify_query_type(query)
+        # Step 1: Identifica tipo di query (LLM-first, regex/general fallback)
+        if self.ai_service is not None:
+            llm_result = await self._classify_with_llm(context.query_text)
+            if llm_result is not None:
+                query_type, type_confidence = llm_result
+                self._last_method = "llm"
+            elif self.disable_regex:
+                query_type, type_confidence = "general", 0.5
+                self._last_method = "general_fallback"
+            else:
+                query_type, type_confidence = self._identify_query_type(query)
+        elif self.disable_regex:
+            query_type, type_confidence = "general", 0.5
+            self._last_method = "general_fallback"
+        else:
+            query_type, type_confidence = self._identify_query_type(query)
 
         # Step 2: Ottieni pesi base per tipo
         base_weights = self.query_weights.get(query_type, self.query_weights["general"]).copy()
@@ -267,10 +323,11 @@ class ExpertRouter:
         reasoning = self._build_reasoning(query_type, context, final_weights)
 
         log.info(
-            f"Router decision",
+            "Router decision",
             query_type=query_type,
             confidence=type_confidence,
-            weights=final_weights
+            weights=final_weights,
+            method=self._last_method,
         )
 
         return RoutingDecision(
@@ -278,8 +335,49 @@ class ExpertRouter:
             query_type=query_type,
             confidence=type_confidence,
             reasoning=reasoning,
-            parallel=True  # Default: esegui in parallelo
+            parallel=True,
         )
+
+    async def _classify_with_llm(self, query: str) -> Optional[Tuple[str, float]]:
+        """Classify query type using a fast LLM.
+
+        Returns:
+            (query_type, confidence) or None if classification fails.
+        """
+        valid_types = set(self.query_weights.keys())
+        prompt = self.LLM_CLASSIFY_PROMPT.format(query=query)
+
+        try:
+            response = await self.ai_service.generate_response_async(
+                prompt=prompt,
+                model=self.classification_model,
+                temperature=0.0,
+            )
+
+            text = response.get("content", str(response)) if isinstance(response, dict) else str(response)
+
+            # Strip markdown fences if present
+            text = text.strip()
+            if text.startswith("```"):
+                text = text.split("\n", 1)[-1]
+            if text.endswith("```"):
+                text = text.rsplit("```", 1)[0]
+            text = text.strip()
+
+            parsed = json.loads(text)
+            q_type = parsed.get("type", "").strip().lower()
+            q_conf = float(parsed.get("confidence", 0.5))
+
+            if q_type not in valid_types:
+                log.warning("llm_classify_unknown_type", llm_type=q_type)
+                return None
+
+            log.info("llm_classification", query_type=q_type, confidence=q_conf)
+            return q_type, q_conf
+
+        except Exception as e:
+            log.warning("llm_classification_failed", error=str(e)[:100])
+            return None
 
     def _identify_query_type(self, query: str) -> Tuple[str, float]:
         """

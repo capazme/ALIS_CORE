@@ -33,6 +33,7 @@ from merlt.experts.base import (
     LegalSource,
     ReasoningStep,
     ConfidenceFactors,
+    FeedbackHook,
 )
 from merlt.experts.react_mixin import ReActMixin
 from merlt.tools import BaseTool
@@ -218,13 +219,31 @@ class PrinciplesExpert(BaseExpert, ReActMixin):
 
         return response
 
+    def _rewrite_search_query(self, context: ExpertContext) -> str:
+        """Rewrite query for principles/teleological interpretation focus.
+
+        Focuses on ratio legis, legislative intent, constitutional
+        principles, and the purpose behind the norm.
+        """
+        concepts = context.entities.get("legal_concepts", [])
+        articles = context.entities.get("article_numbers", [])
+
+        if concepts:
+            return (
+                f"ratio legis finalità principio {' '.join(concepts)} "
+                f"intenzione legislatore tutela"
+            )
+        elif articles:
+            return f"ratio legis articolo {' '.join(articles)} finalità scopo norma"
+        return context.query_text
+
     async def _retrieve_sources(self, context: ExpertContext) -> List[Dict[str, Any]]:
         """
         Recupera fonti usando i tools disponibili.
 
         Flow:
         1. Usa chunks già recuperati se presenti
-        2. Semantic search per trovare ratio e spiegazioni
+        2. Semantic search per trovare ratio e spiegazioni (query rewritten)
         3. Estrai URN dai risultati per graph expansion
         """
         sources = []
@@ -239,11 +258,12 @@ class PrinciplesExpert(BaseExpert, ReActMixin):
                     self._extracted_urns.add(urn)
 
         # Semantic search - ratio e spiegazioni per PrinciplesExpert (art. 12, II)
+        search_query = self._rewrite_search_query(context)
         semantic_tool = self._tool_registry.get("semantic_search")
         if semantic_tool:
             source_types = get_source_types_for_expert("PrinciplesExpert")
             result = await semantic_tool(
-                query=context.query_text,
+                query=search_query,
                 top_k=5,
                 expert_type="PrinciplesExpert",
                 source_types=source_types  # ["ratio", "spiegazione"] - principi generali
@@ -350,7 +370,7 @@ class PrinciplesExpert(BaseExpert, ReActMixin):
         user_prompt = self._format_context_for_llm(context)
 
         try:
-            response = await self.ai_service.generate_response_async(
+            response = await self._traced_llm_call(
                 prompt=f"{system_prompt}\n\n{user_prompt}",
                 model=self.model,
                 temperature=self.temperature
@@ -362,6 +382,10 @@ class PrinciplesExpert(BaseExpert, ReActMixin):
             else:
                 content = str(response)
                 tokens = 0
+            # Fallback: read usage from ai_service
+            if tokens == 0 and hasattr(self.ai_service, 'get_last_usage'):
+                svc_usage = self.ai_service.get_last_usage()
+                tokens = svc_usage.get("total_tokens", 0)
 
             content = content.strip()
             if content.startswith("```json"):
@@ -502,14 +526,64 @@ class PrinciplesExpert(BaseExpert, ReActMixin):
         if data.get("constitutional_framework"):
             limitations += f"\n\nQuadro costituzionale: {data['constitutional_framework']}"
 
+        # Create F5 feedback hook for RLCF (PrinciplesExpert = F5)
+        confidence = data.get("confidence", 0.5)
+        interpretation = data.get("interpretation", "")
+        feedback_hook = None
+        if self.config.get("enable_f5_feedback", True):
+            feedback_hook = FeedbackHook(
+                feedback_type="F5",
+                expert_type=self.expert_type,
+                response_id=context.trace_id,
+                enabled=True,
+                correction_options={
+                    "ratio_legis_quality": [
+                        "excellent",
+                        "good",
+                        "partial",
+                        "incorrect",
+                    ],
+                    "principle_relevance": [
+                        "all_relevant",
+                        "mostly_relevant",
+                        "some_irrelevant",
+                        "mostly_irrelevant",
+                    ],
+                    "constitutional_grounding": [
+                        "well_grounded",
+                        "reasonable",
+                        "weak",
+                        "not_applicable",
+                    ],
+                    "doctrinal_support": [
+                        "strong_consensus",
+                        "majority_view",
+                        "divided",
+                        "minority_view",
+                    ],
+                    "confidence_calibration": [
+                        "well_calibrated",
+                        "overconfident",
+                        "underconfident",
+                    ],
+                },
+                context_snapshot={
+                    "query": context.query_text[:200],
+                    "sources_count": len(legal_basis),
+                    "confidence": confidence,
+                    "interpretation_preview": interpretation[:300],
+                },
+            )
+
         return ExpertResponse(
             expert_type=self.expert_type,
-            interpretation=data.get("interpretation", ""),
+            interpretation=interpretation,
             legal_basis=legal_basis,
             reasoning_steps=reasoning_steps,
-            confidence=data.get("confidence", 0.5),
+            confidence=confidence,
             confidence_factors=confidence_factors,
             limitations=limitations.strip(),
             trace_id=context.trace_id,
-            tokens_used=tokens
+            tokens_used=tokens,
+            feedback_hook=feedback_hook,
         )

@@ -6,6 +6,35 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 
+def pytest_addoption(parser):
+    """Add custom command line options."""
+    parser.addoption(
+        "--run-live",
+        action="store_true",
+        default=False,
+        help="Run live tests that hit real external websites"
+    )
+
+
+def pytest_configure(config):
+    """Configure custom markers."""
+    config.addinivalue_line(
+        "markers",
+        "live: mark test as live test that hits real external websites"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    """Skip live tests unless --run-live is passed."""
+    if config.getoption("--run-live"):
+        # --run-live given: do not skip live tests
+        return
+    skip_live = pytest.mark.skip(reason="need --run-live option to run")
+    for item in items:
+        if "live" in item.keywords:
+            item.add_marker(skip_live)
+
+
 @pytest.fixture(scope="session")
 def event_loop():
     """Create an instance of the default event loop for each test case."""

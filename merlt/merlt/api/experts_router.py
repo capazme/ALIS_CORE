@@ -47,6 +47,7 @@ class ExpertQueryRequest(BaseModel):
     user_id: str = Field(..., description="User ID for tracking and authority")
     context: Optional[Dict[str, Any]] = Field(None, description="Additional context (entities, article_urn, etc.)")
     max_experts: Optional[int] = Field(4, ge=1, le=4, description="Max number of experts to invoke")
+    include_trace: bool = Field(False, description="Include full pipeline trace in response")
 
 
 class SourceReference(BaseModel):
@@ -67,6 +68,8 @@ class ExpertQueryResponse(BaseModel):
     experts_used: List[str] = Field(default_factory=list, description="Experts that analyzed the query")
     confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence score")
     execution_time_ms: int = Field(..., description="Execution time in milliseconds")
+    pipeline_trace: Optional[Dict[str, Any]] = Field(None, description="Full pipeline trace (when include_trace=True)")
+    pipeline_metrics: Optional[Dict[str, Any]] = Field(None, description="Pipeline metrics (when include_trace=True)")
 
 
 class InlineFeedbackRequest(BaseModel):
@@ -217,7 +220,8 @@ async def query_experts(
             query=request.query,
             entities=request.context.get("entities") if request.context else None,
             retrieved_chunks=request.context.get("retrieved_chunks") if request.context else None,
-            metadata={"user_id": request.user_id}
+            metadata={"user_id": request.user_id},
+            include_trace=request.include_trace
         )
 
         execution_time_ms = int((time.time() - start_time) * 1000)
@@ -238,6 +242,14 @@ async def query_experts(
         # Extract experts used from expert_contributions
         experts_used = list(result.expert_contributions.keys())
 
+        # Extract pipeline trace from result metadata
+        pipeline_trace_data = result.metadata.get("pipeline_trace") if request.include_trace else None
+        pipeline_metrics_data = result.metadata.get("pipeline_metrics") if request.include_trace else None
+
+        # Inject trace_id into pipeline_trace for correlation
+        if pipeline_trace_data:
+            pipeline_trace_data["trace_id"] = trace_id
+
         # Save trace to database
         trace = QATrace(
             trace_id=trace_id,
@@ -247,7 +259,8 @@ async def query_experts(
             synthesis_mode=result.mode.value,
             synthesis_text=result.synthesis,
             sources=[s.dict() for s in sources],  # Store as JSONB
-            execution_time_ms=execution_time_ms
+            execution_time_ms=execution_time_ms,
+            full_trace=pipeline_trace_data,
         )
         session.add(trace)
         await session.commit()
@@ -258,7 +271,8 @@ async def query_experts(
             mode=result.mode.value,
             experts_count=len(experts_used),
             sources_count=len(sources),
-            execution_time_ms=execution_time_ms
+            execution_time_ms=execution_time_ms,
+            has_trace=pipeline_trace_data is not None
         )
 
         # Return response
@@ -270,7 +284,9 @@ async def query_experts(
             sources=sources,
             experts_used=experts_used,
             confidence=result.confidence,
-            execution_time_ms=execution_time_ms
+            execution_time_ms=execution_time_ms,
+            pipeline_trace=pipeline_trace_data,
+            pipeline_metrics=pipeline_metrics_data,
         )
 
     except Exception as e:
@@ -679,3 +695,34 @@ async def submit_refine_feedback(
     except Exception as e:
         log.error("Failed to process refine feedback", error=str(e))
         raise HTTPException(status_code=500, detail=f"Failed to process refinement: {str(e)}")
+
+
+@router.get("/trace/{trace_id}")
+async def get_trace(
+    trace_id: str,
+    session: AsyncSession = Depends(get_async_session_dep)
+):
+    """
+    Recupera il trace completo di una query precedente.
+
+    Returns the full pipeline trace JSON stored during query execution.
+    Only available for queries executed with include_trace=True.
+
+    Example:
+        GET /api/experts/trace/trace_abc123def456
+    """
+    result = await session.execute(
+        select(QATrace).where(QATrace.trace_id == trace_id)
+    )
+    qa_trace = result.scalar_one_or_none()
+
+    if not qa_trace:
+        raise HTTPException(status_code=404, detail=f"Trace {trace_id} not found")
+
+    if not qa_trace.full_trace:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No pipeline trace available for {trace_id}. Was the query executed with include_trace=True?"
+        )
+
+    return qa_trace.full_trace

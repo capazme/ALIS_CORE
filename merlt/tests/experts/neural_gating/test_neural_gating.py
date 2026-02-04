@@ -333,7 +333,7 @@ class TestHybridExpertRouter:
         return HybridExpertRouter(
             neural_gating=mlp,
             embedding_service=None,  # Usa hash embedding
-            regex_router=ExpertRouter(),
+            llm_router=ExpertRouter(disable_regex=True),
             confidence_threshold=0.7
         )
 
@@ -379,7 +379,7 @@ class TestHybridExpertRouter:
 
         # Con threshold 0.99, quasi sempre regex
         # (dipende dal modello non trainato)
-        assert decision.query_type in ["neural", "regex_fallback"]
+        assert decision.query_type in ["neural", "llm_fallback"]
 
     @pytest.mark.asyncio
     async def test_routing_stats(self, router, context):

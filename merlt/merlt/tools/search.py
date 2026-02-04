@@ -18,6 +18,8 @@ Esempio:
 """
 
 import structlog
+import hashlib
+import json
 from typing import List, Optional, Dict, Any
 from dataclasses import dataclass
 
@@ -71,6 +73,10 @@ class SemanticSearchTool(BaseTool):
 
     Formula: final_score = α * similarity_score + (1-α) * graph_score
 
+    Includes a class-level retrieval cache shared across cloned instances
+    to avoid duplicate embedding+search when multiple experts issue
+    identical queries in the same pipeline run.
+
     Esempio:
         >>> from merlt.tools import SemanticSearchTool
         >>> from merlt.storage.retriever import GraphAwareRetriever
@@ -87,6 +93,9 @@ class SemanticSearchTool(BaseTool):
         ... )
         >>> print(f"Trovati {len(result.data['results'])} risultati")
     """
+
+    # Class-level cache shared across clones (cleared per pipeline run)
+    _shared_cache: Dict[str, "ToolResult"] = {}
 
     name = "semantic_search"
     description = (
@@ -209,6 +218,12 @@ class SemanticSearchTool(BaseTool):
             f"top_k={top_k}, expert={expert_type}, source_types={source_types}"
         )
 
+        # Check class-level cache (keyed on query+source_types+top_k, NOT expert_type)
+        cache_key = self._make_cache_key(query, top_k, source_types)
+        if cache_key in SemanticSearchTool._shared_cache:
+            log.info("semantic_search cache hit", expert=expert_type)
+            return SemanticSearchTool._shared_cache[cache_key]
+
         # Verifica dipendenze
         if self.embeddings is None:
             return ToolResult.fail(
@@ -256,7 +271,25 @@ class SemanticSearchTool(BaseTool):
                 f"top_score={results[0]['final_score']:.3f}" if results else "no results"
             )
 
-            return ToolResult.ok(
+            # Extract retrieval metadata for tracing
+            retriever_alpha = getattr(
+                getattr(self.retriever, 'config', None), 'alpha', 0.7
+            )
+            over_retrieve_factor = getattr(
+                getattr(self.retriever, 'config', None), 'over_retrieve_factor', 3
+            )
+            top_source_urns = []
+            seen_urns = set()
+            for r in results[:5]:
+                urn = (
+                    r.get("metadata", {}).get("article_urn", "")
+                    or r.get("chunk_id", "")
+                )
+                if urn and urn not in seen_urns:
+                    seen_urns.add(urn)
+                    top_source_urns.append(urn)
+
+            tool_result = ToolResult.ok(
                 data={
                     "query": query,
                     "results": results,
@@ -269,8 +302,16 @@ class SemanticSearchTool(BaseTool):
                 query=query,
                 top_k=top_k,
                 expert_type=expert_type,
-                source_types=source_types
+                source_types=source_types,
+                retrieval_alpha=retriever_alpha,
+                total_candidates=top_k * over_retrieve_factor,
+                chunks_after_reranking=len(results),
+                top_source_urns=top_source_urns,
             )
+
+            # Store in shared cache
+            SemanticSearchTool._shared_cache[cache_key] = tool_result
+            return tool_result
 
         except Exception as e:
             log.error(f"semantic_search failed: {e}")
@@ -278,6 +319,22 @@ class SemanticSearchTool(BaseTool):
                 error=f"Errore durante la ricerca: {str(e)}",
                 tool_name=self.name
             )
+
+    @staticmethod
+    def _make_cache_key(
+        query: str, top_k: int, source_types: Optional[List[str]]
+    ) -> str:
+        """Create cache key from retrieval parameters (excludes expert_type)."""
+        key_data = json.dumps(
+            {"q": query, "k": top_k, "st": sorted(source_types or [])},
+            sort_keys=True,
+        )
+        return hashlib.md5(key_data.encode()).hexdigest()
+
+    @classmethod
+    def clear_cache(cls):
+        """Clear the shared retrieval cache. Call at pipeline start."""
+        cls._shared_cache.clear()
 
     async def _encode_query(self, query: str) -> List[float]:
         """
@@ -527,26 +584,35 @@ class GraphSearchTool(BaseTool):
     def _node_to_dict(self, node: Any) -> Dict[str, Any]:
         """Converte nodo FalkorDB in dizionario."""
         if hasattr(node, 'properties'):
+            # Raw FalkorDB Node object
             props = dict(node.properties)
+            labels = list(getattr(node, 'labels', []))
         elif isinstance(node, dict):
-            props = node
+            # Already serialized by FalkorDBClient._query_sync
+            # Structure: {"properties": {...}, "labels": [...], "id": ...}
+            props = node.get("properties", node)
+            labels = node.get("labels", [])
         else:
             props = {}
+            labels = []
 
         return {
             "urn": props.get("URN", props.get("node_id", "")),
-            "type": props.get("_type", "Unknown"),
+            "type": labels[0] if labels else props.get("_type", "Unknown"),
             "properties": props
         }
 
     def _edge_to_dict(self, edge: Any) -> Dict[str, Any]:
         """Converte edge FalkorDB in dizionario."""
-        if hasattr(edge, 'type'):
-            edge_type = edge.type
+        if hasattr(edge, 'relation') and not isinstance(edge, dict):
+            # Raw FalkorDB Edge object
+            edge_type = edge.relation
             props = dict(edge.properties) if hasattr(edge, 'properties') else {}
         elif isinstance(edge, dict):
-            edge_type = edge.get("type", "UNKNOWN")
-            props = edge
+            # Already serialized by FalkorDBClient._query_sync
+            # Structure: {"properties": {...}, "relation": "TIPO", "id": ...}
+            edge_type = edge.get("relation", "UNKNOWN")
+            props = edge.get("properties", {})
         else:
             edge_type = "UNKNOWN"
             props = {}

@@ -31,6 +31,7 @@ Usage:
 import structlog
 import re
 from datetime import datetime, timezone
+from functools import lru_cache
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 
@@ -118,6 +119,13 @@ def _derive_autorita_emanante(tipo_documento: str) -> str:
     if not tipo_documento:
         return "Stato"
     return AUTORITA_EMANANTE_MAPPING.get(tipo_documento.lower(), "Stato")
+
+
+@lru_cache(maxsize=1)
+def _get_llm_service():
+    """Get cached LLM service instance."""
+    from merlt.rlcf.ai_service import OpenRouterService
+    return OpenRouterService()
 
 
 def parse_estremi(estremi: str) -> Dict[str, Optional[str]]:
@@ -266,6 +274,184 @@ def parse_disposizione(disposizione: str) -> Dict[str, Any]:
     return result
 
 
+def _format_destinazione(parsed: Dict[str, Optional[str]]) -> str:
+    """
+    Formatta i componenti della destinazione in stringa leggibile.
+
+    Args:
+        parsed: Dict con articolo, comma, lettera, numero
+
+    Returns:
+        Stringa formattata es. "art. 10, comma 1, lettera a"
+    """
+    parts = []
+    if parsed.get("articolo"):
+        parts.append(f"art. {parsed['articolo']}")
+    if parsed.get("comma"):
+        parts.append(f"comma {parsed['comma']}")
+    if parsed.get("lettera"):
+        parts.append(f"lettera {parsed['lettera']}")
+    if parsed.get("numero"):
+        parts.append(f"numero {parsed['numero']}")
+    return ", ".join(parts)
+
+
+def parse_destinazione(destinazione_text: str) -> Dict[str, Optional[str]]:
+    """
+    Parse la destinazione con regex per estrarre articolo, comma, lettera, numero.
+
+    La destinazione indica QUALE parte della norma TARGET viene modificata.
+    Usa gli stessi pattern della disposizione ma restituisce valori singolari.
+
+    Args:
+        destinazione_text: Es. "art. 5, comma 2" o "comma 3 dell'art. 10"
+
+    Returns:
+        Dict con target_article, comma, lettera, numero, destinazione (stringa formattata)
+    """
+    result = {
+        "target_article": None,
+        "comma": None,
+        "lettera": None,
+        "numero": None,
+        "destinazione": None,
+    }
+
+    if not destinazione_text:
+        return result
+
+    text_lower = destinazione_text.lower().strip()
+
+    # Estrai numero articolo: "art. 12" o "art.12" o "art. 12-bis"
+    art_match = re.search(r"art\.?\s*(\d+(?:-\w+)?)", text_lower)
+    if art_match:
+        result["target_article"] = art_match.group(1)
+
+    # Estrai comma (primo match, singolare)
+    comma_match = re.search(r"comm[ai]\s+(\d+)", text_lower)
+    if comma_match:
+        result["comma"] = comma_match.group(1)
+
+    # Estrai lettera (primo match, singolare)
+    lettera_match = re.search(r"letter[ae]\s+([a-z])", text_lower)
+    if lettera_match:
+        result["lettera"] = lettera_match.group(1)
+
+    # Estrai numero (primo match, singolare)
+    numero_match = re.search(r"numer[oi]\s+(\d+)", text_lower)
+    if numero_match:
+        result["numero"] = numero_match.group(1)
+
+    # Costruisci stringa formattata
+    parsed_for_format = {
+        "articolo": result["target_article"],
+        "comma": result["comma"],
+        "lettera": result["lettera"],
+        "numero": result["numero"],
+    }
+    formatted = _format_destinazione(parsed_for_format)
+    result["destinazione"] = formatted if formatted else None
+
+    return result
+
+
+async def parse_destinazione_with_llm(
+    destinazione_text: str,
+    llm_service=None,
+) -> Dict[str, Optional[str]]:
+    """
+    Parse la destinazione usando LLM per casi complessi.
+
+    Pattern: regex-first, LLM fallback.
+    La destinazione indica quale parte della norma target viene modificata.
+
+    Args:
+        destinazione_text: Testo della destinazione
+        llm_service: Optional LLM service (default: usa _get_llm_service())
+
+    Returns:
+        Dict con target_article, comma, lettera, numero, destinazione
+    """
+    # Prima prova con regex (veloce, economico)
+    result = parse_destinazione(destinazione_text)
+
+    # Se regex ha trovato almeno l'articolo, usa quello
+    if result["target_article"]:
+        return result
+
+    # Altrimenti usa LLM
+    if not llm_service:
+        try:
+            llm_service = _get_llm_service()
+        except ImportError:
+            log.warning("LLM service not available, using regex only")
+            return result
+
+    prompt = f"""Estrai le componenti strutturali dalla seguente destinazione normativa italiana.
+
+Destinazione: "{destinazione_text}"
+
+La destinazione indica quale parte della norma viene modificata.
+Gerarchia: Articolo -> Comma -> Lettera -> Numero
+
+Esempi:
+- "del comma 2 dell'art. 5" -> articolo="5", comma="2"
+- "all'articolo 10, comma 1, lettera a)" -> articolo="10", comma="1", lettera="a"
+- "primo comma dell'articolo 48" -> articolo="48", comma="1"
+- "la norma di cui al capo III" -> articolo=null, comma=null"""
+
+    json_schema = {
+        "type": "object",
+        "properties": {
+            "articolo": {
+                "type": ["string", "null"],
+                "description": "Numero articolo (es. '5', '12-bis') o null"
+            },
+            "comma": {
+                "type": ["string", "null"],
+                "description": "Numero comma (es. '2') o null"
+            },
+            "lettera": {
+                "type": ["string", "null"],
+                "description": "Lettera (es. 'a', 'b') o null"
+            },
+            "numero": {
+                "type": ["string", "null"],
+                "description": "Numero (es. '1', '2') o null"
+            }
+        },
+        "required": ["articolo", "comma", "lettera", "numero"],
+        "additionalProperties": False
+    }
+
+    try:
+        import os
+        model = os.getenv("LLM_PARSING_MODEL", "mistralai/mistral-7b-instruct")
+
+        parsed = await llm_service.generate_json_completion(
+            prompt=prompt,
+            json_schema=json_schema,
+            system_prompt="Sei un parser di testi normativi italiani. Converti ordinali in numeri (primo=1, secondo=2).",
+            model=model,
+            temperature=0.0,
+            max_tokens=200,
+        )
+
+        formatted = _format_destinazione(parsed)
+        return {
+            "target_article": parsed.get("articolo"),
+            "comma": parsed.get("comma"),
+            "lettera": parsed.get("lettera"),
+            "numero": parsed.get("numero"),
+            "destinazione": formatted if formatted else None,
+        }
+
+    except Exception as e:
+        log.warning(f"LLM parsing failed for destinazione: {e}, using regex result")
+
+    return result
+
+
 async def parse_disposizione_with_llm(
     disposizione: str,
     estremi_atto: str,
@@ -295,8 +481,7 @@ async def parse_disposizione_with_llm(
     # Altrimenti usa LLM
     if not llm_service:
         try:
-            from merlt.rlcf.ai_service import OpenRouterService
-            llm_service = OpenRouterService()
+            llm_service = _get_llm_service()
         except ImportError:
             log.warning("LLM service not available, using regex only")
             return result

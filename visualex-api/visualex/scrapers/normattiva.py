@@ -142,8 +142,8 @@ class NormattivaScraper(BaseScraper):
                 return {"testo": final_text, "link": link_dict}
             return final_text
         except Exception as e:
-            logger.error(f"Error in _estrai_testo_akn_dettagliato: {e}", exc_info=True)
-            return f"Error in _estrai_testo_akn_dettagliato: {e}"
+            log.error("Error in _estrai_testo_akn_dettagliato", error=str(e), exc_info=True)
+            raise ParsingError(f"Error extracting AKN detailed text: {e}")
 
     def _estrai_testo_akn_semplice(self, corpo: Tag, link: bool = False) -> Union[str, Dict[str, Any]]:
         try:
@@ -170,8 +170,8 @@ class NormattivaScraper(BaseScraper):
                 return {"testo": final_text, "link": link_dict}
             return final_text
         except Exception as e:
-            logger.error(f"Error in _estrai_testo_akn_semplice: {e}", exc_info=True)
-            return f"Error in _estrai_testo_akn_semplice: {e}"
+            log.error("Error in _estrai_testo_akn_semplice", error=str(e), exc_info=True)
+            raise ParsingError(f"Error extracting AKN simple text: {e}")
 
     def _estrai_testo_allegato(self, corpo: Tag, link: bool = False) -> Union[str, Dict[str, Any]]:
         try:
@@ -197,8 +197,8 @@ class NormattivaScraper(BaseScraper):
                 return {"testo": final_text, "link": link_dict}
             return final_text
         except Exception as e:
-            logger.error(f"Error in _estrai_testo_allegato: {e}", exc_info=True)
-            return f"Error in _estrai_testo_allegato: {e}"
+            log.error("Error in _estrai_testo_allegato", error=str(e), exc_info=True)
+            raise ParsingError(f"Error extracting attachment text: {e}")
 
     def _estrai_testo_fallback(self, corpo: Tag, link: bool = False) -> Union[str, Dict[str, Any]]:
         """
@@ -224,8 +224,8 @@ class NormattivaScraper(BaseScraper):
                 return {"testo": final_text, "link": link_dict}
             return final_text
         except Exception as e:
-            logger.error(f"Error in _estrai_testo_fallback: {e}", exc_info=True)
-            return f"Error in _estrai_testo_fallback: {e}"
+            log.error("Error in _estrai_testo_fallback", error=str(e), exc_info=True)
+            raise ParsingError(f"Error in fallback text extraction: {e}")
 
     def parse_document(self, atto: str) -> BeautifulSoup:
         return BeautifulSoup(atto, 'html.parser')

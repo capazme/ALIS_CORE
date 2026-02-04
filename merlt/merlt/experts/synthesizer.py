@@ -33,7 +33,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 
-from merlt.experts.base import ExpertResponse, LegalSource, ReasoningStep
+from merlt.experts.base import ExpertResponse, LegalSource, ReasoningStep, FeedbackHook
 from merlt.disagreement.types import (
     DisagreementType,
     DisagreementLevel,
@@ -50,6 +50,43 @@ class SynthesisMode(str, Enum):
     CONVERGENT = "convergent"
     DIVERGENT = "divergent"
     AUTO = "auto"  # Deciso automaticamente da DisagreementAnalysis
+
+
+class UserProfile(str, Enum):
+    """Profili utente per sintesi adattiva."""
+    CONSULENZA = "consulenza"      # Summary + conclusion
+    RICERCA = "ricerca"            # Summary + expandable details
+    ANALISI = "analisi"            # Full trace
+    CONTRIBUTORE = "contributore"  # Full trace + feedback hooks
+
+
+@dataclass
+class AccordionSection:
+    """
+    Sezione collassabile per progressive disclosure.
+
+    Attributes:
+        expert_type: Tipo di expert
+        header: Intestazione sezione
+        content: Contenuto sezione
+        confidence: Confidenza dell'expert
+        is_expanded: Se mostrare espansa di default
+    """
+    expert_type: str
+    header: str
+    content: str
+    confidence: float
+    is_expanded: bool = False
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serializza in dizionario."""
+        return {
+            "expert_type": self.expert_type,
+            "header": self.header,
+            "content": self.content,
+            "confidence": round(self.confidence, 3),
+            "is_expanded": self.is_expanded,
+        }
 
 
 @dataclass
@@ -99,22 +136,51 @@ class SynthesisResult:
     execution_time_ms: float = 0.0
     trace_id: str = ""
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+    # Profile-aware fields
+    user_profile: str = ""
+    confidence_indicator: str = ""
+    expert_accordion: List[AccordionSection] = field(default_factory=list)
+    source_links: List[Dict[str, str]] = field(default_factory=list)
+    devils_advocate_flag: bool = False
+    feedback_hook: Optional[FeedbackHook] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         """Serializza in dizionario."""
-        return {
+        result = {
             "synthesis": self.synthesis,
             "mode": self.mode.value,
-            "disagreement_analysis": self.disagreement_analysis.to_dict() if self.disagreement_analysis else None,
+            "disagreement_analysis": (
+                self.disagreement_analysis.to_dict()
+                if self.disagreement_analysis else None
+            ),
             "alternatives": self.alternatives,
             "expert_contributions": self.expert_contributions,
-            "combined_legal_basis": [lb.to_dict() for lb in self.combined_legal_basis],
-            "confidence": self.confidence,
+            "combined_legal_basis": [
+                lb.to_dict() for lb in self.combined_legal_basis
+            ],
+            "confidence": round(self.confidence, 3),
             "explanation": self.explanation,
-            "execution_time_ms": self.execution_time_ms,
+            "execution_time_ms": round(self.execution_time_ms, 2),
             "trace_id": self.trace_id,
             "timestamp": self.timestamp,
+            "metadata": self.metadata,
         }
+        if self.user_profile:
+            result["user_profile"] = self.user_profile
+        if self.confidence_indicator:
+            result["confidence_indicator"] = self.confidence_indicator
+        if self.expert_accordion:
+            result["expert_accordion"] = [
+                s.to_dict() for s in self.expert_accordion
+            ]
+        if self.source_links:
+            result["source_links"] = self.source_links
+        if self.devils_advocate_flag:
+            result["devils_advocate_flag"] = True
+        if self.feedback_hook:
+            result["feedback_hook"] = self.feedback_hook.to_dict()
+        return result
 
 
 class AdaptiveSynthesizer:
@@ -182,6 +248,7 @@ class AdaptiveSynthesizer:
         responses: List[ExpertResponse],
         weights: Optional[Dict[str, float]] = None,
         trace_id: str = "",
+        user_profile: Optional[str] = None,
     ) -> SynthesisResult:
         """
         Sintetizza le risposte degli expert.
@@ -191,6 +258,7 @@ class AdaptiveSynthesizer:
             responses: Lista di ExpertResponse
             weights: Pesi per ogni expert (opzionale)
             trace_id: ID per tracing
+            user_profile: Profilo utente per sintesi adattiva
 
         Returns:
             SynthesisResult con sintesi e metadata
@@ -200,19 +268,34 @@ class AdaptiveSynthesizer:
         if not trace_id:
             trace_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 
+        profile = self._resolve_profile(user_profile)
+
         log.info(
             "Synthesizing responses",
             query=query[:50],
             num_responses=len(responses),
             trace_id=trace_id,
+            profile=profile.value,
         )
 
         # Normalizza pesi
         if weights is None:
-            weights = {r.expert_type: 1.0 / len(responses) for r in responses} if responses else {}
+            weights = (
+                {r.expert_type: 1.0 / len(responses) for r in responses}
+                if responses else {}
+            )
+        else:
+            # Ensure weights sum to 1.0 for correct confidence calculation
+            total_w = sum(weights.get(r.expert_type, 0.0) for r in responses)
+            if total_w > 0 and abs(total_w - 1.0) > 0.01:
+                weights = {
+                    k: v / total_w for k, v in weights.items()
+                }
 
         # Step 1: Analizza disagreement
-        disagreement_analysis = await self._analyze_disagreement(query, responses)
+        disagreement_analysis = await self._analyze_disagreement(
+            query, responses
+        )
 
         # Step 2: Determina modalita'
         mode = self._determine_mode(disagreement_analysis)
@@ -230,18 +313,178 @@ class AdaptiveSynthesizer:
         result.disagreement_analysis = disagreement_analysis
         result.mode = mode
 
+        # Calibrate confidence using α-blending with disagreement analysis
+        result.confidence = self._calibrate_confidence(
+            result.confidence, disagreement_analysis
+        )
+
         # Calcola execution_time_ms
-        result.execution_time_ms = (time.perf_counter() - start_time) * 1000
+        result.execution_time_ms = (
+            (time.perf_counter() - start_time) * 1000
+        )
+
+        # Profile-aware enhancements
+        result.user_profile = profile.value
+        result.confidence_indicator = self._compute_confidence_indicator(
+            result.confidence
+        )
+        result.expert_accordion = self._build_accordion(
+            responses, weights, profile
+        )
+        result.source_links = self._build_source_links(responses)
+
+        has_disagreement = (
+            disagreement_analysis.has_disagreement
+            if disagreement_analysis else False
+        )
+        result.devils_advocate_flag = has_disagreement
+
+        # F7 feedback hook for RLCF (only for analisi/contributore)
+        if profile in (UserProfile.ANALISI, UserProfile.CONTRIBUTORE):
+            result.feedback_hook = FeedbackHook(
+                feedback_type="F7",
+                expert_type="synthesizer",
+                response_id=trace_id,
+                enabled=True,
+            )
+
+        result.metadata = {
+            "expert_count": len(responses),
+            "source_count": sum(
+                len(r.legal_basis) for r in responses
+            ),
+            "profile": profile.value,
+        }
 
         log.info(
             "Synthesis completed",
             mode=mode.value,
-            has_disagreement=disagreement_analysis.has_disagreement if disagreement_analysis else False,
+            has_disagreement=has_disagreement,
             execution_time_ms=result.execution_time_ms,
             trace_id=trace_id,
+            profile=profile.value,
         )
 
         return result
+
+    def _calibrate_confidence(
+        self,
+        expert_confidence: float,
+        analysis: Optional[DisagreementAnalysis],
+    ) -> float:
+        """Calibrate final confidence by blending expert and disagreement signals.
+
+        Uses α-blending: final = α * expert_conf + (1-α) * disagr_conf
+        where α increases as disagreement intensity → 0.
+
+        When experts agree (intensity=0, has_disagreement=false), α≈1.0
+        so expert confidence dominates. When intensity is high, the
+        disagreement detector's confidence weighs in more heavily.
+        """
+        if analysis is None:
+            return expert_confidence
+
+        disagr_conf = analysis.confidence
+        intensity = analysis.intensity
+
+        # α = 1 - intensity^0.5 (square root for softer curve)
+        # intensity=0 → α=1.0 (pure expert confidence)
+        # intensity=0.5 → α≈0.29
+        # intensity=1.0 → α=0.0 (pure disagreement confidence)
+        alpha = 1.0 - (intensity ** 0.5)
+
+        # Floor: never let α go below 0.3 to avoid disagreement
+        # detector dominating when it might not be well-calibrated
+        alpha = max(alpha, 0.3)
+
+        calibrated = alpha * expert_confidence + (1.0 - alpha) * disagr_conf
+        return max(0.0, min(1.0, calibrated))
+
+    def _resolve_profile(
+        self, user_profile: Optional[str]
+    ) -> UserProfile:
+        """Resolve user profile from string."""
+        if user_profile is None:
+            return UserProfile.RICERCA
+        try:
+            return UserProfile(user_profile)
+        except ValueError:
+            log.warning(
+                "unknown_user_profile",
+                profile=user_profile,
+                fallback="ricerca",
+            )
+            return UserProfile.RICERCA
+
+    def _compute_confidence_indicator(self, confidence: float) -> str:
+        """Compute human-readable confidence indicator."""
+        if confidence >= 0.75:
+            return "alta"
+        elif confidence >= 0.5:
+            return "media"
+        else:
+            return "bassa"
+
+    def _build_accordion(
+        self,
+        responses: List[ExpertResponse],
+        weights: Dict[str, float],
+        profile: UserProfile,
+    ) -> List[AccordionSection]:
+        """Build collapsible expert sections based on profile."""
+        if profile == UserProfile.CONSULENZA:
+            return []  # No accordion for summary-only profile
+
+        header_map = {
+            "literal": "Interpretazione Letterale",
+            "systemic": "Interpretazione Sistematica",
+            "principles": "Ratio Legis e Principi",
+            "precedent": "Giurisprudenza e Precedenti",
+        }
+
+        sorted_responses = sorted(
+            responses,
+            key=lambda r: weights.get(r.expert_type, 0),
+            reverse=True,
+        )
+
+        sections = []
+        for resp in sorted_responses:
+            is_expanded = profile in (
+                UserProfile.ANALISI, UserProfile.CONTRIBUTORE
+            )
+            sections.append(AccordionSection(
+                expert_type=resp.expert_type,
+                header=header_map.get(
+                    resp.expert_type, resp.expert_type.title()
+                ),
+                content=resp.interpretation,
+                confidence=resp.confidence,
+                is_expanded=is_expanded,
+            ))
+        return sections
+
+    def _build_source_links(
+        self, responses: List[ExpertResponse]
+    ) -> List[Dict[str, str]]:
+        """Build source links from expert responses."""
+        seen = set()
+        links = []
+        for resp in responses:
+            for lb in resp.legal_basis:
+                if lb.source_id not in seen:
+                    seen.add(lb.source_id)
+                    links.append({
+                        "citation": lb.citation,
+                        "source_id": lb.source_id,
+                        "urn": (
+                            lb.source_id
+                            if lb.source_id.startswith("urn:")
+                            else ""
+                        ),
+                        "expert": resp.expert_type,
+                    })
+        return links[:8]
 
     async def _analyze_disagreement(
         self,

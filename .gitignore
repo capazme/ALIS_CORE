@@ -1,8 +1,208 @@
-_bmad
-.cursor
+# =============================================================================
+# ALIS_CORE - .gitignore
+# =============================================================================
+
+# =============================================================================
+# Database & Persistence (CRITICO - mai tracciare)
+# =============================================================================
+# PostgreSQL
+*.sql.gz
+merlt/data/postgres/
+data/postgres/
+**/postgres/data/
+**/pg_data/
+
+# Redis / FalkorDB
+*.rdb
+*.aof
+merlt/data/redis/
+merlt/data/falkordb/
+data/redis/
+data/falkordb/
+**/redis/data/
+**/falkordb/data/
+**/appendonlydir/
+
+# Qdrant
+merlt/data/qdrant/
+data/qdrant/
+**/qdrant/storage/
+
+# SQLite
+*.sqlite
+*.sqlite3
+*.db
+
+# =============================================================================
+# Process Files (mai tracciare)
+# =============================================================================
+*.pid
+*.lock
+postmaster.pid
+postmaster.opts
+
+# =============================================================================
+# Python
+# =============================================================================
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.python-version
+
+# Distribution / packaging
+build/
+dist/
+eggs/
+*.egg
+*.egg-info/
+.eggs/
+wheels/
+*.whl
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# =============================================================================
+# Node.js / Frontend
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build output
+dist/
+build/
+.next/
+out/
+
+# =============================================================================
+# IDE & Editors
+# =============================================================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# AI Tools
+.claude/
+.cursor/
+.gemini/
+.trae/
+.copilot/
+
+# =============================================================================
+# OS Files
+# =============================================================================
 .DS_Store
 .claude
 .gemini
 .trae
-.docker
 merge*.sh
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# =============================================================================
+# Secrets & Credentials (CRITICO)
+# =============================================================================
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+*.pem
+*.key
+*.cert
+credentials.json
+secrets.json
+service-account*.json
+
+# =============================================================================
+# Logs
+# =============================================================================
+*.log
+logs/
+*.log.*
+
+# =============================================================================
+# Temporary Files
+# =============================================================================
+tmp/
+temp/
+.tmp/
+*.tmp
+download/
+downloads/
+
+# =============================================================================
+# Test Artifacts
+# =============================================================================
+playwright-report/
+test-results/
+coverage/
+
+# =============================================================================
+# Docker
+# =============================================================================
+.docker/
+docker-compose.override.yml
+
+# =============================================================================
+# Binary Documents (opzionale, valuta se serve)
+# =============================================================================
+*.docx
+*.xlsx
+*.pptx
+# *.pdf  # Decommentare se non vuoi PDF nel repo
+
+# =============================================================================
+# Project Specific
+# =============================================================================
+# Legacy data directories
+Legacy/VisuaLexAPI/logs/
+
+# Local experiment outputs (grandi)
+experiments/outputs/
+**/experiment_results/
+
+# Model weights (troppo grandi per git)
+*.pt
+*.pth
+*.onnx
+*.safetensors
+models/checkpoints/

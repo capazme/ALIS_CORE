@@ -151,12 +151,22 @@ class FalkorDBClient:
 
                         # Handle FalkorDB Node/Edge objects
                         if hasattr(value, 'properties'):
-                            # Node or Edge - convert to dict with properties
-                            record[col_name] = {
-                                "properties": value.properties,
-                                "labels": getattr(value, 'labels', []),
-                                "id": getattr(value, 'id', None),
-                            }
+                            if hasattr(value, 'relation'):
+                                # Edge object: has .relation (str), .src_node, .dest_node
+                                record[col_name] = {
+                                    "properties": value.properties,
+                                    "relation": value.relation,
+                                    "id": getattr(value, 'id', None),
+                                    "src_node": getattr(value, 'src_node', None),
+                                    "dest_node": getattr(value, 'dest_node', None),
+                                }
+                            else:
+                                # Node object: has .labels (list)
+                                record[col_name] = {
+                                    "properties": value.properties,
+                                    "labels": getattr(value, 'labels', []),
+                                    "id": getattr(value, 'id', None),
+                                }
                         else:
                             # Scalar value
                             record[col_name] = value

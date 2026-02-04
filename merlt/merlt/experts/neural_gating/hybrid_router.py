@@ -2,11 +2,11 @@
 Hybrid Expert Router
 =====================
 
-PHASE 3: Router ibrido Neural + Regex fallback.
+PHASE 3: Router ibrido Neural + LLM fallback.
 
 Strategia:
-- Se Neural Confidence > threshold (0.7): usa neural weights
-- Se Neural Confidence < threshold: usa regex weights (ExpertRouter esistente)
+- Se Neural Confidence >= threshold: usa neural weights
+- Se Neural Confidence < threshold: usa LLM classification (ExpertRouter con disable_regex)
 
 Questo garantisce smooth transition durante training iniziale.
 
@@ -14,10 +14,10 @@ Esempio:
     >>> router = HybridExpertRouter(
     ...     neural_gating=ExpertGatingMLP(),
     ...     embedding_service=embedding_service,
-    ...     regex_router=ExpertRouter()
+    ...     llm_router=ExpertRouter(ai_service=ai, disable_regex=True)
     ... )
     >>> decision = await router.route(context)
-    >>> print(decision.query_type)  # "neural" o "regex_fallback"
+    >>> print(decision.query_type)  # "neural" o "llm_fallback"
 """
 
 import structlog
@@ -62,22 +62,22 @@ class HybridRoutingDecision(RoutingDecision):
 
 class HybridExpertRouter:
     """
-    Router ibrido: Neural Gating con fallback Regex.
+    Router ibrido: Neural Gating con fallback LLM.
 
     Strategia:
     - Se Neural Confidence >= threshold: usa neural weights
-    - Se Neural Confidence < threshold: usa regex weights
+    - Se Neural Confidence < threshold: usa LLM classification
 
     Il threshold può essere dinamico (aumenta man mano che il modello impara).
 
     Attributi:
         neural_gating: ExpertGatingMLP per routing neurale
         embedding_service: Servizio per encoding query
-        regex_router: ExpertRouter per fallback
+        llm_router: ExpertRouter per fallback LLM (con disable_regex=True)
         confidence_threshold: Soglia per usare neural (default 0.7)
 
     Esempio:
-        >>> hybrid = HybridExpertRouter(neural_gating, embedding_service, regex_router)
+        >>> hybrid = HybridExpertRouter(neural_gating, embedding_service, llm_router)
         >>> decision = await hybrid.route(context)
         >>> if decision.neural_used:
         ...     print("Used neural routing")
@@ -87,10 +87,10 @@ class HybridExpertRouter:
         self,
         neural_gating: "ExpertGatingMLP",
         embedding_service: Any = None,
-        regex_router: Optional[ExpertRouter] = None,
+        llm_router: Optional[ExpertRouter] = None,
         confidence_threshold: float = 0.7,
         checkpoint_path: Optional[Path] = None,
-        device: str = "cpu"
+        device: str = "cpu",
     ):
         """
         Inizializza HybridExpertRouter.
@@ -98,7 +98,7 @@ class HybridExpertRouter:
         Args:
             neural_gating: ExpertGatingMLP per routing neurale
             embedding_service: Servizio per encoding query (opzionale)
-            regex_router: ExpertRouter per fallback (crea default se None)
+            llm_router: ExpertRouter per fallback LLM (crea default se None)
             confidence_threshold: Soglia per usare neural (0-1)
             checkpoint_path: Path per caricare checkpoint esistente
             device: Device PyTorch (cpu/cuda)
@@ -111,7 +111,7 @@ class HybridExpertRouter:
 
         self.neural_gating = neural_gating
         self.embedding_service = embedding_service
-        self.regex_router = regex_router or ExpertRouter()
+        self.llm_router = llm_router or ExpertRouter(disable_regex=True)
         self.confidence_threshold = confidence_threshold
         self.device = device
 
@@ -119,7 +119,7 @@ class HybridExpertRouter:
         self._routing_stats = {
             "total_queries": 0,
             "neural_used": 0,
-            "regex_fallback": 0,
+            "llm_fallback": 0,
             "avg_neural_confidence": 0.0,
         }
 
@@ -152,24 +152,24 @@ class HybridExpertRouter:
                 # Fallback: hash-based deterministic embedding per testing
                 query_embedding = self._hash_embedding(context.query_text)
         except Exception as e:
-            log.warning(f"Embedding failed: {e}, using regex fallback")
-            return await self._regex_fallback(context, error=str(e))
+            log.warning(f"Embedding failed: {e}, using LLM fallback")
+            return await self._llm_fallback(context, error=str(e))
 
         # 2. Neural prediction
         try:
             neural_pred = self.neural_gating.predict_single(query_embedding)
         except Exception as e:
-            log.warning(f"Neural prediction failed: {e}, using regex fallback")
-            return await self._regex_fallback(context, error=str(e))
+            log.warning(f"Neural prediction failed: {e}, using LLM fallback")
+            return await self._llm_fallback(context, error=str(e))
 
         # 3. Aggiorna statistiche
         self._update_stats(neural_pred["confidence"])
 
-        # 4. Decide: neural vs regex
+        # 4. Decide: neural vs llm fallback
         if neural_pred["confidence"] >= self.confidence_threshold:
             return self._neural_decision(context, neural_pred)
         else:
-            return await self._regex_fallback(
+            return await self._llm_fallback(
                 context,
                 neural_pred=neural_pred,
                 reason="confidence_too_low"
@@ -206,43 +206,43 @@ class HybridExpertRouter:
             neural_weights=neural_pred["weights"]
         )
 
-    async def _regex_fallback(
+    async def _llm_fallback(
         self,
         context: ExpertContext,
         neural_pred: Optional[Dict[str, Any]] = None,
         reason: str = "unknown",
         error: Optional[str] = None
     ) -> HybridRoutingDecision:
-        """Fallback a regex router."""
-        self._routing_stats["regex_fallback"] += 1
+        """Fallback a LLM classification router."""
+        self._routing_stats["llm_fallback"] += 1
 
-        # Ottieni decision da regex router
-        regex_decision = await self.regex_router.route(context)
+        # Ottieni decision da LLM router
+        llm_decision = await self.llm_router.route(context)
 
         # Build reasoning
         if error:
-            reasoning = f"Regex fallback (error: {error}). {regex_decision.reasoning}"
+            reasoning = f"LLM fallback (error: {error}). {llm_decision.reasoning}"
         elif neural_pred:
             reasoning = (
-                f"Regex fallback (neural confidence: {neural_pred['confidence']:.2f} < "
-                f"{self.confidence_threshold:.2f}). {regex_decision.reasoning}"
+                f"LLM fallback (neural confidence: {neural_pred['confidence']:.2f} < "
+                f"{self.confidence_threshold:.2f}). {llm_decision.reasoning}"
             )
         else:
-            reasoning = f"Regex fallback ({reason}). {regex_decision.reasoning}"
+            reasoning = f"LLM fallback ({reason}). {llm_decision.reasoning}"
 
         log.info(
-            "Routing decision: REGEX_FALLBACK",
+            "Routing decision: LLM_FALLBACK",
             reason=reason,
             neural_confidence=neural_pred["confidence"] if neural_pred else None,
-            weights=regex_decision.expert_weights
+            weights=llm_decision.expert_weights
         )
 
         return HybridRoutingDecision(
-            expert_weights=regex_decision.expert_weights,
-            query_type="regex_fallback",
-            confidence=regex_decision.confidence,
+            expert_weights=llm_decision.expert_weights,
+            query_type="llm_fallback",
+            confidence=llm_decision.confidence,
             reasoning=reasoning,
-            parallel=regex_decision.parallel,
+            parallel=llm_decision.parallel,
             neural_used=False,
             neural_confidence=neural_pred["confidence"] if neural_pred else 0.0,
             neural_weights=neural_pred["weights"] if neural_pred else {}
@@ -279,7 +279,7 @@ class HybridExpertRouter:
         return {
             "total_queries": total,
             "neural_used": self._routing_stats["neural_used"],
-            "regex_fallback": self._routing_stats["regex_fallback"],
+            "llm_fallback": self._routing_stats["llm_fallback"],
             "neural_usage_rate": self._routing_stats["neural_used"] / total,
             "avg_neural_confidence": self._routing_stats["avg_neural_confidence"],
             "confidence_threshold": self.confidence_threshold,

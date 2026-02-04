@@ -4,12 +4,13 @@
  *
  * Pagina impostazioni account utente.
  * Permette di:
- * - Modificare nome utente
- * - Modificare email
+ * - Modificare nome utente e email
  * - Cambiare password
+ * - Selezionare profilo di ricerca ALIS (4 tipi)
+ * - Configurare preferenze (tema, lingua, notifiche)
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   User,
@@ -21,10 +22,21 @@ import {
   Eye,
   EyeOff,
   ArrowLeft,
+  Sun,
+  Moon,
+  Monitor,
+  Globe,
+  Bell,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useAuth } from '../hooks/useAuth';
+import { ProfileSelector } from '../components/features/profile';
+import { ConsentSelector } from '../components/features/consent';
+import { AuthorityScoreDisplay } from '../components/features/authority';
+import { PrivacySettings } from '../components/features/privacy';
+import * as profileService from '../services/profileService';
+import type { ProfileType, UserPreferences, ConsentLevel } from '../types/api';
 
 // =============================================================================
 // INPUT COMPONENT
@@ -206,6 +218,29 @@ export function SettingsPage() {
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [profileError, setProfileError] = useState('');
 
+  // Preferences state
+  const [preferences, setPreferences] = useState<UserPreferences>({
+    theme: 'system',
+    language: 'it',
+    notifications_enabled: true,
+  });
+  const [preferencesSaving, setPreferencesSaving] = useState(false);
+  const [preferencesSuccess, setPreferencesSuccess] = useState(false);
+  const [preferencesError, setPreferencesError] = useState('');
+
+  // Load preferences on mount
+  useEffect(() => {
+    const loadPreferences = async () => {
+      try {
+        const response = await profileService.getProfile();
+        setPreferences(response.preferences);
+      } catch {
+        // Keep defaults if API fails
+      }
+    };
+    loadPreferences();
+  }, []);
+
   // Password form state
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -226,8 +261,9 @@ export function SettingsPage() {
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate
       setProfileSuccess(true);
       setTimeout(() => setProfileSuccess(false), 3000);
-    } catch (err: any) {
-      setProfileError(err.message || 'Errore nel salvataggio');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Errore nel salvataggio';
+      setProfileError(message);
     } finally {
       setProfileSaving(false);
     }
@@ -256,12 +292,46 @@ export function SettingsPage() {
       setNewPassword('');
       setConfirmPassword('');
       setTimeout(() => setPasswordSuccess(false), 3000);
-    } catch (err: any) {
-      setPasswordError(err.message || 'Errore nel cambio password');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Errore nel cambio password';
+      setPasswordError(message);
     } finally {
       setPasswordSaving(false);
     }
   };
+
+  // Handle preferences save
+  const handlePreferencesSave = useCallback(async () => {
+    setPreferencesSaving(true);
+    setPreferencesError('');
+    setPreferencesSuccess(false);
+
+    try {
+      const response = await profileService.updatePreferences(preferences);
+      setPreferences(response.preferences);
+      setPreferencesSuccess(true);
+      setTimeout(() => setPreferencesSuccess(false), 3000);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Errore nel salvataggio delle preferenze';
+      setPreferencesError(message);
+    } finally {
+      setPreferencesSaving(false);
+    }
+  }, [preferences]);
+
+  // Handle profile type change (callback from ProfileSelector)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleProfileChange = useCallback((_profileType: ProfileType) => {
+    // Profile is saved by ProfileSelector, no additional action needed here
+    // This callback can be used for analytics or side effects in the future
+  }, []);
+
+  // Handle consent level change (callback from ConsentSelector)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleConsentChange = useCallback((_consentLevel: ConsentLevel) => {
+    // Consent is saved by ConsentSelector, no additional action needed here
+    // This callback can be used for analytics or triggering data cleanup flows
+  }, []);
 
   return (
     <div className="min-h-full bg-slate-50 dark:bg-slate-950">
@@ -353,6 +423,180 @@ export function SettingsPage() {
               La password deve essere di almeno 8 caratteri
             </p>
           </SectionCard>
+
+          {/* Profile Type Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden"
+          >
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+                Profilo di Ricerca
+              </h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Scegli il tuo stile di ricerca in base al tuo livello di esperienza
+              </p>
+            </div>
+            <div className="p-5">
+              <ProfileSelector
+                initialProfileType={user?.profile_type || 'assisted_research'}
+                authorityScore={user?.authority_score || 0}
+                onProfileChange={handleProfileChange}
+              />
+            </div>
+          </motion.div>
+
+          {/* Authority Score Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden"
+          >
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+                Punteggio Autorità
+              </h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                La tua influenza sull'apprendimento del sistema RLCF
+              </p>
+            </div>
+            <div className="p-5">
+              <AuthorityScoreDisplay />
+            </div>
+          </motion.div>
+
+          {/* Preferences Section */}
+          <SectionCard
+            title="Preferenze"
+            description="Personalizza l'aspetto e il comportamento dell'applicazione"
+            onSave={handlePreferencesSave}
+            isSaving={preferencesSaving}
+            isSuccess={preferencesSuccess}
+            error={preferencesError}
+          >
+            {/* Theme Selection */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Tema
+              </label>
+              <div className="flex gap-3">
+                {[
+                  { value: 'light', icon: Sun, label: 'Chiaro' },
+                  { value: 'dark', icon: Moon, label: 'Scuro' },
+                  { value: 'system', icon: Monitor, label: 'Sistema' },
+                ].map(({ value, icon: Icon, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setPreferences((p) => ({ ...p, theme: value as 'light' | 'dark' | 'system' }))}
+                    className={cn(
+                      'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border transition-colors',
+                      preferences.theme === value
+                        ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
+                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
+                    )}
+                  >
+                    <Icon size={18} />
+                    <span className="text-sm font-medium">{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Language Selection */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                <Globe size={16} className="inline mr-1.5 -mt-0.5" />
+                Lingua
+              </label>
+              <div className="flex gap-3">
+                {[
+                  { value: 'it', label: '🇮🇹 Italiano' },
+                  { value: 'en', label: '🇬🇧 English' },
+                ].map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setPreferences((p) => ({ ...p, language: value as 'it' | 'en' }))}
+                    className={cn(
+                      'flex-1 py-2.5 px-4 rounded-lg border transition-colors text-sm font-medium',
+                      preferences.language === value
+                        ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
+                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Notifications Toggle */}
+            <div className="flex items-center justify-between py-2">
+              <div className="flex items-center gap-2">
+                <Bell size={18} className="text-slate-500" />
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Notifiche
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreferences((p) => ({ ...p, notifications_enabled: !p.notifications_enabled }))}
+                className={cn(
+                  'relative w-11 h-6 rounded-full transition-colors',
+                  preferences.notifications_enabled
+                    ? 'bg-blue-500'
+                    : 'bg-slate-300 dark:bg-slate-600'
+                )}
+              >
+                <span
+                  className={cn(
+                    'absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform',
+                    preferences.notifications_enabled && 'translate-x-5'
+                  )}
+                />
+              </button>
+            </div>
+          </SectionCard>
+
+          {/* Consent Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden"
+          >
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+                Consenso Dati (GDPR)
+              </h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Scegli come i tuoi dati contribuiscono al miglioramento del sistema
+              </p>
+            </div>
+            <div className="p-5">
+              <ConsentSelector onConsentChange={handleConsentChange} />
+            </div>
+          </motion.div>
+
+          {/* Privacy Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden"
+          >
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+                Privacy e Dati Personali
+              </h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Esporta i tuoi dati o richiedi la cancellazione del tuo account
+              </p>
+            </div>
+            <div className="p-5">
+              <PrivacySettings />
+            </div>
+          </motion.div>
         </div>
       </div>
     </div>

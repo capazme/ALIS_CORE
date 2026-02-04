@@ -11,6 +11,8 @@ from uuid import uuid4
 
 from merlt.storage.bridge import BridgeTable, BridgeTableConfig
 
+pytestmark = pytest.mark.integration
+
 
 @pytest_asyncio.fixture(scope="function")
 async def bridge_table():

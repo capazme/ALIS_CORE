@@ -162,6 +162,7 @@ class LegalDisagreementNet:
             num_experts=self.config.num_experts,
             dropout=self.config.dropout,
         )
+        self.heads = self.heads.to(self.device)
 
         self._initialized = False
         log.info(f"LegalDisagreementNet creato: device={self.device}")

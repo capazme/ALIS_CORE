@@ -1,120 +1,230 @@
 /**
  * Tests for SearchForm component
+ *
+ * Tests the actual implementation:
+ * - Act type selection with grouped options
+ * - Article number input with increment/decrement
+ * - Version selection (vigente/originale)
+ * - Brocardi toggle
+ * - Form submission
  */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
+import { SearchForm } from '@/components/features/search/SearchForm';
 
-// Mock the search hook
-vi.mock('@/hooks/useSearch', () => ({
-  useSearch: () => ({
-    search: vi.fn(),
-    isLoading: false,
-    results: [],
-    error: null,
+// Mock the store
+vi.mock('@/store/useAppStore', () => ({
+  useAppStore: () => ({
+    customAliases: [],
+    trackAliasUsage: vi.fn(),
   }),
 }));
 
-// Mock the API service
-vi.mock('@/services/api', () => ({
-  fetchNormaData: vi.fn().mockResolvedValue([]),
-}));
+// Mock fetch for article tree
+global.fetch = vi.fn();
 
 describe('SearchForm', () => {
+  const mockOnSearch = vi.fn();
+
   beforeEach(() => {
     vi.clearAllMocks();
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ norma_data: [] }),
+    });
   });
 
-  it('renders all form fields', async () => {
-    // Lazy import to allow mocks to be set up
-    const { SearchForm } = await import('@/components/features/search/SearchForm');
+  it('renders the search form', () => {
+    render(<SearchForm onSearch={mockOnSearch} isLoading={false} />);
 
-    render(<SearchForm />);
-
-    // Check for act type selector
-    expect(screen.getByLabelText(/tipo atto/i)).toBeInTheDocument();
-
-    // Check for article input
-    expect(screen.getByLabelText(/articolo/i)).toBeInTheDocument();
-
-    // Check for search button
-    expect(screen.getByRole('button', { name: /cerca/i })).toBeInTheDocument();
+    // Check for main elements
+    expect(screen.getByText('Parametri di Estrazione')).toBeInTheDocument();
+    expect(screen.getByText('Fonte Normativa')).toBeInTheDocument();
+    expect(screen.getByText('Articolo')).toBeInTheDocument();
   });
 
-  it('submits form with correct values', async () => {
-    const { SearchForm } = await import('@/components/features/search/SearchForm');
+  it('renders act type selector with grouped options', () => {
+    render(<SearchForm onSearch={mockOnSearch} isLoading={false} />);
+
+    const select = screen.getByRole('combobox');
+    expect(select).toBeInTheDocument();
+
+    // Check for option groups
+    expect(screen.getByText('Seleziona Atto...')).toBeInTheDocument();
+  });
+
+  it('renders article input with increment/decrement buttons', () => {
+    render(<SearchForm onSearch={mockOnSearch} isLoading={false} />);
+
+    // Find article input
+    const articleInput = screen.getByRole('textbox', { name: '' });
+    expect(articleInput).toBeInTheDocument();
+
+    // Find increment/decrement buttons
+    const decrementBtn = screen.getByLabelText('Articolo precedente');
+    const incrementBtn = screen.getByLabelText('Articolo successivo');
+    expect(decrementBtn).toBeInTheDocument();
+    expect(incrementBtn).toBeInTheDocument();
+  });
+
+  it('increments article number when clicking plus', async () => {
     const user = userEvent.setup();
+    render(<SearchForm onSearch={mockOnSearch} isLoading={false} />);
 
-    const onSubmit = vi.fn();
-    render(<SearchForm onSubmit={onSubmit} />);
+    const articleInput = screen.getByDisplayValue('1');
+    const incrementBtn = screen.getByLabelText('Articolo successivo');
 
-    // Fill act type
-    const actTypeSelect = screen.getByLabelText(/tipo atto/i);
-    await user.selectOptions(actTypeSelect, 'codice civile');
+    await user.click(incrementBtn);
 
-    // Fill article number
-    const articleInput = screen.getByLabelText(/articolo/i);
-    await user.type(articleInput, '1453');
+    expect(articleInput).toHaveValue('2');
+  });
 
-    // Submit form
-    const submitButton = screen.getByRole('button', { name: /cerca/i });
+  it('decrements article number when clicking minus', async () => {
+    const user = userEvent.setup();
+    render(<SearchForm onSearch={mockOnSearch} isLoading={false} />);
+
+    // First increment to 2
+    const incrementBtn = screen.getByLabelText('Articolo successivo');
+    await user.click(incrementBtn);
+
+    const articleInput = screen.getByDisplayValue('2');
+    const decrementBtn = screen.getByLabelText('Articolo precedente');
+
+    await user.click(decrementBtn);
+
+    expect(articleInput).toHaveValue('1');
+  });
+
+  it('does not decrement below 1', async () => {
+    const user = userEvent.setup();
+    render(<SearchForm onSearch={mockOnSearch} isLoading={false} />);
+
+    const articleInput = screen.getByDisplayValue('1');
+    const decrementBtn = screen.getByLabelText('Articolo precedente');
+
+    await user.click(decrementBtn);
+
+    expect(articleInput).toHaveValue('1');
+  });
+
+  it('renders version selection buttons', () => {
+    render(<SearchForm onSearch={mockOnSearch} isLoading={false} />);
+
+    expect(screen.getByText('Vigente')).toBeInTheDocument();
+    expect(screen.getByText('Originale')).toBeInTheDocument();
+  });
+
+  it('toggles version selection', async () => {
+    const user = userEvent.setup();
+    render(<SearchForm onSearch={mockOnSearch} isLoading={false} />);
+
+    const originaleBtn = screen.getByText('Originale');
+    await user.click(originaleBtn);
+
+    // Check the button is selected (has different styling)
+    expect(originaleBtn.className).toContain('border-primary');
+  });
+
+  it('renders Brocardi toggle', () => {
+    render(<SearchForm onSearch={mockOnSearch} isLoading={false} />);
+
+    expect(screen.getByText('Brocardi & Ratio')).toBeInTheDocument();
+  });
+
+  it('submits form with search parameters', async () => {
+    const user = userEvent.setup();
+    render(<SearchForm onSearch={mockOnSearch} isLoading={false} />);
+
+    // Select an act type
+    const select = screen.getByRole('combobox');
+    await user.selectOptions(select, 'codice civile');
+
+    // Submit the form
+    const submitButton = screen.getByText('Estrai Contenuto');
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith(
+      expect(mockOnSearch).toHaveBeenCalledWith(
         expect.objectContaining({
-          actType: 'codice civile',
-          article: '1453',
+          act_type: 'codice civile',
+          article: '1',
         })
       );
     });
   });
 
-  it('validates required fields', async () => {
-    const { SearchForm } = await import('@/components/features/search/SearchForm');
+  it('disables submit button when loading', () => {
+    render(<SearchForm onSearch={mockOnSearch} isLoading={true} />);
+
+    const submitButton = screen.getByRole('button', { name: /loading/i });
+    expect(submitButton).toBeDisabled();
+  });
+
+  it('renders reset button', () => {
+    render(<SearchForm onSearch={mockOnSearch} isLoading={false} />);
+
+    expect(screen.getByText('Reset')).toBeInTheDocument();
+  });
+
+  it('resets form when clicking reset', async () => {
     const user = userEvent.setup();
+    render(<SearchForm onSearch={mockOnSearch} isLoading={false} />);
 
-    render(<SearchForm />);
+    // Select an act type
+    const select = screen.getByRole('combobox');
+    await user.selectOptions(select, 'codice civile');
 
-    // Try to submit without filling fields
-    const submitButton = screen.getByRole('button', { name: /cerca/i });
-    await user.click(submitButton);
+    // Click reset
+    const resetButton = screen.getByText('Reset');
+    await user.click(resetButton);
 
-    // Should show validation error
+    // Check form is reset
+    expect(select).toHaveValue('');
+  });
+
+  it('shows advanced options when expanded', async () => {
+    const user = userEvent.setup();
+    render(<SearchForm onSearch={mockOnSearch} isLoading={false} />);
+
+    // Click to expand advanced options
+    const advancedButton = screen.getByText('Opzioni Avanzate');
+    await user.click(advancedButton);
+
     await waitFor(() => {
-      expect(screen.getByText(/campo obbligatorio/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/allegato/i)).toBeInTheDocument();
     });
   });
 
-  it('handles article range input', async () => {
-    const { SearchForm } = await import('@/components/features/search/SearchForm');
+  it('disables number/date inputs for codici', async () => {
     const user = userEvent.setup();
+    render(<SearchForm onSearch={mockOnSearch} isLoading={false} />);
 
-    render(<SearchForm />);
+    // Select a codice (doesn't require number/date)
+    const select = screen.getByRole('combobox');
+    await user.selectOptions(select, 'codice civile');
 
-    const articleInput = screen.getByLabelText(/articolo/i);
-    await user.type(articleInput, '1-10');
+    // Number and date inputs should be disabled
+    const numberInput = screen.getByPlaceholderText('n.');
+    const dateInput = screen.getByPlaceholderText('aaaa');
 
-    // Should accept range format
-    expect(articleInput).toHaveValue('1-10');
+    expect(numberInput).toBeDisabled();
+    expect(dateInput).toBeDisabled();
   });
 
-  it('shows loading state during search', async () => {
-    vi.mock('@/hooks/useSearch', () => ({
-      useSearch: () => ({
-        search: vi.fn(),
-        isLoading: true,
-        results: [],
-        error: null,
-      }),
-    }));
+  it('enables number/date inputs for leggi', async () => {
+    const user = userEvent.setup();
+    render(<SearchForm onSearch={mockOnSearch} isLoading={false} />);
 
-    const { SearchForm } = await import('@/components/features/search/SearchForm');
+    // Select a legge (requires number/date)
+    const select = screen.getByRole('combobox');
+    await user.selectOptions(select, 'legge');
 
-    render(<SearchForm />);
+    // Number and date inputs should be enabled
+    const numberInput = screen.getByPlaceholderText('n.');
+    const dateInput = screen.getByPlaceholderText('aaaa');
 
-    // Submit button should be disabled during loading
-    const submitButton = screen.getByRole('button', { name: /cerca/i });
-    expect(submitButton).toBeDisabled();
+    expect(numberInput).not.toBeDisabled();
+    expect(dateInput).not.toBeDisabled();
   });
 });

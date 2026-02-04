@@ -31,6 +31,7 @@ from merlt.experts.base import (
     LegalSource,
     ReasoningStep,
     ConfidenceFactors,
+    FeedbackHook,
 )
 from merlt.experts.react_mixin import ReActMixin
 from merlt.tools import BaseTool
@@ -214,13 +215,32 @@ class SystemicExpert(BaseExpert, ReActMixin):
 
         return response
 
+    def _rewrite_search_query(self, context: ExpertContext) -> str:
+        """Rewrite query for systemic interpretation focus.
+
+        Focuses on connections between norms, related articles,
+        historical evolution, and normative context.
+        """
+        query = context.query_text
+        articles = context.entities.get("article_numbers", [])
+        concepts = context.entities.get("legal_concepts", [])
+
+        if articles and concepts:
+            return (
+                f"norme correlate articolo {' '.join(articles)} "
+                f"{' '.join(concepts)} sistema normativo coordinamento"
+            )
+        elif concepts:
+            return f"{' '.join(concepts)} disciplina normativa correlazione sistema"
+        return query
+
     async def _retrieve_sources(self, context: ExpertContext) -> List[Dict[str, Any]]:
         """
         Recupera fonti usando i tools disponibili.
 
         Flow:
         1. Usa chunks già recuperati se presenti
-        2. Semantic search per trovare norme correlate
+        2. Semantic search per trovare norme correlate (query rewritten for systemic focus)
         3. Estrai URN dai risultati per graph expansion
         """
         sources = []
@@ -235,11 +255,13 @@ class SystemicExpert(BaseExpert, ReActMixin):
                     self._extracted_urns.add(urn)
 
         # Semantic search - SOLO norme per SystemicExpert (connessione tra norme)
+        # Query rewritten to focus on normative connections and system
+        search_query = self._rewrite_search_query(context)
         semantic_tool = self._tool_registry.get("semantic_search")
         if semantic_tool:
             source_types = get_source_types_for_expert("SystemicExpert")
             result = await semantic_tool(
-                query=context.query_text,
+                query=search_query,
                 top_k=5,
                 expert_type="SystemicExpert",
                 source_types=source_types  # ["norma"] - connessione tra norme
@@ -336,7 +358,7 @@ class SystemicExpert(BaseExpert, ReActMixin):
         user_prompt = self._format_context_for_llm(context)
 
         try:
-            response = await self.ai_service.generate_response_async(
+            response = await self._traced_llm_call(
                 prompt=f"{system_prompt}\n\n{user_prompt}",
                 model=self.model,
                 temperature=self.temperature
@@ -348,6 +370,10 @@ class SystemicExpert(BaseExpert, ReActMixin):
             else:
                 content = str(response)
                 tokens = 0
+            # Fallback: read usage from ai_service
+            if tokens == 0 and hasattr(self.ai_service, 'get_last_usage'):
+                svc_usage = self.ai_service.get_last_usage()
+                tokens = svc_usage.get("total_tokens", 0)
 
             # Clean markdown
             content = content.strip()
@@ -490,14 +516,64 @@ class SystemicExpert(BaseExpert, ReActMixin):
         if data.get("systematic_position"):
             limitations += f"\n\nPosizione sistematica: {data['systematic_position']}"
 
+        # Create F4 feedback hook for RLCF (SystemicExpert = F4)
+        confidence = data.get("confidence", 0.5)
+        interpretation = data.get("interpretation", "")
+        feedback_hook = None
+        if self.config.get("enable_f4_feedback", True):
+            feedback_hook = FeedbackHook(
+                feedback_type="F4",
+                expert_type=self.expert_type,
+                response_id=context.trace_id,
+                enabled=True,
+                correction_options={
+                    "systemic_insight": [
+                        "excellent",
+                        "good",
+                        "superficial",
+                        "misleading",
+                    ],
+                    "graph_coverage": [
+                        "comprehensive",
+                        "adequate",
+                        "incomplete",
+                        "poor",
+                    ],
+                    "crossref_relevance": [
+                        "all_relevant",
+                        "mostly_relevant",
+                        "some_irrelevant",
+                        "mostly_irrelevant",
+                    ],
+                    "confidence_calibration": [
+                        "well_calibrated",
+                        "overconfident",
+                        "underconfident",
+                    ],
+                    "isolation_assessment": [
+                        "correctly_isolated",
+                        "false_isolation",
+                        "correctly_connected",
+                        "spurious_connections",
+                    ],
+                },
+                context_snapshot={
+                    "query": context.query_text[:200],
+                    "sources_count": len(legal_basis),
+                    "confidence": confidence,
+                    "interpretation_preview": interpretation[:300],
+                },
+            )
+
         return ExpertResponse(
             expert_type=self.expert_type,
-            interpretation=data.get("interpretation", ""),
+            interpretation=interpretation,
             legal_basis=legal_basis,
             reasoning_steps=reasoning_steps,
-            confidence=data.get("confidence", 0.5),
+            confidence=confidence,
             confidence_factors=confidence_factors,
             limitations=limitations.strip(),
             trace_id=context.trace_id,
-            tokens_used=tokens
+            tokens_used=tokens,
+            feedback_hook=feedback_hook,
         )

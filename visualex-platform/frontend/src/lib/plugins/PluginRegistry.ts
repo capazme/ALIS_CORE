@@ -192,6 +192,17 @@ class PluginRegistryImpl {
   getPluginManifest(pluginId: string) {
     return this.loadedPlugins.get(pluginId)?.plugin.manifest ?? null;
   }
+
+  /**
+   * Reset registry state (for testing)
+   */
+  reset(): void {
+    this.configs.clear();
+    this.loadedPlugins.clear();
+    this.currentUser = null;
+    this.apiBaseUrl = '';
+    this.getAuthToken = async () => null;
+  }
 }
 
 // Singleton instance

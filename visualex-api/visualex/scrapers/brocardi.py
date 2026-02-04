@@ -1,10 +1,8 @@
 import structlog
 import re
-import os
 from typing import Optional, Tuple, Union, Dict, Any, List
-from dataclasses import dataclass
+from urllib.parse import urljoin
 
-import requests
 from bs4 import BeautifulSoup
 from aiocache import cached, Cache
 from aiocache.serializers import JsonSerializer
@@ -48,16 +46,6 @@ AUTORITA_GIUDIZIARIE = {
 
 # Pattern combinato per tutte le autorità
 AUTORITA_PATTERN = '|'.join(f'({pattern})' for pattern in AUTORITA_GIUDIZIARIE.values())
-
-
-@dataclass
-class RelazioneContent:
-    """Contenuto di una Relazione storica (Guardasigilli)."""
-    tipo: str  # "libro_obbligazioni" o "codice_civile"
-    titolo: str
-    numero_paragrafo: Optional[str]
-    testo: str
-    articoli_citati: List[Dict[str, str]]  # [{"numero": "1286", "titolo": "...", "url": "..."}]
 
 
 class BrocardiScraper(BaseScraper):
@@ -467,19 +455,19 @@ class BrocardiScraper(BaseScraper):
         # Utilizza str(soup) invece di prettify per migliorare le performance
         matches = pattern.findall(str(soup))
         if matches:
-            return requests.compat.urljoin(base_url, matches[0])
+            return urljoin(base_url, matches[0])
 
         log.info("No direct match found, searching in 'section-title' divs")
         section_titles = soup.find_all('div', class_='section-title')
         for section in section_titles:
             for a_tag in section.find_all('a', href=True):
-                sub_link = requests.compat.urljoin(base_url, a_tag.get('href', ''))
+                sub_link = urljoin(base_url, a_tag.get('href', ''))
                 sub_soup = await self._fetch_soup(sub_link, cache_suffix="section", source="brocardi_section")
                 if not sub_soup:
                     continue
                 sub_matches = pattern.findall(str(sub_soup))
                 if sub_matches:
-                    return requests.compat.urljoin(base_url, sub_matches[0])
+                    return urljoin(base_url, sub_matches[0])
 
         log.info("No matching article found")
         return None
@@ -508,26 +496,26 @@ class BrocardiScraper(BaseScraper):
         return info.get('Position'), info, norma_link
 
     def _extract_position(self, soup: BeautifulSoup) -> Optional[str]:
-        position_tag = soup.find('div', id='breadcrumb', recursive=True)
+        position_tag = soup.find('div', id=self.selectors.BREADCRUMB_ID, recursive=True)
         if position_tag:
-            # Mantiene la logica originale di slicing
+            # Slice [17:] removes "Codice Civile > " prefix (17 chars) from breadcrumb
             return position_tag.get_text(strip=False).replace('\n', '').replace('  ', '')[17:]
         log.warning("Breadcrumb position not found")
         return None
 
     def _extract_sections(self, soup: BeautifulSoup, info: Dict[str, Any]) -> None:
-        corpo = soup.find('div', class_='panes-condensed panes-w-ads content-ext-guide content-mark', recursive=True)
+        corpo = soup.find('div', class_=self.selectors.MAIN_CONTENT_CLASS, recursive=True)
         if not corpo:
             log.warning("Main content section not found")
             return
 
-        brocardi_sections = corpo.find_all('div', class_='brocardi-content')
+        brocardi_sections = corpo.find_all('div', class_=self.selectors.BROCARDI_CONTENT_CLASS)
         if brocardi_sections:
             info['Brocardi'] = [self._clean_text(section.get_text()) for section in brocardi_sections]
 
-        ratio_section = corpo.find('div', class_='container-ratio')
+        ratio_section = corpo.find('div', class_=self.selectors.RATIO_CONTAINER_CLASS)
         if ratio_section:
-            ratio_text = ratio_section.find('div', class_='corpoDelTesto')
+            ratio_text = ratio_section.find('div', class_=self.selectors.CORPO_DEL_TESTO_CLASS)
             if ratio_text:
                 info['Ratio'] = self._clean_text(ratio_text.get_text())
 

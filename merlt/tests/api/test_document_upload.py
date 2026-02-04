@@ -21,6 +21,8 @@ from merlt.storage.enrichment.models import UserDocument, PendingEntity, Pending
 from merlt.pipeline.document_parser import DocumentParserService
 from merlt.pipeline.amendment_extractor import AmendmentExtractorService
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.mark.asyncio
 class TestDocumentUpload:

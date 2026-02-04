@@ -301,7 +301,7 @@ class ReActMixin:
         )
 
         try:
-            response = await self.ai_service.generate_response_async(
+            response = await self._traced_llm_call(
                 prompt=prompt,
                 model=self.react_config.get("model", self.model if hasattr(self, 'model') else "google/gemini-2.5-flash"),
                 temperature=self.react_config.get("temperature", 0.1),
@@ -329,7 +329,19 @@ class ReActMixin:
                 content = content[:-3].strip()
 
             decision = json.loads(content)
-            decision["tokens_used"] = 0  # Token count not available from string response
+            # Extract tokens if response is dict with usage info
+            decision["tokens_used"] = 0
+            if isinstance(response, dict):
+                usage = response.get("usage", {})
+                decision["tokens_used"] = usage.get("total_tokens", 0) or (
+                    usage.get("prompt_tokens", 0) + usage.get("completion_tokens", 0)
+                )
+            # Fallback: read from ai_service._last_usage
+            if decision["tokens_used"] == 0 and hasattr(self, 'ai_service') and hasattr(self.ai_service, 'get_last_usage'):
+                svc_usage = self.ai_service.get_last_usage()
+                decision["tokens_used"] = svc_usage.get("total_tokens", 0) or (
+                    svc_usage.get("prompt_tokens", 0) + svc_usage.get("completion_tokens", 0)
+                )
             return decision
 
         except Exception as e:

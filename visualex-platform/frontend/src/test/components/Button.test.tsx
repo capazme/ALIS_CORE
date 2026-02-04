@@ -1,5 +1,12 @@
 /**
  * Tests for Button component
+ *
+ * Tests the actual implementation:
+ * - Variants: primary, secondary, ghost, danger, glass, outline
+ * - Sizes: sm, md, lg
+ * - Loading state
+ * - Disabled state
+ * - Icon support
  */
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
@@ -29,33 +36,105 @@ describe('Button', () => {
     expect(button).toBeDisabled();
   });
 
-  it('renders with variant styles', () => {
-    const { rerender } = render(<Button variant="primary">Primary</Button>);
-    expect(screen.getByRole('button')).toHaveClass(/primary/i);
+  it('applies primary variant styles by default', () => {
+    render(<Button>Primary</Button>);
 
-    rerender(<Button variant="secondary">Secondary</Button>);
-    expect(screen.getByRole('button')).toHaveClass(/secondary/i);
+    const button = screen.getByRole('button');
+    // Primary variant has bg-primary-600 class
+    expect(button.className).toContain('bg-primary-600');
   });
 
-  it('renders with different sizes', () => {
-    const { rerender } = render(<Button size="sm">Small</Button>);
-    expect(screen.getByRole('button')).toHaveClass(/sm/i);
+  it('applies secondary variant styles', () => {
+    render(<Button variant="secondary">Secondary</Button>);
 
-    rerender(<Button size="lg">Large</Button>);
-    expect(screen.getByRole('button')).toHaveClass(/lg/i);
+    const button = screen.getByRole('button');
+    // Secondary variant has specific border class
+    expect(button.className).toContain('border-slate-200');
   });
 
-  it('renders as a link when href is provided', () => {
-    render(<Button href="/path">Link Button</Button>);
+  it('applies ghost variant styles', () => {
+    render(<Button variant="ghost">Ghost</Button>);
 
-    const link = screen.getByRole('link');
-    expect(link).toHaveAttribute('href', '/path');
+    const button = screen.getByRole('button');
+    expect(button.className).toContain('bg-transparent');
   });
 
-  it('shows loading state', () => {
-    render(<Button loading>Loading</Button>);
+  it('applies danger variant styles', () => {
+    render(<Button variant="danger">Danger</Button>);
 
-    expect(screen.getByRole('button')).toBeDisabled();
-    // Should show spinner or loading indicator
+    const button = screen.getByRole('button');
+    expect(button.className).toContain('bg-red-600');
+  });
+
+  it('renders with small size', () => {
+    render(<Button size="sm">Small</Button>);
+
+    const button = screen.getByRole('button');
+    expect(button.className).toContain('px-3');
+    expect(button.className).toContain('text-xs');
+  });
+
+  it('renders with medium size (default)', () => {
+    render(<Button>Medium</Button>);
+
+    const button = screen.getByRole('button');
+    expect(button.className).toContain('px-4');
+    expect(button.className).toContain('text-sm');
+  });
+
+  it('renders with large size', () => {
+    render(<Button size="lg">Large</Button>);
+
+    const button = screen.getByRole('button');
+    expect(button.className).toContain('px-6');
+    expect(button.className).toContain('text-base');
+  });
+
+  it('shows loading state with spinner', () => {
+    render(<Button loading>Submit</Button>);
+
+    const button = screen.getByRole('button');
+    expect(button).toBeDisabled();
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
+  });
+
+  it('renders with icon', () => {
+    const TestIcon = () => <span data-testid="test-icon">★</span>;
+    render(<Button icon={<TestIcon />}>With Icon</Button>);
+
+    expect(screen.getByTestId('test-icon')).toBeInTheDocument();
+    expect(screen.getByText('With Icon')).toBeInTheDocument();
+  });
+
+  it('does not call onClick when disabled', () => {
+    const handleClick = vi.fn();
+    render(<Button onClick={handleClick} disabled>Disabled</Button>);
+
+    fireEvent.click(screen.getByRole('button'));
+
+    expect(handleClick).not.toHaveBeenCalled();
+  });
+
+  it('does not call onClick when loading', () => {
+    const handleClick = vi.fn();
+    render(<Button onClick={handleClick} loading>Loading</Button>);
+
+    fireEvent.click(screen.getByRole('button'));
+
+    expect(handleClick).not.toHaveBeenCalled();
+  });
+
+  it('applies custom className', () => {
+    render(<Button className="custom-class">Custom</Button>);
+
+    const button = screen.getByRole('button');
+    expect(button.className).toContain('custom-class');
+  });
+
+  it('forwards ref to button element', () => {
+    const ref = { current: null as HTMLButtonElement | null };
+    render(<Button ref={ref}>Ref Button</Button>);
+
+    expect(ref.current).toBeInstanceOf(HTMLButtonElement);
   });
 });

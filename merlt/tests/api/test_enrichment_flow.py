@@ -28,6 +28,8 @@ from merlt.storage.graph.client import FalkorDBClient
 from merlt.storage.graph.entity_writer import EntityGraphWriter
 from merlt.rlcf.domain_authority import DomainAuthorityService
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.mark.asyncio
 class TestEntityValidationFlow:

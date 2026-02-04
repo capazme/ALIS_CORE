@@ -21,6 +21,10 @@ from . import storage
 from . import ner
 from . import core
 
+# Re-export core classes for convenience
+from .core import LegalKnowledgeGraph, MerltConfig
+from .core.legal_knowledge_graph import InterpretationResult
+
 __all__ = [
     "pipeline",
     "experts",
@@ -28,5 +32,8 @@ __all__ = [
     "storage",
     "ner",
     "core",
+    "LegalKnowledgeGraph",
+    "MerltConfig",
+    "InterpretationResult",
     "__version__",
 ]

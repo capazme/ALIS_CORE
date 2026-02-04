@@ -301,13 +301,13 @@ class TestIngestArticleWithoutGraph:
 
     async def test_ingest_with_treextractor_fallback(self, sample_article_no_brocardi):
         """Test that treextractor fallback provides hierarchy when Brocardi not available."""
-        from visualex.utils.treextractor import (
+        from merlt.clients import (
             NormTree, NormNode, NormLevel
         )
 
         # Create mock NormTree with hierarchy for art. 1453
         mock_tree = NormTree(
-            base_urn="urn:test",
+            urn="urn:test",
             children=[
                 NormNode(
                     level=NormLevel.LIBRO,
@@ -327,7 +327,7 @@ class TestIngestArticleWithoutGraph:
                                         NormNode(
                                             level=NormLevel.ARTICOLO,
                                             number="1453",
-                                            url="https://test/art1453"
+                                            position="Libro IV > Titolo II > Capo XIV"
                                         )
                                     ]
                                 )

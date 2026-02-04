@@ -7,6 +7,13 @@ import { useAuth } from '../../hooks/useAuth';
 import { LogIn, Mail, Lock, Eye, EyeOff, AlertCircle, ArrowRight } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
+/** Location state for redirect after login */
+interface LocationState {
+  from?: {
+    pathname: string;
+  };
+}
+
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,7 +26,8 @@ export function LoginForm() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = (location.state as any)?.from?.pathname || '/';
+  const state = location.state as LocationState | null;
+  const from = state?.from?.pathname || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,6 +159,16 @@ export function LoginForm() {
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+            </div>
+
+            {/* Forgot Password Link */}
+            <div className="flex justify-end">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-blue-600 hover:text-blue-500 hover:underline font-medium transition-colors"
+              >
+                Password dimenticata?
+              </Link>
             </div>
 
             {/* Submit Button */}
