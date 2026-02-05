@@ -24,6 +24,7 @@ import os
 import sys
 import time
 from pathlib import Path
+from uuid import uuid4
 
 import yaml
 
@@ -58,6 +59,10 @@ from merlt.experts.synthesizer import AdaptiveSynthesizer, SynthesisConfig
 # --- Neural Gating ---
 from merlt.experts.neural_gating import ExpertGatingMLP, HybridExpertRouter, GatingConfig
 from merlt.experts.router import ExpertRouter
+
+# --- Trace Storage ---
+from merlt.storage.trace import TraceStorageService, TraceStorageConfig
+from merlt.experts.models import QATrace
 
 
 DEFAULT_CONFIG = Path(__file__).parent / "pipeline_config.yaml"
@@ -200,6 +205,9 @@ async def main():
     parser = argparse.ArgumentParser(description="MERL-T pipeline trace")
     parser.add_argument("query", nargs="?", default=None, help="Legal query")
     parser.add_argument("--config", "-c", default=str(DEFAULT_CONFIG), help="YAML config path")
+    parser.add_argument("--save-db", action="store_true", help="Save trace to PostgreSQL via TraceStorageService")
+    parser.add_argument("--consent", default="basic", choices=["anonymous", "basic", "full"],
+                        help="Consent level for storage (default: basic)")
     args = parser.parse_args()
 
     # Load config
@@ -251,8 +259,52 @@ async def main():
     trace = result.metadata.get("pipeline_trace", {})
     metrics = result.metadata.get("pipeline_metrics", {})
 
+    # Generate trace_id
+    trace_id = f"trace_{uuid4().hex[:12]}"
+
+    # Save to database if requested
+    if args.save_db:
+        print(f"Saving trace to PostgreSQL...", file=sys.stderr)
+        try:
+            trace_service = TraceStorageService(TraceStorageConfig())
+            await trace_service.connect()
+            await trace_service.ensure_tables_exist()
+
+            # Extract routing metadata
+            routing_method = None
+            query_type = None
+            if trace:
+                routing_info = trace.get("routing", {})
+                routing_method = routing_info.get("method")
+                query_type = routing_info.get("query_type")
+
+            # Build QATrace
+            qa_trace = QATrace(
+                trace_id=trace_id,
+                user_id="cli_user",
+                query=query,
+                selected_experts=list(result.expert_contributions.keys()) if result.expert_contributions else [],
+                synthesis_mode=result.mode.value,
+                synthesis_text=result.synthesis,
+                sources=None,  # CLI doesn't populate sources in same format
+                execution_time_ms=int(pipeline_ms),
+                full_trace=trace,
+                consent_level=args.consent,
+                query_type=query_type,
+                confidence=result.confidence,
+                routing_method=routing_method,
+            )
+
+            saved_id = await trace_service.save_trace(qa_trace)
+            await trace_service.close()
+
+            print(f"Trace saved: {saved_id}", file=sys.stderr)
+        except Exception as e:
+            print(f"Failed to save trace: {e}", file=sys.stderr)
+
     output = {
         "query": query,
+        "trace_id": trace_id,
         "config_file": config_path.name,
         "synthesis_mode": result.mode.value,
         "confidence": round(result.confidence, 3),
@@ -264,6 +316,7 @@ async def main():
             "pipeline_ms": round(pipeline_ms, 1),
             "total_ms": round(setup_ms + pipeline_ms, 1),
         },
+        "saved_to_db": args.save_db,
     }
 
     print(json.dumps(output, indent=2, ensure_ascii=False, default=str))

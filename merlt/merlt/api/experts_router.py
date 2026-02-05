@@ -18,7 +18,7 @@ Usage:
 
 import structlog
 import time
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Literal
 from datetime import datetime
 from uuid import uuid4
 
@@ -48,6 +48,10 @@ class ExpertQueryRequest(BaseModel):
     context: Optional[Dict[str, Any]] = Field(None, description="Additional context (entities, article_urn, etc.)")
     max_experts: Optional[int] = Field(4, ge=1, le=4, description="Max number of experts to invoke")
     include_trace: bool = Field(False, description="Include full pipeline trace in response")
+    consent_level: Literal["anonymous", "basic", "full"] = Field(
+        "basic",
+        description="Storage consent level: anonymous (redact query+user_id), basic (redact query), full (no redaction)"
+    )
 
 
 class SourceReference(BaseModel):
@@ -250,7 +254,15 @@ async def query_experts(
         if pipeline_trace_data:
             pipeline_trace_data["trace_id"] = trace_id
 
-        # Save trace to database
+        # Extract routing metadata for new fields
+        routing_method = None
+        query_type = None
+        if pipeline_trace_data:
+            routing_info = pipeline_trace_data.get("routing", {})
+            routing_method = routing_info.get("method")
+            query_type = routing_info.get("query_type")
+
+        # Save trace to database with new consent-aware fields
         trace = QATrace(
             trace_id=trace_id,
             user_id=request.user_id,
@@ -258,9 +270,14 @@ async def query_experts(
             selected_experts=experts_used,
             synthesis_mode=result.mode.value,
             synthesis_text=result.synthesis,
-            sources=[s.dict() for s in sources],  # Store as JSONB
+            sources=[s.model_dump() for s in sources],  # Store as JSONB
             execution_time_ms=execution_time_ms,
             full_trace=pipeline_trace_data,
+            # New consent-aware fields (Story 5-1)
+            consent_level=request.consent_level,
+            query_type=query_type,
+            confidence=result.confidence,
+            routing_method=routing_method,
         )
         session.add(trace)
         await session.commit()
@@ -648,7 +665,7 @@ async def submit_refine_feedback(
 
         experts_used = list(result.expert_contributions.keys())
 
-        # Save new trace
+        # Save new trace (inherit consent_level from original)
         new_trace = QATrace(
             trace_id=new_trace_id,
             user_id=request.user_id,
@@ -656,8 +673,10 @@ async def submit_refine_feedback(
             selected_experts=experts_used,
             synthesis_mode=result.mode.value,
             synthesis_text=result.synthesis,
-            sources=[s.dict() for s in sources],
-            execution_time_ms=execution_time_ms
+            sources=[s.model_dump() for s in sources],
+            execution_time_ms=execution_time_ms,
+            consent_level=original_trace.consent_level,
+            confidence=result.confidence,
         )
         session.add(new_trace)
 
@@ -700,6 +719,7 @@ async def submit_refine_feedback(
 @router.get("/trace/{trace_id}")
 async def get_trace(
     trace_id: str,
+    caller_consent: Optional[str] = None,
     session: AsyncSession = Depends(get_async_session_dep)
 ):
     """
@@ -708,8 +728,18 @@ async def get_trace(
     Returns the full pipeline trace JSON stored during query execution.
     Only available for queries executed with include_trace=True.
 
+    Consent filtering is applied based on:
+    - The trace's stored consent_level
+    - The caller's consent level (caller_consent param)
+
+    The most restrictive level is applied:
+    - anonymous: user_id and query are redacted
+    - basic: query is redacted
+    - full: no redaction
+
     Example:
         GET /api/experts/trace/trace_abc123def456
+        GET /api/experts/trace/trace_abc123def456?caller_consent=basic
     """
     result = await session.execute(
         select(QATrace).where(QATrace.trace_id == trace_id)
@@ -725,4 +755,39 @@ async def get_trace(
             detail=f"No pipeline trace available for {trace_id}. Was the query executed with include_trace=True?"
         )
 
-    return qa_trace.full_trace
+    # Apply consent filtering
+    import copy
+    import json as _json
+    full_trace = copy.deepcopy(qa_trace.full_trace) if qa_trace.full_trace else {}
+
+    consent_levels = {"anonymous": 0, "basic": 1, "full": 2}
+    stored_level = consent_levels.get(qa_trace.consent_level, 0)
+    # None means no caller restriction; invalid value defaults to most restrictive
+    if caller_consent is None:
+        caller_level = 2
+    else:
+        caller_level = consent_levels.get(caller_consent, 0)
+    effective_level = min(stored_level, caller_level)
+
+    if effective_level < 2:  # basic or anonymous — redact query throughout
+        # Redact all occurrences of the original query text from the trace JSON
+        original_query = qa_trace.query
+        if original_query:
+            trace_str = _json.dumps(full_trace, ensure_ascii=False, default=str)
+            trace_str = trace_str.replace(original_query, "[REDACTED]")
+            full_trace = _json.loads(trace_str)
+        # Also redact well-known keys
+        for key in ("query", "query_text"):
+            if key in full_trace:
+                full_trace[key] = "[REDACTED]"
+        if isinstance(full_trace.get("input"), dict) and "query" in full_trace["input"]:
+            full_trace["input"]["query"] = "[REDACTED]"
+
+    if effective_level == 0:  # anonymous — also redact user_id
+        for key in ("user_id",):
+            if key in full_trace:
+                full_trace[key] = "[REDACTED]"
+        if isinstance(full_trace.get("input"), dict) and "user_id" in full_trace["input"]:
+            full_trace["input"]["user_id"] = "[REDACTED]"
+
+    return full_trace

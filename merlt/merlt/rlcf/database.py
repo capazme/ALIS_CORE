@@ -28,9 +28,10 @@ import os
 Base = declarative_base()
 
 # Default database URLs
-DEFAULT_DATABASE_URL = "sqlite:///rlcf.db"
-DEFAULT_ASYNC_DATABASE_URL = "sqlite+aiosqlite:///rlcf.db"
-DEFAULT_POSTGRES_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/merl_t_rlcf"
+# Note: Dev PostgreSQL on port 5433 (docker-compose.dev.yml)
+DEFAULT_DATABASE_URL = "postgresql://dev:devpassword@localhost:5433/rlcf_dev"
+DEFAULT_ASYNC_DATABASE_URL = "postgresql+asyncpg://dev:devpassword@localhost:5433/rlcf_dev"
+DEFAULT_POSTGRES_URL = "postgresql+asyncpg://dev:devpassword@localhost:5433/rlcf_dev"
 
 # Module-level engine and session factory (sync)
 _engine = None

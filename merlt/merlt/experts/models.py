@@ -23,7 +23,7 @@ from typing import Optional, List
 from uuid import uuid4
 
 from sqlalchemy import (
-    Column, String, Text, Integer, Float, DateTime, ForeignKey,
+    Column, String, Text, Integer, Float, DateTime, ForeignKey, Boolean,
     CheckConstraint, Index
 )
 from sqlalchemy.dialects.postgresql import UUID, ARRAY, JSONB
@@ -50,6 +50,12 @@ class QATrace(Base):
         sources: Array JSONB delle fonti citate con metadata
         execution_time_ms: Tempo di esecuzione in millisecondi
         created_at: Timestamp creazione
+        consent_level: Livello consenso storage (anonymous, basic, full)
+        query_type: Tipo query (definitional, interpretive, etc.)
+        confidence: Punteggio confidenza finale [0-1]
+        routing_method: Metodo routing (neural, llm_fallback)
+        is_archived: Flag per archiviazione trace
+        archived_at: Timestamp archiviazione
 
     Example:
         >>> trace = QATrace(
@@ -59,7 +65,11 @@ class QATrace(Base):
         ...     synthesis_mode="convergent",
         ...     synthesis_text="La responsabilità contrattuale...",
         ...     sources=[{"article_urn": "...", "expert": "literal", "relevance": 0.95}],
-        ...     execution_time_ms=2450
+        ...     execution_time_ms=2450,
+        ...     consent_level="basic",
+        ...     query_type="definitional",
+        ...     confidence=0.85,
+        ...     routing_method="neural"
         ... )
     """
     __tablename__ = "qa_traces"
@@ -71,8 +81,8 @@ class QATrace(Base):
         default=lambda: f"trace_{uuid4().hex[:12]}"
     )
 
-    # User
-    user_id = Column(String(50), nullable=False, index=True)
+    # User (indexed via idx_qa_traces_user in __table_args__)
+    user_id = Column(String(50), nullable=False)
 
     # Query details
     query = Column(Text, nullable=False)
@@ -89,6 +99,20 @@ class QATrace(Base):
     # Full scientific pipeline trace (JSON)
     full_trace = Column(JSONB, nullable=True)
 
+    # Consent-aware storage (Story 5-1, indexed via idx_qa_traces_consent)
+    consent_level = Column(
+        String(20),
+        nullable=False,
+        server_default="basic"
+    )
+    query_type = Column(String(50), nullable=True)  # definitional, interpretive, comparative, etc.
+    confidence = Column(Float, nullable=True)  # Final confidence score [0-1]
+    routing_method = Column(String(30), nullable=True)  # neural, llm_fallback, regex
+
+    # Archival (Story 5-1)
+    is_archived = Column(Boolean, nullable=False, server_default="false")
+    archived_at = Column(DateTime, nullable=True)
+
     # Timestamps
     created_at = Column(DateTime, nullable=False, server_default=func.now())
 
@@ -101,8 +125,20 @@ class QATrace(Base):
             "synthesis_mode IS NULL OR synthesis_mode IN ('convergent', 'divergent')",
             name="chk_synthesis_mode"
         ),
+        CheckConstraint(
+            "consent_level IN ('anonymous', 'basic', 'full')",
+            name="chk_consent_level"
+        ),
+        CheckConstraint(
+            "confidence IS NULL OR (confidence >= 0 AND confidence <= 1)",
+            name="chk_confidence"
+        ),
         Index("idx_qa_traces_user", "user_id"),
         Index("idx_qa_traces_created", "created_at"),
+        Index("idx_qa_traces_user_created", "user_id", "created_at"),
+        Index("idx_qa_traces_query_type", "query_type"),
+        Index("idx_qa_traces_archived", "is_archived"),
+        Index("idx_qa_traces_consent", "consent_level"),
     )
 
     def __repr__(self) -> str:
