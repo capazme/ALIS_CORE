@@ -683,3 +683,25 @@ async def training_stream(websocket: WebSocket):
     finally:
         if websocket in _connected_websockets:
             _connected_websockets.remove(websocket)
+
+
+# =============================================================================
+# SYNTHETIC FEEDBACK (Story 6-10)
+# =============================================================================
+
+
+@router.post("/synthetic/generate")
+async def generate_synthetic_feedback(
+    count: int = Query(50, ge=1, le=500, description="Number of feedback pairs"),
+    domain: Optional[str] = Query(None, description="Domain filter"),
+    difficulty: Optional[int] = Query(None, ge=1, le=5, description="Difficulty filter"),
+    session: AsyncSession = Depends(get_async_session_dep),
+):
+    """Generate synthetic feedback for cold-start or testing."""
+    from merlt.rlcf.synthetic_feedback_service import SyntheticFeedbackService
+
+    svc = SyntheticFeedbackService()
+    result = await svc.generate_feedback_batch(
+        session, count=count, domain=domain, difficulty=difficulty
+    )
+    return result.to_dict()

@@ -31,6 +31,8 @@ from merlt.experts.synthesizer import SynthesisMode
 from merlt.experts.models import QATrace, QAFeedback
 from merlt.rlcf.database import get_async_session_dep
 from merlt.rlcf.training_scheduler import get_scheduler
+from merlt.rlcf.pii_service import PIIMaskingService
+from merlt.rlcf.audit_service import AuditService
 from merlt.rlcf.multilevel_feedback import (
     MultilevelFeedback,
     RetrievalFeedback,
@@ -163,6 +165,8 @@ class FeedbackResponse(BaseModel):
 
 # Global orchestrator instance (initialized on startup)
 _orchestrator: Optional[MultiExpertOrchestrator] = None
+_pii_service = PIIMaskingService()
+_audit_service = AuditService()
 
 
 def get_orchestrator() -> MultiExpertOrchestrator:
@@ -195,6 +199,29 @@ def initialize_expert_system(orchestrator: MultiExpertOrchestrator):
     global _orchestrator
     _orchestrator = orchestrator
     log.info("Expert System initialized")
+
+
+# ============================================================================
+# AUDIT LOGGING
+# ============================================================================
+
+async def _audit_feedback(
+    session: AsyncSession,
+    feedback: QAFeedback,
+    feedback_type: str,
+) -> None:
+    """Log feedback creation to audit trail. Non-blocking."""
+    try:
+        await _audit_service.log_event(
+            session,
+            action="CREATE",
+            actor_id=feedback.user_id,
+            resource_type="feedback",
+            resource_id=str(feedback.id),
+            details={"feedback_type": feedback_type, "trace_id": feedback.trace_id},
+        )
+    except Exception as e:
+        log.warning("Audit logging failed (non-blocking)", error=str(e))
 
 
 # ============================================================================
@@ -559,10 +586,22 @@ async def submit_inline_feedback(
         await session.commit()
 
         _wire_feedback_to_training(trace, feedback, "inline")
+        await _audit_feedback(session, feedback, "inline")
         new_authority = await _update_user_authority(request.user_id, feedback, "inline")
         if new_authority is not None:
             feedback.user_authority = new_authority
             await session.commit()
+
+        # F8 implicit: positive inline feedback boosts source affinity
+        try:
+            from merlt.rlcf.affinity_service import AffinityUpdateService
+            affinity_svc = AffinityUpdateService()
+            for expert in (trace.selected_experts or []):
+                await affinity_svc.update_implicit_from_expert_feedback(
+                    session, trace, feedback, expert
+                )
+        except Exception as e:
+            log.warning("Implicit affinity update failed (non-blocking)", error=str(e))
 
         log.info(
             "Inline feedback saved",
@@ -620,24 +659,37 @@ async def submit_detailed_feedback(
         if not trace:
             raise HTTPException(status_code=404, detail=f"Trace {request.trace_id} not found")
 
-        # Create feedback
+        # Create feedback (mask PII in comments)
+        masked_comment = _pii_service.mask_text(request.comment) if request.comment else None
         feedback = QAFeedback(
             trace_id=request.trace_id,
             user_id=request.user_id,
             retrieval_score=request.retrieval_score,
             reasoning_score=request.reasoning_score,
             synthesis_score=request.synthesis_score,
-            detailed_comment=request.comment,
+            detailed_comment=masked_comment,
             user_authority=request.user_authority
         )
         session.add(feedback)
         await session.commit()
 
         _wire_feedback_to_training(trace, feedback, "detailed")
+        await _audit_feedback(session, feedback, "detailed")
         new_authority = await _update_user_authority(request.user_id, feedback, "detailed")
         if new_authority is not None:
             feedback.user_authority = new_authority
             await session.commit()
+
+        # F8 implicit: detailed feedback scores propagate to source affinity
+        try:
+            from merlt.rlcf.affinity_service import AffinityUpdateService
+            affinity_svc = AffinityUpdateService()
+            for expert in (trace.selected_experts or []):
+                await affinity_svc.update_implicit_from_expert_feedback(
+                    session, trace, feedback, expert
+                )
+        except Exception as e:
+            log.warning("Implicit affinity update failed (non-blocking)", error=str(e))
 
         log.info(
             "Detailed feedback saved",
@@ -707,6 +759,7 @@ async def submit_source_feedback(
         await session.commit()
 
         _wire_feedback_to_training(trace, feedback, "source")
+        await _audit_feedback(session, feedback, "source")
         new_authority = await _update_user_authority(request.user_id, feedback, "source")
         if new_authority is not None:
             feedback.user_authority = new_authority
@@ -796,21 +849,33 @@ async def submit_expert_preference_feedback(
                 detail=f"Invalid expert type '{request.preferred_expert}'. Valid: {valid_experts}"
             )
 
-        # Create feedback with expert preference
+        # Create feedback with expert preference (mask PII in comments)
+        masked_comment = _pii_service.mask_text(request.comment) if request.comment else None
         feedback = QAFeedback(
             trace_id=request.trace_id,
             user_id=request.user_id,
             preferred_expert=request.preferred_expert,
-            detailed_comment=request.comment
+            detailed_comment=masked_comment
         )
         session.add(feedback)
         await session.commit()
 
         _wire_feedback_to_training(trace, feedback, "preference")
+        await _audit_feedback(session, feedback, "preference")
         new_authority = await _update_user_authority(request.user_id, feedback, "preference")
         if new_authority is not None:
             feedback.user_authority = new_authority
             await session.commit()
+
+        # F8 implicit: preference feedback boosts the preferred expert's sources
+        try:
+            from merlt.rlcf.affinity_service import AffinityUpdateService
+            affinity_svc = AffinityUpdateService()
+            await affinity_svc.update_implicit_from_expert_feedback(
+                session, trace, feedback, request.preferred_expert
+            )
+        except Exception as e:
+            log.warning("Implicit affinity update failed (non-blocking)", error=str(e))
 
         log.info(
             "Expert preference feedback saved",
@@ -918,6 +983,7 @@ async def submit_router_feedback(
         await session.commit()
 
         _wire_feedback_to_training(trace, feedback, "router")
+        await _audit_feedback(session, feedback, "router")
         new_authority = await _update_user_authority(request.user_id, feedback, "router")
         if new_authority is not None:
             feedback.user_authority = new_authority

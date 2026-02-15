@@ -92,6 +92,9 @@ class TraversalTrainingService:
         result = await session.execute(query)
         rows = result.all()
 
+        # Batch embedding: collect all queries that need real embeddings
+        embedding_cache = self._batch_query_embeddings(rows)
+
         samples = []
         for feedback, trace in rows:
             reward = (feedback.source_relevance - 1) / 4  # 1→0, 5→1
@@ -109,8 +112,10 @@ class TraversalTrainingService:
             if not experts:
                 experts = trace.selected_experts or ["literal"]
 
-            # Create a stub embedding (in production, would use actual query embedding)
-            query_embedding = self._get_query_embedding(trace)
+            # Use cached embedding (batch-computed) or per-trace fallback
+            query_embedding = embedding_cache.get(
+                trace.trace_id, self._get_query_embedding(trace)
+            )
 
             for relation_type in relations:
                 for expert_type in experts:
@@ -335,3 +340,56 @@ class TraversalTrainingService:
 
         # Return 1024-dim zero vector as stub (E5-large dimension)
         return [0.0] * 1024
+
+    @staticmethod
+    def _batch_query_embeddings(rows) -> Dict[str, List[float]]:
+        """
+        Batch-compute query embeddings for traces missing stored embeddings.
+
+        Collects all queries needing embedding, encodes them in one batch
+        via EmbeddingService, and returns a trace_id -> embedding map.
+        """
+        cache: Dict[str, List[float]] = {}
+        needs_encoding: list = []  # (trace_id, query_text) pairs
+
+        for _, trace in rows:
+            # Check if embedding already stored in trace
+            if trace.full_trace:
+                emb = trace.full_trace.get("query_embedding")
+                if emb and isinstance(emb, list):
+                    cache[trace.trace_id] = emb
+                    continue
+                stages = trace.full_trace.get("stages", {})
+                gating = stages.get("gating", {})
+                emb = gating.get("query_embedding")
+                if emb and isinstance(emb, list):
+                    cache[trace.trace_id] = emb
+                    continue
+
+            # Need to encode this query
+            if trace.query and trace.trace_id not in cache:
+                needs_encoding.append((trace.trace_id, trace.query))
+
+        if not needs_encoding:
+            return cache
+
+        # Batch encode using EmbeddingService if available
+        try:
+            from merlt.retrieval.embedding_service import EmbeddingService
+            embedding_svc = EmbeddingService.get_instance()
+            texts = [text for _, text in needs_encoding]
+            embeddings = embedding_svc.encode(texts)  # batch encode
+
+            for (trace_id, _), emb in zip(needs_encoding, embeddings):
+                cache[trace_id] = emb.tolist() if hasattr(emb, 'tolist') else list(emb)
+
+            log.debug(
+                "Batch embeddings computed",
+                count=len(needs_encoding),
+                cached=len(cache) - len(needs_encoding),
+            )
+        except Exception as e:
+            log.debug("Batch embedding unavailable, using stubs", error=str(e))
+            # Fall through to per-trace _get_query_embedding stub
+
+        return cache

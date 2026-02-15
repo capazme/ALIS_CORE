@@ -37,7 +37,7 @@ Esempio:
 import asyncio
 import structlog
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any, Optional, List, Callable
 from enum import Enum
 import threading
@@ -236,6 +236,7 @@ class TrainingScheduler:
         self._training_task: Optional[asyncio.Task] = None
         self._auto_training_task: Optional[asyncio.Task] = None
         self._stop_event = asyncio.Event()
+        self._scheduler = None  # APScheduler instance
 
         # Thread safety
         self._lock = threading.Lock()
@@ -319,13 +320,13 @@ class TrainingScheduler:
             # Idle timeout: buffer non-empty but below threshold for >N days
             if buffer_size > 0 and buffer_size < self.config.buffer_threshold:
                 oldest = self.buffer.oldest_timestamp()
-                if oldest and (datetime.utcnow() - oldest) > timedelta(
+                if oldest and (datetime.now(UTC).replace(tzinfo=None) - oldest) > timedelta(
                     days=self.config.idle_timeout_days
                 ):
                     log.info(
                         "Idle timeout triggered",
                         buffer_size=buffer_size,
-                        oldest_days=(datetime.utcnow() - oldest).days,
+                        oldest_days=(datetime.now(UTC).replace(tzinfo=None) - oldest).days,
                     )
                     return True
 
@@ -334,7 +335,7 @@ class TrainingScheduler:
 
             # Check time interval
             if self._last_training_at:
-                elapsed = datetime.utcnow() - self._last_training_at
+                elapsed = datetime.now(UTC).replace(tzinfo=None) - self._last_training_at
                 if elapsed.total_seconds() < self.config.min_interval_seconds:
                     return False
 
@@ -350,7 +351,7 @@ class TrainingScheduler:
         if not self._last_training_at:
             return timedelta(seconds=0) if len(self.buffer) >= self.config.buffer_threshold else None
 
-        elapsed = datetime.utcnow() - self._last_training_at
+        elapsed = datetime.now(UTC).replace(tzinfo=None) - self._last_training_at
         remaining = self.config.min_interval_seconds - elapsed.total_seconds()
 
         if remaining <= 0:
@@ -375,7 +376,7 @@ class TrainingScheduler:
         Returns:
             TrainingResult con metriche
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC).replace(tzinfo=None)
 
         with self._lock:
             if self._status == TrainingStatus.TRAINING:
@@ -478,17 +479,17 @@ class TrainingScheduler:
 
             # Update state
             with self._lock:
-                self._last_training_at = datetime.utcnow()
+                self._last_training_at = datetime.now(UTC).replace(tzinfo=None)
                 self._status = TrainingStatus.IDLE
                 self._current_epoch = 0
                 self._update_sessions_today()
 
-            duration = (datetime.utcnow() - start_time).total_seconds()
+            duration = (datetime.now(UTC).replace(tzinfo=None) - start_time).total_seconds()
 
             # Save versioned checkpoint
             checkpoint_version = None
             if self.config.auto_save_checkpoint and samples_processed > 0:
-                version_tag = f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{self._training_sessions_today}"
+                version_tag = f"{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d_%H%M%S')}_{self._training_sessions_today}"
                 checkpoint_version = f"v{version_tag}"
                 try:
                     from .policy_manager import PolicyManager
@@ -549,7 +550,7 @@ class TrainingScheduler:
             result = TrainingResult(
                 success=False,
                 error=str(e),
-                duration_seconds=(datetime.utcnow() - start_time).total_seconds()
+                duration_seconds=(datetime.now(UTC).replace(tzinfo=None) - start_time).total_seconds()
             )
 
             if self._on_training_error:
@@ -568,58 +569,91 @@ class TrainingScheduler:
 
     def _update_sessions_today(self):
         """Aggiorna contatore sessioni oggi."""
-        today = datetime.utcnow().strftime("%Y-%m-%d")
+        today = datetime.now(UTC).replace(tzinfo=None).strftime("%Y-%m-%d")
         if self._last_session_date != today:
             self._training_sessions_today = 0
             self._last_session_date = today
         self._training_sessions_today += 1
 
     # -------------------------------------------------------------------------
-    # AUTO TRAINING
+    # AUTO TRAINING (APScheduler)
     # -------------------------------------------------------------------------
 
     async def start_auto_training(self, check_interval: int = 60):
         """
-        Avvia training automatico in background.
+        Avvia training automatico in background via APScheduler.
 
         Args:
             check_interval: Intervallo check in secondi
         """
-        if self._auto_training_task and not self._auto_training_task.done():
+        try:
+            from apscheduler.schedulers.asyncio import AsyncIOScheduler
+            from apscheduler.triggers.interval import IntervalTrigger
+        except ImportError:
+            log.warning("APScheduler not installed, falling back to asyncio loop")
+            await self._start_auto_training_fallback(check_interval)
+            return
+
+        if self._scheduler is not None and self._scheduler.running:
             log.warning("Auto training already running")
             return
 
-        self._stop_event.clear()
-        self._auto_training_task = asyncio.create_task(
-            self._auto_training_loop(check_interval)
+        self._scheduler = AsyncIOScheduler()
+        self._scheduler.add_job(
+            self._auto_training_check,
+            trigger=IntervalTrigger(seconds=check_interval),
+            id="rlcf_training_check",
+            replace_existing=True,
         )
-
-        log.info("Auto training started", check_interval=check_interval)
+        self._scheduler.start()
+        log.info("Auto training started (APScheduler)", check_interval=check_interval)
 
     async def stop_auto_training(self):
         """Ferma training automatico."""
-        self._stop_event.set()
+        if self._scheduler is not None and self._scheduler.running:
+            self._scheduler.shutdown(wait=False)
+            self._scheduler = None
+            log.info("Auto training stopped (APScheduler)")
+            return
 
+        # Fallback stop
+        self._stop_event.set()
         if self._auto_training_task:
             self._auto_training_task.cancel()
             try:
                 await self._auto_training_task
             except asyncio.CancelledError:
                 pass
-
         log.info("Auto training stopped")
 
+    async def _auto_training_check(self):
+        """APScheduler job: check conditions and run training if needed."""
+        try:
+            if self.should_train():
+                await self.run_training_epoch(
+                    trigger=TrainingTrigger.BUFFER_THRESHOLD
+                )
+        except Exception as e:
+            log.error("Error in auto training check", error=str(e))
+
+    async def _start_auto_training_fallback(self, check_interval: int):
+        """Fallback to asyncio loop when APScheduler is not available."""
+        if self._auto_training_task and not self._auto_training_task.done():
+            return
+        self._stop_event.clear()
+        self._auto_training_task = asyncio.create_task(
+            self._auto_training_loop(check_interval)
+        )
+
     async def _auto_training_loop(self, check_interval: int):
-        """Loop interno per auto training."""
+        """Fallback loop for auto training."""
         while not self._stop_event.is_set():
             try:
                 if self.should_train():
                     await self.run_training_epoch(
                         trigger=TrainingTrigger.BUFFER_THRESHOLD
                     )
-
                 await asyncio.sleep(check_interval)
-
             except asyncio.CancelledError:
                 break
             except Exception as e:
@@ -638,7 +672,7 @@ class TrainingScheduler:
             next_training = None
             remaining = self.get_time_until_next_training()
             if remaining is not None:
-                next_training = (datetime.utcnow() + remaining).isoformat()
+                next_training = (datetime.now(UTC).replace(tzinfo=None) + remaining).isoformat()
 
             return SchedulerStatus(
                 status=self._status,

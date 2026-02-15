@@ -18,6 +18,7 @@ Usage:
         await session.commit()
 """
 
+import hashlib
 from datetime import datetime
 from typing import Optional, List
 from uuid import uuid4
@@ -328,3 +329,60 @@ class QAFeedback(Base):
             feedback_type = f"preference_{self.preferred_expert}"
 
         return f"<QAFeedback(id={self.id}, trace_id={self.trace_id}, type={feedback_type})>"
+
+
+class AuditLogEntry(Base):
+    """
+    Immutable audit log for RLCF feedback operations.
+
+    Hash chain: each entry includes prev_hash for tamper detection.
+    Actor IDs are SHA-256 hashed for privacy.
+    """
+    __tablename__ = "audit_log"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime, nullable=False, server_default=func.now())
+    action = Column(String(20), nullable=False)  # CREATE, UPDATE, DELETE
+    actor_hash = Column(String(64), nullable=False)  # SHA-256 of user_id
+    resource_type = Column(String(50), nullable=False)  # feedback, trace, etc.
+    resource_id = Column(String(100), nullable=False)
+    content_hash = Column(String(64), nullable=True)  # SHA-256 of payload
+    consent_level = Column(String(20), nullable=True)
+    prev_hash = Column(String(64), nullable=True)  # hash chain link
+    details = Column(JSONB, nullable=True)
+
+    __table_args__ = (
+        Index("idx_audit_log_timestamp", "timestamp"),
+        Index("idx_audit_log_action", "action"),
+        Index("idx_audit_log_resource", "resource_type", "resource_id"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<AuditLogEntry(id={self.id}, action={self.action}, resource={self.resource_type})>"
+
+
+class DevilsAdvocateLog(Base):
+    """
+    Persistent log of Devil's Advocate triggers and feedback.
+
+    Replaces in-memory deque for durability across restarts.
+    """
+    __tablename__ = "devils_advocate_log"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    trace_id = Column(String(50), nullable=False, index=True)
+    triggered_at = Column(DateTime, nullable=False, server_default=func.now())
+    critical_prompt = Column(Text, nullable=True)
+    feedback_text = Column(Text, nullable=True)
+    assessment = Column(String(20), nullable=True)  # valid, weak, interesting
+    engagement_score = Column(Float, nullable=True)
+    keywords_found = Column(Integer, nullable=True)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+    __table_args__ = (
+        Index("idx_da_log_trace", "trace_id"),
+        Index("idx_da_log_created", "created_at"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<DevilsAdvocateLog(id={self.id}, trace_id={self.trace_id})>"

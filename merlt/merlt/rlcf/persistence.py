@@ -34,7 +34,7 @@ Esempio:
 """
 
 import structlog
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import asdict
 import json
@@ -798,7 +798,7 @@ class RLCFPersistence:
 
             if target:
                 target.is_active = True
-                target.activated_at = datetime.utcnow()
+                target.activated_at = datetime.now(UTC).replace(tzinfo=None)
                 log.info("Policy activated", version=version, policy_type=policy_type)
                 return True
 
@@ -873,7 +873,7 @@ class RLCFPersistence:
             training_session = result.scalar_one_or_none()
 
             if training_session:
-                training_session.ended_at = datetime.utcnow()
+                training_session.ended_at = datetime.now(UTC).replace(tzinfo=None)
                 training_session.policy_version_to = policy_version_to
                 training_session.num_traces = num_traces
                 training_session.num_feedback = num_feedback
@@ -908,7 +908,7 @@ class RLCFPersistence:
             training_session = result.scalar_one_or_none()
 
             if training_session:
-                training_session.ended_at = datetime.utcnow()
+                training_session.ended_at = datetime.now(UTC).replace(tzinfo=None)
                 training_session.status = "failed"
                 training_session.error_message = error_message
 

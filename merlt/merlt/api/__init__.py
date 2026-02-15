@@ -63,6 +63,7 @@ from merlt.api.tracking_router import router as tracking_router
 from merlt.api.policy_evolution_router import router as policy_evolution_router
 from merlt.api.export_router import router as export_router
 from merlt.api.devils_advocate_router import router as devils_advocate_router
+from merlt.api.audit_router import router as audit_router
 
 __all__ = [
     "ingestion_router",
@@ -88,4 +89,5 @@ __all__ = [
     "policy_evolution_router",
     "export_router",
     "devils_advocate_router",
+    "audit_router",
 ]

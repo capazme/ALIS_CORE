@@ -69,6 +69,7 @@ dependencies = [
     "tenacity>=8.2.0",
     "httpx>=0.25.0",
     "asteval>=1.0.0",
+    "apscheduler>=3.10.0",
 ]
 
 [project.optional-dependencies]

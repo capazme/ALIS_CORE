@@ -57,6 +57,7 @@ from merlt.api import (
     policy_evolution_router,
     export_router,
     devils_advocate_router,
+    audit_router,
 )
 
 
@@ -185,6 +186,7 @@ app.include_router(tracking_router, prefix="/api/v1", tags=["tracking"])
 app.include_router(policy_evolution_router, prefix="/api/v1", tags=["policy-evolution"])
 app.include_router(export_router, prefix="/api/v1", tags=["export"])
 app.include_router(devils_advocate_router, prefix="/api/v1", tags=["devils-advocate"])
+app.include_router(audit_router, prefix="/api/v1", tags=["audit"])
 
 
 # Health check endpoint
@@ -234,6 +236,7 @@ async def root():
             "policy-evolution": "/api/v1/policy-evolution",
             "export": "/api/v1/export",
             "devils-advocate": "/api/v1/devils-advocate",
+            "audit": "/api/v1/audit",
         },
     }
 

@@ -85,11 +85,11 @@ development_status:
   # Epic 3: Norm Browsing & Search
   # ============================================
   # Backend Complete - Frontend stories (3-1, 3-2, 3-4) pending in visualex-platform
-  epic-3: in-progress
-  3-1-norm-hierarchical-browser: backlog  # Frontend - visualex-platform
-  3-2-article-viewer: backlog  # Frontend - visualex-platform
+  epic-3: done  # All stories completed - Block B verified frontend implementations
+  3-1-norm-hierarchical-browser: done  # Verified 2026-02-15 - TreeViewPanel, TreeBranch, TreeNodeItem, useTreeExpansion, treeTransform (659 LOC)
+  3-2-article-viewer: done  # Verified 2026-02-15 - ArticleTabContent, ArticleRubrica, ArticleTextMinimap, ArticleToolbar (865 LOC)
   3-3-search-by-keyword-urn: done
-  3-4-citation-highlighting-linking: backlog  # Frontend + NER - visualex-platform
+  3-4-citation-highlighting-linking: done  # Verified 2026-02-15 - citationMatcher, citationNavigator, CitationPreviewPopup, CitationDefinitionSnippet, ExternalCitationBadge (1034 LOC)
   3-5-cross-references-panel: done
   3-6-historical-versions-timeline: done
   3-7-modification-detection-alert: done
@@ -110,7 +110,7 @@ development_status:
   4-8-synthesizer: done  # Completed 2026-02-02 - Synthesizer with profile-aware formatting, progressive disclosure, F7 feedback
   4-9-circuit-breaker-implementation: done  # Completed 2026-02-02 - Circuit breaker with thread-safe registry, state callbacks, graceful degradation
   4-10-llm-provider-abstraction: done  # Completed 2026-02-02 - Multi-provider support, failover, config-driven, per-Expert models
-  4-11-expert-pipeline-status-ui: backlog
+  4-11-expert-pipeline-status-ui: done  # Verified 2026-02-15 - ExpertProgressIndicator, ExpertStatusBlock, useExpertPipelineStatus (280 LOC)
   4-12-gold-standard-regression: done
   epic-4-retrospective: done
 
@@ -129,17 +129,17 @@ development_status:
   # ============================================
   # Epic 6: RLCF Feedback Collection
   # ============================================
-  epic-6: in-progress  # Sprint 2 completed core feedback UI + backend wiring
+  epic-6: done  # All stories completed - Block B completed remaining backlog
   6-1-feedback-data-model: done  # Completed 2026-02-12 - Sprint 2: qa_feedback table (from 5-1), _wire_feedback_to_training helper in experts_router.py, wires all 5 feedback endpoints to TrainingScheduler
   6-2-ner-feedback-f1: done  # Completed 2026-02-12 - Sprint 2: MerltContentOverlay with "Corretto" confirm button (confidence>0.8), CitationCorrectionCard flow, userId via getCurrentUserId
   6-3-expert-output-feedback-f3-f6: done  # Completed 2026-02-12 - Sprint 2: ExpertFeedbackPanel with 5-star rating, reason select (Accurata/Incompleta/Non pertinente/Altro), differentiated dimension mapping, integrated in ExpertAccordion
   6-4-synthesizer-feedback-f7: done  # Completed 2026-02-12 - Sprint 2: InlineFeedbackPanel with thumbs up/down, integrated in TraceViewer after synthesis section
   6-5-bridge-quality-feedback-f8: done  # Completed 2026-02-12 - Sprint 2: SourceRatingWidget 5-star per source, integrated in SourcesList. Implicit F8 inference deferred to Epic 7
-  6-6-fonti-usate-panel: backlog
-  6-7-feedback-history: backlog
-  6-8-pii-anonymization: backlog
-  6-9-audit-trail: backlog
-  6-10-synthetic-feedback-generator: backlog
+  6-6-fonti-usate-panel: done  # Completed 2026-02-15 - SourcesUsedPanel with expert grouping, source type badges, validity, star rating, missing source suggestion (290 LOC)
+  6-7-feedback-history: done  # Verified 2026-02-15 - VoteHistoryModal with timeline, undo, committed/uncommitted indicators (180 LOC)
+  6-8-pii-anonymization: done  # Completed 2026-02-15 - PIIMaskingService (CF, email, date, phone), wired into experts_router feedback endpoints, consent-aware
+  6-9-audit-trail: done  # Completed 2026-02-15 - AuditService with SHA-256 hash chain, AuditLogEntry model, audit_router, wired into all feedback endpoints
+  6-10-synthetic-feedback-generator: done  # Completed 2026-02-15 - SyntheticFeedbackService with template queries, beta distribution ratings, weight decay, POST /rlcf/synthetic/generate
   epic-6-retrospective: optional
 
   # ============================================

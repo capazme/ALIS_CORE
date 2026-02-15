@@ -64,6 +64,8 @@ class AggregationHistoryPoint(BaseModel):
 async def get_time_series(
     metric: str = Query("confidence", description="Metric: confidence or reward"),
     window: int = Query(50, ge=5, le=500, description="Sliding window size (traces)"),
+    offset: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum records to return"),
 ) -> List[TimeSeriesPoint]:
     """
     Confidence or reward time-series from QATrace data.
@@ -103,16 +105,16 @@ async def get_time_series(
                 if row.avg_rating is not None
             }
 
-        points = []
+        all_points = []
         for row in reversed(trace_rows):
             day_str = str(row.day)
-            points.append(TimeSeriesPoint(
+            all_points.append(TimeSeriesPoint(
                 timestamp=day_str,
                 confidence=round(row.avg_confidence, 4) if row.avg_confidence else None,
                 reward=reward_by_day.get(day_str),
                 query_count=row.query_count,
             ))
-        return points
+        return all_points[offset:offset + limit]
 
     except Exception as e:
         log.warning("time-series fetch failed", error=str(e))
@@ -122,6 +124,8 @@ async def get_time_series(
 @router.get("/expert-evolution")
 async def get_expert_evolution(
     days: int = Query(30, ge=1, le=180, description="Period in days"),
+    offset: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum records to return"),
 ) -> List[ExpertEvolutionPoint]:
     """
     Expert usage evolution: how often each expert is selected, by day.
@@ -155,18 +159,18 @@ async def get_expert_evolution(
                         daily_counts[day][exp] += 1
                 daily_counts[day]["total"] += 1
 
-        points = []
+        all_points = []
         for day in sorted(daily_counts.keys()):
             counts = daily_counts[day]
             total = counts["total"] or 1
-            points.append(ExpertEvolutionPoint(
+            all_points.append(ExpertEvolutionPoint(
                 timestamp=day,
                 literal=round(counts["literal"] / total, 4),
                 systemic=round(counts["systemic"] / total, 4),
                 principles=round(counts["principles"] / total, 4),
                 precedent=round(counts["precedent"] / total, 4),
             ))
-        return points
+        return all_points[offset:offset + limit]
 
     except Exception as e:
         log.warning("expert-evolution fetch failed", error=str(e))
@@ -176,6 +180,8 @@ async def get_expert_evolution(
 @router.get("/aggregation-history")
 async def get_aggregation_history(
     days: int = Query(30, ge=1, le=180, description="Period in days"),
+    offset: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum records to return"),
 ) -> List[AggregationHistoryPoint]:
     """
     Aggregated feedback trends per component from AggregatedFeedback table.
@@ -193,16 +199,16 @@ async def get_aggregation_history(
             )
             rows = result.scalars().all()
 
-        points = []
+        all_points = []
         for row in rows:
-            points.append(AggregationHistoryPoint(
+            all_points.append(AggregationHistoryPoint(
                 timestamp=row.period_end.isoformat() if row.period_end else "",
                 component=row.component or "",
                 avg_rating=row.avg_rating,
                 disagreement_score=row.disagreement_score,
                 total_feedback=row.total_feedback or 0,
             ))
-        return points
+        return all_points[offset:offset + limit]
 
     except Exception as e:
         log.warning("aggregation-history fetch failed", error=str(e))

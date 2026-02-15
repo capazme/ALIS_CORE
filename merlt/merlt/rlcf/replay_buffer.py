@@ -41,7 +41,7 @@ import random
 import structlog
 from dataclasses import dataclass, field
 from typing import Dict, Any, Optional, List, Tuple, Generic, TypeVar
-from datetime import datetime
+from datetime import datetime, UTC
 from collections import deque
 import threading
 import json
@@ -76,7 +76,7 @@ class Experience:
     feedback_data: Dict[str, Any]
     reward: float
     priority: float = 1.0
-    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None).isoformat())
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -100,7 +100,7 @@ class Experience:
             feedback_data=data["feedback_data"],
             reward=data["reward"],
             priority=data.get("priority", 1.0),
-            timestamp=data.get("timestamp", datetime.utcnow().isoformat()),
+            timestamp=data.get("timestamp", datetime.now(UTC).replace(tzinfo=None).isoformat()),
             metadata=data.get("metadata", {})
         )
 
@@ -194,7 +194,7 @@ class ExperienceReplayBuffer:
         trace_data = trace.to_dict() if hasattr(trace, 'to_dict') else trace
         feedback_data = feedback.to_dict() if hasattr(feedback, 'to_dict') else feedback
 
-        experience_id = f"exp_{self._total_added}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+        experience_id = f"exp_{self._total_added}_{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}"
 
         experience = Experience(
             experience_id=experience_id,
@@ -513,7 +513,7 @@ class PrioritizedReplayBuffer:
         trace_data = trace.to_dict() if hasattr(trace, 'to_dict') else trace
         feedback_data = feedback.to_dict() if hasattr(feedback, 'to_dict') else feedback
 
-        experience_id = f"exp_{self._total_added}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+        experience_id = f"exp_{self._total_added}_{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d%H%M%S')}"
 
         experience = Experience(
             experience_id=experience_id,
