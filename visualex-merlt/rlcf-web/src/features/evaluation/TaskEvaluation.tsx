@@ -15,14 +15,6 @@ export function TaskEvaluation() {
   const { data: tasks, isLoading: tasksLoading, error: tasksError } = useTasks({ status: 'BLIND_EVALUATION' } as any);
   const { selectedTask: storeSelectedTask, setSelectedTask } = useUIStore();
 
-  // Debug logging
-  console.log('TaskEvaluation Debug:', {
-    tasksLoading,
-    tasksError,
-    tasksCount: tasks?.length,
-    tasks: tasks?.slice(0, 2), // First 2 tasks for inspection
-  });
-  
   // State for evaluation mode and responses
   const [mode, setMode] = useState<'blind' | 'preference'>('blind');
   const [loadingResponse, setLoadingResponse] = useState(false);
@@ -77,7 +69,7 @@ export function TaskEvaluation() {
           }
         }
       } catch (error) {
-        console.error("Failed to load response for task:", error);
+        // Failed to load response for task
         setResponseA({ 
           id: -99, 
           task_id: selectedTask.id, 
@@ -109,30 +101,58 @@ export function TaskEvaluation() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Task Evaluation</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Task Evaluation</h1>
           <p className="text-slate-400">Evaluate AI responses for legal tasks</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate('/dashboard')}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
+          <Button variant="outline" onClick={() => navigate('/dashboard')} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+            <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
             Back to Dashboard
           </Button>
-          <Button variant="secondary" onClick={handleNextTask} disabled={!tasks || tasks.length <= 1}>
+          <Button variant="secondary" onClick={handleNextTask} disabled={!tasks || tasks.length <= 1} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
             Next Task
           </Button>
         </div>
       </div>
 
       {tasksLoading ? (
-        <Card><CardHeader><CardTitle>Loading tasks...</CardTitle></CardHeader><CardContent><div className="text-slate-400 flex items-center gap-2"><div className="animate-spin h-4 w-4 border-2 border-violet-500 border-t-transparent rounded-full"></div>Loading available tasks</div></CardContent></Card>
+        <Card>
+          <CardHeader><CardTitle>Loading tasks...</CardTitle></CardHeader>
+          <CardContent>
+            <div className="text-slate-400 flex items-center gap-2" role="status">
+              <div className="animate-spin h-4 w-4 border-2 border-violet-500 border-t-transparent rounded-full" aria-hidden="true" />
+              <span>Loading available tasks</span>
+              <span className="sr-only">Loading tasks, please wait</span>
+            </div>
+          </CardContent>
+        </Card>
       ) : tasksError ? (
-        <Card><CardHeader><CardTitle>Error loading tasks</CardTitle></CardHeader><CardContent><p className="text-red-400">Failed to load tasks: {(tasksError as Error).message}</p></CardContent></Card>
+        <Card>
+          <CardHeader><CardTitle>Error loading tasks</CardTitle></CardHeader>
+          <CardContent>
+            <p className="text-red-400" role="alert">Failed to load tasks: {(tasksError as Error).message}</p>
+          </CardContent>
+        </Card>
       ) : !tasks || tasks.length === 0 ? (
-        <Card><CardHeader><CardTitle>No tasks available for evaluation</CardTitle></CardHeader><CardContent><p className="text-slate-400">There are currently no tasks in BLIND_EVALUATION status.</p></CardContent></Card>
+        <Card>
+          <CardHeader><CardTitle>No tasks available for evaluation</CardTitle></CardHeader>
+          <CardContent>
+            <p className="text-slate-400">There are currently no tasks in BLIND_EVALUATION status. Check back later or contact an administrator.</p>
+          </CardContent>
+        </Card>
       ) : loadingResponse ? (
-        <Card><CardHeader><CardTitle>Loading Task Response...</CardTitle></CardHeader><CardContent><div className="text-slate-400 flex items-center gap-2"><div className="animate-spin h-4 w-4 border-2 border-violet-500 border-t-transparent rounded-full"></div>Loading AI response for evaluation</div></CardContent></Card>
+        <Card>
+          <CardHeader><CardTitle>Loading Task Response...</CardTitle></CardHeader>
+          <CardContent>
+            <div className="text-slate-400 flex items-center gap-2" role="status">
+              <div className="animate-spin h-4 w-4 border-2 border-violet-500 border-t-transparent rounded-full" aria-hidden="true" />
+              <span>Loading AI response for evaluation</span>
+              <span className="sr-only">Loading response, please wait</span>
+            </div>
+          </CardContent>
+        </Card>
       ) : isReady && selectedTask ? (
         <EvaluationWizard
           key={selectedTask.id} // Add key to force re-mount on task change
@@ -152,7 +172,7 @@ export function TaskEvaluation() {
                 },
                 onError: (error) => {
                   toast.error('Failed to submit feedback. Please try again.');
-                  console.error('Submission error:', error);
+                  // Submission error handled by toast
                 }
               }
             );

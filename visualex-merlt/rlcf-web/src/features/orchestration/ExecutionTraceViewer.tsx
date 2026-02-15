@@ -25,9 +25,9 @@ export function ExecutionTraceViewer({ traceId }: ExecutionTraceViewerProps) {
   if (isLoading) {
     return (
       <Card>
-        <CardContent className="flex items-center justify-center py-12">
-          <Loader className="w-8 h-8 animate-spin text-blue-500" />
-          <span className="ml-3 text-gray-400">Loading execution trace...</span>
+        <CardContent className="flex items-center justify-center py-12" role="status" aria-label="Loading execution trace">
+          <Loader className="w-8 h-8 animate-spin text-blue-500" aria-hidden="true" />
+          <span className="ml-3 text-slate-400">Loading execution trace...</span>
         </CardContent>
       </Card>
     );
@@ -36,7 +36,7 @@ export function ExecutionTraceViewer({ traceId }: ExecutionTraceViewerProps) {
   if (!queryData) {
     return (
       <Card>
-        <CardContent className="py-12 text-center text-gray-400">
+        <CardContent className="py-12 text-center text-slate-400" role="status">
           Query not found or trace unavailable.
         </CardContent>
       </Card>
@@ -62,24 +62,24 @@ export function ExecutionTraceViewer({ traceId }: ExecutionTraceViewerProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h3 className="text-sm font-medium text-gray-400 mb-2">Query Text</h3>
-            <p className="text-white bg-gray-800 p-4 rounded-lg">{queryData.query}</p>
+            <h3 className="text-sm font-medium text-slate-400 mb-2">Query Text</h3>
+            <p className="text-white bg-slate-800 p-4 rounded-lg">{queryData.query}</p>
           </div>
 
           {answer && (
             <div>
-              <h3 className="text-sm font-medium text-gray-400 mb-2">Answer Preview</h3>
-              <div className="bg-gray-800 p-4 rounded-lg space-y-2">
+              <h3 className="text-sm font-medium text-slate-400 mb-2">Answer Preview</h3>
+              <div className="bg-slate-800 p-4 rounded-lg space-y-2">
                 <p className="text-white line-clamp-3">{answer.primary_answer}</p>
                 <div className="flex items-center gap-4 text-sm">
-                  <span className="text-gray-400">
+                  <span className="text-slate-400">
                     Confidence: <span className="text-green-400 font-medium">{(answer.confidence * 100).toFixed(1)}%</span>
                   </span>
                   {answer.uncertainty_preserved && (
                     <Badge variant="outline">Uncertainty Preserved</Badge>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 italic">See detailed synthesis below</p>
+                <p className="text-xs text-slate-500 italic">See detailed synthesis below</p>
               </div>
             </div>
           )}
@@ -98,17 +98,17 @@ export function ExecutionTraceViewer({ traceId }: ExecutionTraceViewerProps) {
           <CardContent className="space-y-6">
             {/* Timeline */}
             <div className="space-y-3">
-              <h3 className="text-sm font-medium text-gray-400">Pipeline Stages</h3>
+              <h3 className="text-sm font-medium text-slate-400">Pipeline Stages</h3>
               <div className="space-y-2">
                 {trace.stages_executed?.map((stage, idx) => (
-                  <div key={idx} className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg">
+                  <div key={idx} className="flex items-center gap-3 p-3 bg-slate-800 rounded-lg">
                     <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-medium">
                       {idx + 1}
                     </div>
                     <div className="flex-1">
                       <div className="text-white font-medium capitalize">{stage.replace('_', ' ')}</div>
                       {trace.stage_timings?.[stage] && (
-                        <div className="text-sm text-gray-400">
+                        <div className="text-sm text-slate-400">
                           {trace.stage_timings[stage].toFixed(0)}ms
                         </div>
                       )}
@@ -121,7 +121,7 @@ export function ExecutionTraceViewer({ traceId }: ExecutionTraceViewerProps) {
             {/* Agents Used */}
             {trace.agents_used && trace.agents_used.length > 0 && (
               <div className="space-y-3">
-                <h3 className="text-sm font-medium text-gray-400 flex items-center gap-2">
+                <h3 className="text-sm font-medium text-slate-400 flex items-center gap-2">
                   <Database className="w-4 h-4" />
                   Retrieval Agents Used
                 </h3>
@@ -142,11 +142,11 @@ export function ExecutionTraceViewer({ traceId }: ExecutionTraceViewerProps) {
               <MetricCard label="Tokens Used" value={trace.tokens_used?.toLocaleString() || 'N/A'} />
               <MetricCard label="Errors" value={trace.errors?.length?.toString() || '0'} />
             </div>
-            <p className="text-xs text-gray-500 italic text-center">See detailed performance metrics below</p>
+            <p className="text-xs text-slate-500 italic text-center">See detailed performance metrics below</p>
 
             {/* Errors */}
             {trace.errors && trace.errors.length > 0 && (
-              <div className="space-y-2">
+              <div className="space-y-2" role="alert">
                 <h3 className="text-sm font-medium text-red-400">Errors</h3>
                 {trace.errors.map((error, idx) => (
                   <div key={idx} className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-300 text-sm">
@@ -157,17 +157,18 @@ export function ExecutionTraceViewer({ traceId }: ExecutionTraceViewerProps) {
             )}
 
             {/* Raw JSON Toggle */}
-            <div className="pt-4 border-t border-gray-700">
+            <div className="pt-4 border-t border-slate-700">
               <button
                 onClick={() => setShowRawJson(!showRawJson)}
-                className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+                aria-expanded={showRawJson}
               >
-                <Code className="w-4 h-4" />
+                <Code className="w-4 h-4" aria-hidden="true" />
                 {showRawJson ? 'Hide' : 'Show'} Raw JSON
               </button>
 
               {showRawJson && (
-                <pre className="mt-4 p-4 bg-black rounded-lg overflow-x-auto text-xs text-gray-300">
+                <pre className="mt-4 p-4 bg-black rounded-lg overflow-x-auto text-xs text-slate-300">
                   {JSON.stringify(trace, null, 2)}
                 </pre>
               )}
@@ -192,7 +193,7 @@ export function ExecutionTraceViewer({ traceId }: ExecutionTraceViewerProps) {
               )}
               {metadata.concepts_identified && (
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-gray-400">Concepts</h4>
+                  <h4 className="text-sm font-medium text-slate-400">Concepts</h4>
                   <div className="flex flex-wrap gap-1">
                     {metadata.concepts_identified.slice(0, 5).map((concept: string, idx: number) => (
                       <Badge key={idx} variant="outline" size="sm">
@@ -231,8 +232,8 @@ export function ExecutionTraceViewer({ traceId }: ExecutionTraceViewerProps) {
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-gray-800 p-4 rounded-lg">
-      <div className="text-sm text-gray-400 mb-1">{label}</div>
+    <div className="bg-slate-800 p-4 rounded-lg">
+      <div className="text-sm text-slate-400 mb-1">{label}</div>
       <div className="text-xl font-semibold text-white">{value}</div>
     </div>
   );

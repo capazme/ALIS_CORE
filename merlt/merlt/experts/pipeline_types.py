@@ -243,6 +243,7 @@ class PipelineTrace:
     total_tokens: int = 0
     # Scientific trace extensions
     query_embedding_time_ms: float = 0.0
+    query_embedding: Optional[List[float]] = None
     disagreement_analysis: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
@@ -264,6 +265,8 @@ class PipelineTrace:
         }
         if self.query_embedding_time_ms > 0:
             result["query_embedding_time_ms"] = round(self.query_embedding_time_ms, 2)
+        if self.query_embedding is not None:
+            result["query_embedding"] = self.query_embedding
         if self.disagreement_analysis:
             result["stages"]["synthesis"]["disagreement_analysis"] = self.disagreement_analysis
         return result
@@ -290,6 +293,7 @@ class PipelineTrace:
             stage_times_ms=data.get("stage_times_ms", {}),
             total_tokens=data.get("total_tokens", 0),
             query_embedding_time_ms=data.get("query_embedding_time_ms", 0.0),
+            query_embedding=data.get("query_embedding"),
             disagreement_analysis=data.get("disagreement_analysis"),
         )
 

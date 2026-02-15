@@ -1,11 +1,13 @@
 /**
  * useProposals Hook
  *
- * Handles submitting new entity/relation proposals.
+ * Handles submitting new entity/relation proposals
+ * using the centralized merltService.
  */
 
 import { useState, useCallback } from 'react';
-import { getMerltConfig } from '../services/merltInit';
+import { merltService } from '../services/merltService';
+import type { EntityType, RelationType } from '../types/merlt';
 
 export interface ProposalData {
   type: 'entity' | 'relation';
@@ -25,43 +27,52 @@ interface UseProposalsResult {
   error: Error | null;
 }
 
-export function useProposals(): UseProposalsResult {
+/** Map UI entity type values to backend EntityType. */
+function toEntityType(uiType: string | undefined): EntityType {
+  const map: Record<string, EntityType> = {
+    'CONCEPT': 'concetto',
+    'SUBJECT': 'soggetto_giuridico',
+    'CONDITION': 'fatto_giuridico',
+    'EFFECT': 'fatto_giuridico',
+    'PROCEDURE': 'procedura',
+  };
+  return map[uiType ?? ''] ?? 'concetto';
+}
+
+export function useProposals(userId?: string): UseProposalsResult {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState(null as Error | null);
+
+  const effectiveUserId = userId || 'anonymous';
 
   const submitProposal = useCallback(async (data: ProposalData) => {
-    const config = getMerltConfig();
-    if (!config) {
-      setError(new Error('MERLT not initialized'));
-      return null;
-    }
-
     setIsSubmitting(true);
     setError(null);
 
     try {
-      const token = await config.getAuthToken();
-      const endpoint =
-        data.type === 'entity'
-          ? `${config.apiBaseUrl}/merlt/proposals/entity`
-          : `${config.apiBaseUrl}/merlt/proposals/relation`;
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message ?? `Failed to submit proposal: ${response.statusText}`);
+      if (data.type === 'entity') {
+        const result = await merltService.proposeEntity({
+          tipo: toEntityType(data.entityType),
+          nome: data.name,
+          descrizione: data.description ?? '',
+          article_urn: data.articleUrn,
+          ambito: 'generale',
+          evidence: data.description ?? data.name,
+          user_id: effectiveUserId,
+        });
+        return { id: result.pending_entity?.id ?? '' };
+      } else {
+        const result = await merltService.proposeRelation({
+          tipo_relazione: (data.relationType ?? 'CORRELATO') as RelationType,
+          source_urn: data.sourceId ?? '',
+          target_entity_id: data.targetId ?? '',
+          article_urn: data.articleUrn,
+          descrizione: data.description ?? '',
+          certezza: 0.5,
+          user_id: effectiveUserId,
+        });
+        return { id: result.relation_id ?? '' };
       }
-
-      const result = await response.json();
-      return { id: result.proposalId };
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Unknown error');
       setError(error);
@@ -69,7 +80,7 @@ export function useProposals(): UseProposalsResult {
     } finally {
       setIsSubmitting(false);
     }
-  }, []);
+  }, [effectiveUserId]);
 
   return {
     submitProposal,

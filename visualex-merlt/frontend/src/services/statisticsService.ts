@@ -15,7 +15,7 @@
 
 import { get, post } from './api';
 
-const PREFIX = 'merlt';
+const PREFIX = '/merlt';
 
 // =============================================================================
 // TYPES
@@ -233,7 +233,7 @@ export async function exportStatistics(request: ExportRequest): Promise<ExportRe
  * Download file esportato.
  */
 export async function downloadExport(filename: string): Promise<Blob> {
-  const response = await fetch(`/api/${PREFIX}/statistics/download/${filename}`);
+  const response = await fetch(`/api${PREFIX}/statistics/download/${filename}`);
   if (!response.ok) {
     throw new Error(`Download failed: ${response.statusText}`);
   }
@@ -295,7 +295,7 @@ export function getSignificanceColor(significance: SignificanceLevel): string {
     case '*':
       return 'text-green-400';
     case 'ns':
-      return 'text-gray-400';
+      return 'text-slate-400';
   }
 }
 
@@ -309,9 +309,9 @@ export function getEffectSizeColor(interpretation: EffectInterpretation): string
     case 'medium':
       return 'text-blue-500';
     case 'small':
-      return 'text-gray-500';
+      return 'text-slate-500';
     case 'negligible':
-      return 'text-gray-400';
+      return 'text-slate-400';
   }
 }
 

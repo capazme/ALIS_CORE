@@ -29,7 +29,7 @@ import {
   Activity,
   CheckCircle2,
 } from 'lucide-react';
-import { cn } from '../../../../../lib/utils';
+import { cn } from '../../../../lib/utils';
 import {
   getTrainingStatus,
   startTraining,
@@ -44,7 +44,7 @@ import {
   type BufferStatus,
   type PolicyWeightsStatus,
   type TrainingConfig,
-} from '../../../../../services/rlcfService';
+} from '../../../../services/rlcfService';
 
 // =============================================================================
 // TRAINING STATUS CARD
@@ -69,9 +69,9 @@ function TrainingStatusCard({
     : 0;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
           Training Status
         </h3>
         <div className="flex items-center gap-2">
@@ -86,10 +86,11 @@ function TrainingStatusCard({
                   disabled={loading}
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium',
-                    'bg-green-600 text-white hover:bg-green-700 disabled:opacity-50'
+                    'bg-green-600 text-white hover:bg-green-700 disabled:opacity-50',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2'
                   )}
                 >
-                  <Play size={14} />
+                  <Play size={14} aria-hidden="true" />
                   Start
                 </button>
               </>
@@ -99,10 +100,11 @@ function TrainingStatusCard({
                 disabled={loading}
                 className={cn(
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium',
-                  'bg-red-600 text-white hover:bg-red-700 disabled:opacity-50'
+                  'bg-red-600 text-white hover:bg-red-700 disabled:opacity-50',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2'
                 )}
               >
-                <Square size={14} />
+                <Square size={14} aria-hidden="true" />
                 Stop
               </button>
             )}
@@ -113,14 +115,21 @@ function TrainingStatusCard({
       {/* Progress bar */}
       <div className="mb-4">
         <div className="flex justify-between text-sm mb-1">
-          <span className="text-gray-600 dark:text-gray-400">
+          <span className="text-slate-600 dark:text-slate-400">
             Epoch {status.current_epoch}/{status.total_epochs}
           </span>
-          <span className="text-gray-600 dark:text-gray-400">
+          <span className="text-slate-600 dark:text-slate-400">
             {progressPercent.toFixed(1)}%
           </span>
         </div>
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div
+          className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden"
+          role="progressbar"
+          aria-valuenow={Math.round(progressPercent)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Training progress: ${progressPercent.toFixed(1)}%`}
+        >
           <motion.div
             className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
             initial={{ width: 0 }}
@@ -131,20 +140,20 @@ function TrainingStatusCard({
       </div>
 
       {/* Metrics grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs mb-1">
-            <TrendingDown size={12} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3">
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs mb-1">
+            <TrendingDown size={12} aria-hidden="true" />
             Current Loss
           </div>
-          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
             {formatLoss(status.current_loss)}
           </p>
         </div>
 
-        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs mb-1">
-            <CheckCircle2 size={12} />
+        <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3">
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs mb-1">
+            <CheckCircle2 size={12} aria-hidden="true" />
             Best Loss
           </div>
           <p className="text-lg font-semibold text-green-600 dark:text-green-400">
@@ -152,22 +161,22 @@ function TrainingStatusCard({
           </p>
         </div>
 
-        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs mb-1">
-            <Activity size={12} />
+        <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3">
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs mb-1">
+            <Activity size={12} aria-hidden="true" />
             Learning Rate
           </div>
-          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
             {status.learning_rate != null ? status.learning_rate.toExponential(1) : '-'}
           </p>
         </div>
 
-        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs mb-1">
-            <Clock size={12} />
+        <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3">
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs mb-1">
+            <Clock size={12} aria-hidden="true" />
             ETA
           </div>
-          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
             {formatETA(status.eta_seconds ?? undefined)}
           </p>
         </div>
@@ -193,30 +202,30 @@ function PolicyWeightsCard({ weights }: PolicyWeightsCardProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
         Policy Weights
       </h3>
 
       {/* Gating Policy */}
       <div className="mb-6">
-        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">
+        <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">
           GatingPolicy (Expert Selection)
         </h4>
         <div className="space-y-3">
           {Object.entries(weights.gating).map(([expert, weight]) => (
             <div key={expert}>
               <div className="flex justify-between text-sm mb-1">
-                <span className="capitalize text-gray-700 dark:text-gray-300">
+                <span className="capitalize text-slate-700 dark:text-slate-300">
                   {expert}
                 </span>
-                <span className="text-gray-500 dark:text-gray-400">
+                <span className="text-slate-500 dark:text-slate-400">
                   {(weight * 100).toFixed(1)}%
                 </span>
               </div>
-              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                 <motion.div
-                  className={cn('h-full', gatingColors[expert] || 'bg-gray-500')}
+                  className={cn('h-full', gatingColors[expert] || 'bg-slate-500')}
                   initial={{ width: 0 }}
                   animate={{ width: `${weight * 100}%` }}
                   transition={{ duration: 0.5 }}
@@ -229,19 +238,19 @@ function PolicyWeightsCard({ weights }: PolicyWeightsCardProps) {
 
       {/* Traversal Policy */}
       <div>
-        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">
+        <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">
           TraversalPolicy (Graph Navigation)
         </h4>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {Object.entries(weights.traversal).map(([param, value]) => (
             <div
               key={param}
-              className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3"
+              className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3"
             >
-              <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+              <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
                 {param.replace(/_/g, ' ')}
               </p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                 {typeof value === 'number' ? value.toFixed(2) : value}
               </p>
             </div>
@@ -262,9 +271,9 @@ interface BufferStatusCardProps {
 
 function BufferStatusCard({ buffer }: BufferStatusCardProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
           Feedback Buffer
         </h3>
         <span
@@ -282,14 +291,14 @@ function BufferStatusCard({ buffer }: BufferStatusCardProps) {
       {/* Buffer fill */}
       <div className="mb-4">
         <div className="flex justify-between text-sm mb-1">
-          <span className="text-gray-600 dark:text-gray-400">
+          <span className="text-slate-600 dark:text-slate-400">
             {(buffer.size ?? 0).toLocaleString()} / {(buffer.capacity ?? 0).toLocaleString()} experiences
           </span>
-          <span className="text-gray-600 dark:text-gray-400">
+          <span className="text-slate-600 dark:text-slate-400">
             {(buffer.fill_percentage ?? 0).toFixed(1)}%
           </span>
         </div>
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
           <motion.div
             className={cn(
               'h-full',
@@ -308,7 +317,7 @@ function BufferStatusCard({ buffer }: BufferStatusCardProps) {
 
       {/* Distribution */}
       <div>
-        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">
+        <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">
           Distribuzione Feedback
         </h4>
         <div className="flex h-4 rounded-full overflow-hidden">
@@ -318,7 +327,7 @@ function BufferStatusCard({ buffer }: BufferStatusCardProps) {
             title={`Positive: ${buffer.positive_count ?? 0}`}
           />
           <div
-            className="bg-gray-400"
+            className="bg-slate-400"
             style={{ width: `${buffer.size ? ((buffer.neutral_count ?? 0) / buffer.size) * 100 : 0}%` }}
             title={`Neutral: ${buffer.neutral_count ?? 0}`}
           />
@@ -328,13 +337,13 @@ function BufferStatusCard({ buffer }: BufferStatusCardProps) {
             title={`Negative: ${buffer.negative_count ?? 0}`}
           />
         </div>
-        <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex justify-between mt-2 text-xs text-slate-500 dark:text-slate-400">
           <span className="flex items-center gap-1">
             <span className="w-2 h-2 bg-green-500 rounded-full" />
             Positive ({buffer.positive_count ?? 0})
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 bg-gray-400 rounded-full" />
+            <span className="w-2 h-2 bg-slate-400 rounded-full" />
             Neutral ({buffer.neutral_count ?? 0})
           </span>
           <span className="flex items-center gap-1">
@@ -345,7 +354,7 @@ function BufferStatusCard({ buffer }: BufferStatusCardProps) {
       </div>
 
       {buffer.last_feedback_at && (
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
+        <p className="text-xs text-slate-400 dark:text-slate-500 mt-4">
           Ultimo feedback: {new Date(buffer.last_feedback_at).toLocaleString('it-IT')}
         </p>
       )}
@@ -358,13 +367,13 @@ function BufferStatusCard({ buffer }: BufferStatusCardProps) {
 // =============================================================================
 
 export function RLCFTab() {
-  const [trainingStatus, setTrainingStatus] = useState<TrainingStatus | null>(null);
-  const [bufferStatus, setBufferStatus] = useState<BufferStatus | null>(null);
-  const [policyWeights, setPolicyWeights] = useState<PolicyWeightsStatus | null>(null);
+  const [trainingStatus, setTrainingStatus] = useState(null as TrainingStatus | null);
+  const [bufferStatus, setBufferStatus] = useState(null as BufferStatus | null);
+  const [policyWeights, setPolicyWeights] = useState(null as PolicyWeightsStatus | null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const disconnectRef = useRef<(() => void) | null>(null);
+  const [error, setError] = useState(null as string | null);
+  const disconnectRef = useRef(null as (() => void) | null);
 
   const fetchAllData = async () => {
     setLoading(true);
@@ -395,7 +404,7 @@ export function RLCFTab() {
         setPolicyWeights(data.weights);
       },
       onEpochComplete: (data) => {
-        setTrainingStatus((prev) =>
+        setTrainingStatus((prev: TrainingStatus | null) =>
           prev
             ? {
                 ...prev,
@@ -408,10 +417,10 @@ export function RLCFTab() {
         );
       },
       onTrainingStart: () => {
-        setTrainingStatus((prev) => (prev ? { ...prev, is_running: true } : prev));
+        setTrainingStatus((prev: TrainingStatus | null) => (prev ? { ...prev, is_running: true } : prev));
       },
       onTrainingStop: () => {
-        setTrainingStatus((prev) => (prev ? { ...prev, is_running: false } : prev));
+        setTrainingStatus((prev: TrainingStatus | null) => (prev ? { ...prev, is_running: false } : prev));
       },
     });
 
@@ -456,20 +465,21 @@ export function RLCFTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <RefreshCw size={24} className="animate-spin text-blue-500" />
+      <div className="flex items-center justify-center py-12" role="status">
+        <RefreshCw size={24} className="animate-spin text-blue-500" aria-hidden="true" />
+        <span className="sr-only">Caricamento dati RLCF in corso...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
-        <p className="text-gray-500 dark:text-gray-400">{error}</p>
+      <div className="text-center py-12" role="alert">
+        <AlertCircle size={48} className="mx-auto text-red-400 mb-4" aria-hidden="true" />
+        <p className="text-slate-500 dark:text-slate-400">{error}</p>
         <button
           onClick={fetchAllData}
-          className="mt-4 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="mt-4 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         >
           Riprova
         </button>
@@ -490,13 +500,13 @@ export function RLCFTab() {
       )}
 
       {/* Policy Weights + Buffer Status */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {policyWeights && <PolicyWeightsCard weights={policyWeights} />}
         {bufferStatus && <BufferStatusCard buffer={bufferStatus} />}
       </div>
 
       {/* Info text */}
-      <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+      <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
         Il training aggiorna automaticamente i pesi delle policy in base al feedback collettivo
       </p>
     </div>

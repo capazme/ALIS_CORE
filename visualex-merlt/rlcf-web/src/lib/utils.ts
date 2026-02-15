@@ -66,7 +66,7 @@ export function getTaskTypeColor(taskType: TaskType): string {
     [TaskType.DOCTRINE_APPLICATION]: 'bg-pink-500',
   };
 
-  return colors[taskType] || 'bg-gray-500';
+  return colors[taskType] || 'bg-slate-500';
 }
 
 export function getStatusColor(status: string): string {
@@ -74,10 +74,10 @@ export function getStatusColor(status: string): string {
     'OPEN': 'bg-green-500 text-green-100',
     'BLIND_EVALUATION': 'bg-yellow-500 text-yellow-100',
     'AGGREGATED': 'bg-blue-500 text-blue-100',
-    'CLOSED': 'bg-gray-500 text-gray-100',
+    'CLOSED': 'bg-slate-500 text-slate-100',
   };
   
-  return colors[status] || 'bg-gray-500 text-gray-100';
+  return colors[status] || 'bg-slate-500 text-slate-100';
 }
 
 export function getAuthorityTrend(current: number, previous: number): 'up' | 'down' | 'stable' {

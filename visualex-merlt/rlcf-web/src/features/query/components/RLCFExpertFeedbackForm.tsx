@@ -120,8 +120,8 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
           onSuccess?.();
         }, 3000);
       },
-      onError: (error: any) => {
-        console.error('Failed to submit RLCF feedback:', error);
+      onError: (_error: unknown) => {
+        // Error handled by TanStack Query
       },
     });
   };
@@ -140,12 +140,12 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
   if (submitted) {
     return (
       <Card className="border-green-500/30">
-        <CardContent className="py-12 text-center">
-          <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
+        <CardContent className="py-8 md:py-12 text-center" role="alert">
+          <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" aria-hidden="true" />
           <h3 className="text-xl font-semibold text-white mb-2">
             Feedback RLCF Inviato!
           </h3>
-          <p className="text-gray-400 max-w-md mx-auto">
+          <p className="text-slate-400 max-w-md mx-auto">
             Grazie per il tuo contributo come esperto. Il tuo feedback rafforzerà l'autorità
             del sistema e migliorerà le future risposte attraverso il principio RLCF.
           </p>
@@ -160,10 +160,10 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="flex items-center gap-2">
-              <Brain className="w-5 h-5 text-purple-400" />
+              <Brain className="w-5 h-5 text-purple-400" aria-hidden="true" />
               Feedback Esperto RLCF
             </CardTitle>
-            <p className="text-sm text-gray-400 mt-2">
+            <p className="text-sm text-slate-400 mt-2">
               Contribuisci come esperto legale per migliorare il sistema attraverso RLCF
               (Reinforcement Learning from Community Feedback)
             </p>
@@ -185,7 +185,7 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
                     ? 'bg-purple-600 text-white'
                     : currentStep > step
                       ? 'bg-green-600 text-white'
-                      : 'bg-gray-700 text-gray-400'
+                      : 'bg-slate-700 text-slate-400'
                 }`}
               >
                 {currentStep > step ? <CheckCircle className="w-5 h-5" /> : step}
@@ -193,7 +193,7 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
               {step < 3 && (
                 <div
                   className={`flex-1 h-1 mx-2 transition-colors ${
-                    currentStep > step ? 'bg-green-600' : 'bg-gray-700'
+                    currentStep > step ? 'bg-green-600' : 'bg-slate-700'
                   }`}
                 />
               )}
@@ -201,12 +201,12 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
           ))}
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" role="form" aria-label="Feedback esperto RLCF">
           {/* Step 1: Concept Mapping */}
           {currentStep === 1 && (
             <div className="space-y-6">
               <div className="flex items-start gap-3 p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                <Brain className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
+                <Brain className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <div className="flex-1">
                   <h3 className="text-base font-semibold text-white mb-1">
                     Step 1: Concept Mapping
@@ -247,7 +247,7 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
           {currentStep === 2 && (
             <div className="space-y-6">
               <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                <GitBranch className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+                <GitBranch className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <div className="flex-1">
                   <h3 className="text-base font-semibold text-white mb-1">
                     Step 2: Routing Evaluation
@@ -260,35 +260,35 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
               </div>
 
               <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-300">
+                <label className="block text-sm font-medium text-slate-300">
                   Il routing era appropriato?
                 </label>
-                <div className="flex gap-3">
-                  <label className="flex-1 flex items-center gap-3 p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer group border-2 border-transparent has-[:checked]:border-green-500">
+                <div className="flex flex-col sm:flex-row gap-3" role="radiogroup" aria-label="Il routing era appropriato?">
+                  <label className="flex-1 flex items-center gap-3 p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors cursor-pointer group border-2 border-transparent has-[:checked]:border-green-500">
                     <input
                       type="radio"
                       {...register('routing_was_appropriate')}
                       value={true as any}
                       disabled={isPending}
-                      className="w-4 h-4 text-green-600 cursor-pointer"
+                      className="w-4 h-4 text-green-600 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     />
                     <div className="flex-1">
                       <div className="text-sm font-medium text-white">Sì</div>
-                      <div className="text-xs text-gray-500">Gli agenti erano appropriati</div>
+                      <div className="text-xs text-slate-500">Gli agenti erano appropriati</div>
                     </div>
                   </label>
 
-                  <label className="flex-1 flex items-center gap-3 p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer group border-2 border-transparent has-[:checked]:border-red-500">
+                  <label className="flex-1 flex items-center gap-3 p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors cursor-pointer group border-2 border-transparent has-[:checked]:border-red-500">
                     <input
                       type="radio"
                       {...register('routing_was_appropriate')}
                       value={false as any}
                       disabled={isPending}
-                      className="w-4 h-4 text-red-600 cursor-pointer"
+                      className="w-4 h-4 text-red-600 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     />
                     <div className="flex-1">
                       <div className="text-sm font-medium text-white">No</div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-slate-500">
                         Il routing andrebbe migliorato
                       </div>
                     </div>
@@ -310,7 +310,7 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
               )}
 
               {routingAppropriate === undefined && (
-                <p className="text-xs text-gray-500 italic">
+                <p className="text-xs text-slate-500 italic">
                   Lascia vuoto se non hai feedback specifico sul routing
                 </p>
               )}
@@ -321,7 +321,7 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
           {currentStep === 3 && (
             <div className="space-y-6">
               <div className="flex items-start gap-3 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                <ThumbsUp className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+                <ThumbsUp className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <div className="flex-1">
                   <h3 className="text-base font-semibold text-white mb-1">
                     Step 3: Answer Quality Vote
@@ -334,11 +334,11 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
               </div>
 
               <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-300">
+                <label className="block text-sm font-medium text-slate-300">
                   Voto sulla Qualità <span className="text-red-400">*</span>
                 </label>
-                <div className="grid grid-cols-3 gap-3">
-                  <label className="flex flex-col items-center gap-3 p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer border-2 border-transparent has-[:checked]:border-green-500">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3" role="radiogroup" aria-label="Voto sulla qualità della risposta">
+                  <label className="flex flex-col items-center gap-3 p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors cursor-pointer border-2 border-transparent has-[:checked]:border-green-500">
                     <input
                       type="radio"
                       {...register('answer_vote')}
@@ -347,15 +347,15 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
                       className="sr-only"
                     />
                     <ThumbsUp
-                      className={`w-8 h-8 ${answerVote === 'approve' ? 'text-green-400' : 'text-gray-600'}`}
+                      className={`w-8 h-8 ${answerVote === 'approve' ? 'text-green-400' : 'text-slate-600'}`}
                     />
                     <div className="text-center">
                       <div className="text-sm font-medium text-white">Approvo</div>
-                      <div className="text-xs text-gray-500">Risposta corretta</div>
+                      <div className="text-xs text-slate-500">Risposta corretta</div>
                     </div>
                   </label>
 
-                  <label className="flex flex-col items-center gap-3 p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer border-2 border-transparent has-[:checked]:border-yellow-500">
+                  <label className="flex flex-col items-center gap-3 p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors cursor-pointer border-2 border-transparent has-[:checked]:border-yellow-500">
                     <input
                       type="radio"
                       {...register('answer_vote')}
@@ -364,15 +364,15 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
                       className="sr-only"
                     />
                     <HelpCircle
-                      className={`w-8 h-8 ${answerVote === 'uncertain' ? 'text-yellow-400' : 'text-gray-600'}`}
+                      className={`w-8 h-8 ${answerVote === 'uncertain' ? 'text-yellow-400' : 'text-slate-600'}`}
                     />
                     <div className="text-center">
                       <div className="text-sm font-medium text-white">Incerto</div>
-                      <div className="text-xs text-gray-500">Necessita verifica</div>
+                      <div className="text-xs text-slate-500">Necessita verifica</div>
                     </div>
                   </label>
 
-                  <label className="flex flex-col items-center gap-3 p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer border-2 border-transparent has-[:checked]:border-red-500">
+                  <label className="flex flex-col items-center gap-3 p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors cursor-pointer border-2 border-transparent has-[:checked]:border-red-500">
                     <input
                       type="radio"
                       {...register('answer_vote')}
@@ -381,16 +381,16 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
                       className="sr-only"
                     />
                     <ThumbsDown
-                      className={`w-8 h-8 ${answerVote === 'reject' ? 'text-red-400' : 'text-gray-600'}`}
+                      className={`w-8 h-8 ${answerVote === 'reject' ? 'text-red-400' : 'text-slate-600'}`}
                     />
                     <div className="text-center">
                       <div className="text-sm font-medium text-white">Respingo</div>
-                      <div className="text-xs text-gray-500">Risposta errata</div>
+                      <div className="text-xs text-slate-500">Risposta errata</div>
                     </div>
                   </label>
                 </div>
                 {errors.answer_vote && (
-                  <p className="text-xs text-red-400">Seleziona un voto</p>
+                  <p className="text-xs text-red-400" role="alert">Seleziona un voto</p>
                 )}
               </div>
 
@@ -424,7 +424,7 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex items-center justify-between pt-6 border-t border-gray-700">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-slate-700">
             <div>
               {currentStep > 1 && (
                 <Button
@@ -432,8 +432,9 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
                   variant="ghost"
                   onClick={() => setCurrentStep(currentStep - 1)}
                   disabled={isPending}
+                  className="min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  <ArrowLeft className="w-4 h-4 mr-2" aria-hidden="true" />
                   Indietro
                 </Button>
               )}
@@ -445,25 +446,26 @@ export function RLCFExpertFeedbackForm({ traceId, onSuccess }: RLCFExpertFeedbac
                   type="button"
                   onClick={() => setCurrentStep(currentStep + 1)}
                   disabled={!canProceedToNextStep() || isPending}
+                  className="min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Avanti
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  <ArrowRight className="w-4 h-4 ml-2" aria-hidden="true" />
                 </Button>
               ) : (
                 <Button
                   type="submit"
                   disabled={!canProceedToNextStep() || isPending}
                   loading={isPending}
-                  className="min-w-[160px]"
+                  className="min-w-[160px] min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   {isPending ? (
                     <>
-                      <Loader className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />
                       Invio...
                     </>
                   ) : (
                     <>
-                      <Brain className="w-4 h-4 mr-2" />
+                      <Brain className="w-4 h-4 mr-2" aria-hidden="true" />
                       Invia Feedback
                     </>
                   )}

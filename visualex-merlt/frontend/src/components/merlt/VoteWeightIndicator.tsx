@@ -18,9 +18,9 @@
 
 import { motion } from 'framer-motion';
 import { Scale, Award, Shield, User, GraduationCap, Gavel, Info } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { Tooltip } from '../../ui/Tooltip';
-import type { AuthorityBreakdown } from '../../../types/merlt';
+import { cn } from '../../lib/utils';
+import { Tooltip } from '../ui/Tooltip';
+import type { AuthorityBreakdown } from '../../types/merlt';
 
 interface VoteWeightIndicatorProps {
   /** User's authority score A_u [0-1] */
@@ -119,6 +119,11 @@ export function VoteWeightIndicator({
     <motion.div
       initial={{ scale: 0.95, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
+      role="meter"
+      aria-valuenow={authorityScore}
+      aria-valuemin={0}
+      aria-valuemax={1}
+      aria-label={`Authority: ${tier.label} ${authorityPercent}%`}
       className={cn(
         'inline-flex items-center gap-1.5 rounded-full',
         compact ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs',
@@ -128,7 +133,7 @@ export function VoteWeightIndicator({
         className
       )}
     >
-      <Icon size={compact ? 10 : 12} className={tier.color} />
+      <Icon size={compact ? 10 : 12} className={tier.color} aria-hidden="true" />
       <span className={cn('font-medium', tier.color)}>
         {compact ? `${authorityPercent}%` : `${tier.label} ${authorityPercent}%`}
       </span>
@@ -263,7 +268,14 @@ export function VoteWeightCard({
                 <span className="text-slate-500">Verso {nextLabel}</span>
                 <span className="text-slate-400">{Math.round(progress)}%</span>
               </div>
-              <div className="h-1.5 bg-white dark:bg-slate-700 rounded-full overflow-hidden">
+              <div
+                className="h-1.5 bg-white dark:bg-slate-700 rounded-full overflow-hidden"
+                role="progressbar"
+                aria-valuenow={Math.round(progress)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`Progresso verso ${nextLabel}: ${Math.round(progress)}%`}
+              >
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}

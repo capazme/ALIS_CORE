@@ -28,10 +28,10 @@ export function LegalBasisPanel({ legalBasis }: LegalBasisPanelProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Scale className="w-5 h-5 text-blue-400" />
+          <Scale className="w-5 h-5 text-blue-400" aria-hidden="true" />
           Fondamento Normativo
         </CardTitle>
-        <p className="text-sm text-gray-400 mt-2">
+        <p className="text-sm text-slate-400 mt-2">
           Norme e articoli di legge citati a supporto della risposta
         </p>
       </CardHeader>
@@ -44,9 +44,9 @@ export function LegalBasisPanel({ legalBasis }: LegalBasisPanelProps) {
         </div>
 
         {/* Summary */}
-        <div className="mt-6 pt-4 border-t border-gray-700 text-xs text-gray-500">
+        <div className="mt-6 pt-4 border-t border-slate-700 text-xs text-slate-500">
           <p>
-            Totale norme citate: <strong className="text-gray-400">{legalBasis.length}</strong>
+            Totale norme citate: <strong className="text-slate-400">{legalBasis.length}</strong>
           </p>
         </div>
       </CardContent>
@@ -139,17 +139,19 @@ function LegalBasisCard({ basis }: LegalBasisCardProps) {
         <div className="mb-3">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+            aria-expanded={isExpanded}
+            className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
           >
             <ChevronDown
               className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              aria-hidden="true"
             />
             {isExpanded ? 'Nascondi' : 'Mostra'} estratto
           </button>
 
           {isExpanded && (
-            <div className="mt-3 p-3 bg-gray-900/50 rounded-lg border border-gray-700">
-              <p className="text-sm text-gray-300 italic leading-relaxed">"{basis.excerpt}"</p>
+            <div className="mt-3 p-3 bg-slate-900/50 rounded-lg border border-slate-700">
+              <p className="text-sm text-slate-300 italic leading-relaxed">"{basis.excerpt}"</p>
             </div>
           )}
         </div>
@@ -162,9 +164,9 @@ function LegalBasisCard({ basis }: LegalBasisCardProps) {
             href={normativaLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+            className="inline-flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
           >
-            <ExternalLink className="w-3.5 h-3.5" />
+            <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
             Consulta su Normattiva
           </a>
         </div>

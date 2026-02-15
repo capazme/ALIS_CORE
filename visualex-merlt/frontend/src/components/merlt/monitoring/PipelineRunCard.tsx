@@ -19,7 +19,7 @@ import {
   Zap,
   FileText,
 } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
+import { cn } from '../../../lib/utils';
 import {
   type PipelineRun,
   type ProgressUpdate,
@@ -27,7 +27,7 @@ import {
   formatETA,
   formatSpeed,
   formatDuration,
-} from '../../../../services/pipelineService';
+} from '../../../services/pipelineService';
 
 // =============================================================================
 // TYPES
@@ -63,7 +63,7 @@ function getStatusIcon(status: PipelineRun['status']) {
     case 'paused':
       return <Pause size={18} className="text-amber-500" />;
     default:
-      return <Activity size={18} className="text-gray-400" />;
+      return <Activity size={18} className="text-slate-400" />;
   }
 }
 
@@ -86,7 +86,7 @@ function getStatusBadge(status: PipelineRun['status']) {
     <span
       className={cn(
         'px-2.5 py-1 rounded-full text-xs font-medium',
-        classes[status] || 'bg-gray-100 text-gray-700'
+        classes[status] || 'bg-slate-100 text-slate-700'
       )}
     >
       {labels[status] || status}
@@ -149,7 +149,7 @@ export function PipelineRunCard({
   return (
     <div
       className={cn(
-        'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700',
+        'bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700',
         'transition-all duration-200',
         isExpanded && 'ring-2 ring-blue-500/50',
         className
@@ -163,12 +163,12 @@ export function PipelineRunCard({
             <div className="mt-0.5">{getStatusIcon(run.status)}</div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100 truncate">
                   {run.run_id}
                 </h3>
                 {getTypeBadge(run.type)}
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                 Avviato: {formatDateTime(run.started_at)}
                 {run.completed_at && ` | Completato: ${formatDateTime(run.completed_at)}`}
               </p>
@@ -180,13 +180,15 @@ export function PipelineRunCard({
             {getStatusBadge(run.status)}
             <button
               onClick={onExpand}
-              className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               title={isExpanded ? 'Comprimi' : 'Espandi'}
+              aria-label={isExpanded ? 'Comprimi dettagli run' : 'Espandi dettagli run'}
+              aria-expanded={isExpanded}
             >
               {isExpanded ? (
-                <ChevronUp size={18} className="text-gray-500" />
+                <ChevronUp size={18} className="text-slate-500" />
               ) : (
-                <ChevronDown size={18} className="text-gray-500" />
+                <ChevronDown size={18} className="text-slate-500" />
               )}
             </button>
           </div>
@@ -195,16 +197,23 @@ export function PipelineRunCard({
         {/* Progress Bar */}
         <div className="mt-4">
           <div className="flex items-center justify-between text-sm mb-1">
-            <span className="text-gray-600 dark:text-gray-400">
+            <span className="text-slate-600 dark:text-slate-400">
               Progresso: {progress.toFixed(1)}%
             </span>
             {currentItem && run.status === 'running' && (
-              <span className="text-gray-500 dark:text-gray-500 text-xs truncate max-w-[200px]">
+              <span className="text-slate-500 dark:text-slate-500 text-xs truncate max-w-[200px]">
                 {currentItem}
               </span>
             )}
           </div>
-          <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div
+            className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden"
+            role="progressbar"
+            aria-valuenow={Math.round(progress)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`Progresso pipeline: ${progress.toFixed(1)}%`}
+          >
             <div
               className={cn(
                 'h-full rounded-full transition-all duration-300',
@@ -222,18 +231,18 @@ export function PipelineRunCard({
         <div className="mt-3 flex items-center gap-4 text-sm">
           {run.status === 'running' && (
             <>
-              <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+              <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
                 <Zap size={14} />
                 <span>{formatSpeed(speed)}</span>
               </div>
-              <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+              <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
                 <Clock size={14} />
                 <span>ETA: {formatETA(eta)}</span>
               </div>
             </>
           )}
           {elapsed !== undefined && (
-            <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
               <Clock size={14} />
               <span>{formatDuration(elapsed)}</span>
             </div>
@@ -255,15 +264,15 @@ export function PipelineRunCard({
 
       {/* Expanded Content */}
       {isExpanded && (
-        <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50/50 dark:bg-gray-900/30">
+        <div className="border-t border-slate-200 dark:border-slate-700 p-4 bg-slate-50/50 dark:bg-slate-900/30">
           {/* Config */}
           {run.config && Object.keys(run.config).length > 0 && (
             <div className="mb-4">
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Configurazione
               </h4>
-              <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
-                <pre className="text-xs text-gray-600 dark:text-gray-400 overflow-x-auto">
+              <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-3">
+                <pre className="text-xs text-slate-600 dark:text-slate-400 overflow-x-auto">
                   {JSON.stringify(run.config, null, 2)}
                 </pre>
               </div>
@@ -273,7 +282,7 @@ export function PipelineRunCard({
           {/* Errors */}
           {errors && errors.length > 0 && (
             <div className="mb-4">
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Errori ({errors.length})
               </h4>
               <div className="space-y-2 max-h-[200px] overflow-y-auto">
@@ -305,7 +314,7 @@ export function PipelineRunCard({
             <div className="flex justify-end">
               <button
                 onClick={onRetry}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
               >
                 <RefreshCw size={16} />
                 Riprova Item Falliti

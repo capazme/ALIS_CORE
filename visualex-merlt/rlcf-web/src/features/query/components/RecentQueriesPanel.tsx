@@ -20,22 +20,22 @@ const STATUS_CONFIG: Record<
   { icon: React.ReactNode; color: string; label: string }
 > = {
   pending: {
-    icon: <Clock className="w-3 h-3" />,
+    icon: <Clock className="w-3 h-3" aria-hidden="true" />,
     color: 'text-yellow-400',
     label: 'In Attesa',
   },
   processing: {
-    icon: <Loader className="w-3 h-3 animate-spin" />,
+    icon: <Loader className="w-3 h-3 animate-spin" aria-hidden="true" />,
     color: 'text-blue-400',
     label: 'Elaborazione',
   },
   completed: {
-    icon: <CheckCircle className="w-3 h-3" />,
+    icon: <CheckCircle className="w-3 h-3" aria-hidden="true" />,
     color: 'text-green-400',
     label: 'Completata',
   },
   failed: {
-    icon: <XCircle className="w-3 h-3" />,
+    icon: <XCircle className="w-3 h-3" aria-hidden="true" />,
     color: 'text-red-400',
     label: 'Fallita',
   },
@@ -68,7 +68,7 @@ export function RecentQueriesPanel() {
     <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
-          <Clock className="w-4 h-4 text-blue-400" />
+          <Clock className="w-4 h-4 text-blue-400" aria-hidden="true" />
           Query Recenti
         </CardTitle>
       </CardHeader>
@@ -76,20 +76,21 @@ export function RecentQueriesPanel() {
       <CardContent className="flex-1 overflow-hidden flex flex-col">
         {/* Loading State */}
         {isLoading && (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center" role="status">
             <div className="text-center space-y-3">
-              <Loader className="w-8 h-8 animate-spin text-blue-500 mx-auto" />
-              <p className="text-sm text-gray-400">Caricamento cronologia...</p>
+              <Loader className="w-8 h-8 animate-spin text-blue-500 mx-auto" aria-hidden="true" />
+              <p className="text-sm text-slate-400">Caricamento cronologia...</p>
+              <span className="sr-only">Caricamento cronologia in corso</span>
             </div>
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center" role="alert">
             <div className="text-center space-y-3">
-              <AlertCircle className="w-8 h-8 text-red-400 mx-auto" />
-              <p className="text-sm text-gray-400">
+              <AlertCircle className="w-8 h-8 text-red-400 mx-auto" aria-hidden="true" />
+              <p className="text-sm text-slate-400">
                 Errore nel caricamento della cronologia
               </p>
             </div>
@@ -100,13 +101,13 @@ export function RecentQueriesPanel() {
         {!isLoading && !error && (!historyData?.queries || historyData.queries.length === 0) && (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center space-y-3 py-8">
-              <div className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center mx-auto">
-                <Clock className="w-6 h-6 text-gray-600" />
+              <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mx-auto">
+                <Clock className="w-6 h-6 text-slate-600" aria-hidden="true" />
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-slate-400">
                 Nessuna query recente
               </p>
-              <p className="text-xs text-gray-600 max-w-[200px]">
+              <p className="text-xs text-slate-600 max-w-[200px]">
                 Le tue query passate appariranno qui per un facile accesso
               </p>
             </div>
@@ -123,7 +124,8 @@ export function RecentQueriesPanel() {
                 <button
                   key={query.trace_id}
                   onClick={() => handleQueryClick(query)}
-                  className="w-full text-left p-3 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 hover:border-blue-600 transition-all group"
+                  aria-label={`Carica query: ${query.query?.substring(0, 60)}...`}
+                  className="w-full text-left p-3 min-h-[44px] bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 hover:border-blue-600 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   {/* Query Text */}
                   <p className="text-sm text-white line-clamp-2 mb-2 group-hover:text-blue-300 transition-colors">
@@ -142,8 +144,8 @@ export function RecentQueriesPanel() {
                       {/* Confidence (if available) */}
                       {query.confidence !== null && query.confidence !== undefined && (
                         <>
-                          <span className="text-gray-600">•</span>
-                          <span className="text-gray-400">
+                          <span className="text-slate-600">•</span>
+                          <span className="text-slate-400">
                             {(query.confidence * 100).toFixed(0)}%
                           </span>
                         </>
@@ -151,7 +153,7 @@ export function RecentQueriesPanel() {
                     </div>
 
                     {/* Timestamp */}
-                    <span className="text-gray-500 tabular-nums">
+                    <span className="text-slate-500 tabular-nums">
                       {formatDistanceToNow(new Date(query.timestamp), {
                         addSuffix: true,
                         locale: it,
@@ -161,7 +163,7 @@ export function RecentQueriesPanel() {
 
                   {/* Answer Preview (if available) */}
                   {query.answer_preview && (
-                    <p className="text-xs text-gray-500 mt-2 line-clamp-1 italic">
+                    <p className="text-xs text-slate-500 mt-2 line-clamp-1 italic">
                       "{query.answer_preview}..."
                     </p>
                   )}
@@ -173,8 +175,8 @@ export function RecentQueriesPanel() {
 
         {/* Footer Info */}
         {historyData && historyData.queries.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-gray-700 text-center">
-            <p className="text-xs text-gray-500">
+          <div className="mt-4 pt-3 border-t border-slate-700 text-center">
+            <p className="text-xs text-slate-500">
               Mostrando {historyData.queries.length} di {historyData.total_count} query totali
             </p>
           </div>

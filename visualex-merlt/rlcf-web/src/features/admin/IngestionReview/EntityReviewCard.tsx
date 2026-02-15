@@ -6,10 +6,10 @@
  */
 
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Textarea } from '@/components/ui/Textarea';
 import {
   CheckCircle,
   XCircle,
@@ -74,7 +74,7 @@ const getSourceBadgeColor = (source: string): string => {
     COMMUNITY: 'bg-green-100 text-green-800',
     NORMATTIVA: 'bg-orange-100 text-orange-800',
   };
-  return colors[source] || 'bg-gray-100 text-gray-800';
+  return colors[source] || 'bg-slate-100 text-slate-800';
 };
 
 // =============================================================================
@@ -106,7 +106,7 @@ export const EntityReviewCard: React.FC<EntityReviewCardProps> = ({
 
   return (
     <Card className="shadow-lg">
-      <CardHeader className="bg-gray-50 border-b">
+      <CardHeader className="bg-slate-50 border-b">
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-xl font-bold">
@@ -120,13 +120,13 @@ export const EntityReviewCard: React.FC<EntityReviewCardProps> = ({
               </Badge>
               {confidence_score < 0.75 && (
                 <Badge variant="destructive">
-                  <AlertTriangle className="h-3 w-3 mr-1" />
+                  <AlertTriangle className="h-3 w-3 mr-1" aria-hidden="true" />
                   Low Confidence
                 </Badge>
               )}
             </div>
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-slate-500">
             Created: {new Date(entity.created_at).toLocaleString()}
           </div>
         </div>
@@ -136,10 +136,10 @@ export const EntityReviewCard: React.FC<EntityReviewCardProps> = ({
         {/* Provenance Info */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h4 className="font-semibold text-blue-900 mb-2 flex items-center">
-            <Database className="h-4 w-4 mr-2" />
+            <Database className="h-4 w-4 mr-2" aria-hidden="true" />
             Provenance
           </h4>
-          <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
             <div>
               <span className="font-medium">Source:</span> {provenance.source}
             </div>
@@ -157,7 +157,7 @@ export const EntityReviewCard: React.FC<EntityReviewCardProps> = ({
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline flex items-center"
                 >
-                  <ExternalLink className="h-3 w-3 mr-1" />
+                  <ExternalLink className="h-3 w-3 mr-1" aria-hidden="true" />
                   View Source
                 </a>
               </div>
@@ -167,17 +167,17 @@ export const EntityReviewCard: React.FC<EntityReviewCardProps> = ({
 
         {/* Entity Properties */}
         <div>
-          <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-            <FileText className="h-4 w-4 mr-2" />
+          <h4 className="font-semibold text-slate-900 mb-3 flex items-center">
+            <FileText className="h-4 w-4 mr-2" aria-hidden="true" />
             Entity Properties
           </h4>
-          <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+          <div className="bg-slate-50 rounded-lg p-4 space-y-2">
             {Object.entries(properties)
               .filter(([key]) => !key.startsWith('import_') && key !== 'source')
               .map(([key, value]) => (
-                <div key={key} className="flex border-b border-gray-200 pb-2 last:border-0">
-                  <div className="w-1/3 font-medium text-gray-700">{key}:</div>
-                  <div className="w-2/3 text-gray-900">
+                <div key={key} className="flex border-b border-slate-200 pb-2 last:border-0">
+                  <div className="w-1/3 font-medium text-slate-700">{key}:</div>
+                  <div className="w-2/3 text-slate-900">
                     {typeof value === 'string' && value.length > 200 ? (
                       <details className="cursor-pointer">
                         <summary className="text-blue-600 hover:underline">
@@ -201,14 +201,14 @@ export const EntityReviewCard: React.FC<EntityReviewCardProps> = ({
         {/* Relationships (if any) */}
         {relationships && relationships.length > 0 && (
           <div>
-            <h4 className="font-semibold text-gray-900 mb-3">
+            <h4 className="font-semibold text-slate-900 mb-3">
               Relationships ({relationships.length})
             </h4>
             <div className="space-y-2">
               {relationships.map((rel, idx) => (
                 <div key={idx} className="bg-purple-50 border border-purple-200 rounded p-3">
                   <div className="font-medium text-purple-900">{rel.type}</div>
-                  <div className="text-sm text-gray-700 mt-1">
+                  <div className="text-sm text-slate-700 mt-1">
                     → {rel.target_node.entity_type}:{' '}
                     {rel.target_node.properties.nome ||
                       rel.target_node.properties.testo?.substring(0, 50) ||
@@ -225,7 +225,7 @@ export const EntityReviewCard: React.FC<EntityReviewCardProps> = ({
           properties.brocardi_spiegazione ||
           properties.brocardi_position) && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <h4 className="font-semibold text-amber-900 mb-2">📚 BrocardiInfo</h4>
+            <h4 className="font-semibold text-amber-900 mb-2">BrocardiInfo</h4>
             {properties.brocardi_position && (
               <div className="text-sm mb-2">
                 <span className="font-medium">Position:</span> {properties.brocardi_position}
@@ -234,7 +234,7 @@ export const EntityReviewCard: React.FC<EntityReviewCardProps> = ({
             {properties.brocardi_ratio && (
               <div className="text-sm mb-2">
                 <span className="font-medium">Ratio:</span>{' '}
-                <span className="text-gray-700">{properties.brocardi_ratio}</span>
+                <span className="text-slate-700">{properties.brocardi_ratio}</span>
               </div>
             )}
             {properties.brocardi_spiegazione && (
@@ -242,7 +242,7 @@ export const EntityReviewCard: React.FC<EntityReviewCardProps> = ({
                 <summary className="font-medium text-amber-800 hover:underline">
                   Spiegazione
                 </summary>
-                <div className="mt-2 text-gray-700 whitespace-pre-wrap">
+                <div className="mt-2 text-slate-700 whitespace-pre-wrap">
                   {properties.brocardi_spiegazione}
                 </div>
               </details>
@@ -267,31 +267,32 @@ export const EntityReviewCard: React.FC<EntityReviewCardProps> = ({
 
         {/* Review Note */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="review-note" className="block text-sm font-medium text-slate-700 mb-2">
             Review Note (Optional)
           </label>
           <Textarea
+            id="review-note"
             value={reviewNote}
             onChange={(e) => setReviewNote(e.target.value)}
             placeholder="Add any notes about this entity (e.g., why rejected, corrections needed)..."
             rows={3}
-            className="w-full"
+            className="w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           />
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 pt-4 border-t">
+        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
           <Button
             onClick={handleApprove}
             disabled={isReviewing}
-            className="flex-1 bg-green-600 hover:bg-green-700"
+            className="flex-1 bg-green-600 hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             size="lg"
           >
             {isReviewing ? (
               'Processing...'
             ) : (
               <>
-                <CheckCircle className="h-5 w-5 mr-2" />
+                <CheckCircle className="h-5 w-5 mr-2" aria-hidden="true" />
                 Approve & Import to Neo4j
               </>
             )}
@@ -301,14 +302,14 @@ export const EntityReviewCard: React.FC<EntityReviewCardProps> = ({
             onClick={handleReject}
             disabled={isReviewing}
             variant="destructive"
-            className="flex-1"
+            className="flex-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             size="lg"
           >
             {isReviewing ? (
               'Processing...'
             ) : (
               <>
-                <XCircle className="h-5 w-5 mr-2" />
+                <XCircle className="h-5 w-5 mr-2" aria-hidden="true" />
                 Reject
               </>
             )}
@@ -317,8 +318,8 @@ export const EntityReviewCard: React.FC<EntityReviewCardProps> = ({
 
         {/* Confidence Warning */}
         {confidence_score < 0.75 && (
-          <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 flex items-start">
-            <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" />
+          <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 flex items-start" role="alert">
+            <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" aria-hidden="true" />
             <div className="text-sm text-yellow-800">
               <strong>Low Confidence Warning:</strong> This entity has a confidence score below
               75%. Please review carefully before approving. Consider rejecting if data quality is

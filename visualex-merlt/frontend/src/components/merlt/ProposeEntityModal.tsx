@@ -8,12 +8,12 @@
  */
 
 import { useState } from 'react';
-import { Modal } from '../../ui/Modal';
+import { Modal } from '../ui/Modal';
 import { Plus, Loader2, CheckCircle2, AlertCircle, Sparkles, AlertTriangle } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { merltService } from '../../../services/merltService';
-import { ENTITY_TYPE_OPTIONS, groupByCategory } from '../../../constants/merltTypes';
-import type { EntityType, PendingEntity, DuplicateCandidate } from '../../../types/merlt';
+import { cn } from '../../lib/utils';
+import { merltService } from '../../services/merltService';
+import { ENTITY_TYPE_OPTIONS, groupByCategory } from '../../constants/merltTypes';
+import type { EntityType, PendingEntity, DuplicateCandidate } from '../../types/merlt';
 
 // =============================================================================
 // TYPES
@@ -47,20 +47,20 @@ export function ProposeEntityModal({
   ambito = 'civile',
 }: ProposeEntityModalProps) {
   // Form state
-  const [tipo, setTipo] = useState<EntityType>('concetto');
+  const [tipo, setTipo] = useState('concetto' as EntityType);
   const [nome, setNome] = useState('');
   const [descrizione, setDescrizione] = useState('');
   const [evidence, setEvidence] = useState('');
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null as string | null);
   const [success, setSuccess] = useState(false);
 
   // Duplicate detection state
   const [duplicatesFound, setDuplicatesFound] = useState(false);
-  const [duplicates, setDuplicates] = useState<DuplicateCandidate[]>([]);
-  const [selectedDuplicate, setSelectedDuplicate] = useState<string | null>(null);
+  const [duplicates, setDuplicates] = useState([] as DuplicateCandidate[]);
+  const [selectedDuplicate, setSelectedDuplicate] = useState(null as string | null);
 
   // Reset form
   const resetForm = () => {
@@ -202,7 +202,7 @@ export function ProposeEntityModal({
               Entità esistenti simili:
             </p>
 
-            {duplicates.map((dup) => (
+            {duplicates.map((dup: DuplicateCandidate) => (
               <div
                 key={dup.entity_id}
                 onClick={() => setSelectedDuplicate(
@@ -320,10 +320,11 @@ export function ProposeEntityModal({
 
           {/* Entity Type */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label htmlFor="modal-entity-tipo" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Tipo di entità *
             </label>
             <select
+              id="modal-entity-tipo"
               value={tipo}
               onChange={(e) => setTipo(e.target.value as EntityType)}
               className={cn(
@@ -348,10 +349,11 @@ export function ProposeEntityModal({
 
           {/* Nome */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label htmlFor="modal-entity-nome" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Nome *
             </label>
             <input
+              id="modal-entity-nome"
               type="text"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
@@ -368,10 +370,11 @@ export function ProposeEntityModal({
 
           {/* Descrizione */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label htmlFor="modal-entity-descrizione" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Descrizione *
             </label>
             <textarea
+              id="modal-entity-descrizione"
               value={descrizione}
               onChange={(e) => setDescrizione(e.target.value)}
               placeholder="Descrivi brevemente cosa rappresenta questa entità nel contesto giuridico..."
@@ -391,10 +394,11 @@ export function ProposeEntityModal({
 
           {/* Evidence (optional) */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label htmlFor="modal-entity-evidence" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Citazione testuale (opzionale)
             </label>
             <textarea
+              id="modal-entity-evidence"
               value={evidence}
               onChange={(e) => setEvidence(e.target.value)}
               placeholder="Cita il passaggio dell'articolo che supporta questa entità..."
@@ -411,8 +415,8 @@ export function ProposeEntityModal({
 
           {/* Error */}
           {error && (
-            <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
-              <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+            <div role="alert" className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
+              <AlertCircle size={16} className="flex-shrink-0 mt-0.5" aria-hidden="true" />
               {error}
             </div>
           )}
@@ -422,7 +426,7 @@ export function ProposeEntityModal({
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+              className="px-4 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 min-h-[44px]"
             >
               Annulla
             </button>
@@ -430,19 +434,20 @@ export function ProposeEntityModal({
               type="submit"
               disabled={isSubmitting || !nome.trim() || !descrizione.trim()}
               className={cn(
-                'flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all',
+                'flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all min-h-[44px]',
                 'bg-primary-600 hover:bg-primary-700 text-white',
-                'disabled:opacity-50 disabled:cursor-not-allowed'
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
               )}
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 size={18} className="animate-spin" />
+                  <Loader2 size={18} className="animate-spin" aria-hidden="true" />
                   Invio...
                 </>
               ) : (
                 <>
-                  <Plus size={18} />
+                  <Plus size={18} aria-hidden="true" />
                   Proponi
                 </>
               )}

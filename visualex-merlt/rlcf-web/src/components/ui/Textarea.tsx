@@ -49,7 +49,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className="w-full space-y-2">
         {label && (
-          <label className="block text-sm font-medium text-gray-300">
+          <label className="block text-sm font-medium text-slate-300">
             {label}
             {props.required && <span className="text-red-400 ml-1">*</span>}
           </label>
@@ -58,8 +58,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           ref={ref}
           className={cn(
-            'w-full px-4 py-3 bg-gray-800 border rounded-lg',
-            'text-white placeholder-gray-500',
+            'w-full px-4 py-3 bg-slate-800 border rounded-lg',
+            'text-white placeholder-slate-500',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             'disabled:opacity-50 disabled:cursor-not-allowed',
             'transition-all duration-200',
@@ -67,7 +67,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             !autoResize && 'resize-y',
             error
               ? 'border-red-500 focus:ring-red-500'
-              : 'border-gray-700 hover:border-gray-600',
+              : 'border-slate-700 hover:border-slate-600',
             className
           )}
           onChange={handleChange}
@@ -89,7 +89,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <div className="flex items-center justify-between text-sm">
           <div className="flex-1">
             {error && <p className="text-red-400">{error}</p>}
-            {!error && helperText && <p className="text-gray-400">{helperText}</p>}
+            {!error && helperText && <p className="text-slate-400">{helperText}</p>}
           </div>
 
           {showCharCount && maxLength && (
@@ -100,7 +100,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
                   ? 'text-orange-400'
                   : charCount === maxLength
                   ? 'text-red-400'
-                  : 'text-gray-500'
+                  : 'text-slate-500'
               )}
             >
               {charCount} / {maxLength}

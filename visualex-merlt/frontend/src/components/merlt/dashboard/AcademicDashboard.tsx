@@ -39,7 +39,7 @@ import {
   Download,
   Calendar,
 } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
+import { cn } from '../../../lib/utils';
 
 // Tab components
 import { OverviewTab } from './tabs/OverviewTab';
@@ -119,17 +119,21 @@ function TabButton({ tab, isActive, onClick }: TabButtonProps) {
   return (
     <button
       onClick={onClick}
+      role="tab"
+      aria-selected={isActive}
       className={cn(
         'relative flex items-center gap-2 px-4 py-2.5 text-sm font-medium',
         'rounded-lg transition-all duration-200',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
         isActive
           ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
+          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
       )}
       title={tab.description}
     >
-      {tab.icon}
+      <span aria-hidden="true">{tab.icon}</span>
       <span className="hidden sm:inline">{tab.label}</span>
+      <span className="sr-only sm:hidden">{tab.label}</span>
 
       {/* Active indicator */}
       {isActive && (
@@ -157,8 +161,8 @@ export function AcademicDashboard({
   className,
   initialTab = 'overview',
 }: AcademicDashboardProps) {
-  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
 
   // Update timestamp when tab changes
   useEffect(() => {
@@ -193,25 +197,25 @@ export function AcademicDashboard({
   };
 
   return (
-    <div className={cn('min-h-screen bg-gray-50 dark:bg-gray-900', className)}>
+    <div className={cn('min-h-screen bg-slate-50 dark:bg-slate-900', className)}>
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Title row */}
           <div className="py-4 flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 MERL-T Academic Dashboard
               </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                 Legal Knowledge Graph + RLCF Monitoring
               </p>
             </div>
 
             <div className="flex items-center gap-3">
               {/* Last updated */}
-              <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-                <Calendar size={14} />
+              <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                <Calendar size={14} aria-hidden="true" />
                 Ultimo aggiornamento: {formatLastUpdated()}
               </span>
 
@@ -220,29 +224,32 @@ export function AcademicDashboard({
                 onClick={() => setLastUpdated(new Date())}
                 className={cn(
                   'p-2 rounded-lg transition-colors',
-                  'text-gray-500 hover:text-gray-700 hover:bg-gray-100',
-                  'dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700'
+                  'text-slate-500 hover:text-slate-700 hover:bg-slate-100',
+                  'dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-700',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                 )}
-                title="Aggiorna dati"
+                aria-label="Aggiorna dati"
               >
-                <RefreshCw size={18} />
+                <RefreshCw size={18} aria-hidden="true" />
               </button>
 
               {/* Export button */}
               <button
                 className={cn(
                   'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium',
-                  'bg-blue-600 text-white hover:bg-blue-700 transition-colors'
+                  'bg-blue-600 text-white hover:bg-blue-700 transition-colors',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
                 )}
+                aria-label="Esporta dati"
               >
-                <Download size={16} />
+                <Download size={16} aria-hidden="true" />
                 <span className="hidden sm:inline">Export</span>
               </button>
             </div>
           </div>
 
           {/* Tabs navigation */}
-          <div className="flex items-center gap-1 pb-2 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-1 pb-2 overflow-x-auto scrollbar-hide" role="tablist" aria-label="Dashboard tabs">
             {TABS.map((tab) => (
               <TabButton
                 key={tab.id}
@@ -260,6 +267,8 @@ export function AcademicDashboard({
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
+            role="tabpanel"
+            aria-label={TABS.find(t => t.id === activeTab)?.label}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}

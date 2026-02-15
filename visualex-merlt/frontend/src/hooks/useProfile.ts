@@ -12,7 +12,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getUserProfile } from '../services/merltService';
-import type { ProfileResponse, AuthorityTier, LegalDomain } from '../types/merlt';
+import type { ProfileResponse, AuthorityTier, LegalDomain, DomainStats } from '../types/merlt';
 
 // =============================================================================
 // TIER UTILITIES
@@ -104,11 +104,11 @@ export function useProfile(
 ) {
   const { autoFetch = true } = options;
 
-  const [state, setState] = useState<UseProfileState>({
+  const [state, setState] = useState({
     profile: null,
     loading: autoFetch,
     error: null,
-  });
+  } as UseProfileState);
 
   /**
    * Fetch profilo dal backend.
@@ -119,7 +119,7 @@ export function useProfile(
       return;
     }
 
-    setState((prev) => ({ ...prev, loading: true, error: null }));
+    setState((prev: UseProfileState) => ({ ...prev, loading: true, error: null }));
 
     try {
       const profile = await getUserProfile(userId);
@@ -159,7 +159,7 @@ export function useProfile(
   const sortedDomains = useMemo(() => {
     if (!state.profile) return [];
 
-    return Object.entries(state.profile.domains)
+    return (Object.entries(state.profile.domains) as [string, DomainStats][])
       .map(([domain, stats]) => ({
         domain: domain as LegalDomain,
         ...stats,

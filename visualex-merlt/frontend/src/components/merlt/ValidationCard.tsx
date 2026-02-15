@@ -29,11 +29,11 @@ import {
   ArrowRight,
   Link2,
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
+import { cn } from '../../lib/utils';
 import { VoteWeightIndicator } from './VoteWeightIndicator';
-import { formatUrnToReadable } from '../../../utils/normattivaParser';
-import type { VoteType, PendingRelation } from '../../../types/merlt';
-import type { ValidationItem } from '../../../hooks/useValidationState';
+import { formatUrnToReadable } from '../../utils/normattivaParser';
+import type { VoteType, PendingRelation } from '../../types/merlt';
+import type { ValidationItem } from '../../hooks/useValidationState';
 
 interface ValidationCardProps {
   item: ValidationItem;
@@ -168,7 +168,7 @@ function RelationDisplay({ relation }: { relation: PendingRelation }) {
   );
 }
 
-export const ValidationCard = forwardRef<HTMLDivElement, ValidationCardProps>(
+export const ValidationCard = forwardRef(
   function ValidationCard(
     {
       item,
@@ -183,15 +183,15 @@ export const ValidationCard = forwardRef<HTMLDivElement, ValidationCardProps>(
       onToggleSelect,
       selectionMode = false,
       className,
-    },
-    ref
+    }: ValidationCardProps,
+    ref: ((instance: HTMLDivElement | null) => void) | { current: HTMLDivElement | null } | null
   ) {
     const [expanded, setExpanded] = useState(false);
-    const [voteAnimation, setVoteAnimation] = useState<'approve' | 'reject' | 'edit' | null>(null);
+    const [voteAnimation, setVoteAnimation] = useState(null as 'approve' | 'reject' | 'edit' | null);
     const [isExiting, setIsExiting] = useState(false);
     const reducedMotion = useReducedMotion();
 
-    const cardRef = useRef<HTMLDivElement>(null);
+    const cardRef = useRef(null as HTMLDivElement | null);
 
     // Get labels based on item type
     const getTypeLabel = () => {
@@ -271,7 +271,9 @@ export const ValidationCard = forwardRef<HTMLDivElement, ValidationCardProps>(
         {/* Header */}
         <button
           onClick={() => setExpanded(!expanded)}
-          className="relative z-10 w-full flex items-start gap-3 p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+          aria-expanded={expanded}
+          aria-label={`${item.name} - ${expanded ? 'Comprimi' : 'Espandi'} dettagli`}
+          className="relative z-10 w-full flex items-start gap-3 p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
         >
           {/* Selection checkbox */}
           {selectionMode && (
@@ -280,12 +282,14 @@ export const ValidationCard = forwardRef<HTMLDivElement, ValidationCardProps>(
                 e.stopPropagation();
                 onToggleSelect();
               }}
-              className="flex-shrink-0 mt-0.5"
+              aria-label={isSelected ? `Deseleziona ${item.name}` : `Seleziona ${item.name}`}
+              aria-pressed={isSelected}
+              className="flex-shrink-0 mt-0.5 min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
             >
               {isSelected ? (
-                <CheckSquare size={16} className="text-primary-500" />
+                <CheckSquare size={16} className="text-primary-500" aria-hidden="true" />
               ) : (
-                <Square size={16} className="text-slate-400" />
+                <Square size={16} className="text-slate-400" aria-hidden="true" />
               )}
             </button>
           )}
@@ -302,19 +306,19 @@ export const ValidationCard = forwardRef<HTMLDivElement, ValidationCardProps>(
                     : 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
                 )}
               >
-                {item.type === 'relation' && <Link2 size={10} />}
+                {item.type === 'relation' && <Link2 size={10} aria-hidden="true" />}
                 {item.type === 'entity' ? getTypeLabel() : 'Relazione'}
               </span>
 
               {/* Origin badge - AI or Community */}
               {item.isAiGenerated ? (
                 <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded">
-                  <Bot size={10} />
+                  <Bot size={10} aria-hidden="true" />
                   AI {confidencePercent}%
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded">
-                  <User size={10} />
+                  <User size={10} aria-hidden="true" />
                   Community
                 </span>
               )}
@@ -322,7 +326,7 @@ export const ValidationCard = forwardRef<HTMLDivElement, ValidationCardProps>(
               {/* High confidence indicator */}
               {item.confidence >= 0.9 && (
                 <span className="inline-flex items-center gap-0.5 text-[10px] px-1 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded">
-                  <Sparkles size={8} />
+                  <Sparkles size={8} aria-hidden="true" />
                   Alta
                 </span>
               )}
@@ -346,9 +350,9 @@ export const ValidationCard = forwardRef<HTMLDivElement, ValidationCardProps>(
           </div>
 
           {expanded ? (
-            <ChevronDown size={16} className="text-slate-400 mt-1 flex-shrink-0" />
+            <ChevronDown size={16} className="text-slate-400 mt-1 flex-shrink-0" aria-hidden="true" />
           ) : (
-            <ChevronRight size={16} className="text-slate-400 mt-1 flex-shrink-0" />
+            <ChevronRight size={16} className="text-slate-400 mt-1 flex-shrink-0" aria-hidden="true" />
           )}
         </button>
 
@@ -407,62 +411,70 @@ export const ValidationCard = forwardRef<HTMLDivElement, ValidationCardProps>(
           <button
             onClick={() => handleVote('approve')}
             disabled={isValidating || isExiting}
+            aria-label={`Approva ${item.name}`}
             className={cn(
-              'flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all',
+              'flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all min-h-[44px]',
               'bg-emerald-50 hover:bg-emerald-100 text-emerald-700',
               'dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 dark:text-emerald-400',
               'disabled:opacity-50 disabled:cursor-not-allowed',
-              'active:scale-95'
+              'active:scale-95',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
             )}
           >
-            <ThumbsUp size={12} />
+            <ThumbsUp size={12} aria-hidden="true" />
             <span className="hidden sm:inline">Approva</span>
-            <kbd className="hidden sm:inline text-[10px] opacity-50 ml-1">A</kbd>
+            <kbd className="hidden sm:inline text-[10px] opacity-50 ml-1" aria-hidden="true">A</kbd>
           </button>
 
           {/* Reject */}
           <button
             onClick={() => handleVote('reject')}
             disabled={isValidating || isExiting}
+            aria-label={`Rifiuta ${item.name}`}
             className={cn(
-              'flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all',
+              'flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all min-h-[44px]',
               'bg-red-50 hover:bg-red-100 text-red-700',
               'dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400',
               'disabled:opacity-50 disabled:cursor-not-allowed',
-              'active:scale-95'
+              'active:scale-95',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
             )}
           >
-            <ThumbsDown size={12} />
+            <ThumbsDown size={12} aria-hidden="true" />
             <span className="hidden sm:inline">Rifiuta</span>
-            <kbd className="hidden sm:inline text-[10px] opacity-50 ml-1">R</kbd>
+            <kbd className="hidden sm:inline text-[10px] opacity-50 ml-1" aria-hidden="true">R</kbd>
           </button>
 
           {/* Skip */}
           <button
             onClick={onSkip}
             disabled={isValidating || isExiting}
+            aria-label={`Salta ${item.name}`}
             className={cn(
-              'p-1.5 rounded-md transition-colors',
+              'p-1.5 rounded-md transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center',
               'text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 dark:hover:text-amber-400',
-              'disabled:opacity-50 disabled:cursor-not-allowed'
+              'disabled:opacity-50 disabled:cursor-not-allowed',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
             )}
             title="Salta (rivedi dopo) [S]"
           >
-            <SkipForward size={14} />
+            <SkipForward size={14} aria-hidden="true" />
           </button>
 
           {/* Edit */}
           <button
             onClick={onEdit}
             disabled={isValidating || isExiting}
+            aria-label={`Modifica ${item.name}`}
             className={cn(
-              'p-1.5 rounded-md transition-colors',
+              'p-1.5 rounded-md transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center',
               'text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 dark:hover:text-blue-400',
-              'disabled:opacity-50 disabled:cursor-not-allowed'
+              'disabled:opacity-50 disabled:cursor-not-allowed',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
             )}
             title="Modifica [E]"
           >
-            <Edit3 size={14} />
+            <Edit3 size={14} aria-hidden="true" />
           </button>
         </div>
       </motion.div>

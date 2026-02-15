@@ -36,6 +36,7 @@ from merlt.storage.bridge import BridgeTable, BridgeTableConfig, BridgeTableEntr
 from merlt.storage.retriever import GraphAwareRetriever, RetrievalResult, RetrieverConfig
 from merlt.storage.vectors.embeddings import EmbeddingService
 from merlt.storage.trace import TraceStorageService, TraceStorageConfig
+from merlt.storage.temporal import TemporalValidityService, ValidityResult, ValiditySummary
 
 __all__ = [
     # FalkorDB
@@ -54,4 +55,8 @@ __all__ = [
     # Trace Storage
     "TraceStorageService",
     "TraceStorageConfig",
+    # Temporal Validity
+    "TemporalValidityService",
+    "ValidityResult",
+    "ValiditySummary",
 ]

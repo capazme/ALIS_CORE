@@ -10,12 +10,13 @@ Tests cover:
 - Archive functionality
 
 Usage:
-    pytest tests/storage/test_trace_service.py -v
+    pytest tests/storage/test_trace_service.py -v -m integration
 
 Requires:
     PostgreSQL running on localhost:5433 (docker-compose.dev.yml)
 """
 
+import os
 import pytest
 from datetime import datetime, timedelta
 from uuid import uuid4
@@ -24,6 +25,8 @@ from merlt.storage.trace import TraceStorageService, TraceStorageConfig
 from merlt.storage.trace.trace_service import TraceFilter
 from merlt.experts.models import QATrace
 
+pytestmark = pytest.mark.integration
+
 
 # ============================================================================
 # FIXTURES
@@ -31,13 +34,13 @@ from merlt.experts.models import QATrace
 
 @pytest.fixture
 def trace_config():
-    """Test configuration pointing to dev PostgreSQL."""
+    """Test configuration pointing to dev PostgreSQL (env-overridable)."""
     return TraceStorageConfig(
-        host="localhost",
-        port=5433,
-        database="rlcf_dev",
-        user="dev",
-        password="devpassword"
+        host=os.environ.get("RLCF_PG_HOST", "localhost"),
+        port=int(os.environ.get("RLCF_PG_PORT", "5433")),
+        database=os.environ.get("RLCF_PG_DATABASE", "rlcf_dev"),
+        user=os.environ.get("RLCF_PG_USER", "dev"),
+        password=os.environ.get("RLCF_PG_PASSWORD", "devpassword"),
     )
 
 

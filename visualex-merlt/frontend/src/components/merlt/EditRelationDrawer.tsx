@@ -23,11 +23,11 @@ import {
   ArrowRight,
   Scale,
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { merltService } from '../../../services/merltService';
-import { RELATION_TYPE_OPTIONS, ENTITY_TYPE_LABELS, groupByCategory } from '../../../constants/merltTypes';
-import { parseLegalCitation, isSearchReady, formatParsedCitation, type ParsedCitation } from '../../../utils/citationParser';
-import type { RelationType, PendingRelation, EntityType, NormResolveResponse, ValidationStatus } from '../../../types/merlt';
+import { cn } from '../../lib/utils';
+import { merltService } from '../../services/merltService';
+import { RELATION_TYPE_OPTIONS, ENTITY_TYPE_LABELS, groupByCategory } from '../../constants/merltTypes';
+import { parseLegalCitation, isSearchReady, formatParsedCitation, type ParsedCitation } from '../../utils/citationParser';
+import type { RelationType, PendingRelation, EntityType, NormResolveResponse, ValidationStatus } from '../../types/merlt';
 
 // =============================================================================
 // TYPES
@@ -57,7 +57,7 @@ const groupedRelationOptions = groupByCategory(RELATION_TYPE_OPTIONS);
 // =============================================================================
 
 function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  const [debouncedValue, setDebouncedValue] = useState(value as T);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedValue(value), delay);
@@ -79,16 +79,16 @@ export function EditRelationDrawer({
   userId,
 }: EditRelationDrawerProps) {
   // Form state - initialized with current relation values
-  const [relationType, setRelationType] = useState<RelationType>(relation.relation_type);
+  const [relationType, setRelationType] = useState(relation.relation_type as RelationType);
   const [evidence, setEvidence] = useState(relation.evidence || '');
   const [motivazione, setMotivazione] = useState('');
 
   // Target entity state (autocomplete) - inizia con il target attuale
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedEntity, setSelectedEntity] = useState<EntitySearchResult | null>(null);
+  const [selectedEntity, setSelectedEntity] = useState(null as EntitySearchResult | null);
   const [isNewEntity, setIsNewEntity] = useState(false);
   const [newEntityName, setNewEntityName] = useState('');
-  const [searchResults, setSearchResults] = useState<EntitySearchResult[]>([]);
+  const [searchResults, setSearchResults] = useState([] as EntitySearchResult[]);
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -96,19 +96,19 @@ export function EditRelationDrawer({
   const [originalTargetDisplay, setOriginalTargetDisplay] = useState(relation.target_urn);
 
   // Norm resolution state (R5)
-  const [parsedCitation, setParsedCitation] = useState<ParsedCitation | null>(null);
+  const [parsedCitation, setParsedCitation] = useState(null as ParsedCitation | null);
   const [isNormSelected, setIsNormSelected] = useState(false);
-  const [resolvedNorm, setResolvedNorm] = useState<NormResolveResponse | null>(null);
+  const [resolvedNorm, setResolvedNorm] = useState(null as NormResolveResponse | null);
   const [isResolvingNorm, setIsResolvingNorm] = useState(false);
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null as string | null);
   const [success, setSuccess] = useState(false);
 
   // Refs
-  const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef(null as HTMLInputElement | null);
+  const dropdownRef = useRef(null as HTMLDivElement | null);
 
   // Debounced search query
   const debouncedQuery = useDebounce(searchQuery, 300);
@@ -256,7 +256,6 @@ export function EditRelationDrawer({
         onClose();
       }, 1500);
     } catch (err) {
-      console.error('Failed to submit edit:', err);
       setError(err instanceof Error ? err.message : 'Errore nell\'invio della modifica');
     } finally {
       setIsSubmitting(false);
@@ -351,6 +350,9 @@ export function EditRelationDrawer({
 
           {/* Drawer */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Modifica Relazione"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -360,16 +362,17 @@ export function EditRelationDrawer({
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
               <div className="flex items-center gap-2">
-                <Edit3 className="w-5 h-5 text-indigo-500" />
+                <Edit3 className="w-5 h-5 text-indigo-500" aria-hidden="true" />
                 <h2 className="font-semibold text-slate-900 dark:text-slate-100">
                   Modifica Relazione
                 </h2>
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                aria-label="Chiudi pannello"
+                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
-                <X size={20} className="text-slate-500" />
+                <X size={20} className="text-slate-500" aria-hidden="true" />
               </button>
             </div>
 
@@ -426,10 +429,11 @@ export function EditRelationDrawer({
 
                   {/* Relation Type */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label htmlFor="edit-relation-tipo" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                       Tipo Relazione *
                     </label>
                     <select
+                      id="edit-relation-tipo"
                       value={relationType}
                       onChange={(e) => setRelationType(e.target.value as RelationType)}
                       className={cn(
@@ -458,7 +462,7 @@ export function EditRelationDrawer({
 
                   {/* Target Entity - Autocomplete */}
                   <div className="relative">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label htmlFor="edit-relation-target" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                       Target (Entità di destinazione)
                     </label>
                     <p className="text-xs text-slate-500 mb-2">
@@ -468,6 +472,7 @@ export function EditRelationDrawer({
                       <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
                         ref={inputRef}
+                        id="edit-relation-target"
                         type="text"
                         value={searchQuery}
                         onChange={(e) => {
@@ -549,7 +554,7 @@ export function EditRelationDrawer({
                             "max-h-[200px] overflow-y-auto"
                           )}
                         >
-                          {searchResults.map((entity) => (
+                          {searchResults.map((entity: EntitySearchResult) => (
                             <button
                               key={entity.id}
                               type="button"
@@ -609,7 +614,7 @@ export function EditRelationDrawer({
                           )}
 
                           {/* Create new option */}
-                          {searchQuery.length >= 2 && !searchResults.find(e => e.nome.toLowerCase() === searchQuery.toLowerCase()) && !isNormSelected && (
+                          {searchQuery.length >= 2 && !searchResults.find((e: EntitySearchResult) => e.nome.toLowerCase() === searchQuery.toLowerCase()) && !isNormSelected && (
                             <button
                               type="button"
                               onClick={handleCreateNew}
@@ -642,10 +647,11 @@ export function EditRelationDrawer({
 
                   {/* Evidence */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label htmlFor="edit-relation-evidence" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                       Evidenza / Giustificazione
                     </label>
                     <textarea
+                      id="edit-relation-evidence"
                       value={evidence}
                       onChange={(e) => setEvidence(e.target.value)}
                       rows={4}
@@ -666,10 +672,11 @@ export function EditRelationDrawer({
 
                   {/* Motivazione (required) */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label htmlFor="edit-relation-motivazione" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                       Motivazione della modifica *
                     </label>
                     <textarea
+                      id="edit-relation-motivazione"
                       value={motivazione}
                       onChange={(e) => setMotivazione(e.target.value)}
                       rows={3}
@@ -687,8 +694,8 @@ export function EditRelationDrawer({
 
                   {/* Error message */}
                   {error && (
-                    <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                      <AlertCircle size={16} className="text-red-500 flex-shrink-0" />
+                    <div role="alert" className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                      <AlertCircle size={16} className="text-red-500 flex-shrink-0" aria-hidden="true" />
                       <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
                     </div>
                   )}
@@ -723,7 +730,7 @@ export function EditRelationDrawer({
                   <button
                     type="button"
                     onClick={onClose}
-                    className="flex-1 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                    className="flex-1 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 min-h-[44px]"
                   >
                     Annulla
                   </button>
@@ -731,19 +738,20 @@ export function EditRelationDrawer({
                     onClick={handleSubmit}
                     disabled={isSubmitting || !hasChanges || !motivazione.trim()}
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors",
+                      "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors min-h-[44px]",
                       "bg-indigo-500 hover:bg-indigo-600 text-white",
-                      "disabled:opacity-50 disabled:cursor-not-allowed"
+                      "disabled:opacity-50 disabled:cursor-not-allowed",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     )}
                   >
                     {isSubmitting ? (
                       <>
-                        <Loader2 size={16} className="animate-spin" />
+                        <Loader2 size={16} className="animate-spin" aria-hidden="true" />
                         Invio...
                       </>
                     ) : (
                       <>
-                        <Save size={16} />
+                        <Save size={16} aria-hidden="true" />
                         Invia Modifica
                       </>
                     )}

@@ -16,9 +16,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { X, ChevronDown, Send, Loader2, CheckCircle2, Sparkles, GripVertical } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { merltService } from '../../../services/merltService';
-import type { NERFeedbackRequest, NERFeedbackResponse, ParsedCitationData } from '../../../types/merlt';
+import { cn } from '../../lib/utils';
+import { merltService } from '../../services/merltService';
+import type { NERFeedbackRequest, NERFeedbackResponse, ParsedCitationData } from '../../types/merlt';
 
 // =============================================================================
 // TYPES
@@ -130,7 +130,7 @@ export function CitationCorrectionCard({
   getContextWindow,
   onSuccess,
 }: CitationCorrectionCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef(null as HTMLDivElement | null);
   const dragControls = useDragControls();
 
   // Form state
@@ -142,7 +142,7 @@ export function CitationCorrectionCard({
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null as string | null);
   const [success, setSuccess] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -257,7 +257,7 @@ export function CitationCorrectionCard({
 
     const articlesArray = articoli
       .split(/[,\s]+/)
-      .map(a => a.trim())
+      .map((a: string) => a.trim())
       .filter(Boolean);
 
     if (articlesArray.length === 0) {
@@ -341,10 +341,12 @@ export function CitationCorrectionCard({
             "fixed z-[200]",
             isDragging && "cursor-grabbing"
           )}
+          role="dialog"
+          aria-label={originalParsed ? 'Correggi citazione' : 'Annota citazione'}
           style={{
             top: initialPosition.top,
             left: initialPosition.left,
-            width: 320,
+            width: 'min(320px, calc(100vw - 32px))',
           }}
         >
           <div className={cn(
@@ -366,8 +368,8 @@ export function CitationCorrectionCard({
             >
               <div className="flex items-center gap-2">
                 {/* Drag handle indicator */}
-                <GripVertical size={14} className="text-slate-400 dark:text-slate-500" />
-                <Sparkles size={14} className="text-blue-600 dark:text-blue-400" />
+                <GripVertical size={14} className="text-slate-400 dark:text-slate-500" aria-hidden="true" />
+                <Sparkles size={14} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
                 <span className="text-sm font-medium text-slate-900 dark:text-white">
                   {originalParsed ? 'Correggi' : 'Annota'} citazione
                 </span>
@@ -375,9 +377,10 @@ export function CitationCorrectionCard({
               <button
                 onClick={onClose}
                 onPointerDown={(e) => e.stopPropagation()}
-                className="p-1 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 rounded transition-colors"
+                className="p-1 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                aria-label="Chiudi correzione citazione"
               >
-                <X size={16} className="text-slate-500" />
+                <X size={16} className="text-slate-500" aria-hidden="true" />
               </button>
             </div>
 
@@ -385,9 +388,9 @@ export function CitationCorrectionCard({
               /* Success state */
               <div className="p-6 text-center">
                 <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <CheckCircle2 size={24} />
+                  <CheckCircle2 size={24} aria-hidden="true" />
                 </div>
-                <p className="text-sm font-medium text-slate-900 dark:text-white">
+                <p className="text-sm font-medium text-slate-900 dark:text-white" role="status">
                   Feedback salvato!
                 </p>
               </div>
@@ -413,7 +416,7 @@ export function CitationCorrectionCard({
                         type="button"
                         onClick={() => handleQuickType(value)}
                         className={cn(
-                          "px-2 py-1 text-xs rounded-lg border transition-all",
+                          "px-2 py-1 text-xs rounded-lg border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
                           tipoAtto === value
                             ? "bg-blue-600 text-white border-blue-600"
                             : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-400"
@@ -426,9 +429,10 @@ export function CitationCorrectionCard({
                       <button
                         type="button"
                         onClick={() => setShowAllTypes(true)}
-                        className="px-2 py-1 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center gap-0.5"
+                        className="px-2 py-1 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center gap-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+                        aria-label="Mostra altri tipi di atto"
                       >
-                        Altri <ChevronDown size={12} />
+                        Altri <ChevronDown size={12} aria-hidden="true" />
                       </button>
                     )}
                   </div>
@@ -497,7 +501,7 @@ export function CitationCorrectionCard({
 
                 {/* Error */}
                 {error && (
-                  <p className="text-xs text-red-600 dark:text-red-400">
+                  <p className="text-xs text-red-600 dark:text-red-400" role="alert">
                     {error}
                   </p>
                 )}
@@ -509,17 +513,19 @@ export function CitationCorrectionCard({
                   className={cn(
                     "w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all",
                     "bg-blue-600 hover:bg-blue-700 text-white",
-                    "disabled:opacity-50 disabled:cursor-not-allowed"
+                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                   )}
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 size={14} className="animate-spin" />
-                      Invio...
+                      <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                      <span>Invio...</span>
+                      <span className="sr-only">Invio in corso</span>
                     </>
                   ) : (
                     <>
-                      <Send size={14} />
+                      <Send size={14} aria-hidden="true" />
                       Invia feedback
                     </>
                   )}

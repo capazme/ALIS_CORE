@@ -8,6 +8,7 @@ Endpoints:
 - GET /api/traces/health: Health check
 - GET /api/traces: List traces with pagination and filters
 - GET /api/traces/{id}: Get single trace with consent filtering
+- GET /api/traces/{id}/validity: Temporal validity check for cited sources
 - GET /api/traces/{id}/sources: Resolve sources via bridge_table
 - DELETE /api/traces/{id}: GDPR-compliant hard delete
 - POST /api/traces/archive: Archive old traces
@@ -30,10 +31,17 @@ from pydantic import BaseModel, Field
 from merlt.storage.trace import TraceStorageService, TraceStorageConfig
 from merlt.storage.trace.trace_service import TraceFilter, TraceSummary, SourceResolution
 from merlt.storage.bridge import BridgeTable, BridgeTableConfig
+from merlt.storage.graph import FalkorDBClient, FalkorDBConfig
+from merlt.storage.temporal import TemporalValidityService
+from merlt.storage.temporal.validity_service import validate_as_of_date
+from merlt.api.models.validity_models import (
+    ValidityResultResponse,
+    ValiditySummaryResponse,
+)
 
 log = structlog.get_logger()
 
-router = APIRouter(prefix="/api/traces", tags=["traces"])
+router = APIRouter(prefix="/traces", tags=["traces"])
 
 # Valid consent levels
 VALID_CONSENT_LEVELS = {"anonymous", "basic", "full"}
@@ -106,12 +114,16 @@ class DeleteResponse(BaseModel):
     message: str
 
 
+
+
 # ============================================================================
 # DEPENDENCY INJECTION
 # ============================================================================
 
 _trace_service: Optional[TraceStorageService] = None
 _bridge_table: Optional[BridgeTable] = None
+_graph_db: Optional[FalkorDBClient] = None
+_validity_service: Optional[TemporalValidityService] = None
 
 
 async def get_trace_service() -> TraceStorageService:
@@ -140,9 +152,29 @@ async def get_bridge_table() -> BridgeTable:
     return _bridge_table
 
 
+async def get_graph_db() -> FalkorDBClient:
+    """Get FalkorDBClient instance (lazy init)."""
+    global _graph_db
+    if _graph_db is None:
+        _graph_db = FalkorDBClient(FalkorDBConfig())
+        await _graph_db.connect()
+    return _graph_db
+
+
+async def get_validity_service() -> TemporalValidityService:
+    """Get TemporalValidityService instance (lazy init)."""
+    global _validity_service
+    if _validity_service is None:
+        graph = await get_graph_db()
+        _validity_service = TemporalValidityService(graph_db=graph)
+    return _validity_service
+
+
 def initialize_trace_services(
     trace_service: TraceStorageService,
-    bridge_table: Optional[BridgeTable] = None
+    bridge_table: Optional[BridgeTable] = None,
+    graph_db: Optional[FalkorDBClient] = None,
+    validity_service: Optional[TemporalValidityService] = None
 ):
     """
     Initialize trace services for FastAPI app.
@@ -152,10 +184,16 @@ def initialize_trace_services(
     Args:
         trace_service: Pre-configured TraceStorageService
         bridge_table: Pre-configured BridgeTable for source resolution
+        graph_db: Pre-configured FalkorDBClient
+        validity_service: Pre-configured TemporalValidityService
     """
-    global _trace_service, _bridge_table
+    global _trace_service, _bridge_table, _graph_db, _validity_service
     _trace_service = trace_service
     _bridge_table = bridge_table
+    if graph_db:
+        _graph_db = graph_db
+    if validity_service:
+        _validity_service = validity_service
     log.info("Trace services initialized")
 
 
@@ -342,6 +380,80 @@ async def get_trace(
         raise HTTPException(status_code=500, detail="Failed to get trace")
 
 
+@router.get("/{trace_id}/validity", response_model=ValiditySummaryResponse)
+async def get_trace_validity(
+    trace_id: str,
+    as_of_date: Optional[str] = Query(None, description="Data per verifica relativa (ISO YYYY-MM-DD)"),
+    caller_consent: Optional[str] = Query(None, description="Caller's consent level"),
+    service: TraceStorageService = Depends(get_trace_service),
+    validity: TemporalValidityService = Depends(get_validity_service)
+):
+    """
+    Verifica la vigenza temporale delle fonti citate in un trace.
+
+    Per ogni norma citata nelle sources del trace, verifica se è ancora
+    in vigore consultando il grafo FalkorDB. Rileva modifiche, abrogazioni
+    e sostituzioni, generando warning strutturati.
+
+    Il check è a render-time (non stored) con cache in-memory TTL 24h.
+
+    Args:
+        trace_id: ID del trace da verificare
+        as_of_date: Data opzionale per verifica relativa
+        caller_consent: Livello consent del chiamante
+    """
+    log.info("Checking trace validity", trace_id=trace_id)
+
+    # Validate as_of_date format
+    try:
+        validated_date = validate_as_of_date(as_of_date)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    validated_consent = _validate_consent(caller_consent)
+
+    try:
+        summary = await validity.check_trace_validity(
+            trace_id=trace_id,
+            trace_service=service,
+            as_of_date=validated_date,
+            consent_level=validated_consent
+        )
+
+        return ValiditySummaryResponse(
+            trace_id=summary.trace_id,
+            as_of_date=summary.as_of_date,
+            total_sources=summary.total_sources,
+            valid_count=summary.valid_count,
+            warning_count=summary.warning_count,
+            critical_count=summary.critical_count,
+            unknown_count=summary.unknown_count,
+            results=[
+                ValidityResultResponse(
+                    urn=r.urn,
+                    status=r.status,
+                    is_valid=r.is_valid,
+                    warning_level=r.warning_level,
+                    warning_message=r.warning_message,
+                    last_modified=r.last_modified,
+                    modification_count=r.modification_count,
+                    abrogating_norm=r.abrogating_norm,
+                    replacing_norm=r.replacing_norm,
+                    recent_modifications=r.recent_modifications,
+                    checked_at=r.checked_at,
+                )
+                for r in summary.results
+            ],
+            summary_message=summary.summary_message,
+        )
+
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        log.error("trace_validity_check_failed", error=str(e), trace_id=trace_id)
+        raise HTTPException(status_code=500, detail="Validity check failed")
+
+
 @router.get("/{trace_id}/sources", response_model=SourcesResponse)
 async def get_trace_sources(
     trace_id: str,
@@ -376,6 +488,38 @@ async def get_trace_sources(
     except Exception as e:
         log.error("Failed to resolve sources", error=str(e), trace_id=trace_id)
         raise HTTPException(status_code=500, detail="Failed to resolve sources")
+
+
+@router.post("/{trace_id}/reproduce")
+async def reproduce_trace(
+    trace_id: str,
+    service: TraceStorageService = Depends(get_trace_service)
+):
+    """
+    Reproduce a historical query with pinned config and diff results.
+
+    Re-runs the orchestrator with the original query and selected experts,
+    then computes a reproducibility score based on expert overlap,
+    confidence delta, and source Jaccard similarity.
+
+    Returns diff, reproducibility_score, and caveats.
+    """
+    log.info("Reproducing trace", trace_id=trace_id)
+
+    try:
+        from merlt.rlcf.reproducibility_service import ReproducibilityService
+        from merlt.rlcf.database import get_async_session
+
+        repro_svc = ReproducibilityService()
+
+        async with get_async_session() as session:
+            result = await repro_svc.reproduce_query(session, trace_id)
+
+        return result.to_dict()
+
+    except Exception as e:
+        log.error("Failed to reproduce trace", error=str(e), trace_id=trace_id)
+        raise HTTPException(status_code=500, detail=f"Reproduction failed: {str(e)}")
 
 
 @router.delete("/{trace_id}", response_model=DeleteResponse)

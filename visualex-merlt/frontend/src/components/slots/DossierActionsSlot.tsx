@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { GraduationCap, Loader2 } from 'lucide-react';
 import type { SlotProps } from '@visualex/platform/lib/plugins';
 import { exportDossierTrainingSet, loadDossierTrainingSet } from '../../services/merltService';
-import type { DossierArticleData } from '../../types/dossier';
+import type { DossierArticleData } from '../../types/merlt';
 
 export function DossierActionsSlot({ dossierId, userId, dossier }: SlotProps['dossier-actions']) {
   const [isExporting, setIsExporting] = useState(false);
@@ -20,11 +20,11 @@ export function DossierActionsSlot({ dossierId, userId, dossier }: SlotProps['do
       const articles: DossierArticleData[] = dossier.items
         .filter(item => item.type === 'norma')
         .map(item => ({
-          urn: item.data.urn || '',
-          tipo_atto: item.data.tipo_atto || 'unknown',
-          numero_atto: item.data.numero_atto || '',
+          urn: String(item.data.urn || ''),
+          tipo_atto: String(item.data.tipo_atto || 'unknown'),
+          numero_atto: String(item.data.numero_atto || ''),
           numero_articolo: String(item.data.numero_articolo || ''),
-          data: item.data.data || '',
+          data: String(item.data.data || ''),
           user_status: (item.status || 'unread') as 'unread' | 'reading' | 'important' | 'done',
         }));
 
@@ -66,12 +66,14 @@ export function DossierActionsSlot({ dossierId, userId, dossier }: SlotProps['do
 
   return (
     <button
+      type="button"
       onClick={handleExportTrainingSet}
-      className="text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-2 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      className="text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 p-2 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      aria-label="Esporta Training Set RLCF"
       title="Esporta Training Set RLCF"
       disabled={isExporting}
     >
-      {isExporting ? <Loader2 size={18} className="animate-spin" /> : <GraduationCap size={18} />}
+      {isExporting ? <Loader2 size={18} className="animate-spin" aria-hidden="true" /> : <GraduationCap size={18} aria-hidden="true" />}
     </button>
   );
 }

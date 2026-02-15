@@ -6,10 +6,10 @@
  * Triggered by pressing '?' while the panel is open.
  */
 
-import { Modal } from '../../ui/Modal';
+import { Modal } from '../ui/Modal';
 import { Keyboard, ThumbsUp, ThumbsDown, Edit3, SkipForward, ArrowUp, ArrowDown, HelpCircle, X } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { VALIDATION_SHORTCUTS, type KeyboardShortcut } from '../../../hooks/useValidationKeyboard';
+import { cn } from '../../lib/utils';
+import { VALIDATION_SHORTCUTS, type KeyboardShortcut } from '../../hooks/useValidationKeyboard';
 
 interface ValidationKeyboardHelpModalProps {
   isOpen: boolean;
@@ -64,7 +64,7 @@ export function ValidationKeyboardHelpModal({
         {/* Header info */}
         <div className="flex items-center gap-3 p-3 rounded-lg bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-900/30">
           <div className="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-            <Keyboard size={20} className="text-primary-600 dark:text-primary-400" />
+            <Keyboard size={20} className="text-primary-600 dark:text-primary-400" aria-hidden="true" />
           </div>
           <div>
             <p className="text-sm font-medium text-primary-900 dark:text-primary-100">

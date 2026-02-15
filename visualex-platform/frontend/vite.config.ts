@@ -12,8 +12,13 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     resolve: {
+      // Deduplicate React to prevent "two copies of React" error
+      // when merlt-frontend plugin is bundled
+      dedupe: ['react', 'react-dom'],
       alias: {
         '@': path.resolve(__dirname, 'src'),
+        // Resolve MERLT's platform type imports to actual platform source
+        '@visualex/platform/lib/plugins': path.resolve(__dirname, 'src/lib/plugins'),
         ...(merltEnabled
           ? {}
           : {

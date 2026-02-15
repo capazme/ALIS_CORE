@@ -27,7 +27,7 @@ Example:
     ...     print(f"{expert['name']}: {expert['accuracy']}%")
 """
 
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List, Optional
 
 import structlog
@@ -154,31 +154,96 @@ class AggregationStats(BaseModel):
 # =============================================================================
 
 
-def _get_expert_list() -> List[ExpertPerformance]:
+async def _get_expert_list(period_days: int = 30) -> List[ExpertPerformance]:
     """
-    Ritorna lista expert con valori default.
+    Ritorna lista expert con metriche reali da QATrace e QAFeedback.
+    """
+    try:
+        from merlt.rlcf.database import get_async_session
+        from merlt.experts.models import QATrace, QAFeedback
+        from sqlalchemy import select, func
+        from datetime import datetime, timedelta, UTC
 
-    TODO: Implementare tracking metriche nel sistema Expert.
-    """
-    # Ritorna gli expert con valori default (0)
-    return [
-        ExpertPerformance(
-            name="literal",
-            display_name="LiteralExpert",
-        ),
-        ExpertPerformance(
-            name="systemic",
-            display_name="SystemicExpert",
-        ),
-        ExpertPerformance(
-            name="principles",
-            display_name="PrinciplesExpert",
-        ),
-        ExpertPerformance(
-            name="precedent",
-            display_name="PrecedentExpert",
-        ),
-    ]
+        since = datetime.now(UTC) - timedelta(days=period_days)
+
+        async with get_async_session() as session:
+            # Total queries in period
+            total_result = await session.execute(
+                select(func.count(QATrace.trace_id)).where(QATrace.created_at >= since)
+            )
+            total_queries = total_result.scalar() or 0
+
+            # Get all traces to count expert usage
+            traces_result = await session.execute(
+                select(QATrace.selected_experts, QATrace.execution_time_ms, QATrace.confidence)
+                .where(QATrace.created_at >= since)
+            )
+            traces = traces_result.all()
+
+            expert_stats: dict = {
+                name: {"count": 0, "latency_sum": 0, "conf_sum": 0.0, "conf_count": 0}
+                for name in ["literal", "systemic", "principles", "precedent"]
+            }
+
+            for experts, latency, confidence in traces:
+                if experts:
+                    for exp in experts:
+                        if exp in expert_stats:
+                            expert_stats[exp]["count"] += 1
+                            if latency:
+                                expert_stats[exp]["latency_sum"] += latency
+                            if confidence is not None:
+                                expert_stats[exp]["conf_sum"] += confidence
+                                expert_stats[exp]["conf_count"] += 1
+
+            # Get feedback scores per expert
+            fb_result = await session.execute(
+                select(QAFeedback.preferred_expert, func.avg(QAFeedback.inline_rating))
+                .where(
+                    QAFeedback.created_at >= since,
+                    QAFeedback.preferred_expert.isnot(None),
+                )
+                .group_by(QAFeedback.preferred_expert)
+            )
+            fb_scores = {row[0]: row[1] for row in fb_result.all()}
+
+        display_names = {
+            "literal": "LiteralExpert",
+            "systemic": "SystemicExpert",
+            "principles": "PrinciplesExpert",
+            "precedent": "PrecedentExpert",
+        }
+
+        experts = []
+        for name in ["literal", "systemic", "principles", "precedent"]:
+            stats = expert_stats[name]
+            count = stats["count"]
+            usage_pct = (count / total_queries * 100) if total_queries > 0 else 0.0
+            avg_latency = (stats["latency_sum"] / count) if count > 0 else 0.0
+            avg_conf = (stats["conf_sum"] / stats["conf_count"]) if stats["conf_count"] > 0 else 0.0
+            fb_score = fb_scores.get(name)
+            feedback_score = ((fb_score - 3) / 2) if fb_score else 0.0  # normalize 1-5 to -1..1
+
+            experts.append(ExpertPerformance(
+                name=name,
+                display_name=display_names[name],
+                accuracy=round(avg_conf * 100, 1),
+                latency_ms=round(avg_latency, 1),
+                usage_percentage=round(usage_pct, 1),
+                feedback_score=round(feedback_score, 3),
+                queries_handled=count,
+            ))
+
+        return experts
+
+    except Exception as e:
+        log.warning("Failed to fetch real expert metrics, using defaults", error=str(e))
+        return [
+            ExpertPerformance(name="literal", display_name="LiteralExpert"),
+            ExpertPerformance(name="systemic", display_name="SystemicExpert"),
+            ExpertPerformance(name="principles", display_name="PrinciplesExpert"),
+            ExpertPerformance(name="precedent", display_name="PrecedentExpert"),
+        ]
 
 
 # =============================================================================
@@ -214,12 +279,14 @@ async def get_expert_performance(
     """
     log.info("Getting expert performance", period_days=period_days)
 
-    experts = _get_expert_list()
+    experts = await _get_expert_list(period_days=period_days)
+
+    total_queries = sum(e.queries_handled for e in experts)
 
     return ExpertPerformanceResponse(
         experts=experts,
         period_days=period_days,
-        total_queries=0,
+        total_queries=total_queries,
         last_updated=datetime.now().isoformat(),
     )
 
@@ -358,13 +425,55 @@ async def get_aggregation_stats() -> AggregationStats:
     """
     log.info("Getting aggregation stats")
 
-    return AggregationStats(
-        method="weighted_consensus",
-        total_responses=0,
-        agreement_rate=0.0,
-        divergence_count=0,
-        divergence_rate=0.0,
-        avg_confidence=0.0,
-        confidence_ci=(0.0, 0.0),
-        avg_experts_per_query=0.0,
-    )
+    try:
+        from merlt.rlcf.feedback_aggregation_service import FeedbackAggregationService
+        from merlt.rlcf.database import get_async_session
+        from merlt.experts.models import QATrace
+        from sqlalchemy import select, func
+        from datetime import datetime, timedelta
+
+        since = datetime.now(UTC) - timedelta(days=30)
+        svc = FeedbackAggregationService()
+
+        async with get_async_session() as session:
+            agg_result = await svc.run_periodic_aggregation(session, since=since)
+
+            # Get trace-level stats
+            trace_result = await session.execute(
+                select(
+                    func.count(QATrace.trace_id),
+                    func.avg(QATrace.confidence),
+                )
+                .where(QATrace.created_at >= since)
+            )
+            row = trace_result.one()
+            total_responses = row[0] or 0
+            avg_confidence = row[1] or 0.0
+
+            # Count divergent
+            div_result = await session.execute(
+                select(func.count(QATrace.trace_id))
+                .where(
+                    QATrace.created_at >= since,
+                    QATrace.synthesis_mode == "divergent",
+                )
+            )
+            divergence_count = div_result.scalar() or 0
+
+        divergence_rate = (divergence_count / total_responses) if total_responses > 0 else 0.0
+        agreement_rate = 1.0 - divergence_rate
+
+        return AggregationStats(
+            method="weighted_consensus",
+            total_responses=total_responses,
+            agreement_rate=round(agreement_rate * 100, 1),
+            divergence_count=divergence_count,
+            divergence_rate=round(divergence_rate * 100, 1),
+            avg_confidence=round(avg_confidence, 4),
+            confidence_ci=(0.0, 0.0),
+            avg_experts_per_query=0.0,
+        )
+
+    except Exception as e:
+        log.warning("Failed to fetch real aggregation stats", error=str(e))
+        return AggregationStats()

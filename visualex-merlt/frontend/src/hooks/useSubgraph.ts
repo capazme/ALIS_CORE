@@ -51,16 +51,22 @@ export function useSubgraph(options: UseSubgraphOptions = {}): UseSubgraphReturn
   const [filters, setFilters] = useState(initialFilters as string[]);
 
   const refresh = useCallback(async () => {
-    if (!enabled || !initialUrn) return;
+    if (!enabled) return;
     setLoading(true);
     setError(null);
 
     try {
-      const response = await merltService.getSubgraph({
-        root_urn: initialUrn,
-        depth,
-        entity_types: filters.length ? filters : undefined,
-      });
+      let response;
+      if (initialUrn) {
+        response = await merltService.getSubgraph({
+          root_urn: initialUrn,
+          depth,
+          entity_types: filters.length ? filters : undefined,
+        });
+      } else {
+        // No root URN: load graph overview (most-connected nodes)
+        response = await merltService.getGraphOverview(50);
+      }
       setData(response);
     } catch (err) {
       console.error('Error fetching subgraph:', err);

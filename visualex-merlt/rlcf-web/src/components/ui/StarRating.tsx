@@ -64,7 +64,7 @@ export const StarRating = forwardRef<HTMLDivElement, StarRatingProps>(
     return (
       <div ref={ref} className="space-y-2">
         {label && (
-          <label className="block text-sm font-medium text-gray-300">
+          <label className="block text-sm font-medium text-slate-300">
             {label}
             {required && <span className="text-red-400 ml-1">*</span>}
           </label>
@@ -92,7 +92,7 @@ export const StarRating = forwardRef<HTMLDivElement, StarRatingProps>(
                   disabled={disabled}
                   className={cn(
                     'transition-all duration-200',
-                    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded',
+                    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 rounded',
                     !disabled && !readonly && 'cursor-pointer hover:scale-110',
                     disabled && 'cursor-not-allowed opacity-50'
                   )}
@@ -106,7 +106,7 @@ export const StarRating = forwardRef<HTMLDivElement, StarRatingProps>(
                       'transition-all duration-200',
                       isFilled
                         ? 'fill-yellow-400 text-yellow-400'
-                        : 'fill-none text-gray-600 hover:text-gray-500'
+                        : 'fill-none text-slate-600 hover:text-slate-500'
                     )}
                   />
                 </button>
@@ -116,7 +116,7 @@ export const StarRating = forwardRef<HTMLDivElement, StarRatingProps>(
 
           {/* Value Display */}
           {showValue && value > 0 && (
-            <span className="text-sm font-medium text-gray-300 tabular-nums">
+            <span className="text-sm font-medium text-slate-300 tabular-nums">
               {value.toFixed(1)} / {maxRating}
             </span>
           )}

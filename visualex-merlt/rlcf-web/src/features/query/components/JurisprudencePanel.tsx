@@ -27,10 +27,10 @@ export function JurisprudencePanel({ jurisprudence }: JurisprudencePanelProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Gavel className="w-5 h-5 text-purple-400" />
+          <Gavel className="w-5 h-5 text-purple-400" aria-hidden="true" />
           Giurisprudenza Citata
         </CardTitle>
-        <p className="text-sm text-gray-400 mt-2">
+        <p className="text-sm text-slate-400 mt-2">
           Sentenze e decisioni giurisprudenziali rilevanti
         </p>
       </CardHeader>
@@ -43,9 +43,9 @@ export function JurisprudencePanel({ jurisprudence }: JurisprudencePanelProps) {
         </div>
 
         {/* Summary */}
-        <div className="mt-6 pt-4 border-t border-gray-700 text-xs text-gray-500">
+        <div className="mt-6 pt-4 border-t border-slate-700 text-xs text-slate-500">
           <p>
-            Totale sentenze citate: <strong className="text-gray-400">{jurisprudence.length}</strong>
+            Totale sentenze citate: <strong className="text-slate-400">{jurisprudence.length}</strong>
           </p>
         </div>
       </CardContent>
@@ -114,15 +114,15 @@ function JurisprudenceCard({ case_ }: JurisprudenceCardProps) {
               {courtLevel}
             </Badge>
             {case_.date && (
-              <div className="flex items-center gap-1 text-xs text-gray-400">
-                <Calendar className="w-3 h-3" />
+              <div className="flex items-center gap-1 text-xs text-slate-400">
+                <Calendar className="w-3 h-3" aria-hidden="true" />
                 <span>{formattedDate}</span>
               </div>
             )}
           </div>
 
           <h4 className="text-base font-semibold text-white">{case_.court}</h4>
-          <p className="text-sm text-gray-400 mt-1">ID: {case_.case_id}</p>
+          <p className="text-sm text-slate-400 mt-1">ID: {case_.case_id}</p>
         </div>
 
         {/* Relevance Score */}
@@ -141,18 +141,20 @@ function JurisprudenceCard({ case_ }: JurisprudenceCardProps) {
         <div className="mb-3">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+            aria-expanded={isExpanded}
+            className="flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
           >
             <ChevronDown
               className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              aria-hidden="true"
             />
             {isExpanded ? 'Nascondi' : 'Mostra'} massima
           </button>
 
           {isExpanded && (
-            <div className="mt-3 p-3 bg-gray-900/50 rounded-lg border border-gray-700">
-              <h5 className="text-xs font-semibold text-gray-400 uppercase mb-2">Massima</h5>
-              <p className="text-sm text-gray-300 leading-relaxed">{case_.summary}</p>
+            <div className="mt-3 p-3 bg-slate-900/50 rounded-lg border border-slate-700">
+              <h5 className="text-xs font-semibold text-slate-400 uppercase mb-2">Massima</h5>
+              <p className="text-sm text-slate-300 leading-relaxed">{case_.summary}</p>
             </div>
           )}
         </div>
@@ -165,9 +167,9 @@ function JurisprudenceCard({ case_ }: JurisprudenceCardProps) {
             href={case_.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-xs text-purple-400 hover:text-purple-300 transition-colors"
+            className="inline-flex items-center gap-2 text-xs text-purple-400 hover:text-purple-300 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
           >
-            <ExternalLink className="w-3.5 h-3.5" />
+            <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
             Consulta sentenza completa
           </a>
         </div>

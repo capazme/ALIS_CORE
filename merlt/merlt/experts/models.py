@@ -24,13 +24,33 @@ from uuid import uuid4
 
 from sqlalchemy import (
     Column, String, Text, Integer, Float, DateTime, ForeignKey, Boolean,
-    CheckConstraint, Index
+    CheckConstraint, Index,
 )
 from sqlalchemy.dialects.postgresql import UUID, ARRAY, JSONB
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
 from merlt.rlcf.database import Base
+
+
+class AggregatedFeedback(Base):
+    """
+    Aggregated feedback results per component over a time period.
+
+    Stores periodic aggregation output from FeedbackAggregationService.
+    """
+    __tablename__ = "aggregated_feedback"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    component = Column(String(50), nullable=False, index=True)
+    period_start = Column(DateTime, nullable=False)
+    period_end = Column(DateTime, nullable=False)
+    avg_rating = Column(Float, nullable=True)
+    authority_weighted_avg = Column(Float, nullable=True)
+    disagreement_score = Column(Float, nullable=True)
+    total_feedback = Column(Integer, nullable=True)
+    details = Column(JSONB, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
 
 
 class QATrace(Base):

@@ -186,7 +186,7 @@ export const RELATION_TYPE_OPTIONS: RelationTypeOption[] = [
   { value: 'MODIFICA_EFFICACIA', label: 'Modifica efficacia', description: 'Fatto modifica efficacia', category: 'Effetti' },
   { value: 'APPLICA_REGOLA', label: 'Applica regola', description: 'Atto giudiziario applica regola', category: 'Reasoning' },
   { value: 'IMPLICA', label: 'Implica', description: 'Implicazione logica', category: 'Reasoning' },
-  { value: 'CONTRADICE', label: 'Contraddizione tra proposizioni', category: 'Reasoning' },
+  { value: 'CONTRADICE', label: 'Contraddizione tra proposizioni', description: 'Contraddizione logica tra proposizioni', category: 'Reasoning' },
   { value: 'GIUSTIFICA', label: 'Giustifica', description: 'Giustificazione/reasoning', category: 'Reasoning' },
   { value: 'LIMITA', label: 'Limita', description: 'Limitazione di diritti/poteri', category: 'Limitazioni' },
   { value: 'TUTELA', label: 'Tutela', description: 'Norma/Procedura tutela diritto', category: 'Tutela' },

@@ -968,8 +968,26 @@ export function formatCitationLabel(parsed: ParsedCitationData): string {
 }
 
 /**
+ * Determines if a citation references an EU/external act type.
+ */
+function detectCitationType(parsed: ParsedCitationData): 'internal' | 'external' {
+  const actType = parsed.act_type.toLowerCase();
+  if (
+    actType.includes('regolamento ue') ||
+    actType.includes('direttiva ue') ||
+    parsed.act_type === 'TUE' ||
+    parsed.act_type === 'TFUE' ||
+    parsed.act_type === 'CDFUE'
+  ) {
+    return 'external';
+  }
+  return 'internal';
+}
+
+/**
  * Applica il wrapping delle citazioni al testo HTML.
  * Restituisce il testo con le citazioni wrappate in span.
+ * Each span gets data-citation-type="internal" or "external".
  */
 export function wrapCitationsInHtml(
   html: string,
@@ -985,13 +1003,14 @@ export function wrapCitationsInHtml(
     const citation = citations[i];
     const serialized = serializeCitation(citation.parsed);
     const escaped = serialized.replace(/"/g, '&quot;');
+    const citationType = detectCitationType(citation.parsed);
 
     const before = result.substring(0, citation.startIndex);
     const after = result.substring(citation.endIndex);
     const matchText = result.substring(citation.startIndex, citation.endIndex);
 
     result = before +
-      `<span class="citation-hover" data-citation="${escaped}" data-cache-key="${citation.cacheKey}">${matchText}</span>` +
+      `<span class="citation-hover" data-citation="${escaped}" data-cache-key="${citation.cacheKey.replace(/"/g, '&quot;')}" data-citation-type="${citationType}">${matchText}</span>` +
       after;
   }
 

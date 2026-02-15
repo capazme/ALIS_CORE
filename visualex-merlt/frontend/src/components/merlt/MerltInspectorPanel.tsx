@@ -34,7 +34,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
+import { cn } from '../../lib/utils';
 import { EditEntityDrawer } from './EditEntityDrawer';
 import { EditRelationDrawer } from './EditRelationDrawer';
 import { ValidationCard } from './ValidationCard';
@@ -42,14 +42,14 @@ import { ValidationBulkActionsBar } from './ValidationBulkActionsBar';
 import { SkipQueuePanel } from './SkipQueuePanel';
 import { VoteHistoryModal } from './VoteHistoryModal';
 import { ValidationKeyboardHelpModal } from './ValidationKeyboardHelpModal';
-import { useValidationState } from '../../../hooks/useValidationState';
-import { useValidationKeyboard } from '../../../hooks/useValidationKeyboard';
-import { showUndoToast } from '../../../hooks/useUndoableAction';
+import { useValidationState, type ValidationItem, type VoteHistoryEntry } from '../../hooks/useValidationState';
+import { useValidationKeyboard } from '../../hooks/useValidationKeyboard';
+import { showUndoToast } from '../../hooks/useUndoableAction';
 import type {
   PendingEntity,
   PendingRelation,
   VoteType,
-} from '../../../types/merlt';
+} from '../../types/merlt';
 
 // =============================================================================
 // TYPES
@@ -107,7 +107,7 @@ function StatusBadge({ inGraph, entityCount }: { inGraph: boolean; entityCount: 
   if (inGraph && entityCount > 0) {
     return (
       <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/30 rounded-lg">
-        <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400" />
+        <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
         <div className="text-sm">
           <span className="font-medium text-emerald-700 dark:text-emerald-300">Nel Knowledge Graph</span>
           <span className="text-emerald-600 dark:text-emerald-400 ml-2">
@@ -120,7 +120,7 @@ function StatusBadge({ inGraph, entityCount }: { inGraph: boolean; entityCount: 
 
   return (
     <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg">
-      <Network size={16} className="text-slate-400" />
+      <Network size={16} className="text-slate-400" aria-hidden="true" />
       <span className="text-sm text-slate-600 dark:text-slate-400">Articolo non ancora analizzato</span>
     </div>
   );
@@ -165,11 +165,11 @@ export function MerltInspectorPanel({
   const [showVoteHistory, setShowVoteHistory] = useState(false);
 
   // Edit drawer state
-  const [editingEntity, setEditingEntity] = useState<PendingEntity | null>(null);
-  const [editingRelation, setEditingRelation] = useState<PendingRelation | null>(null);
+  const [editingEntity, setEditingEntity] = useState(null as PendingEntity | null);
+  const [editingRelation, setEditingRelation] = useState(null as PendingRelation | null);
 
   // Card refs for focus management
-  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const cardRefs = useRef(new Map() as Map<string, HTMLDivElement>);
 
   // Use validation state hook
   const {
@@ -216,7 +216,7 @@ export function MerltInspectorPanel({
   // Handle vote with undo toast
   const handleVote = useCallback(
     async (itemId: string, itemType: 'entity' | 'relation', vote: VoteType) => {
-      const item = allItems.find((i) => i.id === itemId);
+      const item = allItems.find((i: ValidationItem) => i.id === itemId);
       if (!item) return;
 
       // Record in history immediately
@@ -234,7 +234,7 @@ export function MerltInspectorPanel({
         },
         undo: () => {
           // Remove from history on undo
-          const entry = voteHistory.find((h) => h.itemId === itemId);
+          const entry = voteHistory.find((h: VoteHistoryEntry) => h.itemId === itemId);
           if (entry) {
             removeVoteFromHistory(entry.id);
           }
@@ -290,7 +290,7 @@ export function MerltInspectorPanel({
   // Get item name for skip queue
   const getItemName = useCallback(
     (itemId: string) => {
-      const item = allItems.find((i) => i.id === itemId);
+      const item = allItems.find((i: ValidationItem) => i.id === itemId);
       return item?.name ?? itemId;
     },
     [allItems]
@@ -300,7 +300,7 @@ export function MerltInspectorPanel({
   const handleBulkApprove = useCallback(
     async (itemIds: string[]) => {
       for (const itemId of itemIds) {
-        const item = allItems.find((i) => i.id === itemId);
+        const item = allItems.find((i: ValidationItem) => i.id === itemId);
         if (item) {
           if (item.type === 'entity') {
             await onValidateEntity(itemId, 'approve');
@@ -317,7 +317,7 @@ export function MerltInspectorPanel({
   const handleBulkReject = useCallback(
     async (itemIds: string[]) => {
       for (const itemId of itemIds) {
-        const item = allItems.find((i) => i.id === itemId);
+        const item = allItems.find((i: ValidationItem) => i.id === itemId);
         if (item) {
           if (item.type === 'entity') {
             await onValidateEntity(itemId, 'reject');
@@ -387,6 +387,9 @@ export function MerltInspectorPanel({
 
             {/* Panel */}
             <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Knowledge Graph Inspector"
               initial={{ x: '100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
@@ -400,7 +403,7 @@ export function MerltInspectorPanel({
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/50">
                 <div className="flex items-center gap-2">
-                  <Brain size={20} className="text-primary-600 dark:text-primary-400" />
+                  <Brain size={20} className="text-primary-600 dark:text-primary-400" aria-hidden="true" />
                   <div>
                     <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                       Knowledge Graph
@@ -418,14 +421,16 @@ export function MerltInspectorPanel({
                       'p-1.5 rounded-lg transition-colors',
                       'hover:bg-slate-100 dark:hover:bg-slate-700',
                       'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
                       voteHistory.length > 0 && 'text-primary-500'
                     )}
+                    aria-label="Cronologia voti"
                     title="Cronologia voti"
                   >
-                    <History size={16} />
-                    {voteHistory.filter((h) => !h.isCommitted).length > 0 && (
+                    <History size={16} aria-hidden="true" />
+                    {voteHistory.filter((h: VoteHistoryEntry) => !h.isCommitted).length > 0 && (
                       <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                        {voteHistory.filter((h) => !h.isCommitted).length}
+                        {voteHistory.filter((h: VoteHistoryEntry) => !h.isCommitted).length}
                       </span>
                     )}
                   </button>
@@ -433,18 +438,20 @@ export function MerltInspectorPanel({
                   {/* Keyboard help button */}
                   <button
                     onClick={() => setShowKeyboardHelp(true)}
-                    className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    aria-label="Scorciatoie tastiera"
                     title="Scorciatoie tastiera (?)"
                   >
-                    <Keyboard size={16} />
+                    <Keyboard size={16} aria-hidden="true" />
                   </button>
 
                   {/* Close button */}
                   <button
                     onClick={onClose}
-                    className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    aria-label="Chiudi pannello"
                   >
-                    <X size={18} />
+                    <X size={18} aria-hidden="true" />
                   </button>
                 </div>
               </div>
@@ -453,16 +460,17 @@ export function MerltInspectorPanel({
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {/* Error */}
                 {error && (
-                  <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-lg text-sm text-red-700 dark:text-red-400">
-                    <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+                  <div role="alert" className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-lg text-sm text-red-700 dark:text-red-400">
+                    <AlertCircle size={16} className="flex-shrink-0 mt-0.5" aria-hidden="true" />
                     {error}
                   </div>
                 )}
 
                 {/* Loading */}
                 {isLoading && (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 size={24} className="animate-spin text-primary-500" />
+                  <div className="flex items-center justify-center py-8" role="status">
+                    <Loader2 size={24} className="animate-spin text-primary-500" aria-hidden="true" />
+                    <span className="sr-only">Caricamento in corso...</span>
                   </div>
                 )}
 
@@ -471,7 +479,7 @@ export function MerltInspectorPanel({
                   <div className="bg-gradient-to-br from-violet-50 to-violet-100 dark:from-violet-900/20 dark:to-violet-800/20 border border-violet-200 dark:border-violet-800/30 rounded-lg p-4">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm">
-                        <Bot size={20} className="text-violet-600 dark:text-violet-400 animate-pulse" />
+                        <Bot size={20} className="text-violet-600 dark:text-violet-400 animate-pulse" aria-hidden="true" />
                       </div>
                       <div className="flex-1">
                         <h3 className="text-sm font-semibold text-violet-900 dark:text-violet-100 mb-1 flex items-center gap-2">
@@ -491,7 +499,7 @@ export function MerltInspectorPanel({
                   <div className="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/20 dark:to-orange-800/20 border border-amber-200 dark:border-amber-800/30 rounded-lg p-4">
                     <div className="flex items-start gap-3">
                       <div className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm">
-                        <Users size={20} className="text-amber-600 dark:text-amber-400" />
+                        <Users size={20} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
                       </div>
                       <div className="flex-1">
                         <h3 className="text-sm font-semibold text-amber-900 dark:text-amber-100 mb-1 flex items-center gap-2">
@@ -554,10 +562,11 @@ export function MerltInspectorPanel({
                               className={cn(
                                 'w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium',
                                 'bg-primary-600 hover:bg-primary-700 text-white shadow-sm',
-                                'disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                                'disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
+                                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                               )}
                             >
-                              <Sparkles size={14} />
+                              <Sparkles size={14} aria-hidden="true" />
                               Avvia Estrazione
                             </button>
                           </div>
@@ -604,10 +613,10 @@ export function MerltInspectorPanel({
                         </div>
                         <div className="space-y-2">
                           <AnimatePresence mode="popLayout">
-                            {visibleItems.map((item, index) => (
+                            {visibleItems.map((item: ValidationItem, index: number) => (
                               <ValidationCard
                                 key={item.id}
-                                ref={(el) => {
+                                ref={(el: HTMLDivElement | null) => {
                                   if (el) cardRefs.current.set(item.id, el);
                                   else cardRefs.current.delete(item.id);
                                 }}
@@ -621,7 +630,7 @@ export function MerltInspectorPanel({
                                     : hasVotedRelation(item.id)
                                 }
                                 userAuthorityScore={userAuthorityScore}
-                                onVote={(vote) => handleVote(item.id, item.type, vote)}
+                                onVote={(vote: VoteType) => handleVote(item.id, item.type, vote)}
                                 onEdit={() => handleEdit(item.id, item.type)}
                                 onSkip={() => handleSkip(item.id, item.type)}
                                 onToggleSelect={() => toggleSelection(item.id)}
@@ -651,14 +660,15 @@ export function MerltInspectorPanel({
                       <div>
                         <button
                           onClick={() => setShowValidated(!showValidated)}
-                          className="flex items-center gap-2 w-full text-left py-2"
+                          aria-expanded={showValidated}
+                          className="flex items-center gap-2 w-full text-left py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg"
                         >
                           {showValidated ? (
-                            <ChevronDown size={14} className="text-slate-400" />
+                            <ChevronDown size={14} className="text-slate-400" aria-hidden="true" />
                           ) : (
-                            <ChevronRight size={14} className="text-slate-400" />
+                            <ChevronRight size={14} className="text-slate-400" aria-hidden="true" />
                           )}
-                          <CheckCircle2 size={14} className="text-emerald-500" />
+                          <CheckCircle2 size={14} className="text-emerald-500" aria-hidden="true" />
                           <h3 className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
                             Nel Grafo ({entityCount})
                           </h3>
@@ -693,10 +703,11 @@ export function MerltInspectorPanel({
                     className={cn(
                       'w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium',
                       'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm',
-                      'transition-colors'
+                      'transition-colors',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                     )}
                   >
-                    <Send size={14} />
+                    <Send size={14} aria-hidden="true" />
                     Conferma Feedback ({uncommittedVoteCount})
                   </button>
                 )}
@@ -705,25 +716,27 @@ export function MerltInspectorPanel({
                   <button
                     onClick={onProposeEntity}
                     className={cn(
-                      'flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium',
+                      'flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium min-h-[44px]',
                       'bg-slate-100 hover:bg-slate-200 text-slate-700',
                       'dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300',
-                      'transition-colors'
+                      'transition-colors',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                     )}
                   >
-                    <Plus size={12} />
+                    <Plus size={12} aria-hidden="true" />
                     Proponi Entità
                   </button>
                   <button
                     onClick={onProposeRelation}
                     className={cn(
-                      'flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium',
+                      'flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium min-h-[44px]',
                       'bg-slate-100 hover:bg-slate-200 text-slate-700',
                       'dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300',
-                      'transition-colors'
+                      'transition-colors',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                     )}
                   >
-                    <Plus size={12} />
+                    <Plus size={12} aria-hidden="true" />
                     Proponi Relazione
                   </button>
                 </div>

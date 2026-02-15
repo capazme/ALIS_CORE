@@ -55,9 +55,9 @@ export function useUndoableAction<T>({
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [currentMessage, setCurrentMessage] = useState('');
 
-  const resultRef = useRef<T | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const resultRef = useRef(null as T | null);
+  const timerRef = useRef(null as ReturnType<typeof setTimeout> | null);
+  const intervalRef = useRef(null as ReturnType<typeof setInterval> | null);
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -93,7 +93,7 @@ export function useUndoableAction<T>({
 
     // Update countdown every 100ms
     intervalRef.current = setInterval(() => {
-      setTimeRemaining((prev) => {
+      setTimeRemaining((prev: number) => {
         const next = prev - 100;
         if (next <= 0) {
           if (intervalRef.current) clearInterval(intervalRef.current);

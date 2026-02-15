@@ -15,7 +15,7 @@
 
 import { get } from './api';
 
-const PREFIX = 'merlt';
+const PREFIX = '/merlt';
 
 // =============================================================================
 // TYPES
@@ -223,7 +223,7 @@ export function getStatusColor(status: ServiceStatus): string {
     case 'degraded':
       return 'text-yellow-500';
     default:
-      return 'text-gray-500';
+      return 'text-slate-500';
   }
 }
 

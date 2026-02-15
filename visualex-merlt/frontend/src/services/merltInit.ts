@@ -19,7 +19,7 @@ let websocket: WebSocket | null = null;
 export async function initializeMerltServices(cfg: MerltConfig): Promise<void> {
   config = cfg;
 
-  // Connect to MERLT WebSocket for real-time updates (if needed)
+  // Connect to MERLT WebSocket for real-time updates
   const merltWsUrl = cfg.apiBaseUrl.replace(/^http/, 'ws') + '/merlt/ws';
 
   try {
@@ -37,7 +37,7 @@ export async function initializeMerltServices(cfg: MerltConfig): Promise<void> {
       };
 
       websocket.onerror = (error) => {
-        console.error('[MERLT] WebSocket error:', error);
+        console.warn('[MERLT] WebSocket error:', error);
       };
 
       websocket.onclose = () => {
@@ -68,6 +68,27 @@ export function getMerltConfig(): MerltConfig | null {
 }
 
 /**
+ * Get the current user ID from MERLT config or auth token.
+ *
+ * Priority: 1) config.userId, 2) JWT sub claim from access_token, 3) "anonymous"
+ */
+export function getCurrentUserId(): string {
+  if (config?.userId) return config.userId;
+
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.sub) return payload.sub as string;
+    } catch {
+      // malformed token, fall through
+    }
+  }
+
+  return 'anonymous';
+}
+
+/**
  * Handle incoming MERLT WebSocket messages
  */
 function handleMerltMessage(data: { type: string; payload: unknown }): void {
@@ -80,6 +101,10 @@ function handleMerltMessage(data: { type: string; payload: unknown }): void {
       break;
     case 'validation:assigned':
       console.log('[MERLT] New validation assigned:', data.payload);
+      break;
+    case 'system:connected':
+    case 'keepalive':
+      // Expected system messages, no action needed
       break;
     default:
       console.log('[MERLT] Unknown message type:', data.type);

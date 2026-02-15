@@ -292,30 +292,96 @@ async def _get_rlcf_kpis() -> RLCFKPIs:
 
 
 async def _get_expert_kpis() -> ExpertKPIs:
-    """Get Expert System KPIs - empty until real metrics are tracked."""
+    """Get Expert System KPIs from QATrace data."""
     try:
-        # TODO: Implement metrics tracking in expert system
-        # For now return empty/default values
+        from merlt.rlcf.database import get_async_session
+        from merlt.experts.models import QATrace
+        from sqlalchemy import select, func
+
+        async with get_async_session() as session:
+            result = await session.execute(
+                select(
+                    func.count(QATrace.trace_id),
+                    func.avg(QATrace.execution_time_ms),
+                    func.avg(QATrace.confidence),
+                )
+            )
+            row = result.one()
+            total = row[0] or 0
+            avg_lat = row[1] or 0.0
+            avg_conf = row[2] or 0.0
+
+            # Count divergent for agreement rate
+            div_result = await session.execute(
+                select(func.count(QATrace.trace_id))
+                .where(QATrace.synthesis_mode == "divergent")
+            )
+            divergent = div_result.scalar() or 0
+
+        agreement = ((total - divergent) / total * 100) if total > 0 else 0.0
+
         return ExpertKPIs(
-            total_queries=0,
-            avg_latency_ms=0.0,
-            avg_confidence=0.0,
-            agreement_rate=0.0,
+            total_queries=total,
+            avg_latency_ms=round(avg_lat, 1),
+            avg_confidence=round(avg_conf, 4),
+            agreement_rate=round(agreement, 1),
         )
     except Exception as e:
         log.warning("Failed to get Expert KPIs", error=str(e))
         return ExpertKPIs()
 
 
-def _get_activity_feed() -> ActivityFeed:
-    """Get recent activity - empty until event store is implemented."""
-    # TODO: Implement event store for activity tracking
-    # For now return empty activity feed
-    return ActivityFeed(
-        entries=[],
-        total_count=0,
-        has_more=False,
-    )
+async def _get_activity_feed(
+    limit: int = 20,
+    offset: int = 0,
+    activity_type: Optional[ActivityType] = None,
+) -> ActivityFeed:
+    """Get recent activity from QATrace entries with DB-level pagination."""
+    try:
+        from merlt.rlcf.database import get_async_session
+        from merlt.experts.models import QATrace
+        from sqlalchemy import select, func
+
+        async with get_async_session() as session:
+            # Total count for pagination
+            count_result = await session.execute(
+                select(func.count(QATrace.trace_id))
+                .where(QATrace.consent_level != "anonymous")
+            )
+            total_count = count_result.scalar() or 0
+
+            # Paginated query
+            result = await session.execute(
+                select(QATrace)
+                .where(QATrace.consent_level != "anonymous")
+                .order_by(QATrace.created_at.desc())
+                .offset(offset)
+                .limit(limit)
+            )
+            traces = result.scalars().all()
+
+        entries = []
+        for t in traces:
+            entries.append(ActivityEntry(
+                id=t.trace_id,
+                type=ActivityType.QUERY,
+                title=f"Query: {t.query_type or 'general'}",
+                description=f"{', '.join(t.selected_experts or [])} → {t.synthesis_mode or 'unknown'}",
+                timestamp=t.created_at,
+                metadata={
+                    "confidence": t.confidence,
+                    "execution_time_ms": t.execution_time_ms,
+                },
+            ))
+
+        return ActivityFeed(
+            entries=entries,
+            total_count=total_count,
+            has_more=offset + limit < total_count,
+        )
+    except Exception as e:
+        log.warning("Failed to get activity feed", error=str(e))
+        return ActivityFeed(entries=[], total_count=0, has_more=False)
 
 
 # =============================================================================
@@ -351,14 +417,13 @@ async def get_dashboard_overview() -> DashboardOverview:
     log.info("Getting dashboard overview")
 
     # Fetch all data in parallel
-    kg_kpis, rlcf_kpis, expert_kpis, health = await asyncio.gather(
+    kg_kpis, rlcf_kpis, expert_kpis, health, activity = await asyncio.gather(
         _get_knowledge_graph_kpis(),
         _get_rlcf_kpis(),
         _get_expert_kpis(),
         get_system_health(),
+        _get_activity_feed(),
     )
-
-    activity = _get_activity_feed()
 
     return DashboardOverview(
         knowledge_graph=kg_kpis,
@@ -759,19 +824,8 @@ async def get_activity_feed(
           "has_more": true
         }
     """
-    # In produzione, query su event store con offset/limit
-    feed = _get_activity_feed()
-
-    # Apply filtering
-    entries = feed.entries
-    if activity_type:
-        entries = [e for e in entries if e.type == activity_type]
-
-    # Apply pagination
-    entries = entries[offset:offset + limit]
-
-    return ActivityFeed(
-        entries=entries,
-        total_count=feed.total_count,
-        has_more=offset + limit < feed.total_count,
+    return await _get_activity_feed(
+        limit=limit,
+        offset=offset,
+        activity_type=activity_type,
     )

@@ -69,17 +69,17 @@ export function useValidationState({
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Skip queue
-  const [skipQueue, setSkipQueue] = useState<SkipQueueItem[]>([]);
+  const [skipQueue, setSkipQueue] = useState([] as SkipQueueItem[]);
 
   // Vote history (local session only)
-  const [voteHistory, setVoteHistory] = useState<VoteHistoryEntry[]>([]);
+  const [voteHistory, setVoteHistory] = useState([] as VoteHistoryEntry[]);
 
   // Selected items for bulk actions
-  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [selectedItems, setSelectedItems] = useState(new Set() as Set<string>);
 
   // Convert entities and relations to unified items
-  const allItems = useMemo<ValidationItem[]>(() => {
-    const entityItems: ValidationItem[] = entities.map((e) => ({
+  const allItems = useMemo(() => {
+    const entityItems: ValidationItem[] = entities.map((e: PendingEntity) => ({
       id: e.id,
       type: 'entity' as const,
       name: e.nome,
@@ -92,7 +92,7 @@ export function useValidationState({
       raw: e,
     }));
 
-    const relationItems: ValidationItem[] = relations.map((r) => ({
+    const relationItems: ValidationItem[] = relations.map((r: PendingRelation) => ({
       id: r.id,
       type: 'relation' as const,
       name: `${r.relation_type}`,
@@ -105,13 +105,13 @@ export function useValidationState({
       raw: r,
     }));
 
-    return [...entityItems, ...relationItems];
+    return [...entityItems, ...relationItems] as ValidationItem[];
   }, [entities, relations]);
 
   // Items not in skip queue and not voted
   const visibleItems = useMemo(() => {
-    const skippedIds = new Set(skipQueue.map((s) => s.itemId));
-    return allItems.filter((item) => {
+    const skippedIds = new Set(skipQueue.map((s: SkipQueueItem) => s.itemId));
+    return allItems.filter((item: ValidationItem) => {
       if (skippedIds.has(item.id)) return false;
       if (item.type === 'entity' && hasVotedEntity(item.id)) return false;
       if (item.type === 'relation' && hasVotedRelation(item.id)) return false;
@@ -123,10 +123,7 @@ export function useValidationState({
   const currentItem = visibleItems[currentIndex] ?? null;
 
   // Bulk action candidates
-  const bulkCandidates = useMemo<{
-    highConfidence: BulkActionCandidate[];
-    lowConfidence: BulkActionCandidate[];
-  }>(() => {
+  const bulkCandidates = useMemo(() => {
     const high: BulkActionCandidate[] = [];
     const low: BulkActionCandidate[] = [];
 
@@ -138,16 +135,19 @@ export function useValidationState({
       }
     }
 
-    return { highConfidence: high, lowConfidence: low };
+    return { highConfidence: high, lowConfidence: low } as {
+      highConfidence: BulkActionCandidate[];
+      lowConfidence: BulkActionCandidate[];
+    };
   }, [visibleItems]);
 
   // Navigation
   const navigateToNext = useCallback(() => {
-    setCurrentIndex((prev) => Math.min(prev + 1, visibleItems.length - 1));
+    setCurrentIndex((prev: number) => Math.min(prev + 1, visibleItems.length - 1));
   }, [visibleItems.length]);
 
   const navigateToPrev = useCallback(() => {
-    setCurrentIndex((prev) => Math.max(prev - 1, 0));
+    setCurrentIndex((prev: number) => Math.max(prev - 1, 0));
   }, []);
 
   const navigateToIndex = useCallback((index: number) => {
@@ -156,16 +156,16 @@ export function useValidationState({
 
   // Skip management
   const skipItem = useCallback((itemId: string, itemType: ValidationItemType, reason?: string) => {
-    setSkipQueue((prev) => [
+    setSkipQueue((prev: SkipQueueItem[]) => [
       ...prev,
       { itemId, itemType, skippedAt: new Date(), reason },
     ]);
     // Keep index in bounds
-    setCurrentIndex((prev) => Math.min(prev, Math.max(0, visibleItems.length - 2)));
+    setCurrentIndex((prev: number) => Math.min(prev, Math.max(0, visibleItems.length - 2)));
   }, [visibleItems.length]);
 
   const unSkipItem = useCallback((itemId: string) => {
-    setSkipQueue((prev) => prev.filter((s) => s.itemId !== itemId));
+    setSkipQueue((prev: SkipQueueItem[]) => prev.filter((s: SkipQueueItem) => s.itemId !== itemId));
   }, []);
 
   const clearSkipQueue = useCallback(() => {
@@ -188,22 +188,22 @@ export function useValidationState({
       timestamp: new Date(),
       isCommitted: false,
     };
-    setVoteHistory((prev) => [entry, ...prev]);
+    setVoteHistory((prev: VoteHistoryEntry[]) => [entry, ...prev]);
   }, []);
 
   const markVotesAsCommitted = useCallback(() => {
-    setVoteHistory((prev) =>
-      prev.map((entry) => ({ ...entry, isCommitted: true }))
+    setVoteHistory((prev: VoteHistoryEntry[]) =>
+      prev.map((entry: VoteHistoryEntry) => ({ ...entry, isCommitted: true }))
     );
   }, []);
 
   const removeVoteFromHistory = useCallback((id: string) => {
-    setVoteHistory((prev) => prev.filter((entry) => entry.id !== id));
+    setVoteHistory((prev: VoteHistoryEntry[]) => prev.filter((entry: VoteHistoryEntry) => entry.id !== id));
   }, []);
 
   // Selection for bulk actions
   const toggleSelection = useCallback((itemId: string) => {
-    setSelectedItems((prev) => {
+    setSelectedItems((prev: Set<string>) => {
       const next = new Set(prev);
       if (next.has(itemId)) {
         next.delete(itemId);
@@ -215,7 +215,7 @@ export function useValidationState({
   }, []);
 
   const selectAll = useCallback(() => {
-    setSelectedItems(new Set(visibleItems.map((item) => item.id)));
+    setSelectedItems(new Set(visibleItems.map((item: ValidationItem) => item.id)));
   }, [visibleItems]);
 
   const clearSelection = useCallback(() => {
@@ -223,12 +223,12 @@ export function useValidationState({
   }, []);
 
   const selectHighConfidence = useCallback(() => {
-    const ids = bulkCandidates.highConfidence.map((c) => c.item.id);
+    const ids = bulkCandidates.highConfidence.map((c: BulkActionCandidate) => c.item.id);
     setSelectedItems(new Set(ids));
   }, [bulkCandidates.highConfidence]);
 
   const selectLowConfidence = useCallback(() => {
-    const ids = bulkCandidates.lowConfidence.map((c) => c.item.id);
+    const ids = bulkCandidates.lowConfidence.map((c: BulkActionCandidate) => c.item.id);
     setSelectedItems(new Set(ids));
   }, [bulkCandidates.lowConfidence]);
 

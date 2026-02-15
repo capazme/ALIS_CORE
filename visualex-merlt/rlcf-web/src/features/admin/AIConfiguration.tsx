@@ -141,45 +141,49 @@ export const AIConfiguration: React.FC = () => {
   const models = modelsData?.models || [];
 
   return (
-    <div className="space-y-6">
-      <Card className="p-6">
+    <div className="space-y-6 p-4 md:p-6">
+      <Card className="p-4 md:p-6">
         <h3 className="text-lg font-semibold text-white mb-4">AI Model Configuration</h3>
-        
+
         <div className="space-y-4">
           {/* API Key */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="ai-api-key" className="block text-sm font-medium text-slate-300 mb-2">
               OpenRouter API Key
             </label>
             <div className="flex gap-2">
               <input
+                id="ai-api-key"
                 type={showApiKey ? 'text' : 'password'}
                 value={config.apiKey}
                 onChange={(e) => setConfig(prev => ({ ...prev, apiKey: e.target.value }))}
                 placeholder="sk-or-..."
-                className="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white placeholder-gray-400"
+                className="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white placeholder-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               />
               <Button
                 variant="outline"
                 onClick={() => setShowApiKey(!showApiKey)}
+                aria-label={showApiKey ? 'Hide API key' : 'Show API key'}
+                className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 {showApiKey ? 'Hide' : 'Show'}
               </Button>
             </div>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-slate-400 mt-1">
               Get your API key from <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">openrouter.ai/keys</a>
             </p>
           </div>
 
           {/* Model Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="ai-model-select" className="block text-sm font-medium text-slate-300 mb-2">
               AI Model
             </label>
             <select
+              id="ai-model-select"
               value={config.selectedModel}
               onChange={(e) => setConfig(prev => ({ ...prev, selectedModel: e.target.value }))}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               disabled={modelsLoading}
             >
               {models.map((model: AIModel) => (
@@ -189,7 +193,7 @@ export const AIConfiguration: React.FC = () => {
               ))}
             </select>
             {config.selectedModel && (
-              <div className="mt-2 p-2 bg-slate-900 rounded text-xs text-gray-300">
+              <div className="mt-2 p-2 bg-slate-900 rounded text-xs text-slate-300">
                 <strong>Recommended for:</strong> {
                   models.find((m: AIModel) => m.id === config.selectedModel)?.recommended_for?.join(', ') || 'General tasks'
                 }
@@ -199,19 +203,20 @@ export const AIConfiguration: React.FC = () => {
 
           {/* Temperature */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="ai-temperature" className="block text-sm font-medium text-slate-300 mb-2">
               Temperature: {config.temperature}
             </label>
             <input
+              id="ai-temperature"
               type="range"
               min="0"
               max="2"
               step="0.1"
               value={config.temperature}
               onChange={(e) => setConfig(prev => ({ ...prev, temperature: parseFloat(e.target.value) }))}
-              className="w-full"
+              className="w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             />
-            <div className="flex justify-between text-xs text-gray-400 mt-1">
+            <div className="flex justify-between text-xs text-slate-400 mt-1">
               <span>More focused</span>
               <span>More creative</span>
             </div>
@@ -219,19 +224,20 @@ export const AIConfiguration: React.FC = () => {
 
           {/* Max Tokens */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="ai-max-tokens" className="block text-sm font-medium text-slate-300 mb-2">
               Max Tokens
             </label>
             <input
+              id="ai-max-tokens"
               type="number"
               min="100"
               max="4000"
               step="100"
               value={config.maxTokens}
               onChange={(e) => setConfig(prev => ({ ...prev, maxTokens: parseInt(e.target.value) }))}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white"
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-md text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             />
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-slate-400 mt-1">
               Maximum length of AI response (100-4000 tokens)
             </p>
           </div>
@@ -267,20 +273,20 @@ export const AIConfiguration: React.FC = () => {
         <Card className="p-4">
           <h4 className="text-md font-medium text-white mb-2">Test Results</h4>
           {testResult.success ? (
-            <div className="space-y-2">
-              <div className="text-green-400 text-sm">✓ AI connection successful!</div>
+            <div className="space-y-2" role="status">
+              <div className="text-green-400 text-sm">AI connection successful!</div>
               <div className="bg-slate-900 p-3 rounded text-xs">
-                <div className="text-gray-400 mb-1">Response:</div>
+                <div className="text-slate-400 mb-1">Response:</div>
                 <div className="text-white">{testResult.data?.response_data?.response_text || 'No response text'}</div>
-                <div className="text-gray-400 mt-2 text-xs">
+                <div className="text-slate-400 mt-2 text-xs">
                   Model: {testResult.data?.model_used} | 
                   Confidence: {testResult.data?.response_data?.confidence || 'N/A'}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="space-y-2">
-              <div className="text-red-400 text-sm">✗ AI connection failed</div>
+            <div className="space-y-2" role="alert">
+              <div className="text-red-400 text-sm">AI connection failed</div>
               <div className="bg-red-900/20 p-3 rounded text-xs text-red-300">
                 {testResult.error}
               </div>
@@ -292,7 +298,7 @@ export const AIConfiguration: React.FC = () => {
       {/* Usage Instructions */}
       <Card className="p-4">
         <h4 className="text-md font-medium text-white mb-2">Setup Instructions</h4>
-        <div className="text-sm text-gray-300 space-y-2">
+        <div className="text-sm text-slate-300 space-y-2">
           <p>1. Get an API key from <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">OpenRouter</a></p>
           <p>2. Choose an AI model based on your task requirements</p>
           <p>3. Adjust temperature (0.0 = focused, 2.0 = creative)</p>

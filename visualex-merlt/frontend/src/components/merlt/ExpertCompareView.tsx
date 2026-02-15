@@ -28,7 +28,7 @@ import {
   CheckCircle2,
   ExternalLink,
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
+import { cn } from '../../lib/utils';
 
 // =============================================================================
 // TYPES
@@ -192,11 +192,15 @@ function ExpertCard({ alternative, isSelected, onSelect, showFeedback }: ExpertC
           </div>
 
           {/* Expand/Collapse */}
-          <button className="p-1 hover:bg-white/50 dark:hover:bg-black/20 rounded">
+          <button
+            className="p-1 hover:bg-white/50 dark:hover:bg-black/20 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            aria-label={isExpanded ? 'Comprimi dettagli' : 'Espandi dettagli'}
+            aria-expanded={isExpanded}
+          >
             {isExpanded ? (
-              <ChevronUp className="w-4 h-4 text-slate-500" />
+              <ChevronUp className="w-4 h-4 text-slate-500" aria-hidden="true" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-slate-500" />
+              <ChevronDown className="w-4 h-4 text-slate-500" aria-hidden="true" />
             )}
           </button>
         </div>
@@ -255,6 +259,7 @@ function ExpertCard({ alternative, isSelected, onSelect, showFeedback }: ExpertC
                     className={cn(
                       'w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg',
                       'text-sm font-medium transition-all',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
                       isSelected
                         ? 'bg-blue-600 text-white'
                         : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
@@ -377,7 +382,7 @@ export function ExpertCompareView({
   onDetailedFeedback,
   className,
 }: ExpertCompareViewProps) {
-  const [selectedExpert, setSelectedExpert] = useState<string | null>(null);
+  const [selectedExpert, setSelectedExpert] = useState(null as string | null);
   const [feedbackComment, setFeedbackComment] = useState('');
   const [feedbackSent, setFeedbackSent] = useState(false);
 
@@ -442,7 +447,7 @@ export function ExpertCompareView({
           alternatives.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'
         )}
       >
-        {sortedAlternatives.map((alt) => (
+        {sortedAlternatives.map((alt: ExpertAlternative) => (
           <ExpertCard
             key={alt.expert}
             alternative={alt}
@@ -491,7 +496,7 @@ export function ExpertCompareView({
                 setSelectedExpert(null);
                 setFeedbackComment('');
               }}
-              className="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+              className="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               Annulla
             </button>
@@ -500,7 +505,8 @@ export function ExpertCompareView({
               className={cn(
                 'px-4 py-2 rounded-lg text-sm font-medium',
                 'bg-blue-600 text-white hover:bg-blue-700',
-                'transition-colors'
+                'transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
               )}
             >
               Invia Feedback

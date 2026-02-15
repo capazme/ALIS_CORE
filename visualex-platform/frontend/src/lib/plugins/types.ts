@@ -48,6 +48,9 @@ export interface PluginEvents {
 
   // Dossier events
   'dossier:training-exported': { dossierId: string; format: string };
+
+  // MERLT source navigation (emitted by MERLT plugin, consumed by platform for article navigation)
+  'merlt:source-navigate': { urn: string; articleId: string; sourceId: string };
 }
 
 export type PluginEventName = keyof PluginEvents;

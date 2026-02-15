@@ -16,8 +16,8 @@
  */
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { AlertCircle, Database, Activity, History } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -44,16 +44,16 @@ export const IngestionManager: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
+    <div className="container mx-auto p-4 md:p-6 max-w-7xl">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center mb-2">
-          <Database className="h-8 w-8 text-blue-600 mr-3" />
-          <h1 className="text-3xl font-bold text-gray-900">
+          <Database className="h-8 w-8 text-blue-400 mr-3" aria-hidden="true" />
+          <h1 className="text-3xl font-bold text-white">
             Knowledge Graph Ingestion
           </h1>
         </div>
-        <p className="text-gray-600">
+        <p className="text-slate-400">
           LLM-driven entity and relationship extraction from legal documents
         </p>
       </div>
@@ -72,16 +72,16 @@ export const IngestionManager: React.FC = () => {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3 mb-6">
-          <TabsTrigger value="configure" className="flex items-center">
-            <Database className="h-4 w-4 mr-2" />
+          <TabsTrigger value="configure" className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+            <Database className="h-4 w-4 mr-2" aria-hidden="true" />
             Configure Batch
           </TabsTrigger>
-          <TabsTrigger value="progress" className="flex items-center" disabled={!activeBatchId}>
-            <Activity className="h-4 w-4 mr-2" />
+          <TabsTrigger value="progress" className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" disabled={!activeBatchId}>
+            <Activity className="h-4 w-4 mr-2" aria-hidden="true" />
             Progress
           </TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center">
-            <History className="h-4 w-4 mr-2" />
+          <TabsTrigger value="history" className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+            <History className="h-4 w-4 mr-2" aria-hidden="true" />
             Batch History
           </TabsTrigger>
         </TabsList>
@@ -107,7 +107,7 @@ export const IngestionManager: React.FC = () => {
             />
           ) : (
             <Card>
-              <CardContent className="p-12 text-center text-gray-500">
+              <CardContent className="p-12 text-center text-slate-500">
                 No active batch. Configure and start a batch to see progress.
               </CardContent>
             </Card>

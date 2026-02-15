@@ -23,7 +23,7 @@ Esempio:
     >>> from merlt.rlcf.multilevel_feedback import MultilevelFeedback
     >>>
     >>> # Setup policy
-    >>> policy = GatingPolicy(input_dim=768, hidden_dim=256)
+    >>> policy = GatingPolicy(input_dim=1024, hidden_dim=256)
     >>>
     >>> # Setup trainer
     >>> trainer = PolicyGradientTrainer(policy, learning_rate=1e-4)
@@ -86,12 +86,12 @@ class GatingPolicy:
     Mappa query embedding → expert weights (softmax 4-dim).
 
     Architettura:
-        input (768) → hidden (256) → ReLU → hidden (128) → ReLU → output (4) → Softmax
+        input (1024) → hidden (256) → ReLU → hidden (128) → ReLU → output (4) → Softmax
 
     Output: [w_literal, w_systemic, w_principles, w_precedent]
 
     Attributes:
-        input_dim: Dimensione input (es. 768 per BERT embeddings)
+        input_dim: Dimensione input (1024 per E5-large embeddings)
         hidden_dim: Dimensione hidden layer
         num_experts: Numero di expert (default 4)
         device: Device per training
@@ -99,7 +99,7 @@ class GatingPolicy:
 
     def __init__(
         self,
-        input_dim: int = 768,
+        input_dim: int = 1024,
         hidden_dim: int = 256,
         num_experts: int = 4,
         device: Optional[str] = None
@@ -108,7 +108,7 @@ class GatingPolicy:
         Inizializza GatingPolicy.
 
         Args:
-            input_dim: Dimensione input embedding
+            input_dim: Dimensione input embedding (1024 for E5-large)
             hidden_dim: Dimensione hidden layer
             num_experts: Numero di expert
             device: Device (cuda/mps/cpu)
@@ -260,7 +260,7 @@ class TraversalPolicy:
 
     def __init__(
         self,
-        input_dim: int = 768,
+        input_dim: int = 1024,
         relation_dim: int = 64,
         hidden_dim: int = 128,
         device: Optional[str] = None
@@ -269,7 +269,7 @@ class TraversalPolicy:
         Inizializza TraversalPolicy.
 
         Args:
-            input_dim: Dimensione query embedding
+            input_dim: Dimensione query embedding (1024 for E5-large)
             relation_dim: Dimensione relation type embedding
             hidden_dim: Dimensione hidden layer
             device: Device
@@ -923,7 +923,7 @@ class PolicyGradientTrainer:
 # =============================================================================
 
 def create_gating_policy(
-    input_dim: int = 768,
+    input_dim: int = 1024,
     hidden_dim: int = 256,
     checkpoint_path: Optional[str] = None
 ) -> Tuple[GatingPolicy, PolicyGradientTrainer]:
@@ -949,7 +949,7 @@ def create_gating_policy(
 
 
 def create_traversal_policy(
-    input_dim: int = 768,
+    input_dim: int = 1024,
     relation_dim: int = 64,
     hidden_dim: int = 128,
     checkpoint_path: Optional[str] = None

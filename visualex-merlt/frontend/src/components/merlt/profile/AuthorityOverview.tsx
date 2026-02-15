@@ -13,8 +13,8 @@
 
 import { motion } from 'framer-motion';
 import { User, GraduationCap, Award, Gavel, TrendingUp } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
-import type { AuthorityTier, AuthorityBreakdown } from '../../../../types/merlt';
+import { cn } from '../../../lib/utils';
+import type { AuthorityTier, AuthorityBreakdown } from '../../../types/merlt';
 
 // =============================================================================
 // TIER CONFIG
@@ -111,7 +111,7 @@ function RadialProgress({
   return (
     <div className={cn('relative', className)} style={{ width: size, height: size }}>
       {/* Background circle */}
-      <svg className="w-full h-full -rotate-90">
+      <svg className="w-full h-full -rotate-90" aria-hidden="true">
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -223,7 +223,7 @@ export function AuthorityOverview({
                 'bg-white dark:bg-slate-800 shadow-sm'
               )}
             >
-              <Icon size={22} className={config.color} />
+              <Icon size={22} className={config.color} aria-hidden="true" />
             </div>
             <div>
               <h2 className={cn('text-xl font-bold', config.color)}>
@@ -245,14 +245,21 @@ export function AuthorityOverview({
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                  <TrendingUp size={12} />
+                  <TrendingUp size={12} aria-hidden="true" />
                   Verso {nextTierConfig.label}
                 </span>
                 <span className={nextTierConfig.color}>
                   {authorityScore.toFixed(2)} / {nextTierThreshold.toFixed(2)}
                 </span>
               </div>
-              <div className="h-2 bg-white dark:bg-slate-700 rounded-full overflow-hidden">
+              <div
+                className="h-2 bg-white dark:bg-slate-700 rounded-full overflow-hidden"
+                role="progressbar"
+                aria-valuenow={progressToNext}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`Progresso verso ${nextTierConfig.label}: ${progressToNext}%`}
+              >
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${progressToNext}%` }}
@@ -273,7 +280,7 @@ export function AuthorityOverview({
           {/* Max tier message */}
           {!nextTier && (
             <div className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400">
-              <Gavel size={14} />
+              <Gavel size={14} aria-hidden="true" />
               <span>Hai raggiunto il massimo livello di authority!</span>
             </div>
           )}

@@ -15,7 +15,7 @@
 
 import { get, post } from './api';
 
-const PREFIX = 'merlt';
+const PREFIX = '/merlt';
 
 // =============================================================================
 // TYPES
@@ -220,7 +220,7 @@ export async function exportDataset(
  * Costruisce URL di download per un export.
  */
 export function getExportDownloadUrl(filename: string): string {
-  return `/api/${PREFIX}/pipeline/dataset/download/${encodeURIComponent(filename)}`;
+  return `/api${PREFIX}/pipeline/dataset/download/${encodeURIComponent(filename)}`;
 }
 
 // =============================================================================

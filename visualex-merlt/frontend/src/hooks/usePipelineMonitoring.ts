@@ -96,12 +96,12 @@ export function usePipelineMonitoring(
     limit = 50,
   } = options;
 
-  const [runs, setRuns] = useState<PipelineRun[]>([]);
+  const [runs, setRuns] = useState([] as PipelineRun[]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null as string | null);
 
   // Track active WebSocket subscriptions
-  const subscriptionsRef = useRef<Map<string, () => void>>(new Map());
+  const subscriptionsRef = useRef(new Map() as Map<string, () => void>);
 
   // Fetch runs
   const fetchRuns = useCallback(async () => {
@@ -135,15 +135,15 @@ export function usePipelineMonitoring(
   // Cleanup subscriptions on unmount
   useEffect(() => {
     return () => {
-      subscriptionsRef.current.forEach((unsubscribe) => unsubscribe());
+      subscriptionsRef.current.forEach((unsubscribe: () => void) => unsubscribe());
       subscriptionsRef.current.clear();
     };
   }, []);
 
   // Computed values
-  const activeRuns = runs.filter((r) => r.status === 'running');
-  const completedRuns = runs.filter((r) => r.status === 'completed');
-  const failedRuns = runs.filter((r) => r.status === 'failed');
+  const activeRuns = runs.filter((r: PipelineRun) => r.status === 'running');
+  const completedRuns = runs.filter((r: PipelineRun) => r.status === 'completed');
+  const failedRuns = runs.filter((r: PipelineRun) => r.status === 'failed');
 
   const stats: PipelineStats = {
     totalRuns: runs.length,
@@ -151,11 +151,11 @@ export function usePipelineMonitoring(
     completedRuns: completedRuns.length,
     failedRuns: failedRuns.length,
     totalItemsProcessed: runs.reduce(
-      (sum, r) => sum + (r.summary.successful || r.summary.processed || 0),
+      (sum: number, r: PipelineRun) => sum + (r.summary.successful || r.summary.processed || 0),
       0
     ),
     totalErrors: runs.reduce(
-      (sum, r) => sum + (r.summary.failed || r.summary.errors || 0),
+      (sum: number, r: PipelineRun) => sum + (r.summary.failed || r.summary.errors || 0),
       0
     ),
   };

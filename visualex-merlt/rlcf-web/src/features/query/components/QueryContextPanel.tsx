@@ -55,7 +55,7 @@ export function QueryContextPanel({ defaultOpen = false }: QueryContextPanelProp
     <Collapsible
       title="Contesto Query"
       defaultOpen={defaultOpen}
-      icon={<Settings2 className="w-4 h-4" />}
+      icon={<Settings2 className="w-4 h-4" aria-hidden="true" />}
       badge={
         <Badge variant="outline">
           Opzionale
@@ -63,7 +63,7 @@ export function QueryContextPanel({ defaultOpen = false }: QueryContextPanelProp
       }
     >
       <div className="space-y-5">
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-slate-400">
           Configura il contesto della tua domanda per ottenere una risposta più accurata
           e pertinente.
         </p>
@@ -88,11 +88,11 @@ export function QueryContextPanel({ defaultOpen = false }: QueryContextPanelProp
 
         {/* Temporal Reference */}
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-300">
+          <label className="block text-sm font-medium text-slate-300">
             Riferimento Temporale
           </label>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <div className="flex-1">
               <input
                 type="date"
@@ -102,7 +102,8 @@ export function QueryContextPanel({ defaultOpen = false }: QueryContextPanelProp
                     : queryContext.temporal_reference?.split('T')[0] || ''
                 }
                 onChange={handleTemporalReferenceChange}
-                className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                aria-label="Riferimento temporale"
+                className="w-full px-4 py-2.5 min-h-[44px] bg-slate-800 border border-slate-700 rounded-lg text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent transition-all"
                 max={new Date().toISOString().split('T')[0]}
               />
             </div>
@@ -110,17 +111,17 @@ export function QueryContextPanel({ defaultOpen = false }: QueryContextPanelProp
             <button
               type="button"
               onClick={() => updateContext({ temporal_reference: 'latest' })}
-              className={`px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
+              className={`px-4 py-2.5 min-h-[44px] rounded-lg font-medium text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                 isLatest
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
               }`}
             >
               Più recente
             </button>
           </div>
 
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-slate-500">
             {isLatest ? (
               'Verrà utilizzata la normativa più recente disponibile'
             ) : (
@@ -142,8 +143,8 @@ export function QueryContextPanel({ defaultOpen = false }: QueryContextPanelProp
         </div>
 
         {/* Context Summary */}
-        <div className="pt-4 border-t border-gray-700">
-          <h4 className="text-sm font-medium text-gray-300 mb-3">
+        <div className="pt-4 border-t border-slate-700">
+          <h4 className="text-sm font-medium text-slate-300 mb-3">
             Riepilogo Contesto
           </h4>
           <div className="flex flex-wrap gap-2">

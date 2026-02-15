@@ -30,8 +30,8 @@ import {
   Gavel,
   BookOpen,
 } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
-import type { ProfileActivityEntry, LegalDomain } from '../../../../types/merlt';
+import { cn } from '../../../lib/utils';
+import type { ProfileActivityEntry, LegalDomain } from '../../../types/merlt';
 
 // =============================================================================
 // CONSTANTS
@@ -172,7 +172,7 @@ function ActivityItem({ activity, index, isLast }: ActivityItemProps) {
           outcomeConfig.borderColor
         )}
       >
-        <OutcomeIcon size={14} className={outcomeConfig.color} />
+        <OutcomeIcon size={14} className={outcomeConfig.color} aria-hidden="true" />
       </div>
 
       {/* Content */}
@@ -183,7 +183,7 @@ function ActivityItem({ activity, index, isLast }: ActivityItemProps) {
             {/* Activity type + item name */}
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                <ActivityIcon size={10} />
+                <ActivityIcon size={10} aria-hidden="true" />
                 {activityLabel}
               </span>
               <span className="text-xs text-slate-400">su</span>
@@ -213,7 +213,7 @@ function ActivityItem({ activity, index, isLast }: ActivityItemProps) {
               {/* Domain */}
               {activity.domain && DomainIcon && (
                 <span className="text-[10px] text-slate-400 flex items-center gap-0.5 capitalize">
-                  <DomainIcon size={10} />
+                  <DomainIcon size={10} aria-hidden="true" />
                   {activity.domain}
                 </span>
               )}
@@ -233,7 +233,7 @@ function ActivityItem({ activity, index, isLast }: ActivityItemProps) {
                 'bg-slate-100 dark:bg-slate-800'
               )}
             >
-              <delta.icon size={12} className={delta.color} />
+              <delta.icon size={12} className={delta.color} aria-hidden="true" />
               <span className={cn('text-xs font-mono font-medium', delta.color)}>
                 {delta.text}
               </span>
@@ -282,13 +282,13 @@ export function ActivityTimeline({
         )}
       >
         <div className="flex items-center gap-2 mb-4">
-          <Activity size={18} className="text-slate-500" />
+          <Activity size={18} className="text-slate-500" aria-hidden="true" />
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
             Attività Recente
           </h3>
         </div>
         <div className="text-center py-8 text-slate-400">
-          <Clock size={32} className="mx-auto mb-2 opacity-50" />
+          <Clock size={32} className="mx-auto mb-2 opacity-50" aria-hidden="true" />
           <p className="text-sm">Nessuna attività recente</p>
           <p className="text-xs mt-1">Inizia a validare per vedere la tua cronologia</p>
         </div>
@@ -307,7 +307,7 @@ export function ActivityTimeline({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Activity size={18} className="text-slate-500" />
+          <Activity size={18} className="text-slate-500" aria-hidden="true" />
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
             Attività Recente
           </h3>
@@ -316,15 +316,18 @@ export function ActivityTimeline({
         {/* Summary */}
         <div className="flex items-center gap-3 text-[10px]">
           <span className="text-emerald-500 flex items-center gap-1">
-            <CheckCircle size={10} />
+            <CheckCircle size={10} aria-hidden="true" />
+            <span className="sr-only">Approvati:</span>
             {stats.approved}
           </span>
           <span className="text-red-500 flex items-center gap-1">
-            <XCircle size={10} />
+            <XCircle size={10} aria-hidden="true" />
+            <span className="sr-only">Rigettati:</span>
             {stats.rejected}
           </span>
           <span className="text-amber-500 flex items-center gap-1">
-            <Clock size={10} />
+            <Clock size={10} aria-hidden="true" />
+            <span className="sr-only">In attesa:</span>
             {stats.pending}
           </span>
         </div>
@@ -352,9 +355,9 @@ export function ActivityTimeline({
             )}
           >
             {stats.totalDelta > 0 ? (
-              <ArrowUp size={14} />
+              <ArrowUp size={14} aria-hidden="true" />
             ) : (
-              <ArrowDown size={14} />
+              <ArrowDown size={14} aria-hidden="true" />
             )}
             {stats.totalDelta > 0 ? '+' : ''}
             {stats.totalDelta.toFixed(3)}

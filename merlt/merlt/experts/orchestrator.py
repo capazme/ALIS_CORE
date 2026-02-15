@@ -436,6 +436,15 @@ class MultiExpertOrchestrator:
             routing_used = "neural_policy"
             gating_scores = weights
 
+            # Propagate query_embedding to PipelineTrace for downstream RLCF training
+            if pipeline_trace is not None:
+                for action in trace.actions:
+                    if action.action_type == "expert_selection":
+                        emb = action.metadata.get("query_embedding")
+                        if emb:
+                            pipeline_trace.query_embedding = emb
+                            break
+
             log.info(
                 "Neural routing via GatingPolicy",
                 weights=weights,

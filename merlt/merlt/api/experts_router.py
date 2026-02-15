@@ -5,17 +5,18 @@ Expert System Q&A Router
 FastAPI router for Expert System Q&A with multi-level feedback.
 
 Endpoints:
-- POST /api/experts/query: Submit query to MultiExpertOrchestrator
-- POST /api/experts/feedback/inline: Quick thumbs up/down
-- POST /api/experts/feedback/detailed: 3-dimension feedback form
-- POST /api/experts/feedback/source: Per-source rating
-- POST /api/experts/feedback/refine: Conversational follow-up
+- POST /experts/query: Submit query to MultiExpertOrchestrator
+- POST /experts/feedback/inline: Quick thumbs up/down
+- POST /experts/feedback/detailed: 3-dimension feedback form
+- POST /experts/feedback/source: Per-source rating
+- POST /experts/feedback/refine: Conversational follow-up
 
 Usage:
     from merlt.api.experts_router import router as experts_router
     app.include_router(experts_router)
 """
 
+import json
 import structlog
 import time
 from typing import Optional, List, Dict, Any, Literal
@@ -29,12 +30,23 @@ from merlt.experts.orchestrator import MultiExpertOrchestrator
 from merlt.experts.synthesizer import SynthesisMode
 from merlt.experts.models import QATrace, QAFeedback
 from merlt.rlcf.database import get_async_session_dep
+from merlt.rlcf.training_scheduler import get_scheduler
+from merlt.rlcf.multilevel_feedback import (
+    MultilevelFeedback,
+    RetrievalFeedback,
+    ReasoningFeedback,
+    SynthesisFeedback,
+    create_feedback_from_user_rating,
+)
+from merlt.rlcf.authority import update_track_record, update_authority_score
+from merlt.rlcf.database import get_async_session
+from merlt.rlcf import models as rlcf_models
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 log = structlog.get_logger()
 
-router = APIRouter(prefix="/api/experts", tags=["experts"])
+router = APIRouter(prefix="/experts", tags=["experts"])
 
 
 # ============================================================================
@@ -123,6 +135,21 @@ class ExpertPreferenceFeedbackRequest(BaseModel):
     comment: Optional[str] = Field(None, description="Optional comment explaining preference")
 
 
+class RouterFeedbackRequest(BaseModel):
+    """Router feedback from high-authority users (F2)."""
+    trace_id: str
+    user_id: str
+    routing_correct: bool = Field(..., description="True if routing was appropriate")
+    suggested_weights: Optional[Dict[str, float]] = Field(
+        None, description="Suggested expert weights, e.g. {'literal': 0.4, 'systemic': 0.3}"
+    )
+    suggested_query_type: Optional[str] = Field(
+        None, description="Alternative classification for the query"
+    )
+    comment: Optional[str] = None
+    user_authority: Optional[float] = None
+
+
 class FeedbackResponse(BaseModel):
     """Generic feedback response."""
     success: bool
@@ -168,6 +195,184 @@ def initialize_expert_system(orchestrator: MultiExpertOrchestrator):
     global _orchestrator
     _orchestrator = orchestrator
     log.info("Expert System initialized")
+
+
+# ============================================================================
+# TRAINING BUFFER WIRING
+# ============================================================================
+
+def _wire_feedback_to_training(
+    trace: QATrace,
+    feedback: QAFeedback,
+    feedback_type: Literal["inline", "detailed", "source", "preference", "refine", "router"],
+) -> None:
+    """
+    Wire a feedback submission to the RLCF training buffer.
+
+    Computes reward, builds MultilevelFeedback, and pushes to scheduler.
+    Wrapped in try/except so it never breaks the feedback submission.
+    """
+    try:
+        # 1. Compute reward based on feedback type
+        if feedback_type == "inline":
+            reward = (feedback.inline_rating - 1) / 4  # 1→0, 5→1
+        elif feedback_type == "detailed":
+            reward = (
+                0.3 * feedback.retrieval_score
+                + 0.4 * feedback.reasoning_score
+                + 0.3 * feedback.synthesis_score
+            )
+        elif feedback_type == "source":
+            reward = (feedback.source_relevance - 1) / 4  # 1→0, 5→1
+        elif feedback_type == "preference":
+            reward = 0.5
+        elif feedback_type == "refine":
+            reward = 0.3
+        elif feedback_type == "router":
+            reward = 1.0 if feedback.inline_rating and feedback.inline_rating >= 4 else 0.0
+        else:
+            reward = 0.5
+
+        # 2. Reconstruct trace_data from full_trace (JSONB, already dict)
+        trace_data = trace.full_trace if trace.full_trace else {}
+
+        # 3. Build MultilevelFeedback
+        if feedback_type == "detailed":
+            ml_feedback = MultilevelFeedback(
+                query_id=trace.trace_id,
+                retrieval_feedback=RetrievalFeedback(
+                    precision=feedback.retrieval_score,
+                    ranking_quality=feedback.retrieval_score,
+                ),
+                reasoning_feedback=ReasoningFeedback(
+                    logical_coherence=feedback.reasoning_score,
+                    legal_soundness=feedback.reasoning_score,
+                ),
+                synthesis_feedback=SynthesisFeedback(
+                    clarity=feedback.synthesis_score,
+                    usefulness=feedback.synthesis_score,
+                    user_satisfaction=feedback.synthesis_score,
+                ),
+                overall_rating=reward,
+                user_id=feedback.user_id,
+            )
+        else:
+            ml_feedback = create_feedback_from_user_rating(
+                query_id=trace.trace_id,
+                user_rating=reward,
+                user_id=feedback.user_id,
+            )
+
+        # 4. Push to training buffer
+        scheduler = get_scheduler()
+        exp_id = scheduler.add_experience(
+            trace=trace_data,
+            feedback=ml_feedback,
+            reward=reward,
+            metadata={
+                "feedback_type": feedback_type,
+                "feedback_id": feedback.id,
+                "trace_id": trace.trace_id,
+            },
+        )
+
+        # 5. Log result
+        log.debug(
+            "Feedback wired to training buffer",
+            feedback_type=feedback_type,
+            reward=round(reward, 3),
+            experience_id=exp_id,
+            trace_id=trace.trace_id,
+        )
+    except Exception as e:
+        log.warning(
+            "Failed to wire feedback to training buffer (non-blocking)",
+            error=str(e),
+            feedback_type=feedback_type,
+            trace_id=trace.trace_id,
+        )
+
+
+# ============================================================================
+# AUTHORITY SCORING
+# ============================================================================
+
+async def _update_user_authority(
+    user_id: str,
+    feedback: QAFeedback,
+    feedback_type: Literal["inline", "detailed", "source", "preference", "refine", "router"],
+) -> Optional[float]:
+    """
+    Update user authority score after feedback submission.
+
+    Computes quality_score from feedback, then updates track record
+    and authority via RLCF authority module. Non-blocking.
+
+    Returns:
+        New authority score, or None if update failed.
+    """
+    try:
+        # 1. Compute quality_score based on feedback type
+        if feedback_type == "inline":
+            quality_score = (feedback.inline_rating - 1) / 4  # 1→0, 5→1
+        elif feedback_type == "detailed":
+            quality_score = (
+                (feedback.retrieval_score or 0)
+                + (feedback.reasoning_score or 0)
+                + (feedback.synthesis_score or 0)
+            ) / 3
+        elif feedback_type == "source":
+            quality_score = ((feedback.source_relevance or 1) - 1) / 4
+        elif feedback_type == "router":
+            quality_score = 1.0 if (feedback.inline_rating or 0) >= 4 else 0.0
+        else:
+            # preference, refine → neutral
+            quality_score = 0.5
+
+        # 2. Open RLCF session and update authority
+        async with get_async_session() as rlcf_session:
+            # Find or create user in RLCF models
+            result = await rlcf_session.execute(
+                select(rlcf_models.User).where(
+                    rlcf_models.User.username == user_id
+                )
+            )
+            rlcf_user = result.scalar_one_or_none()
+
+            if not rlcf_user:
+                # Cold start: baseline_credential_score=0.3 for unknown users.
+                # In production, load actual credentials from platform user profile.
+                rlcf_user = rlcf_models.User(
+                    username=user_id,
+                    authority_score=0.5,
+                    track_record_score=0.5,
+                    baseline_credential_score=0.3,
+                )
+                rlcf_session.add(rlcf_user)
+                await rlcf_session.flush()
+
+            # 3. Update track record and authority
+            await update_track_record(rlcf_session, rlcf_user.id, quality_score)
+            new_authority = await update_authority_score(
+                rlcf_session, rlcf_user.id, quality_score
+            )
+
+        log.debug(
+            "User authority updated",
+            user_id=user_id,
+            feedback_type=feedback_type,
+            quality_score=round(quality_score, 3),
+            new_authority=round(new_authority, 3),
+        )
+        return new_authority
+    except Exception as e:
+        log.warning(
+            "Authority update failed (non-blocking)",
+            error=str(e),
+            user_id=user_id,
+            feedback_type=feedback_type,
+        )
+        return None
 
 
 # ============================================================================
@@ -353,6 +558,12 @@ async def submit_inline_feedback(
         session.add(feedback)
         await session.commit()
 
+        _wire_feedback_to_training(trace, feedback, "inline")
+        new_authority = await _update_user_authority(request.user_id, feedback, "inline")
+        if new_authority is not None:
+            feedback.user_authority = new_authority
+            await session.commit()
+
         log.info(
             "Inline feedback saved",
             feedback_id=feedback.id,
@@ -422,6 +633,12 @@ async def submit_detailed_feedback(
         session.add(feedback)
         await session.commit()
 
+        _wire_feedback_to_training(trace, feedback, "detailed")
+        new_authority = await _update_user_authority(request.user_id, feedback, "detailed")
+        if new_authority is not None:
+            feedback.user_authority = new_authority
+            await session.commit()
+
         log.info(
             "Detailed feedback saved",
             feedback_id=feedback.id,
@@ -488,6 +705,20 @@ async def submit_source_feedback(
         )
         session.add(feedback)
         await session.commit()
+
+        _wire_feedback_to_training(trace, feedback, "source")
+        new_authority = await _update_user_authority(request.user_id, feedback, "source")
+        if new_authority is not None:
+            feedback.user_authority = new_authority
+            await session.commit()
+
+        # F8c: Update expert affinity
+        try:
+            from merlt.rlcf.affinity_service import AffinityUpdateService
+            affinity_svc = AffinityUpdateService()
+            await affinity_svc.update_from_source_feedback(session, trace, feedback)
+        except Exception as e:
+            log.warning("Affinity update failed (non-blocking)", error=str(e))
 
         log.info(
             "Source feedback saved",
@@ -575,6 +806,12 @@ async def submit_expert_preference_feedback(
         session.add(feedback)
         await session.commit()
 
+        _wire_feedback_to_training(trace, feedback, "preference")
+        new_authority = await _update_user_authority(request.user_id, feedback, "preference")
+        if new_authority is not None:
+            feedback.user_authority = new_authority
+            await session.commit()
+
         log.info(
             "Expert preference feedback saved",
             feedback_id=feedback.id,
@@ -592,6 +829,117 @@ async def submit_expert_preference_feedback(
         raise
     except Exception as e:
         log.error("Failed to save expert preference feedback", error=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to save feedback: {str(e)}")
+
+
+# Configurable authority threshold for router feedback
+ROUTER_FEEDBACK_AUTHORITY_THRESHOLD = 0.7
+
+
+@router.post("/feedback/router", response_model=FeedbackResponse)
+async def submit_router_feedback(
+    request: RouterFeedbackRequest,
+    session: AsyncSession = Depends(get_async_session_dep)
+):
+    """
+    Submit router feedback from high-authority users (F2).
+
+    Only users with authority >= 0.7 can evaluate routing decisions.
+
+    Example:
+        POST /api/experts/feedback/router
+        {
+            "trace_id": "trace_abc123",
+            "user_id": "user456",
+            "routing_correct": true,
+            "comment": "Routing appropriato per la query"
+        }
+    """
+    log.info(
+        "Router feedback received",
+        trace_id=request.trace_id,
+        user_id=request.user_id,
+        routing_correct=request.routing_correct,
+    )
+
+    try:
+        # Always lookup authority from DB — never trust client-supplied value
+        # for authorization decisions (client value is only a UI cache hint)
+        authority = 0.0
+        try:
+            async with get_async_session() as rlcf_session:
+                result = await rlcf_session.execute(
+                    select(rlcf_models.User).where(
+                        rlcf_models.User.username == request.user_id
+                    )
+                )
+                rlcf_user = result.scalar_one_or_none()
+                authority = rlcf_user.authority_score if rlcf_user else 0.0
+        except Exception:
+            authority = 0.0
+
+        if authority < ROUTER_FEEDBACK_AUTHORITY_THRESHOLD:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Authority {authority:.2f} below threshold "
+                       f"{ROUTER_FEEDBACK_AUTHORITY_THRESHOLD}. "
+                       f"Router feedback requires high authority."
+            )
+
+        # Verify trace exists
+        result = await session.execute(
+            select(QATrace).where(QATrace.trace_id == request.trace_id)
+        )
+        trace = result.scalar_one_or_none()
+
+        if not trace:
+            raise HTTPException(status_code=404, detail=f"Trace {request.trace_id} not found")
+
+        # Build comment with routing metadata
+        comment_parts = []
+        if request.suggested_query_type:
+            comment_parts.append(f"[router][{request.suggested_query_type}]")
+        else:
+            comment_parts.append("[router][unchanged]")
+        if request.comment:
+            comment_parts.append(request.comment)
+        if request.suggested_weights:
+            comment_parts.append(f"weights={json.dumps(request.suggested_weights)}")
+
+        # Create feedback
+        feedback = QAFeedback(
+            trace_id=request.trace_id,
+            user_id=request.user_id,
+            inline_rating=5 if request.routing_correct else 1,
+            detailed_comment=" ".join(comment_parts),
+            user_authority=authority,
+        )
+        session.add(feedback)
+        await session.commit()
+
+        _wire_feedback_to_training(trace, feedback, "router")
+        new_authority = await _update_user_authority(request.user_id, feedback, "router")
+        if new_authority is not None:
+            feedback.user_authority = new_authority
+            await session.commit()
+
+        log.info(
+            "Router feedback saved",
+            feedback_id=feedback.id,
+            trace_id=request.trace_id,
+            routing_correct=request.routing_correct,
+        )
+
+        return FeedbackResponse(
+            success=True,
+            feedback_id=feedback.id,
+            message=f"Router feedback saved: {'correct' if request.routing_correct else 'improvable'}"
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        log.error("Failed to save router feedback", error=str(e))
         raise HTTPException(status_code=500, detail=f"Failed to save feedback: {str(e)}")
 
 
@@ -690,6 +1038,12 @@ async def submit_refine_feedback(
         session.add(feedback)
 
         await session.commit()
+
+        _wire_feedback_to_training(original_trace, feedback, "refine")
+        new_authority = await _update_user_authority(request.user_id, feedback, "refine")
+        if new_authority is not None:
+            feedback.user_authority = new_authority
+            await session.commit()
 
         log.info(
             "Refine feedback processed",

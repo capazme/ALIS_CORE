@@ -33,14 +33,14 @@ import {
   Server,
   HardDrive,
 } from 'lucide-react';
-import { cn } from '../../../../../lib/utils';
+import { cn } from '../../../../lib/utils';
 import {
   getArchitectureDiagram,
   getNodeDetails,
   type ArchitectureDiagram,
   type ArchitectureNode,
   type NodeDetails,
-} from '../../../../../services/dashboardService';
+} from '../../../../services/dashboardService';
 
 // =============================================================================
 // NODE ICON MAP
@@ -107,7 +107,7 @@ function ArchitectureNodeCard({
     online: { color: 'text-green-500', bg: 'bg-green-100 dark:bg-green-900/30' },
     offline: { color: 'text-red-500', bg: 'bg-red-100 dark:bg-red-900/30' },
     degraded: { color: 'text-yellow-500', bg: 'bg-yellow-100 dark:bg-yellow-900/30' },
-    unknown: { color: 'text-gray-500', bg: 'bg-gray-100 dark:bg-gray-900/30' },
+    unknown: { color: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-900/30' },
   };
 
   const status = statusConfig[node.status] || statusConfig.unknown;
@@ -120,12 +120,16 @@ function ArchitectureNodeCard({
       className={cn(
         'absolute cursor-pointer transition-all duration-200',
         'w-36 p-3 rounded-xl border-2',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
         isSelected
-          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900'
+          ? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-slate-900'
           : '',
         typeBorderColors[node.type],
         typeBgColors[node.type]
       )}
+      tabIndex={0}
+      role="button"
+      aria-label={`${node.label} - ${node.type} - ${node.status}`}
       style={{
         left: position.x,
         top: position.y,
@@ -145,11 +149,11 @@ function ArchitectureNodeCard({
 
       <div className="flex flex-col items-center text-center">
         {icon}
-        <span className="mt-2 text-xs font-medium text-gray-700 dark:text-gray-300 truncate w-full">
+        <span className="mt-2 text-xs font-medium text-slate-700 dark:text-slate-300 truncate w-full">
           {node.label}
         </span>
         {/* Type label - small text below */}
-        <span className="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-wider mt-0.5">
+        <span className="text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-0.5">
           {node.type}
         </span>
       </div>
@@ -172,39 +176,40 @@ function NodeDetailsPanel({ details, onClose }: NodeDetailsPanelProps) {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
-      className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 w-80"
+      className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 w-80"
     >
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
           {details.label}
         </h3>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+          aria-label="Chiudi dettagli nodo"
+          className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
         >
-          ×
+          <span aria-hidden="true">×</span>
         </button>
       </div>
 
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+      <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
         {details.description}
       </p>
 
       {/* Metrics */}
       <div className="space-y-3 mb-4">
-        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">
           Metriche
         </h4>
         <div className="grid grid-cols-2 gap-2">
           {Object.entries(details.metrics).map(([key, value]) => (
             <div
               key={key}
-              className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2"
+              className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-2"
             >
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 {key.replace(/_/g, ' ')}
               </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
                 {typeof value === 'number' ? value.toLocaleString() : String(value)}
               </p>
             </div>
@@ -215,10 +220,10 @@ function NodeDetailsPanel({ details, onClose }: NodeDetailsPanelProps) {
       {/* Config */}
       {Object.keys(details.config).length > 0 && (
         <div className="space-y-2 mb-4">
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">
             Configurazione
           </h4>
-          <div className="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2 font-mono">
+          <div className="text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 rounded-lg p-2 font-mono">
             {Object.entries(details.config).map(([key, value]) => (
               <div key={key}>
                 {key}: {String(value)}
@@ -231,7 +236,7 @@ function NodeDetailsPanel({ details, onClose }: NodeDetailsPanelProps) {
       {/* Links */}
       {Object.keys(details.links).length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">
             Link utili
           </h4>
           <div className="space-y-1">
@@ -241,9 +246,9 @@ function NodeDetailsPanel({ details, onClose }: NodeDetailsPanelProps) {
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
               >
-                <ExternalLink size={12} />
+                <ExternalLink size={12} aria-hidden="true" />
                 {label}
               </a>
             ))}
@@ -274,15 +279,15 @@ function Legend() {
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-      <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+      <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
         Legenda
       </h3>
 
       <div className="flex flex-wrap gap-6">
         {/* Type legend - shows border colors */}
         <div className="space-y-2">
-          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Tipo (bordo)</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Tipo (bordo)</p>
           <div className="flex flex-wrap gap-3">
             {typeItems.map((item) => (
               <div key={item.label} className="flex items-center gap-1.5">
@@ -293,7 +298,7 @@ function Legend() {
                     item.bg
                   )}
                 />
-                <span className="text-xs text-gray-600 dark:text-gray-400">
+                <span className="text-xs text-slate-600 dark:text-slate-400">
                   {item.label}
                 </span>
               </div>
@@ -303,14 +308,14 @@ function Legend() {
 
         {/* Status legend - shows symbols */}
         <div className="space-y-2">
-          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Status (badge)</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Status (badge)</p>
           <div className="flex flex-wrap gap-3">
             {statusItems.map((item) => (
               <div key={item.label} className="flex items-center gap-1.5">
                 <span className={cn('text-sm font-bold', item.color)}>
                   {item.symbol}
                 </span>
-                <span className="text-xs text-gray-600 dark:text-gray-400">
+                <span className="text-xs text-slate-600 dark:text-slate-400">
                   {item.label}
                 </span>
               </div>
@@ -359,12 +364,12 @@ const NODE_POSITIONS: Record<string, { x: number; y: number }> = {
 // =============================================================================
 
 export function ArchitectureTab() {
-  const [diagram, setDiagram] = useState<ArchitectureDiagram | null>(null);
-  const [selectedNode, setSelectedNode] = useState<string | null>(null);
-  const [nodeDetails, setNodeDetails] = useState<NodeDetails | null>(null);
+  const [diagram, setDiagram] = useState(null as ArchitectureDiagram | null);
+  const [selectedNode, setSelectedNode] = useState(null as string | null);
+  const [nodeDetails, setNodeDetails] = useState(null as NodeDetails | null);
   const [loading, setLoading] = useState(true);
   const [detailsLoading, setDetailsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null as string | null);
 
   const fetchDiagram = async () => {
     setLoading(true);
@@ -399,20 +404,21 @@ export function ArchitectureTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <RefreshCw size={24} className="animate-spin text-blue-500" />
+      <div className="flex items-center justify-center py-12" role="status">
+        <RefreshCw size={24} className="animate-spin text-blue-500" aria-hidden="true" />
+        <span className="sr-only">Caricamento diagramma architettura in corso...</span>
       </div>
     );
   }
 
   if (error || !diagram) {
     return (
-      <div className="text-center py-12">
-        <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
-        <p className="text-gray-500 dark:text-gray-400">{error}</p>
+      <div className="text-center py-12" role="alert">
+        <AlertCircle size={48} className="mx-auto text-red-400 mb-4" aria-hidden="true" />
+        <p className="text-slate-500 dark:text-slate-400">{error}</p>
         <button
           onClick={fetchDiagram}
-          className="mt-4 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="mt-4 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         >
           Riprova
         </button>
@@ -428,18 +434,18 @@ export function ArchitectureTab() {
       {/* Architecture Diagram */}
       <div className="flex gap-6">
         {/* Diagram area */}
-        <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 relative overflow-auto min-h-[600px]">
+        <div className="flex-1 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 relative overflow-auto min-h-[600px]">
           {/* Section labels */}
-          <div className="absolute top-3 left-6 text-xs font-medium text-gray-400 dark:text-gray-500">
+          <div className="absolute top-3 left-6 text-xs font-medium text-slate-400 dark:text-slate-500">
             SOURCES
           </div>
-          <div className="absolute top-3 left-[220px] text-xs font-medium text-gray-400 dark:text-gray-500">
+          <div className="absolute top-3 left-[220px] text-xs font-medium text-slate-400 dark:text-slate-500">
             PIPELINE
           </div>
-          <div className="absolute top-3 left-[390px] text-xs font-medium text-gray-400 dark:text-gray-500">
+          <div className="absolute top-3 left-[390px] text-xs font-medium text-slate-400 dark:text-slate-500">
             STORAGE
           </div>
-          <div className="absolute top-3 left-[560px] text-xs font-medium text-gray-400 dark:text-gray-500">
+          <div className="absolute top-3 left-[560px] text-xs font-medium text-slate-400 dark:text-slate-500">
             EXPERTS / RLCF
           </div>
 
@@ -447,8 +453,9 @@ export function ArchitectureTab() {
           <svg
             className="absolute inset-0 w-full h-full pointer-events-none"
             style={{ zIndex: 0 }}
+            aria-hidden="true"
           >
-            {diagram.edges.map((edge, idx) => {
+            {diagram.edges.map((edge: { source: string; target: string; label?: string; animated?: boolean }, idx: number) => {
               const sourcePos = NODE_POSITIONS[edge.source.toLowerCase()];
               const targetPos = NODE_POSITIONS[edge.target.toLowerCase()];
 
@@ -478,7 +485,7 @@ export function ArchitectureTab() {
           </svg>
 
           {/* Nodes */}
-          {diagram.nodes.map((node) => {
+          {diagram.nodes.map((node: ArchitectureNode) => {
             const position = NODE_POSITIONS[node.id.toLowerCase()];
             if (!position) return null;
 
@@ -498,8 +505,9 @@ export function ArchitectureTab() {
         {(selectedNode || nodeDetails) && (
           <div className="w-80 flex-shrink-0">
             {detailsLoading ? (
-              <div className="flex items-center justify-center h-full">
-                <RefreshCw size={24} className="animate-spin text-blue-500" />
+              <div className="flex items-center justify-center h-full" role="status">
+                <RefreshCw size={24} className="animate-spin text-blue-500" aria-hidden="true" />
+                <span className="sr-only">Caricamento dettagli nodo...</span>
               </div>
             ) : nodeDetails ? (
               <NodeDetailsPanel
@@ -515,7 +523,7 @@ export function ArchitectureTab() {
       </div>
 
       {/* Info text */}
-      <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+      <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
         Clicca su un nodo per visualizzare metriche e configurazione dettagliate
       </p>
     </div>

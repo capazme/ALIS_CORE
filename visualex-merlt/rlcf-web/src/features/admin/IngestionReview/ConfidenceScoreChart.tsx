@@ -6,8 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 
 // =============================================================================
 // Types
@@ -101,8 +101,8 @@ export const ConfidenceScoreChart: React.FC<ConfidenceScoreChartProps> = ({ enti
         <div className="space-y-2 mb-6">
           {distribution.map((bin, idx) => (
             <div key={idx} className="flex items-center gap-3">
-              <div className="w-20 text-sm font-medium text-gray-700">{bin.label}</div>
-              <div className="flex-1 bg-gray-100 rounded-full h-8 relative overflow-hidden">
+              <div className="w-20 text-sm font-medium text-slate-700">{bin.label}</div>
+              <div className="flex-1 bg-slate-100 rounded-full h-8 relative overflow-hidden">
                 <div
                   className={`${bin.color} h-full transition-all duration-500 flex items-center justify-end pr-3`}
                   style={{
@@ -114,7 +114,7 @@ export const ConfidenceScoreChart: React.FC<ConfidenceScoreChartProps> = ({ enti
                   )}
                 </div>
               </div>
-              <div className="w-16 text-sm text-gray-600 text-right">
+              <div className="w-16 text-sm text-slate-600 text-right">
                 {maxCount > 0 ? ((bin.count / entities.length) * 100).toFixed(1) : 0}%
               </div>
             </div>
@@ -122,43 +122,43 @@ export const ConfidenceScoreChart: React.FC<ConfidenceScoreChartProps> = ({ enti
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-4 gap-4 pb-4 mb-4 border-b">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-4 mb-4 border-b">
           <div className="text-center">
             <div className="text-2xl font-bold text-blue-600">{(stats.mean * 100).toFixed(1)}%</div>
-            <div className="text-xs text-gray-600">Mean</div>
+            <div className="text-xs text-slate-600">Mean</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-purple-600">
               {(stats.median * 100).toFixed(1)}%
             </div>
-            <div className="text-xs text-gray-600">Median</div>
+            <div className="text-xs text-slate-600">Median</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-red-600">{(stats.min * 100).toFixed(1)}%</div>
-            <div className="text-xs text-gray-600">Min</div>
+            <div className="text-xs text-slate-600">Min</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-green-600">
               {(stats.max * 100).toFixed(1)}%
             </div>
-            <div className="text-xs text-gray-600">Max</div>
+            <div className="text-xs text-slate-600">Max</div>
           </div>
         </div>
 
         {/* By Source */}
         <div>
-          <h4 className="font-semibold text-gray-900 mb-3">Confidence by Source</h4>
-          <div className="grid grid-cols-2 gap-3">
+          <h4 className="font-semibold text-slate-900 mb-3">Confidence by Source</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {Object.entries(bySource).map(([source, data]) => (
-              <div key={source} className="bg-gray-50 rounded-lg p-3">
+              <div key={source} className="bg-slate-50 rounded-lg p-3">
                 <div className="flex justify-between items-center mb-1">
                   <Badge variant="outline">{source}</Badge>
-                  <span className="text-sm font-medium text-gray-600">{data.count} entities</span>
+                  <span className="text-sm font-medium text-slate-600">{data.count} entities</span>
                 </div>
-                <div className="text-lg font-bold text-gray-900">
+                <div className="text-lg font-bold text-slate-900">
                   {(data.avgConfidence * 100).toFixed(1)}%
                 </div>
-                <div className="text-xs text-gray-500">Average Confidence</div>
+                <div className="text-xs text-slate-500">Average Confidence</div>
               </div>
             ))}
           </div>
@@ -166,7 +166,7 @@ export const ConfidenceScoreChart: React.FC<ConfidenceScoreChartProps> = ({ enti
 
         {/* Quality Recommendations */}
         <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <h5 className="font-semibold text-blue-900 text-sm mb-1">💡 Quality Recommendations</h5>
+          <h5 className="font-semibold text-blue-900 text-sm mb-1">Quality Recommendations</h5>
           <ul className="text-xs text-blue-800 space-y-1">
             {stats.mean < 0.75 && (
               <li>• Mean confidence below 75% - consider reviewing extraction quality</li>

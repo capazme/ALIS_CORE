@@ -21,8 +21,8 @@ import {
   Zap,
   Filter,
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import type { BulkActionCandidate } from '../../../hooks/useValidationState';
+import { cn } from '../../lib/utils';
+import type { BulkActionCandidate } from '../../hooks/useValidationState';
 
 interface ValidationBulkActionsBarProps {
   /** High confidence items (>90%) */
@@ -57,8 +57,8 @@ export function ValidationBulkActionsBar({
   onClearSelection,
   className,
 }: ValidationBulkActionsBarProps) {
-  const [showConfirmDialog, setShowConfirmDialog] = useState<'approve' | 'reject' | null>(null);
-  const [processingAction, setProcessingAction] = useState<'approve' | 'reject' | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(null as 'approve' | 'reject' | null);
+  const [processingAction, setProcessingAction] = useState(null as 'approve' | 'reject' | null);
 
   const hasHighConfidence = highConfidenceItems.length > 0;
   const hasLowConfidence = lowConfidenceItems.length > 0;
@@ -123,7 +123,7 @@ export function ValidationBulkActionsBar({
           className
         )}
       >
-        <Zap size={14} className="text-amber-500 flex-shrink-0" />
+        <Zap size={14} className="text-amber-500 flex-shrink-0" aria-hidden="true" />
 
         <div className="flex-1 flex items-center gap-2 overflow-x-auto">
           {/* Smart suggestions */}
@@ -135,14 +135,15 @@ export function ValidationBulkActionsBar({
                   onClick={() => setShowConfirmDialog('approve')}
                   disabled={isProcessing}
                   className={cn(
-                    'flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium',
+                    'flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium min-h-[44px]',
                     'bg-emerald-100 hover:bg-emerald-200 text-emerald-700',
                     'dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 dark:text-emerald-300',
                     'transition-colors whitespace-nowrap',
-                    'disabled:opacity-50 disabled:cursor-not-allowed'
+                    'disabled:opacity-50 disabled:cursor-not-allowed',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                   )}
                 >
-                  <Sparkles size={12} />
+                  <Sparkles size={12} aria-hidden="true" />
                   Approva {highConfidenceItems.length} ({'>'}90%)
                 </button>
               )}
@@ -153,31 +154,34 @@ export function ValidationBulkActionsBar({
                   onClick={() => setShowConfirmDialog('reject')}
                   disabled={isProcessing}
                   className={cn(
-                    'flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium',
+                    'flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium min-h-[44px]',
                     'bg-red-100 hover:bg-red-200 text-red-700',
                     'dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-300',
                     'transition-colors whitespace-nowrap',
-                    'disabled:opacity-50 disabled:cursor-not-allowed'
+                    'disabled:opacity-50 disabled:cursor-not-allowed',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                   )}
                 >
-                  <AlertTriangle size={12} />
+                  <AlertTriangle size={12} aria-hidden="true" />
                   Rifiuta {lowConfidenceItems.length} ({'<'}50%)
                 </button>
               )}
 
               {/* Filter buttons */}
-              <div className="h-4 w-px bg-slate-300 dark:bg-slate-600 mx-1" />
+              <div className="h-4 w-px bg-slate-300 dark:bg-slate-600 mx-1" aria-hidden="true" />
               <button
                 onClick={onSelectHighConfidence}
                 disabled={!hasHighConfidence}
                 className={cn(
-                  'p-1.5 rounded-md text-slate-500 hover:text-emerald-600 hover:bg-emerald-50',
+                  'p-1.5 rounded-md text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 min-w-[44px] min-h-[44px] flex items-center justify-center',
                   'dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400',
-                  'transition-colors disabled:opacity-30 disabled:cursor-not-allowed'
+                  'transition-colors disabled:opacity-30 disabled:cursor-not-allowed',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                 )}
+                aria-label="Seleziona alta confidenza"
                 title="Seleziona alta confidenza"
               >
-                <Filter size={12} />
+                <Filter size={12} aria-hidden="true" />
               </button>
             </>
           )}
@@ -193,12 +197,13 @@ export function ValidationBulkActionsBar({
                 onClick={handleApproveSelected}
                 disabled={isProcessing}
                 className={cn(
-                  'flex items-center gap-1 px-2 py-1 rounded text-xs font-medium',
+                  'flex items-center gap-1 px-2 py-1 rounded text-xs font-medium min-h-[44px]',
                   'bg-emerald-500 hover:bg-emerald-600 text-white',
-                  'transition-colors disabled:opacity-50'
+                  'transition-colors disabled:opacity-50',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                 )}
               >
-                <CheckCircle2 size={10} />
+                <CheckCircle2 size={10} aria-hidden="true" />
                 Approva
               </button>
 
@@ -206,21 +211,23 @@ export function ValidationBulkActionsBar({
                 onClick={handleRejectSelected}
                 disabled={isProcessing}
                 className={cn(
-                  'flex items-center gap-1 px-2 py-1 rounded text-xs font-medium',
+                  'flex items-center gap-1 px-2 py-1 rounded text-xs font-medium min-h-[44px]',
                   'bg-red-500 hover:bg-red-600 text-white',
-                  'transition-colors disabled:opacity-50'
+                  'transition-colors disabled:opacity-50',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                 )}
               >
-                <XCircle size={10} />
+                <XCircle size={10} aria-hidden="true" />
                 Rifiuta
               </button>
 
               <button
                 onClick={onClearSelection}
-                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400"
+                aria-label="Annulla selezione"
+                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 title="Annulla selezione"
               >
-                <X size={12} />
+                <X size={12} aria-hidden="true" />
               </button>
             </>
           )}
@@ -238,10 +245,13 @@ export function ValidationBulkActionsBar({
             onClick={() => setShowConfirmDialog(null)}
           >
             <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-label={showConfirmDialog === 'approve' ? 'Conferma approvazione' : 'Conferma rifiuto'}
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
               className={cn(
                 'bg-white dark:bg-slate-900 rounded-xl shadow-xl',
                 'border border-slate-200 dark:border-slate-800',
@@ -316,10 +326,11 @@ export function ValidationBulkActionsBar({
                       onClick={() => setShowConfirmDialog(null)}
                       disabled={processingAction !== null}
                       className={cn(
-                        'flex-1 px-4 py-2 rounded-lg text-sm font-medium',
+                        'flex-1 px-4 py-2 rounded-lg text-sm font-medium min-h-[44px]',
                         'bg-slate-100 hover:bg-slate-200 text-slate-700',
                         'dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300',
-                        'transition-colors disabled:opacity-50'
+                        'transition-colors disabled:opacity-50',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                       )}
                     >
                       Annulla
@@ -332,11 +343,12 @@ export function ValidationBulkActionsBar({
                       }
                       disabled={processingAction !== null}
                       className={cn(
-                        'flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white',
+                        'flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white min-h-[44px]',
                         'transition-colors disabled:opacity-50',
                         showConfirmDialog === 'approve'
                           ? 'bg-emerald-600 hover:bg-emerald-700'
-                          : 'bg-red-600 hover:bg-red-700'
+                          : 'bg-red-600 hover:bg-red-700',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                       )}
                     >
                       {processingAction !== null

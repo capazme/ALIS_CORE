@@ -100,9 +100,9 @@ function StageItem({
     },
     pending: {
       icon: Circle,
-      iconColor: 'text-gray-600',
-      bgColor: 'bg-gray-800/50',
-      borderColor: 'border-gray-700',
+      iconColor: 'text-slate-600',
+      bgColor: 'bg-slate-800/50',
+      borderColor: 'border-slate-700',
     },
     error: {
       icon: XCircle,
@@ -134,19 +134,19 @@ function StageItem({
         {/* Stage Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <Icon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <Icon className="w-4 h-4 text-slate-400 flex-shrink-0" />
             <span className="text-sm font-medium text-white">{stage.label}</span>
           </div>
-          <p className="text-xs text-gray-500 mt-0.5">{stage.description}</p>
+          <p className="text-xs text-slate-500 mt-0.5">{stage.description}</p>
         </div>
 
         {/* Expand Icon */}
         {canExpand && (
           <div className="flex-shrink-0">
             {isExpanded ? (
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-4 h-4 text-slate-400" />
             ) : (
-              <ChevronRight className="w-4 h-4 text-gray-400" />
+              <ChevronRight className="w-4 h-4 text-slate-400" />
             )}
           </div>
         )}
@@ -162,7 +162,7 @@ function StageItem({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="px-3 pb-3 pt-2 border-t border-gray-700/50">
+            <div className="px-3 pb-3 pt-2 border-t border-slate-700/50">
               <StageDetails stageKey={stage.key} results={stageResults} />
             </div>
           </motion.div>
@@ -190,7 +190,7 @@ function StageDetails({ stageKey, results }: { stageKey: string; results: any })
     case 'synthesis':
       return <SynthesisDetails data={results} />;
     default:
-      return <pre className="text-xs text-gray-400">{JSON.stringify(results, null, 2)}</pre>;
+      return <pre className="text-xs text-slate-400">{JSON.stringify(results, null, 2)}</pre>;
   }
 }
 
@@ -200,29 +200,29 @@ function StageDetails({ stageKey, results }: { stageKey: string; results: any })
 function PreprocessingDetails({ data }: { data: any }) {
   return (
     <div className="space-y-2 text-sm">
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div>
-          <span className="text-gray-500">Intent:</span>{' '}
+          <span className="text-slate-500">Intent:</span>{' '}
           <span className="text-blue-400 font-medium">{data.intent}</span>
         </div>
         <div>
-          <span className="text-gray-500">Confidence:</span>{' '}
+          <span className="text-slate-500">Confidence:</span>{' '}
           <span className="text-green-400 font-medium">{(data.confidence * 100).toFixed(0)}%</span>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div>
-          <span className="text-gray-500">Entities:</span>{' '}
-          <span className="text-gray-300">{data.entities_count}</span>
+          <span className="text-slate-500">Entities:</span>{' '}
+          <span className="text-slate-300">{data.entities_count}</span>
         </div>
         <div>
-          <span className="text-gray-500">Enrichment sources:</span>{' '}
-          <span className="text-gray-300">{data.enrichment_sources}</span>
+          <span className="text-slate-500">Enrichment sources:</span>{' '}
+          <span className="text-slate-300">{data.enrichment_sources}</span>
         </div>
       </div>
       {data.legal_concepts && data.legal_concepts.length > 0 && (
         <div>
-          <span className="text-gray-500">Concetti:</span>{' '}
+          <span className="text-slate-500">Concetti:</span>{' '}
           <div className="flex flex-wrap gap-1 mt-1">
             {data.legal_concepts.map((concept: string, i: number) => (
               <span
@@ -246,7 +246,7 @@ function RouterDetails({ data }: { data: any }) {
   return (
     <div className="space-y-2 text-sm">
       <div>
-        <span className="text-gray-500">Agents selezionati:</span>
+        <span className="text-slate-500">Agents selezionati:</span>
         <div className="flex flex-wrap gap-1 mt-1">
           {Object.entries(data.agents_selected || {}).map(([agent, enabled]: [string, any]) =>
             enabled ? (
@@ -261,7 +261,7 @@ function RouterDetails({ data }: { data: any }) {
         </div>
       </div>
       <div>
-        <span className="text-gray-500">Experts selezionati:</span>
+        <span className="text-slate-500">Experts selezionati:</span>
         <div className="flex flex-wrap gap-1 mt-1">
           {(data.experts_selected || []).map((expert: string, i: number) => (
             <span
@@ -273,14 +273,14 @@ function RouterDetails({ data }: { data: any }) {
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div>
-          <span className="text-gray-500">Synthesis mode:</span>{' '}
-          <span className="text-gray-300">{data.synthesis_mode}</span>
+          <span className="text-slate-500">Synthesis mode:</span>{' '}
+          <span className="text-slate-300">{data.synthesis_mode}</span>
         </div>
         <div>
-          <span className="text-gray-500">Confidence threshold:</span>{' '}
-          <span className="text-gray-300">{data.confidence_threshold}</span>
+          <span className="text-slate-500">Confidence threshold:</span>{' '}
+          <span className="text-slate-300">{data.confidence_threshold}</span>
         </div>
       </div>
     </div>
@@ -295,13 +295,13 @@ function RetrievalDetails({ data }: { data: any }) {
     <div className="space-y-2 text-sm">
       {Object.entries(data || {}).map(([agent, info]: [string, any]) => (
         <div key={agent} className="flex items-center justify-between">
-          <span className="text-gray-400">{agent}:</span>
+          <span className="text-slate-400">{agent}:</span>
           <div className="flex items-center gap-2">
-            <span className="text-gray-300">{info.count} risultati</span>
+            <span className="text-slate-300">{info.count} risultati</span>
             {info.success ? (
-              <CheckCircle2 className="w-4 h-4 text-green-400" />
+              <CheckCircle2 className="w-4 h-4 text-green-400" aria-hidden="true" />
             ) : (
-              <XCircle className="w-4 h-4 text-red-400" />
+              <XCircle className="w-4 h-4 text-red-400" aria-hidden="true" />
             )}
           </div>
         </div>
@@ -319,7 +319,7 @@ function ExpertsDetails({ data }: { data: any[] }) {
       {data.map((expert, index) => (
         <div
           key={index}
-          className="p-3 bg-gray-800/50 border border-gray-700 rounded"
+          className="p-3 bg-slate-800/50 border border-slate-700 rounded"
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-white">
@@ -329,18 +329,18 @@ function ExpertsDetails({ data }: { data: any[] }) {
               {(expert.confidence * 100).toFixed(0)}% confidence
             </span>
           </div>
-          <p className="text-xs text-gray-400 leading-relaxed">
+          <p className="text-xs text-slate-400 leading-relaxed">
             {expert.interpretation_preview}
           </p>
           <div className="flex gap-2 mt-2">
-            <button className="p-1 hover:bg-green-500/20 rounded transition-colors">
-              <ThumbsUp className="w-3 h-3 text-gray-500 hover:text-green-400" />
+            <button className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-green-500/20 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Approva interpretazione esperto">
+              <ThumbsUp className="w-3 h-3 text-slate-500 hover:text-green-400" aria-hidden="true" />
             </button>
-            <button className="p-1 hover:bg-red-500/20 rounded transition-colors">
-              <ThumbsDown className="w-3 h-3 text-gray-500 hover:text-red-400" />
+            <button className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-red-500/20 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Rifiuta interpretazione esperto">
+              <ThumbsDown className="w-3 h-3 text-slate-500 hover:text-red-400" aria-hidden="true" />
             </button>
-            <button className="p-1 hover:bg-blue-500/20 rounded transition-colors">
-              <MessageSquare className="w-3 h-3 text-gray-500 hover:text-blue-400" />
+            <button className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-blue-500/20 rounded transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Aggiungi feedback esperto">
+              <MessageSquare className="w-3 h-3 text-slate-500 hover:text-blue-400" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -355,37 +355,37 @@ function ExpertsDetails({ data }: { data: any[] }) {
 function SynthesisDetails({ data }: { data: any }) {
   return (
     <div className="space-y-3 text-sm">
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div>
-          <span className="text-gray-500">Confidence:</span>{' '}
+          <span className="text-slate-500">Confidence:</span>{' '}
           <span className="text-green-400 font-medium">
             {(data.confidence * 100).toFixed(0)}%
           </span>
         </div>
         <div>
-          <span className="text-gray-500">Consensus:</span>{' '}
+          <span className="text-slate-500">Consensus:</span>{' '}
           <span className="text-blue-400 font-medium">
             {(data.consensus_level * 100).toFixed(0)}%
           </span>
         </div>
       </div>
       <div>
-        <span className="text-gray-500">Answer preview:</span>
-        <p className="text-gray-300 text-xs mt-1 leading-relaxed bg-gray-800/50 p-2 rounded">
+        <span className="text-slate-500">Answer preview:</span>
+        <p className="text-slate-300 text-xs mt-1 leading-relaxed bg-slate-800/50 p-2 rounded">
           {data.answer_preview}
         </p>
       </div>
-      <div className="flex gap-2">
-        <button className="px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-300 rounded text-xs transition-colors flex items-center gap-1">
-          <ThumbsUp className="w-3 h-3" />
+      <div className="flex flex-wrap gap-2">
+        <button className="px-3 py-2 min-h-[44px] bg-green-500/20 hover:bg-green-500/30 text-green-300 rounded text-xs transition-colors flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Approva sintesi">
+          <ThumbsUp className="w-3 h-3" aria-hidden="true" />
           Approva
         </button>
-        <button className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded text-xs transition-colors flex items-center gap-1">
-          <ThumbsDown className="w-3 h-3" />
+        <button className="px-3 py-2 min-h-[44px] bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded text-xs transition-colors flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Rifiuta sintesi">
+          <ThumbsDown className="w-3 h-3" aria-hidden="true" />
           Rifiuta
         </button>
-        <button className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded text-xs transition-colors flex items-center gap-1">
-          <MessageSquare className="w-3 h-3" />
+        <button className="px-3 py-2 min-h-[44px] bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded text-xs transition-colors flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Fornisci feedback sulla sintesi">
+          <MessageSquare className="w-3 h-3" aria-hidden="true" />
           Feedback
         </button>
       </div>
@@ -403,10 +403,11 @@ export function QueryExecutionMonitor({ traceId }: QueryExecutionMonitorProps) {
   if (!status) {
     return (
       <Card>
-        <CardContent className="p-8">
-          <div className="flex flex-col items-center justify-center gap-4">
-            <Loader className="w-8 h-8 text-blue-400 animate-spin" />
-            <p className="text-sm text-gray-400">Connessione al sistema...</p>
+        <CardContent className="p-4 md:p-8">
+          <div className="flex flex-col items-center justify-center gap-4" role="status">
+            <Loader className="w-8 h-8 text-blue-400 animate-spin" aria-hidden="true" />
+            <p className="text-sm text-slate-400">Connessione al sistema...</p>
+            <span className="sr-only">Connessione al sistema in corso</span>
           </div>
         </CardContent>
       </Card>
@@ -432,23 +433,23 @@ export function QueryExecutionMonitor({ traceId }: QueryExecutionMonitorProps) {
         <CardTitle className="flex items-center gap-2">
           {isProcessing ? (
             <>
-              <Loader className="w-5 h-5 text-blue-400 animate-spin" />
+              <Loader className="w-5 h-5 text-blue-400 animate-spin" aria-hidden="true" />
               Query in elaborazione...
             </>
           ) : hasError ? (
             <>
-              <AlertCircle className="w-5 h-5 text-red-400" />
+              <AlertCircle className="w-5 h-5 text-red-400" aria-hidden="true" />
               Errore durante l'esecuzione
             </>
           ) : (
             <>
-              <CheckCircle2 className="w-5 h-5 text-green-400" />
+              <CheckCircle2 className="w-5 h-5 text-green-400" aria-hidden="true" />
               Esecuzione completata
             </>
           )}
         </CardTitle>
-        <p className="text-sm text-gray-400 mt-1">
-          Traccia ID: <span className="font-mono text-gray-300">{traceId}</span>
+        <p className="text-sm text-slate-400 mt-1">
+          Traccia ID: <span className="font-mono text-slate-300">{traceId}</span>
         </p>
       </CardHeader>
 
@@ -465,9 +466,9 @@ export function QueryExecutionMonitor({ traceId }: QueryExecutionMonitorProps) {
 
         {/* Error Message */}
         {hasError && error && (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4" role="alert">
             <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div>
                 <h4 className="text-sm font-semibold text-red-300 mb-1">
                   Errore di esecuzione
@@ -480,7 +481,7 @@ export function QueryExecutionMonitor({ traceId }: QueryExecutionMonitorProps) {
 
         {/* Pipeline Stages */}
         <div>
-          <h3 className="text-sm font-semibold text-gray-300 mb-3">
+          <h3 className="text-sm font-semibold text-slate-300 mb-3">
             Fasi della Pipeline
           </h3>
           <div className="space-y-2">
@@ -502,10 +503,10 @@ export function QueryExecutionMonitor({ traceId }: QueryExecutionMonitorProps) {
         {/* Stage Logs */}
         {stage_logs && stage_logs.length > 0 && (
           <div>
-            <h3 className="text-sm font-semibold text-gray-300 mb-3">
+            <h3 className="text-sm font-semibold text-slate-300 mb-3">
               Log di Esecuzione
             </h3>
-            <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 max-h-64 overflow-y-auto">
+            <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 max-h-64 overflow-y-auto">
               <div className="space-y-1 font-mono text-xs">
                 <AnimatePresence>
                   {stage_logs.map((log: string, index: number) => (
@@ -515,7 +516,7 @@ export function QueryExecutionMonitor({ traceId }: QueryExecutionMonitorProps) {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className="text-gray-400"
+                      className="text-slate-400"
                     >
                       {log}
                     </motion.div>
@@ -527,10 +528,10 @@ export function QueryExecutionMonitor({ traceId }: QueryExecutionMonitorProps) {
         )}
 
         {/* Current Status Info */}
-        <div className="pt-4 border-t border-gray-700">
-          <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="pt-4 border-t border-slate-700">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-500">Stato:</span>{' '}
+              <span className="text-slate-500">Stato:</span>{' '}
               <span
                 className={
                   queryStatus === 'completed'
@@ -550,8 +551,8 @@ export function QueryExecutionMonitor({ traceId }: QueryExecutionMonitorProps) {
               </span>
             </div>
             <div>
-              <span className="text-gray-500">Fase corrente:</span>{' '}
-              <span className="text-gray-300 font-medium">
+              <span className="text-slate-500">Fase corrente:</span>{' '}
+              <span className="text-slate-300 font-medium">
                 {current_stage
                   ? PIPELINE_STAGES.find((s) => s.key === current_stage)?.label || current_stage
                   : 'N/A'}

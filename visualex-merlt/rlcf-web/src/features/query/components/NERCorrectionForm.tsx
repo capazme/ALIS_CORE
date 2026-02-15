@@ -148,8 +148,8 @@ export function NERCorrectionForm({ traceId, queryText, onSuccess }: NERCorrecti
           onSuccess?.();
         }, 3000);
       },
-      onError: (error: any) => {
-        console.error('Failed to submit NER correction:', error);
+      onError: (_error: unknown) => {
+        // Error handled by TanStack Query
       },
     });
   };
@@ -173,12 +173,12 @@ export function NERCorrectionForm({ traceId, queryText, onSuccess }: NERCorrecti
   if (submitted) {
     return (
       <Card className="border-green-500/30">
-        <CardContent className="py-12 text-center">
-          <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
+        <CardContent className="py-8 md:py-12 text-center" role="alert">
+          <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" aria-hidden="true" />
           <h3 className="text-xl font-semibold text-white mb-2">
             Correzione NER Inviata!
           </h3>
-          <p className="text-gray-400 max-w-md mx-auto">
+          <p className="text-slate-400 max-w-md mx-auto">
             Grazie per il tuo contributo. Le correzioni NER migliorano l'accuratezza del sistema
             di riconoscimento entità attraverso feedback iterativo.
           </p>
@@ -191,27 +191,31 @@ export function NERCorrectionForm({ traceId, queryText, onSuccess }: NERCorrecti
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Tag className="w-5 h-5 text-orange-400" />
+          <Tag className="w-5 h-5 text-orange-400" aria-hidden="true" />
           Correzioni NER (Named Entity Recognition)
         </CardTitle>
-        <p className="text-sm text-gray-400 mt-2">
+        <p className="text-sm text-slate-400 mt-2">
           Segnala errori nell'identificazione di entità legali (norme, articoli, sentenze, ecc.)
         </p>
       </CardHeader>
 
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" role="form" aria-label="Correzione NER">
           {/* Query Text Display with Selection */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-300">Query Originale</label>
+            <label className="block text-sm font-medium text-slate-300">Query Originale</label>
             <div
-              className="p-4 bg-gray-800 rounded-lg border border-gray-700 text-gray-300 leading-relaxed select-text cursor-text"
+              className="p-3 md:p-4 bg-slate-800 rounded-lg border border-slate-700 text-slate-300 leading-relaxed select-text cursor-text"
               onMouseUp={handleTextSelection}
+              role="textbox"
+              aria-readonly="true"
+              aria-label="Testo della query originale - seleziona il testo per identificare entità"
+              tabIndex={0}
             >
               {queryText}
             </div>
-            <div className="flex items-start gap-2 text-xs text-gray-500">
-              <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+            <div className="flex items-start gap-2 text-xs text-slate-500">
+              <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" aria-hidden="true" />
               <p>
                 Seleziona il testo nella query per identificare l'entità. Il testo evidenziato
                 verrà automaticamente inserito nel campo "Testo Entità".
@@ -251,7 +255,7 @@ export function NERCorrectionForm({ traceId, queryText, onSuccess }: NERCorrecti
                   <h4 className="text-sm font-semibold text-white">
                     {CORRECTION_TYPE_OPTIONS.find((opt) => opt.value === selectedCorrectionType)?.label}
                   </h4>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-slate-400 mt-1">
                     {selectedCorrectionType === 'ADD_ENTITY' &&
                       'Aggiungi un\'entità non rilevata dal sistema NER'}
                     {selectedCorrectionType === 'REMOVE_ENTITY' &&
@@ -347,21 +351,21 @@ export function NERCorrectionForm({ traceId, queryText, onSuccess }: NERCorrecti
           )}
 
           {/* Submit Button */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-700">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-700">
             <Button
               type="submit"
               disabled={!selectedCorrectionType || isPending}
               loading={isPending}
-              className="min-w-[160px]"
+              className="min-w-[160px] min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               {isPending ? (
                 <>
-                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />
                   Invio...
                 </>
               ) : (
                 <>
-                  <Tag className="w-4 h-4 mr-2" />
+                  <Tag className="w-4 h-4 mr-2" aria-hidden="true" />
                   Invia Correzione
                 </>
               )}

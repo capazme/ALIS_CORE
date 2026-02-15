@@ -1,4 +1,3 @@
-import React from 'react';
 
 interface EvaluationProgressProps {
   currentStep: number;
@@ -73,22 +72,31 @@ export function EvaluationProgress({ currentStep, totalSteps, isDevilsAdvocate =
   };
 
   return (
-    <div className="mb-8">
-      <div className="flex items-center justify-between relative">
+    <nav className="mb-8" aria-label="Evaluation progress">
+      {/* Desktop: horizontal stepper */}
+      <div className="hidden md:flex items-center justify-between relative">
         {/* Progress line */}
         <div className="absolute top-6 left-6 right-6 h-0.5 bg-slate-600 -z-10">
-          <div 
+          <div
             className="h-full bg-green-500 transition-all duration-500 ease-out"
             style={{ width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%` }}
+            role="progressbar"
+            aria-valuenow={currentStep}
+            aria-valuemin={1}
+            aria-valuemax={totalSteps}
+            aria-label={`Step ${currentStep} of ${totalSteps}`}
           />
         </div>
 
-        {steps.slice(0, totalSteps).map((step, index) => {
+        {steps.slice(0, totalSteps).map((step) => {
           const status = getStepStatus(step.number);
-          const isLast = index === steps.slice(0, totalSteps).length - 1;
-          
+
           return (
-            <div key={step.number} className="flex flex-col items-center relative">
+            <div
+              key={step.number}
+              className="flex flex-col items-center relative"
+              aria-current={status === 'current' ? 'step' : undefined}
+            >
               {/* Step circle */}
               <div className={`
                 w-12 h-12 rounded-full border-2 flex items-center justify-center
@@ -96,19 +104,19 @@ export function EvaluationProgress({ currentStep, totalSteps, isDevilsAdvocate =
                 ${getStepColor(status)}
               `}>
                 {status === 'completed' ? (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 ) : (
-                  <span className="text-lg">{step.icon}</span>
+                  <span className="text-lg" aria-hidden="true">{step.icon}</span>
                 )}
               </div>
-              
+
               {/* Step info */}
               <div className="mt-3 text-center min-w-0">
                 <div className={`
                   text-sm font-medium
-                  ${status === 'current' ? 'text-blue-400' : 
+                  ${status === 'current' ? 'text-blue-400' :
                     status === 'completed' ? 'text-green-400' : 'text-slate-400'}
                 `}>
                   {step.title}
@@ -122,6 +130,43 @@ export function EvaluationProgress({ currentStep, totalSteps, isDevilsAdvocate =
         })}
       </div>
 
+      {/* Mobile: vertical stacked stepper */}
+      <ol className="flex flex-col gap-3 md:hidden" aria-label="Evaluation steps">
+        {steps.slice(0, totalSteps).map((step) => {
+          const status = getStepStatus(step.number);
+          return (
+            <li
+              key={step.number}
+              className="flex items-center gap-3"
+              aria-current={status === 'current' ? 'step' : undefined}
+            >
+              <div className={`
+                w-10 h-10 shrink-0 rounded-full border-2 flex items-center justify-center
+                transition-all duration-300 ease-out
+                ${getStepColor(status)}
+              `}>
+                {status === 'completed' ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <span className="text-sm" aria-hidden="true">{step.icon}</span>
+                )}
+              </div>
+              <div className="min-w-0">
+                <div className={`text-sm font-medium ${
+                  status === 'current' ? 'text-blue-400' :
+                  status === 'completed' ? 'text-green-400' : 'text-slate-400'
+                }`}>
+                  {step.title}
+                </div>
+                <div className="text-xs text-slate-500">{step.description}</div>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+
       {/* Current step info */}
       <div className="mt-6 text-center">
         <div className="text-slate-400 text-sm">
@@ -134,6 +179,6 @@ export function EvaluationProgress({ currentStep, totalSteps, isDevilsAdvocate =
           {steps.find(s => s.number === currentStep)?.description}
         </div>
       </div>
-    </div>
+    </nav>
   );
 }

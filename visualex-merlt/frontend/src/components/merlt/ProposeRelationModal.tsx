@@ -7,11 +7,11 @@
  */
 
 import { useState } from 'react';
-import { Modal } from '../../ui/Modal';
+import { Modal } from '../ui/Modal';
 import { Link2, Loader2, CheckCircle2, AlertCircle, ArrowRight, Sparkles } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { merltService } from '../../../services/merltService';
-import type { RelationType, PendingEntity } from '../../../types/merlt';
+import { cn } from '../../lib/utils';
+import { merltService } from '../../services/merltService';
+import type { RelationType, PendingEntity } from '../../types/merlt';
 
 // =============================================================================
 // TYPES
@@ -71,7 +71,7 @@ export function ProposeRelationModal({
   availableEntities = [],
 }: ProposeRelationModalProps) {
   // Form state
-  const [tipoRelazione, setTipoRelazione] = useState<RelationType>('DISCIPLINA');
+  const [tipoRelazione, setTipoRelazione] = useState('DISCIPLINA' as RelationType);
   const [targetEntityId, setTargetEntityId] = useState('');
   const [targetManual, setTargetManual] = useState('');
   const [descrizione, setDescrizione] = useState('');
@@ -80,7 +80,7 @@ export function ProposeRelationModal({
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null as string | null);
   const [success, setSuccess] = useState(false);
 
   // Reset form
@@ -139,8 +139,9 @@ export function ProposeRelationModal({
         onSuccess?.();
         handleClose();
       }, 1500);
-    } catch (err: any) {
-      setError(err.message || 'Errore nella proposta della relazione');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Errore nella proposta della relazione';
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -200,10 +201,11 @@ export function ProposeRelationModal({
 
           {/* Relation Type */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label htmlFor="modal-relation-tipo" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Tipo di relazione *
             </label>
             <select
+              id="modal-relation-tipo"
               value={tipoRelazione}
               onChange={(e) => setTipoRelazione(e.target.value as RelationType)}
               className={cn(
@@ -225,14 +227,14 @@ export function ProposeRelationModal({
           {/* Target Entity */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              <label htmlFor="modal-relation-target" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Entità di destinazione *
               </label>
               {availableEntities.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setUseManualTarget(!useManualTarget)}
-                  className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                  className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded px-1"
                 >
                   {useManualTarget ? 'Seleziona da lista' : 'Inserisci manualmente'}
                 </button>
@@ -241,6 +243,7 @@ export function ProposeRelationModal({
 
             {useManualTarget ? (
               <input
+                id="modal-relation-target"
                 type="text"
                 value={targetManual}
                 onChange={(e) => setTargetManual(e.target.value)}
@@ -255,6 +258,7 @@ export function ProposeRelationModal({
               />
             ) : (
               <select
+                id="modal-relation-target"
                 value={targetEntityId}
                 onChange={(e) => setTargetEntityId(e.target.value)}
                 className={cn(
@@ -277,10 +281,11 @@ export function ProposeRelationModal({
 
           {/* Descrizione */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label htmlFor="modal-relation-descrizione" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Motivazione *
             </label>
             <textarea
+              id="modal-relation-descrizione"
               value={descrizione}
               onChange={(e) => setDescrizione(e.target.value)}
               placeholder="Spiega perché questa relazione esiste e come si evince dal testo..."
@@ -300,10 +305,11 @@ export function ProposeRelationModal({
 
           {/* Certezza */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label htmlFor="modal-relation-certezza" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               Certezza: {Math.round(certezza * 100)}%
             </label>
             <input
+              id="modal-relation-certezza"
               type="range"
               min="0.1"
               max="1"
@@ -320,8 +326,8 @@ export function ProposeRelationModal({
 
           {/* Error */}
           {error && (
-            <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
-              <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+            <div role="alert" className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
+              <AlertCircle size={16} className="flex-shrink-0 mt-0.5" aria-hidden="true" />
               {error}
             </div>
           )}
@@ -331,7 +337,7 @@ export function ProposeRelationModal({
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+              className="px-4 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 min-h-[44px]"
             >
               Annulla
             </button>
@@ -339,19 +345,20 @@ export function ProposeRelationModal({
               type="submit"
               disabled={isSubmitting || (!targetEntityId && !targetManual.trim()) || !descrizione.trim()}
               className={cn(
-                'flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all',
+                'flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all min-h-[44px]',
                 'bg-primary-600 hover:bg-primary-700 text-white',
-                'disabled:opacity-50 disabled:cursor-not-allowed'
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
               )}
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 size={18} className="animate-spin" />
+                  <Loader2 size={18} className="animate-spin" aria-hidden="true" />
                   Invio...
                 </>
               ) : (
                 <>
-                  <Link2 size={18} />
+                  <Link2 size={18} aria-hidden="true" />
                   Proponi
                 </>
               )}

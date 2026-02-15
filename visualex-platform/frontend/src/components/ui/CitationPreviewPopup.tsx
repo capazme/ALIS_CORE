@@ -8,11 +8,13 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
-import { X, ExternalLink, Loader2, AlertCircle, Check, GripVertical } from 'lucide-react';
+import { X, ExternalLink, Loader2, AlertCircle, Check, GripVertical, Globe } from 'lucide-react';
 import type { ArticleData } from '../../types';
 import type { ParsedCitationData } from '../../utils/citationMatcher';
 import { formatCitationLabel } from '../../utils/citationMatcher';
 import { cn } from '../../lib/utils';
+import { CitationDefinitionSnippet } from '../features/search/CitationDefinitionSnippet';
+import { getCitationType, getExternalUrl } from '../../utils/citationNavigator';
 
 interface CitationPreviewPopupProps {
   isVisible: boolean;
@@ -200,6 +202,9 @@ export function CitationPreviewPopup({
 
               {!isLoading && !error && article && (
                 <div className="space-y-3">
+                  {/* Definition snippet (rubrica + first sentence) */}
+                  <CitationDefinitionSnippet article={article} />
+
                   {/* Article preview - scrollable without truncation */}
                   <div className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed max-h-[300px] overflow-y-auto custom-scrollbar whitespace-pre-wrap">
                     {getPreviewText() || (
@@ -271,20 +276,35 @@ export function CitationPreviewPopup({
                   </div>
                 )}
 
-                {/* Apri button */}
-                <button
-                  onClick={handleOpenInTab}
-                  disabled={isLoading}
-                  className={cn(
-                    "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
-                    "bg-blue-600 hover:bg-blue-700 text-white",
-                    "disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed",
-                    "dark:disabled:bg-slate-700 dark:disabled:text-slate-500"
+                {/* Navigation buttons */}
+                <div className="flex items-center gap-1.5 ml-auto">
+                  {/* EUR-Lex link for external citations */}
+                  {citation && getCitationType(citation) === 'external-eu' && (
+                    <a
+                      href={getExternalUrl(citation) || '#'}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-blue-100 hover:bg-blue-200 text-blue-700 dark:bg-blue-900/40 dark:hover:bg-blue-900/60 dark:text-blue-300 transition-colors"
+                    >
+                      <Globe size={13} />
+                      EUR-Lex
+                    </a>
                   )}
-                >
-                  <ExternalLink size={14} />
-                  Apri
-                </button>
+                  {/* In-app open button */}
+                  <button
+                    onClick={handleOpenInTab}
+                    disabled={isLoading}
+                    className={cn(
+                      "flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                      "bg-blue-600 hover:bg-blue-700 text-white",
+                      "disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed",
+                      "dark:disabled:bg-slate-700 dark:disabled:text-slate-500"
+                    )}
+                  >
+                    <ExternalLink size={14} />
+                    Apri
+                  </button>
+                </div>
               </div>
             </div>
           </div>

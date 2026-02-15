@@ -45,26 +45,22 @@ export function QuerySubmission() {
     // Execute query via TanStack Query mutation
     executeQuery(queryRequest, {
       onSuccess: (response) => {
-        console.log('[QuerySubmission] Query executed successfully, response:', response);
-        console.log('[QuerySubmission] trace_id:', response.trace_id);
-
         // Save trace ID to store
         setCurrentTraceId(response.trace_id);
 
         // Show execution monitor instead of navigating immediately
         setExecutingTraceId(response.trace_id);
-        console.log('[QuerySubmission] executingTraceId set to:', response.trace_id);
 
         // Scroll to monitor
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
-      onError: (error: any) => {
-        console.error('[QuerySubmission] Query execution failed:', error);
-
+      onError: (error: unknown) => {
         // Extract error message
+        const err = error as Record<string, unknown> | undefined;
+        const respData = (err?.response as Record<string, unknown> | undefined)?.data as Record<string, unknown> | undefined;
         const message =
-          error?.response?.data?.detail ||
-          error?.message ||
+          (respData?.detail as string) ||
+          (err?.message as string) ||
           'Si è verificato un errore durante l\'esecuzione della query. Riprova.';
 
         setErrorMessage(message);
@@ -86,39 +82,34 @@ export function QuerySubmission() {
     setErrorMessage(null);
   };
 
-  // Debug logging
-  console.log('[QuerySubmission] Render - executingTraceId:', executingTraceId);
-  console.log('[QuerySubmission] Render - isPending:', isPending);
-  console.log('[QuerySubmission] Render - errorMessage:', errorMessage);
-
   return (
-    <div className="min-h-screen bg-gray-950 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-950 py-4 md:py-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 bg-blue-500/10 rounded-lg">
-              <Search className="w-8 h-8 text-blue-400" />
+              <Search className="w-8 h-8 text-blue-400" aria-hidden="true" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">
                 Interroga MERL-T
               </h1>
-              <p className="text-gray-400 mt-1">
+              <p className="text-slate-400 mt-1">
                 Sistema Multi-Expert per Ricerca e Analisi Legale
               </p>
             </div>
           </div>
 
           {/* Info Banner */}
-          <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-4">
+          <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-3 md:p-4">
             <div className="flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+              <Sparkles className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
               <div className="flex-1">
                 <h3 className="text-sm font-semibold text-white mb-1">
                   Come funziona MERL-T
                 </h3>
-                <p className="text-sm text-gray-300 leading-relaxed">
+                <p className="text-sm text-slate-300 leading-relaxed">
                   Il sistema analizza la tua query attraverso <strong>4 esperti AI</strong>
                   {' '}(Interpretazione Letterale, Sistematico-Teleologica, Bilanciamento
                   Principi, Analisi Precedenti) che consultano{' '}
@@ -138,23 +129,24 @@ export function QuerySubmission() {
             {executingTraceId ? (
               <QueryExecutionMonitor traceId={executingTraceId} />
             ) : (
-              <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
-                <div className="flex flex-col items-center justify-center space-y-4">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-                  <p className="text-gray-400">Inizializzazione query in corso...</p>
-                  <p className="text-sm text-gray-600">Il monitor dettagliato apparirà a breve</p>
+              <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 md:p-8">
+                <div className="flex flex-col items-center justify-center space-y-4" role="status">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" aria-hidden="true"></div>
+                  <p className="text-slate-400">Inizializzazione query in corso...</p>
+                  <p className="text-sm text-slate-600">Il monitor dettagliato apparirà a breve</p>
+                  <span className="sr-only">Inizializzazione query in corso</span>
                 </div>
               </div>
             )}
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-center gap-4">
-              <Button onClick={handleNewQuery} variant="outline">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button onClick={handleNewQuery} variant="outline" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 min-h-[44px]">
                 Nuova Query
               </Button>
-              <Button onClick={handleViewResults} className="gap-2">
+              <Button onClick={handleViewResults} className="gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 min-h-[44px]">
                 Vedi Risultati Completi
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </Button>
             </div>
           </div>
@@ -188,14 +180,14 @@ export function QuerySubmission() {
 
         {/* Bottom Info */}
         <div className="mt-8 text-center">
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-slate-600">
             Powered by MERL-T (Multi-Expert Legal Retrieval Transformer) | RLCF Framework
             v1.0
           </p>
-          <p className="text-xs text-gray-700 mt-1">
+          <p className="text-xs text-slate-700 mt-1">
             {user ? (
               <>
-                Logged in as <span className="text-gray-500">{user.username}</span>
+                Logged in as <span className="text-slate-500">{user.username}</span>
               </>
             ) : (
               'Not authenticated'

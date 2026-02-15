@@ -12,47 +12,47 @@ export function Analytics() {
   const taskDistributionQuery = useTaskDistribution();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" role="main" aria-label="Analytics Dashboard">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Analytics Dashboard</h1>
+        <h1 className="text-2xl font-bold text-white mb-2 sm:text-3xl">Analytics Dashboard</h1>
         <p className="text-slate-400">System performance and community insights</p>
       </div>
 
       <QueryWrapper query={systemMetricsQuery} loadingMessage="Loading system metrics...">
         {(metrics) => (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 sm:gap-6" role="region" aria-label="System metrics">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-slate-400">Total Users</CardTitle>
-                <Users className="h-4 w-4 text-blue-400" />
+                <Users className="h-4 w-4 text-blue-400" aria-hidden="true" />
               </CardHeader>
               <CardContent><div className="text-2xl font-bold text-white">{metrics.totalUsers}</div></CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-slate-400">Total Tasks</CardTitle>
-                <ClipboardCheck className="h-4 w-4 text-violet-400" />
+                <ClipboardCheck className="h-4 w-4 text-violet-400" aria-hidden="true" />
               </CardHeader>
               <CardContent><div className="text-2xl font-bold text-white">{metrics.totalTasks}</div></CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-slate-400">Active Evaluations</CardTitle>
-                <AlertTriangle className="h-4 w-4 text-orange-400" />
+                <AlertTriangle className="h-4 w-4 text-orange-400" aria-hidden="true" />
               </CardHeader>
               <CardContent><div className="text-2xl font-bold text-white">{metrics.activeEvaluations}</div></CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-slate-400">Avg. Consensus</CardTitle>
-                <TrendingUp className="h-4 w-4 text-green-400" />
+                <TrendingUp className="h-4 w-4 text-green-400" aria-hidden="true" />
               </CardHeader>
               <CardContent><div className="text-2xl font-bold text-white">{(metrics.averageConsensus * 100).toFixed(1)}%</div></CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-slate-400">Completion Rate</CardTitle>
-                <ClipboardCheck className="h-4 w-4 text-pink-400" />
+                <ClipboardCheck className="h-4 w-4 text-pink-400" aria-hidden="true" />
               </CardHeader>
               <CardContent><div className="text-2xl font-bold text-white">{(metrics.completionRate * 100).toFixed(1)}%</div></CardContent>
             </Card>
@@ -60,7 +60,7 @@ export function Analytics() {
         )}
       </QueryWrapper>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-5 lg:gap-6">
         <div className="lg:col-span-3">
           <Card>
             <CardHeader><CardTitle>Task Type Distribution</CardTitle></CardHeader>
@@ -92,7 +92,7 @@ export function Analytics() {
             <CardContent>
               <QueryWrapper query={leaderboardQuery} minHeight="300px">
                 {(users) => (
-                  <ul className="space-y-3">
+                  <ul className="space-y-3" role="list" aria-label="Top evaluators">
                     {users.map((user, index) => (
                       <li key={user.id} className="flex items-center justify-between p-2 rounded-lg bg-slate-800/50">
                         <div className="flex items-center gap-3">
@@ -100,7 +100,7 @@ export function Analytics() {
                           <span className="font-medium text-white">{user.username}</span>
                         </div>
                         <div className="flex items-center gap-2 text-violet-400">
-                          <Award className="h-4 w-4" />
+                          <Award className="h-4 w-4" aria-hidden="true" />
                           <span className="font-mono text-sm">{user.authority_score.toFixed(3)}</span>
                         </div>
                       </li>

@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
+import { cn } from '@/lib/utils';
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
@@ -68,12 +69,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
   return (
     <div className={className}>
-      <Card 
-        className={`
-          p-8 border-2 border-dashed transition-colors cursor-pointer
-          ${isDragOver ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
-          ${error ? 'border-red-400 bg-red-50' : ''}
-        `}
+      <Card
+        className={cn(
+          "p-8 border-2 border-dashed transition-colors cursor-pointer",
+          isDragOver && "border-blue-500 bg-blue-500/10",
+          !isDragOver && !error && "border-slate-600 hover:border-slate-500",
+          error && "border-red-500 bg-red-500/10"
+        )}
         onDrop={handleDrop}
         onDragOver={(e) => {
           e.preventDefault();
@@ -88,12 +90,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           accept={accept}
           onChange={handleFileInput}
           className="hidden"
+          aria-label="File upload"
         />
-        
+
         <div className="text-center">
           {children || (
             <>
-              <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+              <svg className="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
                 <path
                   d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
                   strokeWidth={2}
@@ -102,22 +105,22 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 />
               </svg>
               <div className="mt-4">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-slate-300">
                   <Button variant="outline" size="sm" className="mr-2">
                     Choose file
                   </Button>
                   or drag and drop
                 </p>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-slate-400 mt-2">
                   {accept} up to {maxSize}MB
                 </p>
               </div>
             </>
           )}
-          
+
           {error && (
-            <div className="mt-4 p-3 bg-red-100 border border-red-400 rounded-md">
-              <p className="text-sm text-red-700">{error}</p>
+            <div className="mt-4 p-3 bg-red-900/20 border border-red-800 rounded-md">
+              <p className="text-sm text-red-400">{error}</p>
             </div>
           )}
         </div>

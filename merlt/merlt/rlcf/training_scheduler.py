@@ -91,6 +91,10 @@ class SchedulerConfig:
     prioritized_replay: bool = True
     alpha: float = 0.6
     auto_save_checkpoint: bool = True
+    idle_timeout_days: int = 7
+    on_training_start: Optional[List[Callable]] = None
+    on_training_complete_callbacks: Optional[List[Callable]] = None
+    on_training_error_callbacks: Optional[List[Callable]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -102,6 +106,7 @@ class SchedulerConfig:
             "prioritized_replay": self.prioritized_replay,
             "alpha": self.alpha,
             "auto_save_checkpoint": self.auto_save_checkpoint,
+            "idle_timeout_days": self.idle_timeout_days,
         }
 
 
@@ -309,12 +314,27 @@ class TrainingScheduler:
                 return False
 
             # Check buffer threshold
-            if len(self.buffer) < self.config.buffer_threshold:
+            buffer_size = len(self.buffer)
+
+            # Idle timeout: buffer non-empty but below threshold for >N days
+            if buffer_size > 0 and buffer_size < self.config.buffer_threshold:
+                oldest = self.buffer.oldest_timestamp()
+                if oldest and (datetime.utcnow() - oldest) > timedelta(
+                    days=self.config.idle_timeout_days
+                ):
+                    log.info(
+                        "Idle timeout triggered",
+                        buffer_size=buffer_size,
+                        oldest_days=(datetime.utcnow() - oldest).days,
+                    )
+                    return True
+
+            if buffer_size < self.config.buffer_threshold:
                 return False
 
             # Check time interval
             if self._last_training_at:
-                elapsed = datetime.now() - self._last_training_at
+                elapsed = datetime.utcnow() - self._last_training_at
                 if elapsed.total_seconds() < self.config.min_interval_seconds:
                     return False
 
@@ -330,7 +350,7 @@ class TrainingScheduler:
         if not self._last_training_at:
             return timedelta(seconds=0) if len(self.buffer) >= self.config.buffer_threshold else None
 
-        elapsed = datetime.now() - self._last_training_at
+        elapsed = datetime.utcnow() - self._last_training_at
         remaining = self.config.min_interval_seconds - elapsed.total_seconds()
 
         if remaining <= 0:
@@ -355,7 +375,7 @@ class TrainingScheduler:
         Returns:
             TrainingResult con metriche
         """
-        start_time = datetime.now()
+        start_time = datetime.utcnow()
 
         with self._lock:
             if self._status == TrainingStatus.TRAINING:
@@ -374,6 +394,16 @@ class TrainingScheduler:
             buffer_size=len(self.buffer),
             epochs=self.config.epochs_per_run
         )
+
+        # Fire on_training_start callbacks
+        for cb in (self.config.on_training_start or []):
+            try:
+                if asyncio.iscoroutinefunction(cb):
+                    await cb(trigger)
+                else:
+                    cb(trigger)
+            except Exception as e:
+                log.warning("on_training_start callback failed", error=str(e))
 
         try:
             # Import trainer (lazy)
@@ -448,19 +478,38 @@ class TrainingScheduler:
 
             # Update state
             with self._lock:
-                self._last_training_at = datetime.now()
+                self._last_training_at = datetime.utcnow()
                 self._status = TrainingStatus.IDLE
                 self._current_epoch = 0
                 self._update_sessions_today()
 
-            duration = (datetime.now() - start_time).total_seconds()
+            duration = (datetime.utcnow() - start_time).total_seconds()
 
-            # Save checkpoint if configured
+            # Save versioned checkpoint
             checkpoint_version = None
             if self.config.auto_save_checkpoint and samples_processed > 0:
-                checkpoint_version = f"v{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                # In produzione: trainer.save_checkpoint(...)
-                log.info("Checkpoint saved", version=checkpoint_version)
+                version_tag = f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{self._training_sessions_today}"
+                checkpoint_version = f"v{version_tag}"
+                try:
+                    from .policy_manager import PolicyManager
+                    pm = PolicyManager()
+                    pm.save_gating_policy(policy, name=f"gating_v{version_tag}")
+                    log.info("Versioned checkpoint saved", version=checkpoint_version)
+                except Exception as e:
+                    log.warning("Checkpoint save failed", error=str(e))
+
+            # TraversalPolicy training (F8d)
+            try:
+                from .traversal_training_service import TraversalTrainingService
+                from .database import get_async_session
+                traversal_svc = TraversalTrainingService()
+                async with get_async_session() as trav_session:
+                    trav_samples = await traversal_svc.prepare_training_data(trav_session)
+                    if len(trav_samples) >= traversal_svc.MIN_SAMPLES:
+                        trav_result = await traversal_svc.train_traversal_policy(trav_samples)
+                        log.info("TraversalPolicy trained", **trav_result.to_dict())
+            except Exception as e:
+                log.warning("TraversalPolicy training skipped", error=str(e))
 
             result = TrainingResult(
                 success=True,
@@ -479,6 +528,16 @@ class TrainingScheduler:
             if self._on_training_complete:
                 self._on_training_complete(result)
 
+            # Fire config-level callbacks
+            for cb in (self.config.on_training_complete_callbacks or []):
+                try:
+                    if asyncio.iscoroutinefunction(cb):
+                        await cb(result)
+                    else:
+                        cb(result)
+                except Exception as e:
+                    log.warning("on_training_complete callback failed", error=str(e))
+
             return result
 
         except Exception as e:
@@ -490,17 +549,26 @@ class TrainingScheduler:
             result = TrainingResult(
                 success=False,
                 error=str(e),
-                duration_seconds=(datetime.now() - start_time).total_seconds()
+                duration_seconds=(datetime.utcnow() - start_time).total_seconds()
             )
 
             if self._on_training_error:
                 self._on_training_error(result)
 
+            for cb in (self.config.on_training_error_callbacks or []):
+                try:
+                    if asyncio.iscoroutinefunction(cb):
+                        await cb(result)
+                    else:
+                        cb(result)
+                except Exception as e2:
+                    log.warning("on_training_error callback failed", error=str(e2))
+
             return result
 
     def _update_sessions_today(self):
         """Aggiorna contatore sessioni oggi."""
-        today = datetime.now().strftime("%Y-%m-%d")
+        today = datetime.utcnow().strftime("%Y-%m-%d")
         if self._last_session_date != today:
             self._training_sessions_today = 0
             self._last_session_date = today
@@ -570,7 +638,7 @@ class TrainingScheduler:
             next_training = None
             remaining = self.get_time_until_next_training()
             if remaining is not None:
-                next_training = (datetime.now() + remaining).isoformat()
+                next_training = (datetime.utcnow() + remaining).isoformat()
 
             return SchedulerStatus(
                 status=self._status,

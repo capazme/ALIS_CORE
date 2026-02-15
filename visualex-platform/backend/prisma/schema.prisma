@@ -9,6 +9,23 @@ datasource db {
 }
 
 // ============================================
+// ENUMS
+// ============================================
+
+enum ProfileType {
+  quick_consultation
+  assisted_research
+  expert_analysis
+  active_contributor
+}
+
+enum ConsentLevel {
+  basic
+  learning
+  research
+}
+
+// ============================================
 // USER MANAGEMENT
 // ============================================
 
@@ -19,12 +36,16 @@ model User {
   password    String
   name        String?
   role        String    @default("member") // member, researcher, admin
+  profileType ProfileType @default(quick_consultation) @map("profile_type")
+  authorityScore Float  @default(0) @map("authority_score")
   isActive    Boolean   @default(false) @map("is_active") // Changed default to false for invitation flow
   isVerified  Boolean   @default(false) @map("is_verified")
   isAdmin     Boolean   @default(false) @map("is_admin")
   isMerltEnabled Boolean @default(false) @map("is_merlt_enabled")
   loginCount  Int       @default(0) @map("login_count")
   lastLoginAt DateTime? @map("last_login_at")
+  deletionRequestedAt DateTime? @map("deletion_requested_at")
+  deletionReason String? @map("deletion_reason")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
@@ -37,6 +58,12 @@ model User {
   feedbacks     Feedback[]
   searchHistory SearchHistory[]
   features      UserFeature[]
+
+  // RLCF / Privacy / Authority
+  preferences   UserPreferences?
+  consent       UserConsent?
+  authority     UserAuthority?
+  refreshTokens RefreshToken[]
 
   // Shared Environments (Bulletin Board)
   sharedEnvironments       SharedEnvironment[]
@@ -496,4 +523,104 @@ model EmailVerification {
 
   @@index([token])
   @@map("email_verifications")
+}
+
+// ============================================
+// REFRESH TOKENS (Auth Session Management)
+// ============================================
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  revoked   Boolean  @default(false)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+// ============================================
+// USER CONSENT (GDPR Consent Management)
+// ============================================
+
+model UserConsent {
+  id           String       @id @default(uuid())
+  userId       String       @unique @map("user_id")
+  consentLevel ConsentLevel @default(basic) @map("consent_level")
+  grantedAt    DateTime     @default(now()) @map("granted_at")
+  ipHash       String?      @map("ip_hash")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_consents")
+}
+
+// ============================================
+// CONSENT AUDIT LOG (Immutable Consent History)
+// ============================================
+
+model ConsentAuditLog {
+  id            String  @id @default(uuid())
+  userId        String  @map("user_id")
+  previousLevel String? @map("previous_level")
+  newLevel      String  @map("new_level")
+  ipHash        String? @map("ip_hash")
+  userAgent     String? @map("user_agent")
+  changedAt     DateTime @default(now()) @map("changed_at")
+
+  @@index([userId])
+  @@index([changedAt])
+  @@map("consent_audit_logs")
+}
+
+// ============================================
+// USER AUTHORITY (RLCF Authority Scores)
+// ============================================
+
+model UserAuthority {
+  id                String   @id @default(uuid())
+  userId            String   @unique @map("user_id")
+  baselineScore     Float    @default(0) @map("baseline_score")
+  trackRecordScore  Float    @default(0) @map("track_record_score")
+  recentPerformance Float    @default(0) @map("recent_performance")
+  computedScore     Float    @default(0) @map("computed_score")
+  feedbackCount     Int      @default(0) @map("feedback_count")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_authorities")
+}
+
+// ============================================
+// USER PREFERENCES (Profile Settings)
+// ============================================
+
+model UserPreferences {
+  id                   String   @id @default(uuid())
+  userId               String   @unique @map("user_id")
+  theme                String   @default("system")
+  language             String   @default("it")
+  notificationsEnabled Boolean  @default(true) @map("notifications_enabled")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_preferences")
 }

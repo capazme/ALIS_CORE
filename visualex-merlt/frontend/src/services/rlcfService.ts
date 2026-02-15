@@ -17,7 +17,7 @@
 
 import { get, post } from './api';
 
-const PREFIX = 'merlt';
+const PREFIX = '/merlt';
 
 // =============================================================================
 // TYPES
@@ -358,7 +358,7 @@ export function getTrainingStatusColor(status: TrainingStatus): string {
   if (status.is_paused) {
     return 'text-yellow-500';
   }
-  return 'text-gray-500';
+  return 'text-slate-500';
 }
 
 /**
@@ -377,5 +377,5 @@ export function getTrainingStatusBadge(status: TrainingStatus): {
   if (status.current_epoch > 0) {
     return { text: 'Completato', color: 'bg-blue-100 text-blue-800' };
   }
-  return { text: 'Non avviato', color: 'bg-gray-100 text-gray-800' };
+  return { text: 'Non avviato', color: 'bg-slate-100 text-slate-800' };
 }

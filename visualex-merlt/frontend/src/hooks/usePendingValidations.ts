@@ -1,11 +1,13 @@
 /**
  * usePendingValidations Hook
  *
- * Fetches pending validation items for the current user/article.
+ * Fetches pending validation items for the current user/article
+ * using the centralized merltService.
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { getMerltConfig } from '../services/merltInit';
+import { merltService } from '../services/merltService';
+import type { PendingEntity, PendingRelation } from '../types/merlt';
 
 export interface ValidationItem {
   id: string;
@@ -23,74 +25,89 @@ interface UsePendingValidationsResult {
   validations: ValidationItem[] | undefined;
   isLoading: boolean;
   error: Error | null;
-  submitDecision: (validationId: string, decision: 'approve' | 'reject') => Promise<void>;
+  submitDecision: (validationId: string, decision: 'approve' | 'reject', type: 'entity' | 'relation') => Promise<void>;
   refetch: () => Promise<void>;
 }
 
-export function usePendingValidations(articleUrn: string): UsePendingValidationsResult {
-  const [validations, setValidations] = useState<ValidationItem[] | undefined>();
+function mapEntityToValidation(entity: PendingEntity): ValidationItem {
+  return {
+    id: entity.id,
+    type: 'entity',
+    content: {
+      name: entity.nome,
+      description: entity.descrizione,
+      confidence: entity.llm_confidence,
+    },
+    articleUrn: entity.articoli_correlati[0] ?? '',
+    createdAt: entity.created_at,
+  };
+}
+
+function mapRelationToValidation(relation: PendingRelation): ValidationItem {
+  return {
+    id: relation.id,
+    type: 'relation',
+    content: {
+      name: `${relation.source_urn} → ${relation.target_urn}`,
+      description: relation.evidence,
+      confidence: relation.llm_confidence,
+    },
+    articleUrn: '',
+    createdAt: relation.created_at,
+  };
+}
+
+export function usePendingValidations(articleUrn: string, userId?: string): UsePendingValidationsResult {
+  const [validations, setValidations] = useState(undefined as unknown as ValidationItem[] | undefined);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState(null as Error | null);
+
+  const effectiveUserId = userId || 'anonymous';
 
   const fetchValidations = useCallback(async () => {
-    const config = getMerltConfig();
-    if (!config) {
-      setIsLoading(false);
-      return;
-    }
-
     setIsLoading(true);
     setError(null);
 
     try {
-      const token = await config.getAuthToken();
-      const response = await fetch(
-        `${config.apiBaseUrl}/merlt/validations/pending?articleUrn=${encodeURIComponent(articleUrn)}`,
-        {
-          headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-        }
-      );
+      const queue = await merltService.getPendingQueue(effectiveUserId, {
+        article_urn: articleUrn,
+      });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch validations: ${response.statusText}`);
-      }
+      const items: ValidationItem[] = [
+        ...queue.pending_entities.map(mapEntityToValidation),
+        ...queue.pending_relations.map(mapRelationToValidation),
+      ];
 
-      const result = await response.json();
-      setValidations(result.items ?? []);
+      setValidations(items);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Unknown error'));
     } finally {
       setIsLoading(false);
     }
-  }, [articleUrn]);
+  }, [articleUrn, effectiveUserId]);
 
   const submitDecision = useCallback(
-    async (validationId: string, decision: 'approve' | 'reject') => {
-      const config = getMerltConfig();
-      if (!config) {
-        throw new Error('MERLT not initialized');
-      }
+    async (validationId: string, decision: 'approve' | 'reject', type: 'entity' | 'relation') => {
+      const vote = decision === 'approve' ? 'approve' : 'reject';
 
-      const token = await config.getAuthToken();
-      const response = await fetch(`${config.apiBaseUrl}/merlt/validations/${validationId}/decision`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ decision }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to submit decision: ${response.statusText}`);
+      if (type === 'entity') {
+        await merltService.validateEntity({
+          entity_id: validationId,
+          user_id: effectiveUserId,
+          vote: vote as 'approve' | 'reject',
+        });
+      } else {
+        await merltService.validateRelation({
+          relation_id: validationId,
+          user_id: effectiveUserId,
+          vote: vote as 'approve' | 'reject',
+        });
       }
 
       // Remove from local state
-      setValidations((prev) => prev?.filter((v) => v.id !== validationId));
+      setValidations((prev: ValidationItem[] | undefined) => prev?.filter((v: ValidationItem) => v.id !== validationId));
     },
-    []
+    [effectiveUserId]
   );
 
   useEffect(() => {

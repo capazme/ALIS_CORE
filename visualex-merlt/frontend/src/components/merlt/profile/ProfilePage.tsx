@@ -14,8 +14,8 @@
 
 import { motion } from 'framer-motion';
 import { User, RefreshCw, AlertCircle, Calendar, Clock } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
-import { useProfile } from '../../../../hooks/useProfile';
+import { cn } from '../../../lib/utils';
+import { useProfile } from '../../../hooks/useProfile';
 import { AuthorityOverview } from './AuthorityOverview';
 import { AuthorityBreakdown } from './AuthorityBreakdown';
 import { ContributionStats } from './ContributionStats';
@@ -29,12 +29,13 @@ import { RLCFExplainer } from './RLCFExplainer';
 
 function ProfileSkeleton() {
   return (
-    <div className="animate-pulse space-y-6">
+    <div className="animate-pulse space-y-6" role="status">
+      <span className="sr-only">Caricamento profilo in corso...</span>
       {/* Header skeleton */}
       <div className="h-48 bg-slate-200 dark:bg-slate-800 rounded-xl" />
 
       {/* Grid skeleton */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="h-64 bg-slate-200 dark:bg-slate-800 rounded-xl" />
         <div className="h-64 bg-slate-200 dark:bg-slate-800 rounded-xl" />
       </div>
@@ -56,9 +57,9 @@ interface ErrorStateProps {
 
 function ErrorState({ message, onRetry }: ErrorStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
+    <div className="flex flex-col items-center justify-center py-12 text-center" role="alert">
       <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center mb-4">
-        <AlertCircle size={32} className="text-red-500" />
+        <AlertCircle size={32} className="text-red-500" aria-hidden="true" />
       </div>
       <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">
         Errore nel caricamento
@@ -68,9 +69,9 @@ function ErrorState({ message, onRetry }: ErrorStateProps) {
       </p>
       <button
         onClick={onRetry}
-        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
       >
-        <RefreshCw size={16} />
+        <RefreshCw size={16} aria-hidden="true" />
         Riprova
       </button>
     </div>
@@ -120,11 +121,11 @@ function ProfileHeader({
   };
 
   return (
-    <div className="flex items-start justify-between mb-6">
-      <div className="flex items-center gap-4">
+    <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-6">
+      <div className="flex items-center gap-4 min-w-0">
         {/* Avatar */}
         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
-          <User size={32} className="text-white" />
+          <User size={32} className="text-white" aria-hidden="true" />
         </div>
 
         {/* Info */}
@@ -134,11 +135,11 @@ function ProfileHeader({
           </h1>
           <div className="flex items-center gap-4 mt-1 text-xs text-slate-500 dark:text-slate-400">
             <span className="flex items-center gap-1">
-              <Calendar size={12} />
+              <Calendar size={12} aria-hidden="true" />
               Iscritto dal {formatDate(joinedAt)}
             </span>
             <span className="flex items-center gap-1">
-              <Clock size={12} />
+              <Clock size={12} aria-hidden="true" />
               Aggiornato {formatRelativeTime(lastUpdated)}
             </span>
           </div>
@@ -150,12 +151,12 @@ function ProfileHeader({
         onClick={onRefresh}
         disabled={isRefreshing}
         className={cn(
-          'p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors',
+          'p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
           isRefreshing && 'animate-spin'
         )}
-        title="Aggiorna dati"
+        aria-label="Aggiorna dati profilo"
       >
-        <RefreshCw size={18} />
+        <RefreshCw size={18} aria-hidden="true" />
       </button>
     </div>
   );
@@ -219,7 +220,7 @@ export function ProfilePage({ userId, className }: ProfilePageProps) {
       />
 
       {/* Main grid: Breakdown + Stats */}
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <AuthorityBreakdown
           breakdown={profile.authority.breakdown}
           totalScore={profile.authority.score}

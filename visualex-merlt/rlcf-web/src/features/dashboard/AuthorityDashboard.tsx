@@ -224,11 +224,11 @@ export function AuthorityDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" role="main" aria-label="Authority Dashboard">
       {/* Header Card */}
       <Card className="border-purple-700 bg-gradient-to-r from-purple-950/20 to-blue-950/20">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle className="flex items-center gap-3 text-2xl">
                 ⚖️ Authority Dashboard
@@ -254,18 +254,21 @@ export function AuthorityDashboard() {
       </Card>
 
       {/* Time Range Selector */}
-      <div className="flex justify-center space-x-2">
+      <nav className="flex justify-center space-x-2" aria-label="Time range selector">
         {(['7d', '30d', '90d', '1y'] as const).map((range) => (
           <Button
             key={range}
             variant={timeRange === range ? "default" : "outline"}
             onClick={() => setTimeRange(range)}
             size="sm"
+            className="focus-visible:ring-2 focus-visible:ring-blue-500"
+            aria-pressed={timeRange === range}
+            aria-label={`Show data for last ${range}`}
           >
             {range.toUpperCase()}
           </Button>
         ))}
-      </div>
+      </nav>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Authority Evolution Chart */}
@@ -284,17 +287,17 @@ export function AuthorityDashboard() {
             ) : authorityHistory && authorityHistory.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={authorityHistory}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                   <XAxis
                     dataKey="timestamp"
-                    stroke="#9CA3AF"
+                    stroke="#94a3b8"
                     tickFormatter={(value) => new Date(value).toLocaleDateString()}
                   />
-                  <YAxis stroke="#9CA3AF" domain={[0, 1]} />
+                  <YAxis stroke="#94a3b8" domain={[0, 1]} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#1F2937',
-                      border: '1px solid #6366F1',
+                      backgroundColor: '#0f172a',
+                      border: '1px solid #334155',
                       borderRadius: '8px'
                     }}
                     formatter={(value: number) => [value.toFixed(3), 'Authority Score']}
@@ -339,15 +342,15 @@ export function AuthorityDashboard() {
             ) : (
               <ResponsiveContainer width="100%" height={300}>
                 <RadarChart data={radarData}>
-                  <PolarGrid stroke="#374151" />
+                  <PolarGrid stroke="#334155" />
                   <PolarAngleAxis 
                     dataKey="component" 
-                    tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                    tick={{ fontSize: 12, fill: '#94a3b8' }}
                   />
                   <PolarRadiusAxis 
                     angle={90} 
                     domain={[0, 1]} 
-                    tick={{ fontSize: 10, fill: '#6B7280' }}
+                    tick={{ fontSize: 10, fill: '#64748b' }}
                   />
                   <Radar
                     name="Score"
@@ -359,8 +362,8 @@ export function AuthorityDashboard() {
                   />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: '#1F2937', 
-                      border: '1px solid #6366F1',
+                      backgroundColor: '#0f172a', 
+                      border: '1px solid #334155',
                       borderRadius: '8px'
                     }}
                     formatter={(value: number, name, props) => [
@@ -375,7 +378,7 @@ export function AuthorityDashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
         {/* Achievements */}
         <Card className="border-slate-700">
           <CardHeader>
@@ -450,12 +453,13 @@ export function AuthorityDashboard() {
             <div className="space-y-3">
               <div>
                 <label className="text-sm text-slate-400">Next Task Quality Score</label>
-                <input 
-                  type="range" 
-                  min="0" 
-                  max="10" 
+                <input
+                  type="range"
+                  min="0"
+                  max="10"
                   step="0.1"
-                  className="w-full mt-1"
+                  aria-label="Next task quality score"
+                  className="w-full mt-1 focus-visible:ring-2 focus-visible:ring-blue-500"
                   onChange={(e) => {
                     const quality = parseFloat(e.target.value);
                     // Simulate new authority score
@@ -496,7 +500,7 @@ export function AuthorityDashboard() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
             </div>
           ) : (
-            <div className="space-y-2 max-h-64 overflow-y-auto">
+            <div className="space-y-2 max-h-64 overflow-y-auto" role="list" aria-label="Peer ranking">
               {peerComparison?.map((peer, idx) => (
                 <div 
                   key={peer.user_id}

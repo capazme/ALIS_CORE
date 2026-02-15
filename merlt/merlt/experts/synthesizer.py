@@ -492,6 +492,10 @@ class AdaptiveSynthesizer:
         responses: List[ExpertResponse],
     ) -> Optional[DisagreementAnalysis]:
         """Analizza il disagreement tra le risposte."""
+        # Short-circuit: disagreement is meaningless with fewer than 2 responses
+        if len(responses) < 2:
+            return self._heuristic_disagreement(responses)
+
         if self.detector is None:
             return self._heuristic_disagreement(responses)
 
@@ -700,7 +704,7 @@ class AdaptiveSynthesizer:
             )
 
         # Confidenza media (con penalty per disagreement)
-        avg_confidence = sum(r.confidence for r in responses) / len(responses)
+        avg_confidence = sum(r.confidence for r in responses) / len(responses) if responses else 0.0
         if analysis and analysis.intensity:
             avg_confidence *= (1 - analysis.intensity * 0.3)
 

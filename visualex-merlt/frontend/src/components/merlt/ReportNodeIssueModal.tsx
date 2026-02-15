@@ -8,12 +8,12 @@
  */
 
 import { useState } from 'react';
-import { Modal } from '../../ui/Modal';
+import { Modal } from '../ui/Modal';
 import { AlertTriangle, Loader2, CheckCircle2, AlertCircle, Info, ArrowRight, Link2 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { reportNodeIssue } from '../../../services/merltService';
-import type { SubgraphNode, SubgraphEdge, IssueType, IssueSeverity } from '../../../types/merlt';
-import { ISSUE_TYPE_LABELS, ISSUE_SEVERITY_LABELS } from '../../../types/merlt';
+import { cn } from '../../lib/utils';
+import { reportNodeIssue } from '../../services/merltService';
+import type { SubgraphNode, SubgraphEdge, IssueType, IssueSeverity } from '../../types/merlt';
+import { ISSUE_TYPE_LABELS, ISSUE_SEVERITY_LABELS } from '../../types/merlt';
 
 // =============================================================================
 // TYPES
@@ -73,15 +73,15 @@ export function ReportNodeIssueModal({
     : node?.id;
 
   // Form state - default to wrong_relation for edges
-  const [issueType, setIssueType] = useState<IssueType>(isEdgeReport ? 'wrong_relation' : 'factual_error');
-  const [severity, setSeverity] = useState<IssueSeverity>('medium');
+  const [issueType, setIssueType] = useState(isEdgeReport ? 'wrong_relation' : 'factual_error' as IssueType);
+  const [severity, setSeverity] = useState('medium' as IssueSeverity);
   const [description, setDescription] = useState('');
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null as string | null);
   const [success, setSuccess] = useState(false);
-  const [mergedWith, setMergedWith] = useState<string | null>(null);
+  const [mergedWith, setMergedWith] = useState(null as string | null);
 
   // Reset form
   const resetForm = () => {
@@ -152,9 +152,9 @@ export function ReportNodeIssueModal({
       {success ? (
         <div className="text-center py-8">
           <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 size={28} />
+            <CheckCircle2 size={28} aria-hidden="true" />
           </div>
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2" role="status">
             Segnalazione inviata!
           </h3>
           <p className="text-slate-500 dark:text-slate-400">
@@ -262,7 +262,7 @@ export function ReportNodeIssueModal({
                   type="button"
                   onClick={() => setIssueType(type)}
                   className={cn(
-                    'px-3 py-2.5 rounded-lg border-2 text-left transition-all text-sm',
+                    'px-3 py-2.5 rounded-lg border-2 text-left transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
                     issueType === type
                       ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
                       : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300'
@@ -285,7 +285,7 @@ export function ReportNodeIssueModal({
                   type="button"
                   onClick={() => setIssueType(type)}
                   className={cn(
-                    'px-3 py-2.5 rounded-lg border-2 text-left transition-all text-sm',
+                    'px-3 py-2.5 rounded-lg border-2 text-left transition-all text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
                     issueType === type
                       ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
                       : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300'
@@ -309,7 +309,7 @@ export function ReportNodeIssueModal({
                   type="button"
                   onClick={() => setSeverity(sev)}
                   className={cn(
-                    'flex-1 px-4 py-2.5 rounded-lg border-2 transition-all text-sm font-medium',
+                    'flex-1 px-4 py-2.5 rounded-lg border-2 transition-all text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
                     severity === sev
                       ? sev === 'high'
                         ? 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
@@ -350,8 +350,8 @@ export function ReportNodeIssueModal({
 
           {/* Error */}
           {error && (
-            <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
-              <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400" role="alert">
+              <AlertCircle size={16} className="flex-shrink-0 mt-0.5" aria-hidden="true" />
               {error}
             </div>
           )}
@@ -361,7 +361,7 @@ export function ReportNodeIssueModal({
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+              className="px-4 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               Annulla
             </button>
@@ -371,17 +371,19 @@ export function ReportNodeIssueModal({
               className={cn(
                 'flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all',
                 'bg-amber-600 hover:bg-amber-700 text-white',
-                'disabled:opacity-50 disabled:cursor-not-allowed'
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
               )}
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 size={18} className="animate-spin" />
-                  Invio...
+                  <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+                  <span>Invio...</span>
+                  <span className="sr-only">Invio in corso</span>
                 </>
               ) : (
                 <>
-                  <AlertTriangle size={18} />
+                  <AlertTriangle size={18} aria-hidden="true" />
                   Segnala
                 </>
               )}

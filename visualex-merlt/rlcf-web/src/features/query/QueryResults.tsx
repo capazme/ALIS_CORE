@@ -34,22 +34,22 @@ const STATUS_CONFIG: Record<
   { icon: React.ReactNode; color: string; label: string }
 > = {
   pending: {
-    icon: <Clock className="w-4 h-4" />,
+    icon: <Clock className="w-4 h-4" aria-hidden="true" />,
     color: 'bg-yellow-500/20 border-yellow-500/40 text-yellow-300',
     label: 'In Attesa',
   },
   processing: {
-    icon: <Loader className="w-4 h-4 animate-spin" />,
+    icon: <Loader className="w-4 h-4 animate-spin" aria-hidden="true" />,
     color: 'bg-blue-500/20 border-blue-500/40 text-blue-300',
     label: 'Elaborazione',
   },
   completed: {
-    icon: <CheckCircle className="w-4 h-4" />,
+    icon: <CheckCircle className="w-4 h-4" aria-hidden="true" />,
     color: 'bg-green-500/20 border-green-500/40 text-green-300',
     label: 'Completata',
   },
   failed: {
-    icon: <XCircle className="w-4 h-4" />,
+    icon: <XCircle className="w-4 h-4" aria-hidden="true" />,
     color: 'bg-red-500/20 border-red-500/40 text-red-300',
     label: 'Fallita',
   },
@@ -66,13 +66,14 @@ export function QueryResults() {
   // Loading State
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-950 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-slate-950 py-4 md:py-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
           <Card>
-            <CardContent className="flex flex-col items-center justify-center py-24">
-              <Loader className="w-12 h-12 animate-spin text-blue-500 mb-4" />
-              <p className="text-lg text-gray-400">Caricamento risultati query...</p>
-              <p className="text-sm text-gray-600 mt-2">Trace ID: {traceId}</p>
+            <CardContent className="flex flex-col items-center justify-center py-12 md:py-24" role="status">
+              <Loader className="w-12 h-12 animate-spin text-blue-500 mb-4" aria-hidden="true" />
+              <p className="text-lg text-slate-400">Caricamento risultati query...</p>
+              <p className="text-sm text-slate-600 mt-2">Trace ID: {traceId}</p>
+              <span className="sr-only">Caricamento risultati in corso</span>
             </CardContent>
           </Card>
         </div>
@@ -83,19 +84,19 @@ export function QueryResults() {
   // Error State
   if (error || !queryData) {
     return (
-      <div className="min-h-screen bg-gray-950 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-slate-950 py-4 md:py-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
           <Card className="border-red-500/30">
-            <CardContent className="flex flex-col items-center justify-center py-24">
-              <AlertCircle className="w-12 h-12 text-red-400 mb-4" />
+            <CardContent className="flex flex-col items-center justify-center py-12 md:py-24" role="alert">
+              <AlertCircle className="w-12 h-12 text-red-400 mb-4" aria-hidden="true" />
               <h2 className="text-xl font-semibold text-white mb-2">Query non trovata</h2>
-              <p className="text-gray-400 text-center max-w-md mb-6">
+              <p className="text-slate-400 text-center max-w-md mb-6">
                 {error
-                  ? `Errore: ${(error as any)?.message || 'Impossibile caricare i risultati'}`
+                  ? `Errore: ${(error as Error)?.message || 'Impossibile caricare i risultati'}`
                   : `La query con Trace ID "${traceId}" non è stata trovata o non è disponibile.`}
               </p>
-              <Button onClick={() => navigate('/query')} variant="default">
-                <ArrowLeft className="w-4 h-4 mr-2" />
+              <Button onClick={() => navigate('/query')} variant="default" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 min-h-[44px]">
+                <ArrowLeft className="w-4 h-4 mr-2" aria-hidden="true" />
                 Torna alla ricerca
               </Button>
             </CardContent>
@@ -109,18 +110,18 @@ export function QueryResults() {
   const hasTrace = queryData.execution_trace !== null && queryData.execution_trace !== undefined;
 
   return (
-    <div className="min-h-screen bg-gray-950 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-950 py-4 md:py-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           <div className="flex items-center gap-4 mb-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate('/query')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 min-h-[44px]"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4" aria-hidden="true" />
               Nuova Query
             </Button>
 
@@ -135,20 +136,20 @@ export function QueryResults() {
 
           <div className="flex items-start gap-4">
             <div className="p-3 bg-green-500/10 rounded-lg">
-              <FileText className="w-8 h-8 text-green-400" />
+              <FileText className="w-8 h-8 text-green-400" aria-hidden="true" />
             </div>
 
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-white mb-2">Risultati Query</h1>
 
               {/* Query Text */}
-              <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 mb-3">
-                <p className="text-sm text-gray-400 mb-2 font-medium">Domanda Originale:</p>
+              <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 mb-3">
+                <p className="text-sm text-slate-400 mb-2 font-medium">Domanda Originale:</p>
                 <p className="text-white leading-relaxed">{queryData.query}</p>
               </div>
 
               {/* Trace ID */}
-              <div className="flex items-center gap-4 text-sm text-gray-500">
+              <div className="flex items-center gap-4 text-sm text-slate-500">
                 <span>
                   Trace ID: <code className="text-blue-400 font-mono">{traceId}</code>
                 </span>
@@ -171,17 +172,17 @@ export function QueryResults() {
 
         {/* Main Content - Tabs */}
         <Tabs defaultValue="answer" className="space-y-6">
-          <TabsList className="bg-gray-900 p-1 rounded-lg inline-flex gap-1">
-            <TabsTrigger value="answer" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
+          <TabsList className="bg-slate-900 p-1 rounded-lg inline-flex gap-1">
+            <TabsTrigger value="answer" className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 min-h-[44px]">
+              <FileText className="w-4 h-4" aria-hidden="true" />
               Risposta
             </TabsTrigger>
-            <TabsTrigger value="provenance" className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
+            <TabsTrigger value="provenance" className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 min-h-[44px]">
+              <Clock className="w-4 h-4" aria-hidden="true" />
               Provenienza
             </TabsTrigger>
-            <TabsTrigger value="feedback" className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4" />
+            <TabsTrigger value="feedback" className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 min-h-[44px]">
+              <MessageSquare className="w-4 h-4" aria-hidden="true" />
               Feedback
             </TabsTrigger>
           </TabsList>
@@ -215,11 +216,11 @@ export function QueryResults() {
               ) : (
                 <Card>
                   <CardContent className="py-12 text-center">
-                    <AlertCircle className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+                    <AlertCircle className="w-12 h-12 text-yellow-400 mx-auto mb-4" aria-hidden="true" />
                     <h3 className="text-lg font-semibold text-white mb-2">
                       Risposta non disponibile
                     </h3>
-                    <p className="text-gray-400 max-w-md mx-auto">
+                    <p className="text-slate-400 max-w-md mx-auto">
                       {queryData.status === 'processing'
                         ? 'La query è ancora in elaborazione. Ricarica la pagina tra qualche istante.'
                         : queryData.status === 'failed'
@@ -243,7 +244,7 @@ export function QueryResults() {
                   <h3 className="text-lg font-semibold text-white mb-2">
                     Traccia di esecuzione non disponibile
                   </h3>
-                  <p className="text-gray-400 max-w-md mx-auto">
+                  <p className="text-slate-400 max-w-md mx-auto">
                     La traccia di esecuzione non è stata generata per questa query. Potrebbe
                     essere stata disabilitata nelle opzioni di esecuzione.
                   </p>

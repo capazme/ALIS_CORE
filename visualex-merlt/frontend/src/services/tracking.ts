@@ -114,7 +114,7 @@ async function flushEvents(): Promise<void> {
   try {
     const token = await config.getAuthToken();
 
-    await fetch(`${config.apiBaseUrl}/merlt/tracking/events`, {
+    const response = await fetch(`${config.apiBaseUrl}/merlt/tracking/events`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -122,10 +122,13 @@ async function flushEvents(): Promise<void> {
       },
       body: JSON.stringify({ events }),
     });
-  } catch (error) {
-    console.error('[MERLT] Failed to send tracking events:', error);
-    // Re-queue failed events (at the front)
-    eventQueue.unshift(...events);
+
+    // Don't re-queue on 404 (endpoint not implemented yet)
+    if (!response.ok && response.status !== 404) {
+      eventQueue.unshift(...events);
+    }
+  } catch {
+    // Silently discard - tracking is best-effort
   }
 }
 

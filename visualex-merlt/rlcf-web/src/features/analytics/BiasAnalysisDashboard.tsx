@@ -158,11 +158,11 @@ export function BiasAnalysisDashboard({ taskId, userId, timeRange = 'month' }: B
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" role="main" aria-label="Bias Analysis Dashboard">
       {/* Header */}
       <Card className={`border-2 ${overallBiasScore > 0.6 ? 'border-red-600 bg-red-950/10' : overallBiasScore > 0.3 ? 'border-yellow-600 bg-yellow-950/10' : 'border-green-600 bg-green-950/10'}`}>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle className="flex items-center gap-3 text-2xl">
                 <span className="text-3xl">🔍</span>
@@ -192,19 +192,20 @@ export function BiasAnalysisDashboard({ taskId, userId, timeRange = 'month' }: B
       </Card>
 
       {/* View Mode Selector */}
-      <div className="flex justify-center space-x-2">
+      <nav className="flex flex-wrap justify-center gap-2" aria-label="View mode selector">
         {(['overview', 'detailed', 'mitigation', 'trends'] as const).map((mode) => (
           <Button
             key={mode}
             variant={viewMode === mode ? "default" : "outline"}
             onClick={() => setViewMode(mode)}
             size="sm"
-            className="capitalize"
+            className="capitalize focus-visible:ring-2 focus-visible:ring-blue-500"
+            aria-pressed={viewMode === mode}
           >
             {mode}
           </Button>
         ))}
-      </div>
+      </nav>
 
       {/* Overview Mode */}
       {viewMode === 'overview' && (
@@ -220,7 +221,7 @@ export function BiasAnalysisDashboard({ taskId, userId, timeRange = 'month' }: B
             <CardContent>
               <ResponsiveContainer width="100%" height={350}>
                 <RadarChart data={radarData}>
-                  <PolarGrid stroke="#374151" />
+                  <PolarGrid stroke="#334155" />
                   <PolarAngleAxis 
                     dataKey="dimension" 
                     tick={{ fill: '#9CA3AF', fontSize: 12 }}
@@ -248,8 +249,8 @@ export function BiasAnalysisDashboard({ taskId, userId, timeRange = 'month' }: B
                   />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: '#1F2937', 
-                      border: '1px solid #374151',
+                      backgroundColor: '#0f172a', 
+                      border: '1px solid #334155',
                       borderRadius: '8px'
                     }}
                     formatter={(value: number, name: string) => [
@@ -489,7 +490,7 @@ export function BiasAnalysisDashboard({ taskId, userId, timeRange = 'month' }: B
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
                 <LineChart data={biasAnalysis.timeline}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                   <XAxis 
                     dataKey="timestamp" 
                     stroke="#9CA3AF"
@@ -498,8 +499,8 @@ export function BiasAnalysisDashboard({ taskId, userId, timeRange = 'month' }: B
                   <YAxis stroke="#9CA3AF" domain={[0, 1]} />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: '#1F2937', 
-                      border: '1px solid #374151',
+                      backgroundColor: '#0f172a', 
+                      border: '1px solid #334155',
                       borderRadius: '8px'
                     }}
                     labelFormatter={(value) => new Date(value).toLocaleDateString()}
@@ -530,7 +531,7 @@ export function BiasAnalysisDashboard({ taskId, userId, timeRange = 'month' }: B
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <ScatterChart data={biasCorrelations}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                     <XAxis 
                       dataKey="correlation" 
                       domain={[-1, 1]}
@@ -545,8 +546,8 @@ export function BiasAnalysisDashboard({ taskId, userId, timeRange = 'month' }: B
                     />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: '#1F2937', 
-                        border: '1px solid #374151',
+                        backgroundColor: '#0f172a', 
+                        border: '1px solid #334155',
                         borderRadius: '8px'
                       }}
                       formatter={(value, name) => [typeof value === 'number' ? value.toFixed(3) : value, name]}

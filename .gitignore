@@ -200,6 +200,11 @@ Legacy/VisuaLexAPI/logs/
 experiments/outputs/
 **/experiment_results/
 
+# MERL-T generated exports
+merlt/exports/
+merlt/api-contract.json
+merlt/frontend-audit.json
+
 # Model weights (troppo grandi per git)
 *.pt
 *.pth

@@ -13,7 +13,7 @@ import {
   lightTheme,
   darkTheme,
 } from 'reagraph';
-import type { GraphCanvasRef, NodePositionArgs } from 'reagraph';
+import type { GraphCanvasRef, NodePositionArgs, GraphNode } from 'reagraph';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
@@ -34,8 +34,8 @@ import {
 import { cn } from '../../../lib/utils';
 import { useSubgraph } from '../../../hooks/useSubgraph';
 import { getSmartLabel } from '../../../utils/graphLabels';
-import { ReportNodeIssueModal } from '../merlt/ReportNodeIssueModal';
-import type { EdgeReportData } from '../merlt/ReportNodeIssueModal';
+import { ReportNodeIssueModal } from '../../merlt/ReportNodeIssueModal';
+import type { EdgeReportData } from '../../merlt/ReportNodeIssueModal';
 import type { SubgraphNode, SubgraphEdge } from '../../../types/merlt';
 
 // =============================================================================
@@ -228,12 +228,12 @@ export function KnowledgeGraphExplorer({
 }: KnowledgeGraphExplorerProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState([] as string[]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const [reportingNode, setReportingNode] = useState<SubgraphNode | null>(null);
-  const [reportingEdge, setReportingEdge] = useState<EdgeReportData | null>(null);
-  const graphRef = useRef<GraphCanvasRef | null>(null);
+  const [reportingNode, setReportingNode] = useState(null as SubgraphNode | null);
+  const [reportingEdge, setReportingEdge] = useState(null as EdgeReportData | null);
+  const graphRef = useRef(null as GraphCanvasRef | null);
 
   const resolvedUserId = userId || 'anonymous';
 
@@ -254,21 +254,20 @@ export function KnowledgeGraphExplorer({
   });
 
   const { selections, onNodeClick, onCanvasClick } = useSelection({
-    nodes: data.nodes,
-    edges: data.edges,
+    ref: graphRef,
   });
 
   useEffect(() => {
-    if (!selections.nodes.length) {
+    if (!selections.length) {
       setSelectedNode(null);
       return;
     }
 
-    const node = data.nodes.find(n => n.id === selections.nodes[0]);
+    const node = data.nodes.find((n: SubgraphNode) => n.id === selections[0]);
     if (node) {
       setSelectedNode(node);
     }
-  }, [selections.nodes, data.nodes, setSelectedNode]);
+  }, [selections, data.nodes, setSelectedNode]);
 
   const filteredNodes = useMemo(() => {
     if (!searchQuery) return data.nodes;
@@ -277,7 +276,7 @@ export function KnowledgeGraphExplorer({
     );
   }, [data.nodes, searchQuery]);
 
-  const graphNodes = useMemo(() => filteredNodes.map(node => ({
+  const graphNodes = useMemo(() => filteredNodes.map((node: SubgraphNode) => ({
     id: node.id,
     label: getSmartLabel(node),
     size: node.type === 'Norma' ? 12 : 8,
@@ -300,9 +299,9 @@ export function KnowledgeGraphExplorer({
     return Array.from(types).sort();
   }, [data.nodes]);
 
-  const handleNodeClick = useCallback((nodeId: string) => {
-    onNodeClick(nodeId);
-    const node = data.nodes.find(n => n.id === nodeId);
+  const handleNodeClick = useCallback((graphNode: GraphNode) => {
+    onNodeClick?.(graphNode);
+    const node = data.nodes.find((n: SubgraphNode) => n.id === graphNode.id);
     if (node?.urn) {
       onArticleClick?.(node.urn);
     }
@@ -322,8 +321,8 @@ export function KnowledgeGraphExplorer({
   };
 
   const handleToggleType = (type: string) => {
-    setSelectedTypes(prev => {
-      const next = prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type];
+    setSelectedTypes((prev: string[]) => {
+      const next = prev.includes(type) ? prev.filter((t: string) => t !== type) : [...prev, type];
       setFilters(next);
       return next;
     });
@@ -392,7 +391,7 @@ export function KnowledgeGraphExplorer({
               Tipi di nodo
             </h4>
             <div className="space-y-2 max-h-60 overflow-y-auto">
-              {uniqueTypes.map(type => (
+              {uniqueTypes.map((type: string) => (
                 <label key={type} className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
                   <input
                     type="checkbox"
@@ -444,7 +443,7 @@ export function KnowledgeGraphExplorer({
           nodes={graphNodes}
           edges={graphEdges}
           theme={document.documentElement.classList.contains('dark') ? darkTheme : lightTheme}
-          onNodeClick={({ id }) => handleNodeClick(id)}
+          onNodeClick={(node: GraphNode) => handleNodeClick(node)}
           onCanvasClick={onCanvasClick}
           draggable
           animated

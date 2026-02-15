@@ -7,16 +7,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/components/ui/Select';
 import { Loader2, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { EntityReviewCard } from './EntityReviewCard';
 import { ConfidenceScoreChart } from './ConfidenceScoreChart';
@@ -187,9 +187,10 @@ export const StagingEntityList: React.FC = () => {
   // Loading state
   if (entitiesLoading || statsLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-        <span className="ml-2 text-gray-600">Loading staging queue...</span>
+      <div className="flex items-center justify-center h-96" role="status">
+        <Loader2 className="h-8 w-8 animate-spin text-slate-400" aria-hidden="true" />
+        <span className="ml-2 text-slate-600">Loading staging queue...</span>
+        <span className="sr-only">Loading staging queue</span>
       </div>
     );
   }
@@ -198,9 +199,9 @@ export const StagingEntityList: React.FC = () => {
   if (entitiesError) {
     return (
       <Card className="border-red-200 bg-red-50">
-        <CardContent className="pt-6">
+        <CardContent className="pt-6" role="alert">
           <div className="flex items-center text-red-600">
-            <AlertCircle className="h-5 w-5 mr-2" />
+            <AlertCircle className="h-5 w-5 mr-2" aria-hidden="true" />
             <span>Error loading staging entities: {(entitiesError as Error).message}</span>
           </div>
         </CardContent>
@@ -220,32 +221,32 @@ export const StagingEntityList: React.FC = () => {
         </CardHeader>
         <CardContent>
           {stats && (
-            <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <div className="text-center">
                 <div className="text-2xl font-bold text-yellow-600">{stats.total_pending}</div>
-                <div className="text-sm text-gray-600">Pending</div>
+                <div className="text-sm text-slate-600">Pending</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">{stats.total_approved}</div>
-                <div className="text-sm text-gray-600">Approved</div>
+                <div className="text-sm text-slate-600">Approved</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-red-600">{stats.total_rejected}</div>
-                <div className="text-sm text-gray-600">Rejected</div>
+                <div className="text-sm text-slate-600">Rejected</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">
                   {stats.avg_confidence.toFixed(2)}
                 </div>
-                <div className="text-sm text-gray-600">Avg Confidence</div>
+                <div className="text-sm text-slate-600">Avg Confidence</div>
               </div>
             </div>
           )}
 
           {/* Filters */}
-          <div className="flex gap-4 items-center">
+          <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <label id="staging-status-label" className="block text-sm font-medium text-slate-700 mb-1">Status</label>
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                 <SelectTrigger>
                   <SelectValue />
@@ -259,7 +260,7 @@ export const StagingEntityList: React.FC = () => {
             </div>
 
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Source</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Source</label>
               <Select value={selectedSource} onValueChange={setSelectedSource}>
                 <SelectTrigger>
                   <SelectValue />
@@ -275,7 +276,7 @@ export const StagingEntityList: React.FC = () => {
 
             {selectedEntities.size > 0 && (
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 mb-1">
                   Batch Actions
                 </label>
                 <Button
@@ -285,12 +286,12 @@ export const StagingEntityList: React.FC = () => {
                 >
                   {batchApproveMutation.isPending ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
                       Approving...
                     </>
                   ) : (
                     <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
+                      <CheckCircle className="h-4 w-4 mr-2" aria-hidden="true" />
                       Approve {selectedEntities.size} Selected
                     </>
                   )}
@@ -346,10 +347,10 @@ export const StagingEntityList: React.FC = () => {
         </div>
       ) : (
         <Card>
-          <CardContent className="pt-6 text-center text-gray-500">
+          <CardContent className="pt-6 text-center text-slate-500">
             {selectedStatus === 'PENDING' ? (
               <div>
-                <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-400" />
+                <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-400" aria-hidden="true" />
                 <p className="font-medium">No pending entities!</p>
                 <p className="text-sm">All entities have been reviewed.</p>
               </div>

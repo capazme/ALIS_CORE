@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { FileText, Database } from 'lucide-react';
 
 // =============================================================================
@@ -61,22 +61,22 @@ export const SourceComparison: React.FC<SourceComparisonProps> = ({ entity }) =>
   const extractedText = properties.text || properties.testo_completo || '';
 
   return (
-    <Card className="bg-gray-50">
+    <Card className="bg-slate-50">
       <CardContent className="p-6">
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Source Text */}
           <div>
             <div className="flex items-center mb-3">
-              <FileText className="h-5 w-5 text-blue-600 mr-2" />
-              <h4 className="font-semibold text-gray-900">Original Source</h4>
+              <FileText className="h-5 w-5 text-blue-600 mr-2" aria-hidden="true" />
+              <h4 className="font-semibold text-slate-900">Original Source</h4>
             </div>
 
             {/* Source Metadata */}
-            <div className="bg-white border border-gray-200 rounded p-3 mb-3 text-xs space-y-1">
+            <div className="bg-white border border-slate-200 rounded p-3 mb-3 text-xs space-y-1">
               {provenance.source_file && (
                 <div>
                   <span className="font-medium">File:</span>{' '}
-                  <code className="bg-gray-100 px-1 rounded">{provenance.source_file}</code>
+                  <code className="bg-slate-100 px-1 rounded">{provenance.source_file}</code>
                 </div>
               )}
               {provenance.page_number !== undefined && (
@@ -98,10 +98,10 @@ export const SourceComparison: React.FC<SourceComparisonProps> = ({ entity }) =>
             </div>
 
             {/* Source Text Display */}
-            <div className="bg-white border border-gray-200 rounded p-4 max-h-96 overflow-y-auto">
+            <div className="bg-white border border-slate-200 rounded p-4 max-h-96 overflow-y-auto">
               {sourceText ? (
                 <div
-                  className="text-sm text-gray-800 whitespace-pre-wrap"
+                  className="text-sm text-slate-800 whitespace-pre-wrap"
                   dangerouslySetInnerHTML={{
                     __html: highlightText(
                       sourceText,
@@ -111,7 +111,7 @@ export const SourceComparison: React.FC<SourceComparisonProps> = ({ entity }) =>
                   }}
                 />
               ) : (
-                <div className="text-gray-400 text-sm italic">
+                <div className="text-slate-400 text-sm italic">
                   Source text not available (may have been discarded after extraction)
                 </div>
               )}
@@ -121,8 +121,8 @@ export const SourceComparison: React.FC<SourceComparisonProps> = ({ entity }) =>
           {/* Extracted Entity */}
           <div>
             <div className="flex items-center mb-3">
-              <Database className="h-5 w-5 text-purple-600 mr-2" />
-              <h4 className="font-semibold text-gray-900">Extracted Entity</h4>
+              <Database className="h-5 w-5 text-purple-600 mr-2" aria-hidden="true" />
+              <h4 className="font-semibold text-slate-900">Extracted Entity</h4>
             </div>
 
             {/* Entity Type */}
@@ -133,7 +133,7 @@ export const SourceComparison: React.FC<SourceComparisonProps> = ({ entity }) =>
             </div>
 
             {/* Extracted Properties */}
-            <div className="bg-white border border-gray-200 rounded p-4 max-h-96 overflow-y-auto">
+            <div className="bg-white border border-slate-200 rounded p-4 max-h-96 overflow-y-auto">
               <div className="space-y-3">
                 {Object.entries(properties)
                   .filter(
@@ -144,11 +144,11 @@ export const SourceComparison: React.FC<SourceComparisonProps> = ({ entity }) =>
                       key !== 'source_text'
                   )
                   .map(([key, value]) => (
-                    <div key={key} className="border-b border-gray-100 pb-2 last:border-0">
-                      <div className="text-xs font-semibold text-gray-600 uppercase mb-1">
+                    <div key={key} className="border-b border-slate-100 pb-2 last:border-0">
+                      <div className="text-xs font-semibold text-slate-600 uppercase mb-1">
                         {key.replace(/_/g, ' ')}
                       </div>
-                      <div className="text-sm text-gray-900">
+                      <div className="text-sm text-slate-900">
                         {typeof value === 'string' && value.length > 300 ? (
                           <details className="cursor-pointer">
                             <summary className="text-blue-600 hover:underline text-xs">
@@ -157,7 +157,7 @@ export const SourceComparison: React.FC<SourceComparisonProps> = ({ entity }) =>
                             <div className="mt-2 whitespace-pre-wrap">{value}</div>
                           </details>
                         ) : typeof value === 'object' && value !== null ? (
-                          <pre className="text-xs bg-gray-50 p-2 rounded overflow-x-auto">
+                          <pre className="text-xs bg-slate-50 p-2 rounded overflow-x-auto">
                             {JSON.stringify(value, null, 2)}
                           </pre>
                         ) : (
@@ -173,7 +173,7 @@ export const SourceComparison: React.FC<SourceComparisonProps> = ({ entity }) =>
 
         {/* Comparison Notes */}
         <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-          <h5 className="font-semibold text-yellow-900 text-sm mb-1">🔍 Verification Checklist</h5>
+          <h5 className="font-semibold text-yellow-900 text-sm mb-1">Verification Checklist</h5>
           <ul className="text-xs text-yellow-800 space-y-1">
             <li>• Does the extracted entity accurately reflect the source text?</li>
             <li>• Are all key properties correctly extracted?</li>

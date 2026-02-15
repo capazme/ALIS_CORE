@@ -88,10 +88,10 @@ export const CsvUpload: React.FC<CsvUploadProps> = ({ onUploadComplete }) => {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+        <h3 className="text-lg font-medium text-white mb-2">
           Upload CSV Dataset
         </h3>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-slate-400">
           Upload a CSV file to create tasks. The system will auto-detect the task type based on column names.
         </p>
       </div>
@@ -109,8 +109,8 @@ export const CsvUpload: React.FC<CsvUploadProps> = ({ onUploadComplete }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
-            <p className="text-xs text-gray-500">
+            <p className="text-sm font-medium text-slate-900">{selectedFile.name}</p>
+            <p className="text-xs text-slate-500">
               {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
             </p>
             <Button
@@ -131,18 +131,19 @@ export const CsvUpload: React.FC<CsvUploadProps> = ({ onUploadComplete }) => {
       {/* Options */}
       {selectedFile && (
         <Card className="p-4">
-          <h4 className="font-medium text-gray-900 mb-4">Upload Options</h4>
-          
+          <h4 className="font-medium text-white mb-4">Upload Options</h4>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Task Type */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="csv-task-type" className="block text-sm font-medium text-slate-300 mb-2">
                 Task Type
               </label>
               <select
+                id="csv-task-type"
                 value={taskType}
                 onChange={(e) => setTaskType(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-2 bg-slate-800 border border-slate-600 rounded-md text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 {TASK_TYPES.map((type) => (
                   <option key={type.value} value={type.value}>
@@ -151,7 +152,7 @@ export const CsvUpload: React.FC<CsvUploadProps> = ({ onUploadComplete }) => {
                 ))}
               </select>
               {!taskType && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-slate-400 mt-1">
                   System will auto-detect based on CSV columns
                 </p>
               )}
@@ -160,15 +161,16 @@ export const CsvUpload: React.FC<CsvUploadProps> = ({ onUploadComplete }) => {
             {/* Max Records for Preview */}
             {previewMode && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="csv-max-records" className="block text-sm font-medium text-slate-300 mb-2">
                   Max Records (Preview)
                 </label>
                 <input
+                  id="csv-max-records"
                   type="number"
                   value={maxRecords || ''}
                   onChange={(e) => setMaxRecords(e.target.value ? parseInt(e.target.value) : undefined)}
                   placeholder="All records"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-2 bg-slate-800 border border-slate-600 rounded-md text-white placeholder-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   min="1"
                   max="1000"
                 />
@@ -183,9 +185,9 @@ export const CsvUpload: React.FC<CsvUploadProps> = ({ onUploadComplete }) => {
                 type="checkbox"
                 checked={previewMode}
                 onChange={(e) => setPreviewMode(e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-slate-600 text-blue-600 focus-visible:ring-2 focus-visible:ring-blue-500"
               />
-              <span className="ml-2 text-sm text-gray-700">
+              <span className="ml-2 text-sm text-slate-300">
                 Preview mode (download YAML without creating tasks)
               </span>
             </label>
@@ -202,12 +204,13 @@ export const CsvUpload: React.FC<CsvUploadProps> = ({ onUploadComplete }) => {
             className="flex-1"
           >
             {isLoading ? (
-              <div className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <div className="flex items-center" role="status">
+                <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 {previewMode ? 'Generating Preview...' : 'Uploading...'}
+                <span className="sr-only">{previewMode ? 'Generating preview' : 'Uploading file'}</span>
               </div>
             ) : (
               previewMode ? 'Download YAML Preview' : 'Upload and Create Tasks'
@@ -218,16 +221,16 @@ export const CsvUpload: React.FC<CsvUploadProps> = ({ onUploadComplete }) => {
 
       {/* Error Display */}
       {error && (
-        <Card className="p-4 bg-red-50 border-red-200">
+        <Card className="p-4 bg-red-950/20 border-red-700" role="alert">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-5 w-5 text-red-400" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">Upload Error</h3>
-              <p className="text-sm text-red-700 mt-1">
+              <h3 className="text-sm font-medium text-red-400">Upload Error</h3>
+              <p className="text-sm text-red-300 mt-1">
                 {error.message}
               </p>
             </div>
@@ -237,16 +240,16 @@ export const CsvUpload: React.FC<CsvUploadProps> = ({ onUploadComplete }) => {
 
       {/* Success Display */}
       {uploadMutation.isSuccess && (
-        <Card className="p-4 bg-green-50 border-green-200">
+        <Card className="p-4 bg-green-950/20 border-green-700" role="status">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-5 w-5 text-green-400" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-green-800">Upload Successful</h3>
-              <p className="text-sm text-green-700 mt-1">
+              <h3 className="text-sm font-medium text-green-400">Upload Successful</h3>
+              <p className="text-sm text-green-300 mt-1">
                 Created {uploadMutation.data?.length || 0} tasks successfully.
               </p>
             </div>

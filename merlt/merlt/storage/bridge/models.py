@@ -94,6 +94,9 @@ class BridgeTableEntryBase:
     # Additional metadata (flexible JSONB)
     extra_metadata = Column("metadata", JSONB, nullable=True)
 
+    # Expert affinity scores (F8c): {"literal": 0.5, "systemic": 0.5, ...}
+    expert_affinity = Column(JSONB, nullable=True)
+
     def __repr__(self) -> str:
         return (
             f"<BridgeTableEntry(id={self.id}, "
@@ -116,6 +119,7 @@ class BridgeTableEntryBase:
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "metadata": self.extra_metadata,
+            "expert_affinity": self.expert_affinity,
         }
 
 
@@ -154,6 +158,9 @@ class BridgeTableEntry(BridgeTableEntryBase, Base):
     # Note: renamed from 'metadata' to 'extra_metadata' to avoid SQLAlchemy reserved name
     extra_metadata = Column("metadata", JSONB, nullable=True)
 
+    # Expert affinity scores (F8c): {"literal": 0.5, "systemic": 0.5, ...}
+    expert_affinity = Column(JSONB, nullable=True)
+
     # Constraints
     __table_args__ = (
         UniqueConstraint('chunk_id', 'graph_node_urn', name='bridge_table_chunk_id_graph_node_urn_key'),
@@ -182,4 +189,5 @@ class BridgeTableEntry(BridgeTableEntryBase, Base):
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "metadata": self.extra_metadata,
+            "expert_affinity": self.expert_affinity,
         }

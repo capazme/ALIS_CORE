@@ -74,7 +74,7 @@ export const Collapsible = ({
   };
 
   return (
-    <div className={cn('border border-gray-700 rounded-lg overflow-hidden', className)}>
+    <div className={cn('border border-slate-700 rounded-lg overflow-hidden', className)}>
       {/* Trigger */}
       <button
         type="button"
@@ -83,7 +83,7 @@ export const Collapsible = ({
         disabled={disabled}
         className={cn(
           'w-full px-4 py-3 flex items-center justify-between gap-3',
-          'bg-gray-800 hover:bg-gray-700 transition-colors',
+          'bg-slate-800 hover:bg-slate-700 transition-colors',
           'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset',
           disabled && 'opacity-50 cursor-not-allowed',
           triggerClassName
@@ -92,14 +92,14 @@ export const Collapsible = ({
         aria-controls="collapsible-content"
       >
         <div className="flex items-center gap-3 flex-1 text-left">
-          {icon && <span className="text-gray-400">{icon}</span>}
+          {icon && <span className="text-slate-400">{icon}</span>}
           <span className="text-white font-medium">{title}</span>
           {badge && <span>{badge}</span>}
         </div>
 
         <ChevronDown
           className={cn(
-            'w-5 h-5 text-gray-400 transition-transform duration-200',
+            'w-5 h-5 text-slate-400 transition-transform duration-200',
             isOpen && 'transform rotate-180'
           )}
         />
@@ -116,7 +116,7 @@ export const Collapsible = ({
         style={{ height: height !== undefined ? `${height}px` : 'auto' }}
         aria-hidden={!isOpen}
       >
-        <div className="p-4 bg-gray-900 border-t border-gray-700">
+        <div className="p-4 bg-slate-900 border-t border-slate-700">
           {children}
         </div>
       </div>

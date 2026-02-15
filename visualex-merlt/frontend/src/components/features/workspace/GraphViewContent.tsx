@@ -30,11 +30,11 @@ export function GraphViewContent({
   userId,
 }: GraphViewContentProps) {
   const [depth, setDepth] = useState(initialDepth);
-  const [selectedNode, setSelectedNode] = useState<SubgraphNode | null>(null);
+  const [selectedNode, setSelectedNode] = useState(null as SubgraphNode | null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleNodeClick = useCallback((urn: string) => {
-    console.log('[GraphViewContent] Node clicked:', urn);
+  const handleNodeClick = useCallback((_urn: string) => {
+    // TODO: Handle node click via EventBus
   }, []);
 
   useEffect(() => {
@@ -44,13 +44,13 @@ export function GraphViewContent({
   }, [selectedNode, onNodeSelect]);
 
   const handleRefresh = useCallback(() => {
-    setRefreshKey(prev => prev + 1);
+    setRefreshKey((prev: number) => prev + 1);
   }, []);
 
   const handleCycleDepth = useCallback(() => {
-    setDepth(prev => {
+    setDepth((prev: number) => {
       const next = prev === 3 ? 1 : prev + 1;
-      setRefreshKey(k => k + 1);
+      setRefreshKey((k: number) => k + 1);
       return next;
     });
   }, []);
@@ -94,22 +94,26 @@ export function GraphViewContent({
               "hover:bg-slate-200 dark:hover:bg-slate-700",
               "text-slate-700 dark:text-slate-300 text-xs font-medium"
             )}
+            aria-label="Cambia profondità (1-3)"
             title="Cambia profondità (1-3)"
           >
-            <Layers size={14} />
+            <Layers size={14} aria-hidden="true" />
             <span>Depth: {depth}</span>
           </button>
           <button
+            type="button"
             onClick={handleRefresh}
             className={cn(
               "p-1.5 rounded-lg border transition-all",
               "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700",
               "hover:bg-slate-200 dark:hover:bg-slate-700",
-              "text-slate-600 dark:text-slate-400"
+              "text-slate-600 dark:text-slate-400",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             )}
+            aria-label="Ricarica grafo"
             title="Ricarica grafo"
           >
-            <RefreshCw size={16} />
+            <RefreshCw size={16} aria-hidden="true" />
           </button>
         </div>
       </div>

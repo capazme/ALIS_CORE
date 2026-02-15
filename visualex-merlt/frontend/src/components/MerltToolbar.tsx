@@ -2,116 +2,66 @@
  * MerltToolbar
  *
  * Rendered in the article-toolbar slot when MERLT plugin is active.
- * Shows Brain button with status badge and quick actions for MERLT features.
+ * Shows Brain button that opens the MERLT inspector drawer.
+ * Pattern: single icon button with pending-count badge overlay (Legacy style).
  */
 
 import { useMemo } from 'react';
 import type { SlotProps } from '@visualex/platform/lib/plugins';
-import { Brain, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Brain } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useMerltArticleStatus } from '../hooks/useMerltArticleStatus';
+import { useMerltPanelStore } from '../store/useMerltSidebarStore';
 
 type Props = SlotProps['article-toolbar'];
 
 export function MerltToolbar({ urn, articleId }: Props): React.ReactElement {
-  // TODO: Parse article metadata from urn or articleId
-  // For now, using placeholder values
-  const articleMeta = useMemo(() => {
-    // In real implementation, parse from urn like "lex:art2~cc" -> tipo_atto: "codice civile", articolo: "2"
-    return {
-      tipo_atto: 'codice civile',
-      articolo: '1',
-      numero_atto: undefined,
-      data: undefined,
-      user_id: 'anonymous', // TODO: Get from plugin context
-    };
-  }, [urn, articleId]);
+  const articleMeta = useMemo(() => ({
+    tipo_atto: 'codice civile',
+    articolo: '1',
+    numero_atto: undefined,
+    data: undefined,
+    user_id: 'anonymous',
+  }), [urn, articleId]);
+
+  const open = useMerltPanelStore((s) => s.open);
+  const isOpen = useMerltPanelStore((s) => s.isOpen);
 
   const {
-    isLoading,
     isEnriching,
     hasBeenProcessed,
     pendingCount,
-    validatedCount,
-    requestEnrichment,
   } = useMerltArticleStatus({
     ...articleMeta,
     enabled: true,
   });
 
-  const handleAnalyze = () => {
-    requestEnrichment();
-  };
-
-  // Determine status badge
-  const statusBadge = useMemo(() => {
-    if (isEnriching) {
-      return (
-        <div className="flex items-center gap-1 text-blue-600">
-          <Loader2 size={12} className="animate-spin" />
-          <span className="text-[10px] font-medium">Analisi...</span>
-        </div>
-      );
-    }
-
-    if (pendingCount > 0) {
-      return (
-        <div className="flex items-center gap-1 text-amber-600">
-          <AlertCircle size={12} />
-          <span className="text-[10px] font-medium">{pendingCount} da validare</span>
-        </div>
-      );
-    }
-
-    if (hasBeenProcessed && validatedCount > 0) {
-      return (
-        <div className="flex items-center gap-1 text-emerald-600">
-          <CheckCircle2 size={12} />
-          <span className="text-[10px] font-medium">{validatedCount} entità</span>
-        </div>
-      );
-    }
-
-    return null;
-  }, [isEnriching, pendingCount, hasBeenProcessed, validatedCount]);
-
   return (
-    <div className="flex items-center gap-3">
-      {/* Brain Button */}
+    <div className="flex items-center">
       <button
-        onClick={handleAnalyze}
-        disabled={isEnriching || isLoading}
+        onClick={open}
         className={cn(
-          'flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all',
-          'bg-gradient-to-r from-blue-50 to-indigo-50',
-          'border border-blue-200',
-          'hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300',
-          'disabled:opacity-50 disabled:cursor-not-allowed',
+          'relative p-1.5 rounded-md transition-colors',
           'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-          'dark:from-blue-900/30 dark:to-indigo-900/30',
-          'dark:border-blue-700',
-          'dark:hover:from-blue-900/40 dark:hover:to-indigo-900/40'
+          isOpen
+            ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+            : hasBeenProcessed
+              ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400'
+              : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-blue-500'
         )}
-        title="Analizza articolo con AI"
+        title={hasBeenProcessed ? 'Nel Knowledge Graph' : 'Contribuisci al Knowledge Graph'}
+        aria-label="Apri pannello MERLT"
       >
         <Brain
           size={16}
-          className={cn(
-            'text-blue-600 dark:text-blue-400',
-            isEnriching && 'animate-pulse'
-          )}
+          className={cn(isEnriching && 'animate-pulse')}
         />
-        <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
-          {isEnriching ? 'Analisi...' : hasBeenProcessed ? 'Rianalizza' : 'Analizza'}
-        </span>
+        {pendingCount > 0 && (
+          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-500 text-white text-[9px] rounded-full flex items-center justify-center font-medium">
+            {pendingCount > 9 ? '9+' : pendingCount}
+          </span>
+        )}
       </button>
-
-      {/* Status Badge */}
-      {statusBadge && (
-        <div className="px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
-          {statusBadge}
-        </div>
-      )}
     </div>
   );
 }

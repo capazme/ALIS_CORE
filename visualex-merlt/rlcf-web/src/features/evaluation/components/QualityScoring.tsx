@@ -1,4 +1,4 @@
-import React from 'react';
+import { useId } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
 
 interface QualityScoringProps {
@@ -20,6 +20,8 @@ interface ScoreSliderProps {
 }
 
 function ScoreSlider({ label, description, value, onChange, icon, color }: ScoreSliderProps) {
+  const sliderId = useId();
+
   const getScoreLabel = (score: number) => {
     if (score <= 3) return 'Poor';
     if (score <= 5) return 'Fair';
@@ -40,34 +42,40 @@ function ScoreSlider({ label, description, value, onChange, icon, color }: Score
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg">{icon}</span>
+          <span className="text-lg" aria-hidden="true">{icon}</span>
           <div>
-            <div className="font-medium text-slate-200">{label}</div>
+            <label htmlFor={sliderId} className="font-medium text-slate-200">{label}</label>
             <div className="text-sm text-slate-400">{description}</div>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-lg font-bold text-white">{value}/10</div>
+          <div className="text-lg font-bold text-white" aria-live="polite">{value}/10</div>
           <div className={`text-sm font-medium ${getScoreColor(value)}`}>
             {getScoreLabel(value)}
           </div>
         </div>
       </div>
-      
+
       <div className="relative">
         <input
+          id={sliderId}
           type="range"
           min="1"
           max="10"
           step="1"
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
+          aria-label={`${label} score: ${value} out of 10`}
+          aria-valuemin={1}
+          aria-valuemax={10}
+          aria-valuenow={value}
+          aria-valuetext={`${value} out of 10 - ${getScoreLabel(value)}`}
+          className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           style={{
             background: `linear-gradient(to right, ${color} 0%, ${color} ${(value - 1) * 11.11}%, rgb(51 65 85) ${(value - 1) * 11.11}%, rgb(51 65 85) 100%)`
           }}
         />
-        <div className="flex justify-between text-xs text-slate-500 mt-1">
+        <div className="flex justify-between text-xs text-slate-500 mt-1" aria-hidden="true">
           <span>1</span>
           <span>2</span>
           <span>3</span>
@@ -144,18 +152,18 @@ export function QualityScoring({ scores, onScoreChange }: QualityScoringProps) {
 
         <div className="pt-4 border-t border-slate-700">
           <div className="text-sm text-slate-400 mb-2">Score Distribution</div>
-          <div className="flex gap-1">
-            <div 
+          <div className="flex gap-1" role="img" aria-label={`Score distribution: Accuracy ${scores.accuracy}/10, Utility ${scores.utility}/10, Transparency ${scores.transparency}/10`}>
+            <div
               className="h-2 bg-blue-500 rounded-l"
               style={{ width: `${(scores.accuracy / 30) * 100}%` }}
               title={`Accuracy: ${scores.accuracy}/10`}
             />
-            <div 
+            <div
               className="h-2 bg-purple-500"
               style={{ width: `${(scores.utility / 30) * 100}%` }}
               title={`Utility: ${scores.utility}/10`}
             />
-            <div 
+            <div
               className="h-2 bg-cyan-500 rounded-r"
               style={{ width: `${(scores.transparency / 30) * 100}%` }}
               title={`Transparency: ${scores.transparency}/10`}

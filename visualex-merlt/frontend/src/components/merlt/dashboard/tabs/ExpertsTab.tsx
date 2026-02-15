@@ -27,8 +27,8 @@ import {
   FileText,
   Scale,
 } from 'lucide-react';
-import { cn } from '../../../../../lib/utils';
-import { get } from '../../../../../services/api';
+import { cn } from '../../../../lib/utils';
+import { get } from '../../../../services/api';
 
 // =============================================================================
 // TYPES (from expert_metrics_router.py)
@@ -102,7 +102,7 @@ interface AggregationStats {
 // SERVICE FUNCTIONS
 // =============================================================================
 
-const PREFIX = 'merlt';
+const PREFIX = '/merlt';
 
 async function getExpertPerformance(periodDays = 7): Promise<ExpertPerformanceResponse> {
   return get(`${PREFIX}/expert-metrics/performance?period_days=${periodDays}`);
@@ -144,12 +144,12 @@ function ExpertTable({ experts, totalQueries }: ExpertTableProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
           Expert Performance (Last 7 days)
         </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           {totalQueries.toLocaleString()} query totali
         </p>
       </div>
@@ -157,7 +157,7 @@ function ExpertTable({ experts, totalQueries }: ExpertTableProps) {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="bg-gray-50 dark:bg-gray-700/50 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            <tr className="bg-slate-50 dark:bg-slate-700/50 text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">
               <th className="px-4 py-3 text-left">Expert</th>
               <th className="px-4 py-3 text-right">Accuracy</th>
               <th className="px-4 py-3 text-right">Latency</th>
@@ -166,46 +166,46 @@ function ExpertTable({ experts, totalQueries }: ExpertTableProps) {
               <th className="px-4 py-3 text-right">Queries</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
             {experts.map((expert) => (
-              <tr key={expert.name} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+              <tr key={expert.name} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     {expertIcons[expert.name] || <Users size={16} />}
-                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                    <span className="font-medium text-slate-900 dark:text-slate-100">
                       {expert.display_name}
                     </span>
                   </div>
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                    <span className="font-medium text-slate-900 dark:text-slate-100">
                       {expert.accuracy.toFixed(1)}%
                     </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 ml-1">
                       [{expert.accuracy_ci[0].toFixed(1)}, {expert.accuracy_ci[1].toFixed(1)}]
                     </span>
                   </div>
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                    <span className="font-medium text-slate-900 dark:text-slate-100">
                       {(expert.latency_ms / 1000).toFixed(1)}s
                     </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 ml-1">
                       (p95: {(expert.latency_p95 / 1000).toFixed(1)}s)
                     </span>
                   </div>
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <div className="w-16 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="w-16 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-blue-500"
                         style={{ width: `${expert.usage_percentage}%` }}
                       />
                     </div>
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                    <span className="text-sm text-slate-700 dark:text-slate-300">
                       {expert.usage_percentage.toFixed(1)}%
                     </span>
                   </div>
@@ -216,12 +216,12 @@ function ExpertTable({ experts, totalQueries }: ExpertTableProps) {
                       {expert.feedback_score >= 0 ? '+' : ''}
                       {expert.feedback_score.toFixed(2)}
                     </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 ml-1">
                       ({expert.feedback_count})
                     </span>
                   </div>
                 </td>
-                <td className="px-4 py-3 text-right font-medium text-gray-900 dark:text-gray-100">
+                <td className="px-4 py-3 text-right font-medium text-slate-900 dark:text-slate-100">
                   {expert.queries_handled.toLocaleString()}
                 </td>
               </tr>
@@ -257,16 +257,16 @@ function QueryClassificationCard({ stats }: QueryClassificationCardProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
         Classificazione Query
       </h3>
 
       <div className="mb-4">
-        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
           {stats.total_queries.toLocaleString()}
         </p>
-        <p className="text-sm text-gray-500 dark:text-gray-400">Query totali</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">Query totali</p>
       </div>
 
       {/* Stacked bar */}
@@ -274,7 +274,7 @@ function QueryClassificationCard({ stats }: QueryClassificationCardProps) {
         {stats.by_type.map((type) => (
           <div
             key={type.type}
-            className={cn(typeColors[type.type] || 'bg-gray-500')}
+            className={cn(typeColors[type.type] || 'bg-slate-500')}
             style={{ width: `${type.percentage}%` }}
             title={`${typeLabels[type.type] || type.type}: ${type.count} (${type.percentage.toFixed(1)}%)`}
           />
@@ -287,17 +287,17 @@ function QueryClassificationCard({ stats }: QueryClassificationCardProps) {
           <div key={type.type} className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <span
-                className={cn('w-3 h-3 rounded-full', typeColors[type.type] || 'bg-gray-500')}
+                className={cn('w-3 h-3 rounded-full', typeColors[type.type] || 'bg-slate-500')}
               />
-              <span className="text-gray-700 dark:text-gray-300">
+              <span className="text-slate-700 dark:text-slate-300">
                 {typeLabels[type.type] || type.type}
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-gray-500 dark:text-gray-400">
+              <span className="text-slate-500 dark:text-slate-400">
                 {type.count} ({type.percentage.toFixed(1)}%)
               </span>
-              <span className="text-gray-400 dark:text-gray-500 text-xs">
+              <span className="text-slate-400 dark:text-slate-500 text-xs">
                 {type.avg_latency_ms}ms
               </span>
             </div>
@@ -318,21 +318,21 @@ interface AggregationStatsCardProps {
 
 function AggregationStatsCard({ stats }: AggregationStatsCardProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
         Response Aggregation
       </h3>
 
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Method</p>
-          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3">
+          <p className="text-xs text-slate-500 dark:text-slate-400">Method</p>
+          <p className="text-sm font-medium text-slate-900 dark:text-slate-100 capitalize">
             {stats.method.replace(/_/g, ' ')}
           </p>
         </div>
-        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-          <p className="text-xs text-gray-500 dark:text-gray-400">Avg Experts/Query</p>
-          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+        <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3">
+          <p className="text-xs text-slate-500 dark:text-slate-400">Avg Experts/Query</p>
+          <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
             {stats.avg_experts_per_query.toFixed(1)}
           </p>
         </div>
@@ -342,12 +342,12 @@ function AggregationStatsCard({ stats }: AggregationStatsCardProps) {
       <div className="space-y-3">
         <div>
           <div className="flex justify-between text-sm mb-1">
-            <span className="text-gray-600 dark:text-gray-400">Agreement Rate</span>
+            <span className="text-slate-600 dark:text-slate-400">Agreement Rate</span>
             <span className="text-green-600 dark:text-green-400 font-medium">
               {stats.agreement_rate.toFixed(1)}%
             </span>
           </div>
-          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
             <div
               className="h-full bg-green-500"
               style={{ width: `${stats.agreement_rate}%` }}
@@ -357,12 +357,12 @@ function AggregationStatsCard({ stats }: AggregationStatsCardProps) {
 
         <div>
           <div className="flex justify-between text-sm mb-1">
-            <span className="text-gray-600 dark:text-gray-400">Divergence Rate</span>
+            <span className="text-slate-600 dark:text-slate-400">Divergence Rate</span>
             <span className="text-orange-600 dark:text-orange-400 font-medium">
               {stats.divergence_rate.toFixed(1)}%
             </span>
           </div>
-          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
             <div
               className="h-full bg-orange-500"
               style={{ width: `${stats.divergence_rate}%` }}
@@ -396,7 +396,7 @@ interface RecentQueriesListProps {
 }
 
 function RecentQueriesList({ queries }: RecentQueriesListProps) {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState(null as string | null);
 
   const formatTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleString('it-IT', {
@@ -408,27 +408,33 @@ function RecentQueriesList({ queries }: RecentQueriesListProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
           Query Recenti
         </h3>
       </div>
 
-      <div className="divide-y divide-gray-200 dark:divide-gray-700">
+      <div className="divide-y divide-slate-200 dark:divide-slate-700">
+        {queries.length === 0 && (
+          <div className="p-8 text-center text-slate-400">
+            <p className="text-sm">Nessuna query recente disponibile</p>
+          </div>
+        )}
         {queries.map((query) => (
           <div key={query.trace_id} className="p-4">
             <button
               onClick={() => setExpandedId(expandedId === query.trace_id ? null : query.trace_id)}
-              className="w-full text-left"
+              aria-expanded={expandedId === query.trace_id}
+              className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg"
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
                     {query.query}
                   </p>
                   <div className="flex items-center gap-3 mt-1">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
                       {formatTime(query.timestamp)}
                     </span>
                     <span
@@ -449,13 +455,13 @@ function RecentQueriesList({ queries }: RecentQueriesListProps) {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 ml-4">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     {(query.confidence * 100).toFixed(0)}%
                   </span>
                   {expandedId === query.trace_id ? (
-                    <ChevronUp size={16} className="text-gray-400" />
+                    <ChevronUp size={16} className="text-slate-400" aria-hidden="true" />
                   ) : (
-                    <ChevronDown size={16} className="text-gray-400" />
+                    <ChevronDown size={16} className="text-slate-400" aria-hidden="true" />
                   )}
                 </div>
               </div>
@@ -466,16 +472,16 @@ function RecentQueriesList({ queries }: RecentQueriesListProps) {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700"
+                className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700"
               >
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-gray-500 dark:text-gray-400">Experts usati</p>
+                    <p className="text-slate-500 dark:text-slate-400">Experts usati</p>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {query.experts_used.map((expert) => (
                         <span
                           key={expert}
-                          className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs capitalize"
+                          className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-xs capitalize"
                         >
                           {expert}
                         </span>
@@ -483,11 +489,11 @@ function RecentQueriesList({ queries }: RecentQueriesListProps) {
                     </div>
                   </div>
                   <div>
-                    <p className="text-gray-500 dark:text-gray-400">Latenza</p>
-                    <p className="text-gray-900 dark:text-gray-100">{query.latency_ms}ms</p>
+                    <p className="text-slate-500 dark:text-slate-400">Latenza</p>
+                    <p className="text-slate-900 dark:text-slate-100">{query.latency_ms}ms</p>
                   </div>
                 </div>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
                   Trace ID: {query.trace_id}
                 </p>
               </motion.div>
@@ -504,12 +510,12 @@ function RecentQueriesList({ queries }: RecentQueriesListProps) {
 // =============================================================================
 
 export function ExpertsTab() {
-  const [performance, setPerformance] = useState<ExpertPerformanceResponse | null>(null);
-  const [queryStats, setQueryStats] = useState<QueryStatsResponse | null>(null);
-  const [recentQueries, setRecentQueries] = useState<RecentQueriesResponse | null>(null);
-  const [aggregationStats, setAggregationStats] = useState<AggregationStats | null>(null);
+  const [performance, setPerformance] = useState(null as ExpertPerformanceResponse | null);
+  const [queryStats, setQueryStats] = useState(null as QueryStatsResponse | null);
+  const [recentQueries, setRecentQueries] = useState(null as RecentQueriesResponse | null);
+  const [aggregationStats, setAggregationStats] = useState(null as AggregationStats | null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null as string | null);
 
   const fetchAllData = async () => {
     setLoading(true);
@@ -539,20 +545,21 @@ export function ExpertsTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <RefreshCw size={24} className="animate-spin text-blue-500" />
+      <div className="flex items-center justify-center py-12" role="status">
+        <RefreshCw size={24} className="animate-spin text-blue-500" aria-hidden="true" />
+        <span className="sr-only">Caricamento metriche expert in corso...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
-        <p className="text-gray-500 dark:text-gray-400">{error}</p>
+      <div className="text-center py-12" role="alert">
+        <AlertCircle size={48} className="mx-auto text-red-400 mb-4" aria-hidden="true" />
+        <p className="text-slate-500 dark:text-slate-400">{error}</p>
         <button
           onClick={fetchAllData}
-          className="mt-4 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="mt-4 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         >
           Riprova
         </button>
@@ -571,7 +578,7 @@ export function ExpertsTab() {
       )}
 
       {/* Query Stats + Aggregation */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {queryStats && <QueryClassificationCard stats={queryStats} />}
         {aggregationStats && <AggregationStatsCard stats={aggregationStats} />}
       </div>

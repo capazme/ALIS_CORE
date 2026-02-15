@@ -42,10 +42,10 @@ export function EvaluationWizard({
   // Early return if required props are missing
   if (!task || !response) {
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto" role="alert">
         <Card className="border-red-700 bg-red-950/20">
           <CardContent className="text-center py-12">
-            <div className="text-4xl mb-4">⚠️</div>
+            <div className="text-4xl mb-4" aria-hidden="true">&#9888;&#65039;</div>
             <h3 className="text-xl font-semibold text-red-400 mb-2">Missing Data</h3>
             <p className="text-red-200">Task and response data are required for evaluation.</p>
           </CardContent>
@@ -131,7 +131,7 @@ export function EvaluationWizard({
           setValue(key as any, parsedDraft[key]);
         });
       } catch (error) {
-        console.warn('Failed to load evaluation draft:', error);
+        // Failed to load evaluation draft
       }
     }
   }, [task?.id, response?.id, setValue]);
@@ -167,7 +167,7 @@ export function EvaluationWizard({
       setCurrentStep(4); // Success step
     },
     onError: (error: Error) => {
-      console.error('Failed to submit evaluation:', error);
+      // Failed to submit evaluation - handled by toast
       toast.error('Failed to submit evaluation', {
         id: 'submit-feedback',
         description: error.message || 'Please try again or contact support if the issue persists.'
@@ -238,8 +238,7 @@ export function EvaluationWizard({
             description: `Please fix ${errorCount} error${errorCount > 1 ? 's' : ''} before continuing.`
           });
 
-          // Log errors for debugging
-          console.warn('Form validation errors:', errors);
+          // Form validation errors handled by toast
         }
       )();
     } else {
@@ -365,9 +364,9 @@ export function EvaluationWizard({
           </Card>
           
           <div className="flex justify-between">
-            <Button variant="outline" onClick={handleCancel}>Cancel</Button>
-            <Button onClick={handleNext} size="lg" className="bg-purple-600 hover:bg-purple-700">
-              Continue to Evaluation →
+            <Button variant="outline" onClick={handleCancel} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Cancel</Button>
+            <Button onClick={handleNext} size="lg" className="bg-purple-600 hover:bg-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+              Continue to Evaluation
             </Button>
           </div>
         </div>
@@ -413,7 +412,7 @@ export function EvaluationWizard({
             })()}
           </CardHeader>
           <CardContent>
-            <form className="space-y-6">
+            <form className="space-y-6" aria-label="Evaluation form">
               {mode === 'preference' ? (
                 <PreferenceForm register={register} errors={errors} />
               ) : (
@@ -436,6 +435,8 @@ export function EvaluationWizard({
                 <Button
                   variant="outline"
                   size="sm"
+                  className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  aria-label="Save draft"
                   onClick={() => {
                     const draftData = getValues();
                     if (Object.keys(draftData).length > 0) {
@@ -449,14 +450,14 @@ export function EvaluationWizard({
                     }
                   }}
                 >
-                  💾 Save Draft
+                  Save Draft
                 </Button>
               </div>
 
               <div className="flex justify-between gap-2 pt-4 border-t border-slate-700">
-                <Button variant="outline" onClick={handlePrevious}>← Back</Button>
-                <Button onClick={handleNext} size="lg" className="bg-purple-600 hover:bg-purple-700">
-                  Continue to Quality Scoring →
+                <Button variant="outline" onClick={handlePrevious} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Back</Button>
+                <Button onClick={handleNext} size="lg" className="bg-purple-600 hover:bg-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                  Continue to Quality Scoring
                 </Button>
               </div>
             </div>
@@ -498,31 +499,35 @@ export function EvaluationWizard({
 
               {/* Warnings */}
               {timeSpent < 30000 && (
-                <div className="mt-3 p-2 bg-yellow-900/20 border border-yellow-700/50 rounded text-sm text-yellow-300">
-                  ⚠️ Quick submission detected ({formatTime(timeSpent)}). Consider reviewing your feedback for thoroughness.
+                <div className="mt-3 p-2 bg-yellow-900/20 border border-yellow-700/50 rounded text-sm text-yellow-300" role="alert">
+                  Quick submission detected ({formatTime(timeSpent)}). Consider reviewing your feedback for thoroughness.
                 </div>
               )}
               {(scores.accuracy + scores.utility + scores.transparency) / 3 < 5 && (
-                <div className="mt-3 p-2 bg-red-900/20 border border-red-700/50 rounded text-sm text-red-300">
-                  ⚠️ Low average score detected. Please ensure your evaluation is accurate and fair.
+                <div className="mt-3 p-2 bg-red-900/20 border border-red-700/50 rounded text-sm text-red-300" role="alert">
+                  Low average score detected. Please ensure your evaluation is accurate and fair.
                 </div>
               )}
             </div>
             
             <div className="flex justify-between gap-2 pt-4 border-t border-slate-700 mt-6">
-              <Button variant="outline" onClick={handlePrevious} disabled={submitFeedbackMutation.isPending}>
-                ← Back
+              <Button variant="outline" onClick={handlePrevious} disabled={submitFeedbackMutation.isPending} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                Back
               </Button>
               <Button
                 onClick={handleSubmit(onSubmit)}
                 size="lg"
                 disabled={submitFeedbackMutation.isPending}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-green-600 hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 {submitFeedbackMutation.isPending ? (
-                  <>⏳ Submitting...</>
+                  <span className="flex items-center gap-2" role="status">
+                    <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" aria-hidden="true" />
+                    Submitting...
+                    <span className="sr-only">Submitting evaluation, please wait</span>
+                  </span>
                 ) : (
-                  <>✅ Submit Evaluation</>
+                  'Submit Evaluation'
                 )}
               </Button>
             </div>
@@ -532,24 +537,24 @@ export function EvaluationWizard({
 
       {/* Step 4: Success */}
       {currentStep === 4 && (
-        <Card className="border-green-700 bg-green-950/20">
+        <Card className="border-green-700 bg-green-950/20" role="alert" aria-live="polite">
           <CardContent className="text-center py-12">
-            <div className="text-6xl mb-4">🎉</div>
+            <div className="text-6xl mb-4" aria-hidden="true">&#127881;</div>
             <h3 className="text-2xl font-bold text-green-400 mb-2">Evaluation Submitted Successfully!</h3>
             <p className="text-green-200 mb-6">
               Your feedback has been recorded and will contribute to the RLCF aggregation process.
             </p>
             <div className="bg-green-900/30 rounded-lg p-4 mb-6">
-              <h4 className="font-semibold text-green-300 mb-2">📈 Impact Summary</h4>
+              <h4 className="font-semibold text-green-300 mb-2">Impact Summary</h4>
               <div className="text-sm text-green-200 space-y-1">
-                <p>• Authority Score: Will be updated based on peer validation</p>
-                <p>• Time Investment: {formatTime(timeSpent)} contributed to research</p>
-                <p>• Quality Scores: A:{scores.accuracy}, U:{scores.utility}, T:{scores.transparency}</p>
+                <p>Authority Score: Will be updated based on peer validation</p>
+                <p>Time Investment: {formatTime(timeSpent)} contributed to research</p>
+                <p>Quality Scores: A:{scores.accuracy}, U:{scores.utility}, T:{scores.transparency}</p>
               </div>
             </div>
-            <Button 
-              onClick={() => window.location.reload()} 
-              className="bg-green-600 hover:bg-green-700"
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-green-600 hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               Continue to Next Task
             </Button>

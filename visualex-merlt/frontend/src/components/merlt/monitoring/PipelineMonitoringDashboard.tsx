@@ -33,8 +33,8 @@ import {
   FileSpreadsheet,
   FileCode,
 } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
-import { usePipelineMonitoring } from '../../../../hooks/usePipelineMonitoring';
+import { cn } from '../../../lib/utils';
+import { usePipelineMonitoring } from '../../../hooks/usePipelineMonitoring';
 import {
   type PipelineRun,
   type PipelineError,
@@ -47,7 +47,7 @@ import {
   startPipeline,
   getDatasetStats,
   exportDataset,
-} from '../../../../services/pipelineService';
+} from '../../../services/pipelineService';
 import { PipelineStatsPanel } from './PipelineStatsPanel';
 import { PipelineRunCard } from './PipelineRunCard';
 
@@ -67,16 +67,16 @@ export function PipelineMonitoringDashboard({
   className,
 }: PipelineMonitoringDashboardProps) {
   // State
-  const [statusFilter, setStatusFilter] = useState<PipelineStatus | 'all'>('all');
-  const [typeFilter, setTypeFilter] = useState<PipelineType | 'all'>('all');
-  const [expandedRunId, setExpandedRunId] = useState<string | null>(null);
-  const [runErrors, setRunErrors] = useState<Record<string, PipelineError[]>>({});
-  const [liveProgress, setLiveProgress] = useState<Record<string, ProgressUpdate>>({});
+  const [statusFilter, setStatusFilter] = useState('all' as PipelineStatus | 'all');
+  const [typeFilter, setTypeFilter] = useState('all' as PipelineType | 'all');
+  const [expandedRunId, setExpandedRunId] = useState(null as string | null);
+  const [runErrors, setRunErrors] = useState({} as Record<string, PipelineError[]>);
+  const [liveProgress, setLiveProgress] = useState({} as Record<string, ProgressUpdate>);
 
   // New state for start pipeline dialog
   const [showStartDialog, setShowStartDialog] = useState(false);
   const [startLoading, setStartLoading] = useState(false);
-  const [startForm, setStartForm] = useState<StartPipelineRequest>({
+  const [startForm, setStartForm] = useState({
     tipo_atto: 'codice civile',
     libro: 'IV',
     batch_size: 10,
@@ -85,7 +85,7 @@ export function PipelineMonitoringDashboard({
   });
 
   // Dataset state
-  const [datasetStats, setDatasetStats] = useState<DatasetStats | null>(null);
+  const [datasetStats, setDatasetStats] = useState(null as DatasetStats | null);
   const [datasetLoading, setDatasetLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
@@ -113,13 +113,13 @@ export function PipelineMonitoringDashboard({
       const unsubscribe = subscribeToRun(
         run.run_id,
         (progress) => {
-          setLiveProgress((prev) => ({
+          setLiveProgress((prev: Record<string, ProgressUpdate>) => ({
             ...prev,
             [run.run_id]: progress,
           }));
         },
         (err) => {
-          setRunErrors((prev) => ({
+          setRunErrors((prev: Record<string, PipelineError[]>) => ({
             ...prev,
             [run.run_id]: [...(prev[run.run_id] || []), err],
           }));
@@ -146,12 +146,12 @@ export function PipelineMonitoringDashboard({
     if (!runErrors[runId]) {
       try {
         const errors = await getPipelineErrors(runId);
-        setRunErrors((prev) => ({
+        setRunErrors((prev: Record<string, PipelineError[]>) => ({
           ...prev,
           [runId]: errors,
         }));
       } catch (err) {
-        console.error('Failed to load errors for run:', runId, err);
+        // Error loading run errors - handled silently
       }
     }
   }, [expandedRunId, runErrors]);
@@ -163,7 +163,7 @@ export function PipelineMonitoringDashboard({
       const stats = await getDatasetStats();
       setDatasetStats(stats);
     } catch (err) {
-      console.error('Failed to load dataset stats:', err);
+      // Error loading dataset stats - handled silently
     } finally {
       setDatasetLoading(false);
     }
@@ -186,7 +186,7 @@ export function PipelineMonitoringDashboard({
         alert(response.message);
       }
     } catch (err) {
-      console.error('Failed to start pipeline:', err);
+      // Error starting pipeline - alert shown to user
       alert('Errore nell\'avvio della pipeline');
     } finally {
       setStartLoading(false);
@@ -225,7 +225,7 @@ export function PipelineMonitoringDashboard({
         alert(response.message);
       }
     } catch (err) {
-      console.error('Failed to export dataset:', err);
+      // Error exporting dataset - alert shown to user
       alert('Errore nell\'export del dataset');
     } finally {
       setExportLoading(false);
@@ -238,25 +238,26 @@ export function PipelineMonitoringDashboard({
   return (
     <div className={cn('space-y-6', className)}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             Pipeline Monitoring
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
             Monitora lo stato delle pipeline di ingestion e enrichment
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => setShowStartDialog(true)}
             className={cn(
               'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors',
-              'bg-green-600 text-white hover:bg-green-700'
+              'bg-green-600 text-white hover:bg-green-700',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
             )}
           >
-            <Play size={16} />
+            <Play size={16} aria-hidden="true" />
             Avvia Pipeline
           </button>
 
@@ -264,10 +265,11 @@ export function PipelineMonitoringDashboard({
             onClick={() => setShowExportDialog(true)}
             className={cn(
               'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors',
-              'bg-purple-600 text-white hover:bg-purple-700'
+              'bg-purple-600 text-white hover:bg-purple-700',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
             )}
           >
-            <Download size={16} />
+            <Download size={16} aria-hidden="true" />
             Esporta Dataset
           </button>
 
@@ -280,7 +282,7 @@ export function PipelineMonitoringDashboard({
               'disabled:opacity-50 disabled:cursor-not-allowed'
             )}
           >
-            <RefreshCw size={16} className={cn(isLoading && 'animate-spin')} />
+            <RefreshCw size={16} className={cn(isLoading && 'animate-spin')} aria-hidden="true" />
             Aggiorna
           </button>
         </div>
@@ -289,28 +291,28 @@ export function PipelineMonitoringDashboard({
       {/* Dataset Stats Panel */}
       {datasetStats && (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm mb-1">
               <Database size={14} />
               Nodi Totali
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               {datasetStats.total_nodes.toLocaleString()}
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm mb-1">
               <Activity size={14} />
               Relazioni
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               {datasetStats.total_edges.toLocaleString()}
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm mb-1">
               <FileJson size={14} />
               Articoli
             </div>
@@ -319,8 +321,8 @@ export function PipelineMonitoringDashboard({
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm mb-1">
               <BarChart3 size={14} />
               Entità
             </div>
@@ -329,8 +331,8 @@ export function PipelineMonitoringDashboard({
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm mb-1">
               <Database size={14} />
               Embeddings
             </div>
@@ -339,8 +341,8 @@ export function PipelineMonitoringDashboard({
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mb-1">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm mb-1">
               <Activity size={14} />
               Bridge Mappings
             </div>
@@ -357,12 +359,12 @@ export function PipelineMonitoringDashboard({
       {/* Filters */}
       <div className="flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-2">
-          <Filter size={16} className="text-gray-400" />
-          <span className="text-sm text-gray-600 dark:text-gray-400">Filtri:</span>
+          <Filter size={16} className="text-slate-400" />
+          <span className="text-sm text-slate-600 dark:text-slate-400">Filtri:</span>
         </div>
 
         {/* Status Filter */}
-        <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1 overflow-x-auto">
           {(['all', 'running', 'completed', 'failed'] as const).map((status) => (
             <button
               key={status}
@@ -370,8 +372,8 @@ export function PipelineMonitoringDashboard({
               className={cn(
                 'px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
                 statusFilter === status
-                  ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
               )}
             >
               {status === 'all' && <Database size={14} className="inline mr-1" />}
@@ -387,7 +389,7 @@ export function PipelineMonitoringDashboard({
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value as PipelineType | 'all')}
-          className="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"
+          className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm"
         >
           <option value="all">Tutti i tipi</option>
           <option value="ingestion">Ingestion</option>
@@ -398,7 +400,7 @@ export function PipelineMonitoringDashboard({
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4" role="alert">
           <p className="text-red-600 dark:text-red-400">{error}</p>
         </div>
       )}
@@ -406,16 +408,17 @@ export function PipelineMonitoringDashboard({
       {/* Runs List */}
       <div className="space-y-4">
         {isLoading && filteredRuns.length === 0 ? (
-          <div className="flex items-center justify-center py-12">
-            <RefreshCw size={24} className="animate-spin text-gray-400" />
+          <div className="flex items-center justify-center py-12" role="status" aria-label="Caricamento pipeline">
+            <RefreshCw size={24} className="animate-spin text-slate-400" aria-hidden="true" />
+            <span className="sr-only">Caricamento...</span>
           </div>
         ) : filteredRuns.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-            <Database size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">
+          <div className="text-center py-12 bg-slate-50 dark:bg-slate-800/50 rounded-xl" role="status">
+            <Database size={48} className="mx-auto text-slate-300 dark:text-slate-600 mb-4" />
+            <p className="text-slate-500 dark:text-slate-400">
               Nessuna pipeline run trovata
             </p>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">
               Avvia una pipeline di ingestion o enrichment per vedere i dati qui
             </p>
           </div>
@@ -435,29 +438,30 @@ export function PipelineMonitoringDashboard({
 
       {/* Start Pipeline Dialog */}
       {showStartDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" role="dialog" aria-label="Avvia nuova pipeline" aria-modal="true">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                 Avvia Nuova Pipeline
               </h2>
               <button
                 onClick={() => setShowStartDialog(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+                aria-label="Chiudi dialogo"
               >
-                <X size={20} />
+                <X size={20} aria-hidden="true" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Tipo Atto
                 </label>
                 <select
                   value={startForm.tipo_atto}
                   onChange={(e) => setStartForm({ ...startForm, tipo_atto: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700"
                 >
                   <option value="codice civile">Codice Civile</option>
                   <option value="codice penale">Codice Penale</option>
@@ -467,13 +471,13 @@ export function PipelineMonitoringDashboard({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Libro (opzionale)
                 </label>
                 <select
                   value={startForm.libro || ''}
                   onChange={(e) => setStartForm({ ...startForm, libro: e.target.value || undefined })}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700"
                 >
                   <option value="">Tutti i libri</option>
                   <option value="I">Libro I</option>
@@ -486,7 +490,7 @@ export function PipelineMonitoringDashboard({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Batch Size
                 </label>
                 <input
@@ -495,7 +499,7 @@ export function PipelineMonitoringDashboard({
                   onChange={(e) => setStartForm({ ...startForm, batch_size: parseInt(e.target.value) || 10 })}
                   min={1}
                   max={50}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700"
                 />
               </div>
 
@@ -507,7 +511,7 @@ export function PipelineMonitoringDashboard({
                     onChange={(e) => setStartForm({ ...startForm, skip_existing: e.target.checked })}
                     className="rounded"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                  <span className="text-sm text-slate-700 dark:text-slate-300">
                     Salta articoli esistenti
                   </span>
                 </label>
@@ -519,7 +523,7 @@ export function PipelineMonitoringDashboard({
                     onChange={(e) => setStartForm({ ...startForm, with_enrichment: e.target.checked })}
                     className="rounded"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                  <span className="text-sm text-slate-700 dark:text-slate-300">
                     Con enrichment
                   </span>
                 </label>
@@ -529,7 +533,7 @@ export function PipelineMonitoringDashboard({
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setShowStartDialog(false)}
-                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
               >
                 Annulla
               </button>
@@ -552,21 +556,22 @@ export function PipelineMonitoringDashboard({
 
       {/* Export Dialog */}
       {showExportDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" role="dialog" aria-label="Esporta dataset" aria-modal="true">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                 Esporta Dataset
               </h2>
               <button
                 onClick={() => setShowExportDialog(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
+                aria-label="Chiudi dialogo"
               >
-                <X size={20} />
+                <X size={20} aria-hidden="true" />
               </button>
             </div>
 
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
               Scegli il formato di esportazione per il dataset del knowledge graph.
             </p>
 
@@ -576,7 +581,7 @@ export function PipelineMonitoringDashboard({
                 disabled={exportLoading}
                 className={cn(
                   'flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors',
-                  'border-gray-200 dark:border-gray-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20',
+                  'border-slate-200 dark:border-slate-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20',
                   'disabled:opacity-50'
                 )}
               >
@@ -589,7 +594,7 @@ export function PipelineMonitoringDashboard({
                 disabled={exportLoading}
                 className={cn(
                   'flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors',
-                  'border-gray-200 dark:border-gray-700 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20',
+                  'border-slate-200 dark:border-slate-700 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20',
                   'disabled:opacity-50'
                 )}
               >
@@ -602,7 +607,7 @@ export function PipelineMonitoringDashboard({
                 disabled={exportLoading}
                 className={cn(
                   'flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors',
-                  'border-gray-200 dark:border-gray-700 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20',
+                  'border-slate-200 dark:border-slate-700 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20',
                   'disabled:opacity-50'
                 )}
               >
@@ -612,8 +617,8 @@ export function PipelineMonitoringDashboard({
             </div>
 
             {exportLoading && (
-              <div className="flex items-center justify-center gap-2 mt-4 text-gray-500">
-                <RefreshCw size={16} className="animate-spin" />
+              <div className="flex items-center justify-center gap-2 mt-4 text-slate-500" role="status">
+                <RefreshCw size={16} className="animate-spin" aria-hidden="true" />
                 <span>Esportazione in corso...</span>
               </div>
             )}

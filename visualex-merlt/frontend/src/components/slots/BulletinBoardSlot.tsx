@@ -5,8 +5,8 @@
  * that were previously imported directly in BulletinBoardPage.
  */
 
-import { KnowledgeGraphExplorer } from '../KnowledgeGraphExplorer';
-import { IssueList } from '../IssueList';
+import { KnowledgeGraphExplorer } from '../features/bulletin/KnowledgeGraphExplorer';
+import { IssueList } from '../merlt/IssueList';
 import type { SlotProps } from '@visualex/platform/lib/plugins';
 
 export function BulletinBoardSlot({ userId }: SlotProps['bulletin-board']) {
@@ -18,7 +18,7 @@ export function BulletinBoardSlot({ userId }: SlotProps['bulletin-board']) {
           className="w-full"
           userId={userId}
           onArticleClick={(urn) => {
-            console.log('Navigate to article:', urn);
+            // TODO: Navigate to article via EventBus
           }}
         />
       </div>

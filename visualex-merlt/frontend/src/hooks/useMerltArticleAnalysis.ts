@@ -1,12 +1,13 @@
 /**
  * useMerltArticleAnalysis Hook
  *
- * Fetches MERLT analysis data (entities, relations) for an article.
+ * Fetches MERLT analysis data (entities, relations) for an article
+ * by calling the graph API endpoints via merltService.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Entity, Relation } from '../components/EntityList';
-import { getMerltConfig } from '../services/merltInit';
+import { getArticleEntities, getArticleRelations } from '../services/merltService';
 
 interface ArticleAnalysis {
   entities: Entity[];
@@ -22,48 +23,34 @@ interface UseMerltArticleAnalysisResult {
 }
 
 export function useMerltArticleAnalysis(urn: string): UseMerltArticleAnalysisResult {
-  const [data, setData] = useState<ArticleAnalysis | undefined>();
+  const [data, setData] = useState(undefined as unknown as ArticleAnalysis | undefined);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState(null as Error | null);
 
-  const fetchAnalysis = async () => {
-    const config = getMerltConfig();
-    if (!config) {
-      setError(new Error('MERLT not initialized'));
-      setIsLoading(false);
-      return;
-    }
-
+  const fetchAnalysis = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const token = await config.getAuthToken();
-      const response = await fetch(`${config.apiBaseUrl}/merlt/articles/${encodeURIComponent(urn)}/analysis`, {
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
+      const [entitiesResult, relationsResult] = await Promise.all([
+        getArticleEntities(urn),
+        getArticleRelations(urn),
+      ]);
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch analysis: ${response.statusText}`);
-      }
-
-      const result = await response.json();
       setData({
-        entities: result.entities ?? [],
-        relations: result.relations ?? [],
+        entities: entitiesResult.entities ?? [],
+        relations: relationsResult.relations ?? [],
       });
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Unknown error'));
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [urn]);
 
   useEffect(() => {
     fetchAnalysis();
-  }, [urn]);
+  }, [fetchAnalysis]);
 
   return {
     entities: data?.entities,

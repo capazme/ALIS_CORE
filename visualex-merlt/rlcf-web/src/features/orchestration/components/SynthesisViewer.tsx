@@ -54,18 +54,20 @@ export function SynthesisViewer({ answer }: SynthesisViewerProps) {
             onClick={() => setViewMode('convergent')}
             variant={viewMode === 'convergent' ? 'default' : 'outline'}
             size="sm"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            aria-pressed={viewMode === 'convergent'}
           >
-            <Merge className="w-4 h-4" />
+            <Merge className="w-4 h-4" aria-hidden="true" />
             Convergent
           </Button>
           <Button
             onClick={() => setViewMode('divergent')}
             variant={viewMode === 'divergent' ? 'default' : 'outline'}
             size="sm"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            aria-pressed={viewMode === 'divergent'}
           >
-            <Split className="w-4 h-4" />
+            <Split className="w-4 h-4" aria-hidden="true" />
             Divergent
           </Button>
         </div>
@@ -100,32 +102,32 @@ export function SynthesisViewer({ answer }: SynthesisViewerProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Primary Answer */}
-            <div className="bg-gray-800 p-4 rounded-lg">
+            <div className="bg-slate-800 p-4 rounded-lg">
               <p className="text-white leading-relaxed">{answer.primary_answer}</p>
             </div>
 
             {/* Legal Basis */}
             {answer.legal_basis && answer.legal_basis.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
+                <h4 className="text-sm font-medium text-slate-400 mb-2 flex items-center gap-2">
                   <FileText className="w-4 h-4" />
                   Legal Basis
                 </h4>
                 <div className="space-y-2">
                   {answer.legal_basis.map((basis, idx) => (
-                    <div key={idx} className="p-3 bg-gray-800 rounded border border-gray-700">
+                    <div key={idx} className="p-3 bg-slate-800 rounded border border-slate-700">
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           {basis.norm_id && (
                             <code className="text-sm text-blue-400">{basis.norm_id}</code>
                           )}
                           {basis.article && (
-                            <span className="ml-2 text-sm text-gray-300">{basis.article}</span>
+                            <span className="ml-2 text-sm text-slate-300">{basis.article}</span>
                           )}
                         </div>
                       </div>
                       {basis.text && (
-                        <p className="mt-2 text-sm text-gray-400 italic">{basis.text}</p>
+                        <p className="mt-2 text-sm text-slate-400 italic">{basis.text}</p>
                       )}
                     </div>
                   ))}
@@ -136,14 +138,14 @@ export function SynthesisViewer({ answer }: SynthesisViewerProps) {
             {/* Consensus Metrics */}
             {answer.consensus_level !== undefined && (
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-800 p-4 rounded-lg">
-                  <div className="text-sm text-gray-400 mb-1">Consensus Level</div>
+                <div className="bg-slate-800 p-4 rounded-lg">
+                  <div className="text-sm text-slate-400 mb-1">Consensus Level</div>
                   <div className="text-2xl font-semibold text-white">
                     {(answer.consensus_level * 100).toFixed(0)}%
                   </div>
                 </div>
-                <div className="bg-gray-800 p-4 rounded-lg">
-                  <div className="text-sm text-gray-400 mb-1">Expert Agreement</div>
+                <div className="bg-slate-800 p-4 rounded-lg">
+                  <div className="text-sm text-slate-400 mb-1">Expert Agreement</div>
                   <div className="text-2xl font-semibold text-white">
                     {answer.consensus_level > 0.8 ? 'High' : answer.consensus_level > 0.5 ? 'Moderate' : 'Low'}
                   </div>
@@ -174,11 +176,11 @@ export function SynthesisViewer({ answer }: SynthesisViewerProps) {
 
               {/* Primary Position */}
               <div className="mb-4">
-                <h4 className="text-sm font-medium text-gray-400 mb-3 flex items-center gap-2">
+                <h4 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
                   <Badge variant="default">Position 1 (Primary)</Badge>
                   {(answer.confidence * 100).toFixed(0)}% confidence
                 </h4>
-                <div className="p-4 bg-gray-800 rounded-lg border-2 border-blue-500/50">
+                <div className="p-4 bg-slate-800 rounded-lg border-2 border-blue-500/50">
                   <p className="text-white leading-relaxed">{answer.primary_answer}</p>
                 </div>
               </div>
@@ -186,27 +188,27 @@ export function SynthesisViewer({ answer }: SynthesisViewerProps) {
               {/* Alternative Positions */}
               {answer.alternative_interpretations!.map((alt, idx) => (
                 <div key={idx} className="mb-4">
-                  <h4 className="text-sm font-medium text-gray-400 mb-3 flex items-center gap-2">
+                  <h4 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
                     <Badge variant="outline">Position {idx + 2}</Badge>
                     {alt.confidence && `${(alt.confidence * 100).toFixed(0)}% confidence`}
                     {alt.supporting_experts && alt.supporting_experts.length > 0 && (
-                      <span className="text-gray-500">
+                      <span className="text-slate-500">
                         • Supported by {alt.supporting_experts.length} expert(s)
                       </span>
                     )}
                   </h4>
-                  <div className="p-4 bg-gray-800 rounded-lg border border-gray-700 space-y-3">
+                  <div className="p-4 bg-slate-800 rounded-lg border border-slate-700 space-y-3">
                     <div>
-                      <h5 className="text-sm font-medium text-gray-400 mb-1">Position</h5>
+                      <h5 className="text-sm font-medium text-slate-400 mb-1">Position</h5>
                       <p className="text-white">{alt.position}</p>
                     </div>
                     <div>
-                      <h5 className="text-sm font-medium text-gray-400 mb-1">Reasoning</h5>
-                      <p className="text-gray-300 text-sm leading-relaxed">{alt.reasoning}</p>
+                      <h5 className="text-sm font-medium text-slate-400 mb-1">Reasoning</h5>
+                      <p className="text-slate-300 text-sm leading-relaxed">{alt.reasoning}</p>
                     </div>
                     {alt.supporting_experts && alt.supporting_experts.length > 0 && (
                       <div>
-                        <h5 className="text-sm font-medium text-gray-400 mb-2">Supporting Experts</h5>
+                        <h5 className="text-sm font-medium text-slate-400 mb-2">Supporting Experts</h5>
                         <div className="flex flex-wrap gap-2">
                           {alt.supporting_experts.map((expert, i) => (
                             <Badge key={i} variant="secondary" size="sm">
@@ -221,24 +223,24 @@ export function SynthesisViewer({ answer }: SynthesisViewerProps) {
               ))}
 
               {/* Shannon Entropy Visualization (placeholder) */}
-              <div className="mt-6 p-4 bg-gray-800 rounded-lg">
-                <h4 className="text-sm font-medium text-gray-400 mb-3">Uncertainty Metrics</h4>
+              <div className="mt-6 p-4 bg-slate-800 rounded-lg">
+                <h4 className="text-sm font-medium text-slate-400 mb-3">Uncertainty Metrics</h4>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">Positions</div>
+                    <div className="text-xs text-slate-500 mb-1">Positions</div>
                     <div className="text-xl font-semibold text-white">
                       {answer.alternative_interpretations!.length + 1}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">Entropy</div>
+                    <div className="text-xs text-slate-500 mb-1">Entropy</div>
                     <div className="text-xl font-semibold text-white">
                       {/* TODO: Calculate Shannon entropy from position distribution */}
                       N/A
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-gray-500 mb-1">Disagreement</div>
+                    <div className="text-xs text-slate-500 mb-1">Disagreement</div>
                     <div className="text-xl font-semibold text-white">
                       {answer.uncertainty_preserved ? 'High' : 'Low'}
                     </div>
@@ -253,10 +255,10 @@ export function SynthesisViewer({ answer }: SynthesisViewerProps) {
       {/* No Alternatives Message */}
       {viewMode === 'divergent' && !hasAlternatives && (
         <Card>
-          <CardContent className="py-8 text-center">
-            <CheckCircle className="w-12 h-12 mx-auto mb-3 text-green-400" />
+          <CardContent className="py-8 text-center" role="status">
+            <CheckCircle className="w-12 h-12 mx-auto mb-3 text-green-400" aria-hidden="true" />
             <h4 className="text-lg font-medium text-white mb-2">Convergent Synthesis</h4>
-            <p className="text-gray-400">
+            <p className="text-slate-400">
               All experts converged on a single position. No alternative interpretations were identified.
             </p>
           </CardContent>

@@ -11,11 +11,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Link2, Loader2, CheckCircle2, AlertCircle, ArrowRight, Sparkles, Search, Plus, Scale, Copy } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { merltService } from '../../../services/merltService';
-import { RELATION_TYPE_OPTIONS, groupByCategory } from '../../../constants/merltTypes';
-import { parseLegalCitation, isSearchReady, formatParsedCitation, type ParsedCitation } from '../../../utils/citationParser';
-import type { RelationType, PendingEntity, NormResolveResponse, ValidationStatus, EntityType, RelationDuplicateCandidate } from '../../../types/merlt';
+import { cn } from '../../lib/utils';
+import { merltService } from '../../services/merltService';
+import { RELATION_TYPE_OPTIONS, groupByCategory } from '../../constants/merltTypes';
+import { parseLegalCitation, isSearchReady, formatParsedCitation, type ParsedCitation } from '../../utils/citationParser';
+import type { RelationType, PendingEntity, NormResolveResponse, ValidationStatus, EntityType, RelationDuplicateCandidate } from '../../types/merlt';
 
 // =============================================================================
 // TYPES
@@ -48,7 +48,7 @@ const groupedRelationOptions = groupByCategory(RELATION_TYPE_OPTIONS);
 // =============================================================================
 
 function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  const [debouncedValue, setDebouncedValue] = useState(value as T);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedValue(value), delay);
@@ -71,39 +71,39 @@ export function ProposeRelationDrawer({
   availableEntities = [],
 }: ProposeRelationDrawerProps) {
   // Form state
-  const [tipoRelazione, setTipoRelazione] = useState<RelationType>('DISCIPLINA');
+  const [tipoRelazione, setTipoRelazione] = useState('DISCIPLINA' as RelationType);
   const [descrizione, setDescrizione] = useState('');
   const [certezza, setCertezza] = useState(0.7);
 
   // Target entity state (autocomplete)
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedEntity, setSelectedEntity] = useState<EntitySearchResult | null>(null);
+  const [selectedEntity, setSelectedEntity] = useState(null as EntitySearchResult | null);
   const [isNewEntity, setIsNewEntity] = useState(false);
-  const [searchResults, setSearchResults] = useState<EntitySearchResult[]>([]);
+  const [searchResults, setSearchResults] = useState([] as EntitySearchResult[]);
   const [isSearching, setIsSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
   // Norm resolution state (R5)
-  const [parsedCitation, setParsedCitation] = useState<ParsedCitation | null>(null);
+  const [parsedCitation, setParsedCitation] = useState(null as ParsedCitation | null);
   const [isNormSelected, setIsNormSelected] = useState(false);
-  const [resolvedNorm, setResolvedNorm] = useState<NormResolveResponse | null>(null);
+  const [resolvedNorm, setResolvedNorm] = useState(null as NormResolveResponse | null);
   const [isResolvingNorm, setIsResolvingNorm] = useState(false);
 
   // Duplicate detection state
   const [duplicatesFound, setDuplicatesFound] = useState(false);
-  const [duplicates, setDuplicates] = useState<RelationDuplicateCandidate[]>([]);
-  const [exactDuplicate, setExactDuplicate] = useState<RelationDuplicateCandidate | null>(null);
+  const [duplicates, setDuplicates] = useState([] as RelationDuplicateCandidate[]);
+  const [exactDuplicate, setExactDuplicate] = useState(null as RelationDuplicateCandidate | null);
   const [isCheckingDuplicates, setIsCheckingDuplicates] = useState(false);
   const [acknowledgedDuplicate, setAcknowledgedDuplicate] = useState(false);
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null as string | null);
   const [success, setSuccess] = useState(false);
 
   // Refs
-  const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef(null as HTMLInputElement | null);
+  const dropdownRef = useRef(null as HTMLDivElement | null);
 
   // Debounced search query
   const debouncedQuery = useDebounce(searchQuery, 300);
@@ -389,8 +389,7 @@ export function ProposeRelationDrawer({
 
       // Success (may have fuzzy duplicates as info)
       if (result.has_duplicates && result.duplicates?.length > 0) {
-        // Inform user about similar relations but proceed
-        console.info('Relazioni simili trovate:', result.duplicates);
+        // Similar relations found but proceeding
       }
 
       setSuccess(true);
@@ -459,6 +458,9 @@ export function ProposeRelationDrawer({
 
           {/* Drawer Panel */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Proponi Nuova Relazione"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -493,10 +495,11 @@ export function ProposeRelationDrawer({
 
               <button
                 onClick={handleClose}
-                className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors group"
+                aria-label="Chiudi pannello"
+                className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 title="Chiudi pannello (Esc)"
               >
-                <X size={20} className="text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200" />
+                <X size={20} className="text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200" aria-hidden="true" />
               </button>
             </div>
 
@@ -570,10 +573,11 @@ export function ProposeRelationDrawer({
 
                   {/* Relation Type */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label htmlFor="propose-relation-tipo" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Tipo di relazione *
                     </label>
                     <select
+                      id="propose-relation-tipo"
                       value={tipoRelazione}
                       onChange={(e) => setTipoRelazione(e.target.value as RelationType)}
                       className={cn(
@@ -598,13 +602,14 @@ export function ProposeRelationDrawer({
 
                   {/* Target Entity - Autocomplete */}
                   <div className="relative">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label htmlFor="propose-relation-target" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Entità di destinazione *
                     </label>
                     <div className="relative">
                       <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
                         ref={inputRef}
+                        id="propose-relation-target"
                         type="text"
                         value={searchQuery}
                         onChange={(e) => {
@@ -644,7 +649,7 @@ export function ProposeRelationDrawer({
                             "max-h-[250px] overflow-y-auto"
                           )}
                         >
-                          {searchResults.map((entity) => (
+                          {searchResults.map((entity: EntitySearchResult) => (
                             <button
                               key={entity.id}
                               type="button"
@@ -704,7 +709,7 @@ export function ProposeRelationDrawer({
                           )}
 
                           {/* Create new option */}
-                          {searchQuery.length >= 2 && !searchResults.find(e => e.nome.toLowerCase() === searchQuery.toLowerCase()) && !isNormSelected && (
+                          {searchQuery.length >= 2 && !searchResults.find((e: EntitySearchResult) => e.nome.toLowerCase() === searchQuery.toLowerCase()) && !isNormSelected && (
                             <button
                               type="button"
                               onClick={handleCreateNew}
@@ -733,10 +738,11 @@ export function ProposeRelationDrawer({
 
                   {/* Descrizione */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label htmlFor="propose-relation-descrizione" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Motivazione *
                     </label>
                     <textarea
+                      id="propose-relation-descrizione"
                       value={descrizione}
                       onChange={(e) => setDescrizione(e.target.value)}
                       placeholder="Spiega perché questa relazione esiste e come si evince dal testo..."
@@ -756,10 +762,11 @@ export function ProposeRelationDrawer({
 
                   {/* Certezza */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label htmlFor="propose-relation-certezza" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       Certezza: {Math.round(certezza * 100)}%
                     </label>
                     <input
+                      id="propose-relation-certezza"
                       type="range"
                       min="0.1"
                       max="1"
@@ -819,7 +826,7 @@ export function ProposeRelationDrawer({
                       {/* Similar duplicates - informational */}
                       {!exactDuplicate && duplicates.length > 0 && (
                         <div className="space-y-2 mb-3 max-h-[150px] overflow-y-auto">
-                          {duplicates.map((dup) => (
+                          {duplicates.map((dup: RelationDuplicateCandidate) => (
                             <div
                               key={dup.relation_id}
                               className="flex items-center gap-2 p-2 bg-white dark:bg-slate-800/50 rounded-lg border border-amber-200 dark:border-amber-800/20"
@@ -878,8 +885,8 @@ export function ProposeRelationDrawer({
 
                   {/* Error */}
                   {error && (
-                    <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
-                      <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+                    <div role="alert" className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
+                      <AlertCircle size={16} className="flex-shrink-0 mt-0.5" aria-hidden="true" />
                       {error}
                     </div>
                   )}
@@ -889,7 +896,7 @@ export function ProposeRelationDrawer({
                     <button
                       type="button"
                       onClick={handleClose}
-                      className="px-4 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                      className="px-4 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 min-h-[44px]"
                     >
                       Annulla
                     </button>
@@ -903,19 +910,20 @@ export function ProposeRelationDrawer({
                         !descrizione.trim()
                       }
                       className={cn(
-                        'flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all',
+                        'flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all min-h-[44px]',
                         'bg-primary-600 hover:bg-primary-700 text-white',
-                        'disabled:opacity-50 disabled:cursor-not-allowed'
+                        'disabled:opacity-50 disabled:cursor-not-allowed',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                       )}
                     >
                       {isSubmitting || isCheckingDuplicates ? (
                         <>
-                          <Loader2 size={18} className="animate-spin" />
+                          <Loader2 size={18} className="animate-spin" aria-hidden="true" />
                           {isCheckingDuplicates ? 'Verifico...' : 'Invio...'}
                         </>
                       ) : (
                         <>
-                          <Link2 size={18} />
+                          <Link2 size={18} aria-hidden="true" />
                           Proponi
                         </>
                       )}

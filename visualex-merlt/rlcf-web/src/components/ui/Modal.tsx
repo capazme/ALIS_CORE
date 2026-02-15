@@ -94,7 +94,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
         <div
           ref={ref}
           className={cn(
-            'relative w-full bg-gray-900 border border-gray-700 rounded-lg shadow-2xl',
+            'relative w-full bg-slate-900 border border-slate-700 rounded-lg shadow-2xl',
             'animate-in fade-in zoom-in-95 duration-200',
             'flex flex-col max-h-[90vh]',
             sizeMap[size],
@@ -103,7 +103,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
         >
           {/* Header */}
           {(title || showCloseButton) && (
-            <div className="flex items-start justify-between p-6 border-b border-gray-700">
+            <div className="flex items-start justify-between p-6 border-b border-slate-700">
               <div className="flex-1">
                 {title && (
                   <h2
@@ -116,7 +116,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
                 {description && (
                   <p
                     id="modal-description"
-                    className="mt-2 text-sm text-gray-400"
+                    className="mt-2 text-sm text-slate-400"
                   >
                     {description}
                   </p>
@@ -127,7 +127,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
                 <button
                   type="button"
                   onClick={onClose}
-                  className="ml-4 p-1 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="ml-4 p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                   aria-label="Close modal"
                 >
                   <X className="w-5 h-5" />
@@ -143,7 +143,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
 
           {/* Footer */}
           {footer && (
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-700 bg-gray-800/50">
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-slate-700 bg-slate-800/50">
               {footer}
             </div>
           )}

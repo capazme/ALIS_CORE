@@ -110,12 +110,13 @@ export function AdminDashboard() {
   // Handle view switching
   if (currentView === 'tasks') {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 p-4 md:p-6">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             onClick={() => setCurrentView('dashboard')}
-            className="text-slate-400 hover:text-white"
+            className="text-slate-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            aria-label="Back to Dashboard"
           >
             ← Back to Dashboard
           </Button>
@@ -127,12 +128,13 @@ export function AdminDashboard() {
 
   if (currentView === 'upload') {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 p-4 md:p-6">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             onClick={() => setCurrentView('dashboard')}
-            className="text-slate-400 hover:text-white"
+            className="text-slate-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            aria-label="Back to Dashboard"
           >
             ← Back to Dashboard
           </Button>
@@ -153,17 +155,18 @@ export function AdminDashboard() {
 
   if (currentView === 'ai-config') {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 p-4 md:p-6">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             onClick={() => setCurrentView('dashboard')}
-            className="text-slate-400 hover:text-white"
+            className="text-slate-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            aria-label="Back to Dashboard"
           >
             ← Back to Dashboard
           </Button>
         </div>
-        
+
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">AI Configuration</h1>
           <p className="text-slate-400 mb-6">Configure OpenRouter integration for realistic AI responses</p>
@@ -174,16 +177,22 @@ export function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-4 md:p-6">
       <div>
         <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
         <p className="text-slate-400">Gestisci tasks, utenti, chiavi e configurazioni del framework</p>
       </div>
 
       {/* System Statistics Overview */}
+      {loadingMetrics && (
+        <div className="flex items-center justify-center py-8" role="status">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400" aria-hidden="true"></div>
+          <span className="sr-only">Loading system metrics...</span>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-blue-600/20">
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-400 mb-1">Total Tasks</p>
@@ -192,7 +201,7 @@ export function AdminDashboard() {
                 </p>
               </div>
               <div className="p-3 bg-blue-500/10 rounded-full">
-                <BarChart className="h-6 w-6 text-blue-400" />
+                <BarChart className="h-6 w-6 text-blue-400" aria-hidden="true" />
               </div>
             </div>
             <div className="mt-3 flex gap-2">
@@ -204,7 +213,7 @@ export function AdminDashboard() {
         </Card>
 
         <Card className="border-purple-600/20">
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-400 mb-1">Total Users</p>
@@ -213,7 +222,7 @@ export function AdminDashboard() {
                 </p>
               </div>
               <div className="p-3 bg-purple-500/10 rounded-full">
-                <Users className="h-6 w-6 text-purple-400" />
+                <Users className="h-6 w-6 text-purple-400" aria-hidden="true" />
               </div>
             </div>
             <div className="mt-3 flex gap-2">
@@ -225,7 +234,7 @@ export function AdminDashboard() {
         </Card>
 
         <Card className="border-green-600/20">
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-400 mb-1">Avg Consensus</p>
@@ -234,7 +243,7 @@ export function AdminDashboard() {
                 </p>
               </div>
               <div className="p-3 bg-green-500/10 rounded-full">
-                <CheckCircle className="h-6 w-6 text-green-400" />
+                <CheckCircle className="h-6 w-6 text-green-400" aria-hidden="true" />
               </div>
             </div>
             <div className="mt-3 flex gap-2">
@@ -246,7 +255,7 @@ export function AdminDashboard() {
         </Card>
 
         <Card className="border-yellow-600/20">
-          <CardContent className="p-6">
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-400 mb-1">Evaluations</p>
@@ -255,7 +264,7 @@ export function AdminDashboard() {
                 </p>
               </div>
               <div className="p-3 bg-yellow-500/10 rounded-full">
-                <Clock className="h-6 w-6 text-yellow-400" />
+                <Clock className="h-6 w-6 text-yellow-400" aria-hidden="true" />
               </div>
             </div>
             <div className="mt-3 flex gap-2">
@@ -273,43 +282,43 @@ export function AdminDashboard() {
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             <Button
               onClick={() => navigate('/admin/ingestion')}
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
-              <Database className="h-4 w-4" />
+              <Database className="h-4 w-4" aria-hidden="true" />
               KG Ingestion
             </Button>
             <Button
               onClick={() => setCurrentView('upload')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
-              <Upload className="h-4 w-4" />
+              <Upload className="h-4 w-4" aria-hidden="true" />
               Upload CSV Dataset
             </Button>
             <Button
               variant="outline"
               onClick={() => setCurrentView('tasks')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className="h-4 w-4" aria-hidden="true" />
               Manage Tasks
             </Button>
             <Button
               variant="outline"
               onClick={() => setCurrentView('ai-config')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
-              🤖 AI Configuration
+              AI Configuration
             </Button>
             <Button
               variant="outline"
               onClick={handleExport}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               disabled={exportDataset.isPending}
             >
-              <Download className="h-4 w-4" />
+              <Download className="h-4 w-4" aria-hidden="true" />
               Export Data
             </Button>
           </div>
@@ -325,36 +334,36 @@ export function AdminDashboard() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label className="block text-sm text-slate-300">New Username</label>
-                <input className="w-full p-2 bg-slate-900 border border-slate-700 rounded" value={username} onChange={(e) => setUsername(e.target.value)} />
+                <label htmlFor="new-username" className="block text-sm text-slate-300">New Username</label>
+                <input id="new-username" className="w-full p-2 bg-slate-900 border border-slate-700 rounded text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" value={username} onChange={(e) => setUsername(e.target.value)} />
                 <div className="flex justify-end">
-                  <Button onClick={() => username && createUser.mutate(username)}>Create User</Button>
+                  <Button className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" onClick={() => username && createUser.mutate(username)}>Create User</Button>
                 </div>
               </div>
 
               <div className="space-y-2 border-t border-slate-700 pt-4">
-                <label className="block text-sm text-slate-300 font-medium">Add Credential</label>
-                <div className="grid grid-cols-2 gap-2 items-end">
-                  <div className="col-span-2">
-                    <label className="block text-xs text-slate-400">User ID</label>
-                    <input type="number" className="w-full p-2 bg-slate-900 border border-slate-700 rounded" value={credUserId} onChange={(e) => setCredUserId(e.target.value === '' ? '' : Number(e.target.value))} />
+                <span className="block text-sm text-slate-300 font-medium">Add Credential</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
+                  <div className="col-span-1 sm:col-span-2">
+                    <label htmlFor="cred-user-id" className="block text-xs text-slate-400">User ID</label>
+                    <input id="cred-user-id" type="number" className="w-full p-2 bg-slate-900 border border-slate-700 rounded text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" value={credUserId} onChange={(e) => setCredUserId(e.target.value === '' ? '' : Number(e.target.value))} />
                   </div>
-                  <div className="col-span-2">
-                    <label className="block text-xs text-slate-400">Type</label>
-                    <select className="w-full p-2 bg-slate-900 border border-slate-700 rounded" value={credType} onChange={(e) => setCredType(e.target.value)}>
+                  <div className="col-span-1 sm:col-span-2">
+                    <label htmlFor="cred-type" className="block text-xs text-slate-400">Type</label>
+                    <select id="cred-type" className="w-full p-2 bg-slate-900 border border-slate-700 rounded text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" value={credType} onChange={(e) => setCredType(e.target.value)}>
                       {['ACADEMIC_DEGREE','PROFESSIONAL_EXPERIENCE','PUBLICATION','INSTITUTIONAL_ROLE'].map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs text-slate-400">Value</label>
-                    <input className="w-full p-2 bg-slate-900 border border-slate-700 rounded" value={credValue} onChange={(e) => setCredValue(e.target.value)} />
+                    <label htmlFor="cred-value" className="block text-xs text-slate-400">Value</label>
+                    <input id="cred-value" className="w-full p-2 bg-slate-900 border border-slate-700 rounded text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" value={credValue} onChange={(e) => setCredValue(e.target.value)} />
                   </div>
                   <div>
-                    <label className="block text-xs text-slate-400">Weight</label>
-                    <input type="number" min={0} max={1} step={0.05} className="w-full p-2 bg-slate-900 border border-slate-700 rounded" value={credWeight} onChange={(e) => setCredWeight(Number(e.target.value))} />
+                    <label htmlFor="cred-weight" className="block text-xs text-slate-400">Weight</label>
+                    <input id="cred-weight" type="number" min={0} max={1} step={0.05} className="w-full p-2 bg-slate-900 border border-slate-700 rounded text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" value={credWeight} onChange={(e) => setCredWeight(Number(e.target.value))} />
                   </div>
-                  <div className="col-span-2 flex justify-end">
-                    <Button onClick={() => {
+                  <div className="col-span-1 sm:col-span-2 flex justify-end">
+                    <Button className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" onClick={() => {
                       if (credUserId === '') return;
                       addCredential.mutate({ id: credUserId as number, credential: { type: credType, value: credValue, weight: credWeight } });
                     }}>Add Credential</Button>
@@ -370,20 +379,20 @@ export function AdminDashboard() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label className="block text-sm text-slate-300">Task Type</label>
-                <select className="w-full p-2 bg-slate-900 border border-slate-700 rounded" value={exportTaskType} onChange={(e) => setExportTaskType(e.target.value as TaskType)}>
+                <label htmlFor="export-task-type" className="block text-sm text-slate-300">Task Type</label>
+                <select id="export-task-type" className="w-full p-2 bg-slate-900 border border-slate-700 rounded text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" value={exportTaskType} onChange={(e) => setExportTaskType(e.target.value as TaskType)}>
                   {Object.values('QA').map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="block text-sm text-slate-300">Format</label>
-                <select className="w-full p-2 bg-slate-900 border border-slate-700 rounded" value={exportFormat} onChange={(e) => setExportFormat(e.target.value)}>
+                <label htmlFor="export-format" className="block text-sm text-slate-300">Format</label>
+                <select id="export-format" className="w-full p-2 bg-slate-900 border border-slate-700 rounded text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" value={exportFormat} onChange={(e) => setExportFormat(e.target.value)}>
                   <option value="sft">SFT (JSONL)</option>
                   <option value="preference">Preference (JSONL)</option>
                 </select>
               </div>
               <div className="flex justify-end">
-                <Button onClick={handleExport} icon={<Download className="h-4 w-4" />} loading={exportDataset.isPending}>
+                <Button className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" onClick={handleExport} icon={<Download className="h-4 w-4" />} loading={exportDataset.isPending}>
                   Export Data
                 </Button>
               </div>
@@ -400,18 +409,18 @@ export function AdminDashboard() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm text-slate-300 mb-2 font-medium">Create Single Task</label>
+                  <span className="block text-sm text-slate-300 mb-2 font-medium">Create Single Task</span>
                   <div className="space-y-2">
-                    <label className="block text-xs text-slate-400">Task Type</label>
-                    <select className="w-full p-2 bg-slate-900 border border-slate-700 rounded" value={taskType} onChange={(e) => setTaskType(e.target.value as TaskType)}>
+                    <label htmlFor="task-type-select" className="block text-xs text-slate-400">Task Type</label>
+                    <select id="task-type-select" className="w-full p-2 bg-slate-900 border border-slate-700 rounded text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" value={taskType} onChange={(e) => setTaskType(e.target.value as TaskType)}>
                       {Object.keys(taskInputPlaceholders).map(t => (
                         <option key={t} value={t}>{t}</option>
                       ))}
                     </select>
                   </div>
                   <div className="space-y-2 mt-2">
-                    <label className="block text-xs text-slate-400">Input Data (JSON)</label>
-                    <textarea className="w-full p-2 bg-slate-900 border border-slate-700 rounded font-mono text-xs" rows={6} value={inputData} onChange={(e) => setInputData(e.target.value)} />
+                    <label htmlFor="input-data-json" className="block text-xs text-slate-400">Input Data (JSON)</label>
+                    <textarea id="input-data-json" className="w-full p-2 bg-slate-900 border border-slate-700 rounded font-mono text-xs text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" rows={6} value={inputData} onChange={(e) => setInputData(e.target.value)} />
                   </div>
                   <div className="flex justify-end mt-2">
                     <Button onClick={() => {
@@ -425,10 +434,10 @@ export function AdminDashboard() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-300 mb-2 font-medium">Create Batch from YAML</label>
+                  <span className="block text-sm text-slate-300 mb-2 font-medium">Create Batch from YAML</span>
                   <div className="space-y-2">
-                    <label className="block text-xs text-slate-400">YAML Content</label>
-                    <textarea className="w-full p-2 bg-slate-900 border border-slate-700 rounded font-mono text-xs" rows={9} value={yamlBatch} onChange={(e) => setYamlBatch(e.target.value)} />
+                    <label htmlFor="yaml-batch-content" className="block text-xs text-slate-400">YAML Content</label>
+                    <textarea id="yaml-batch-content" className="w-full p-2 bg-slate-900 border border-slate-700 rounded font-mono text-xs text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" rows={9} value={yamlBatch} onChange={(e) => setYamlBatch(e.target.value)} />
                   </div>
                   <div className="flex justify-end mt-2">
                     <Button onClick={() => batchCreate.mutate(yamlBatch)}>Create Batch</Button>
@@ -445,32 +454,36 @@ export function AdminDashboard() {
         <Card>
           <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle>User List</CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => refetchUsers()}><RefreshCw className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="sm" onClick={() => refetchUsers()} aria-label="Refresh user list" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><RefreshCw className="h-4 w-4" aria-hidden="true" /></Button>
           </CardHeader>
           <CardContent>
-            <div className="max-h-96 overflow-auto text-xs bg-slate-900 border border-slate-800 rounded">
-              <table className="w-full text-left">
-                <thead className="sticky top-0 bg-slate-900">
-                  <tr className="text-slate-400">
-                    <th className="p-2">ID</th>
-                    <th className="p-2">Username</th>
-                    <th className="p-2">Authority</th>
-                    <th className="p-2">Baseline</th>
-                    <th className="p-2">Track Record</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(users || []).map((u: User) => (
-                    <tr key={u.id} className="border-t border-slate-800 hover:bg-slate-800/50">
-                      <td className="p-2">{u.id}</td>
-                      <td className="p-2 font-medium text-slate-200">{u.username}</td>
-                      <td className="p-2 font-mono text-violet-400">{u.authority_score?.toFixed(3)}</td>
-                      <td className="p-2 font-mono">{u.baseline_credential_score?.toFixed(3)}</td>
-                      <td className="p-2 font-mono">{u.track_record_score?.toFixed(3)}</td>
+            <div className="max-h-96 overflow-x-auto overflow-y-auto text-xs bg-slate-900 border border-slate-800 rounded">
+              {(!users || users.length === 0) ? (
+                <p className="p-6 text-center text-slate-500">No users found. Create a user to get started.</p>
+              ) : (
+                <table className="w-full text-left min-w-[400px]">
+                  <thead className="sticky top-0 bg-slate-900">
+                    <tr className="text-slate-400">
+                      <th className="p-2" scope="col">ID</th>
+                      <th className="p-2" scope="col">Username</th>
+                      <th className="p-2" scope="col">Authority</th>
+                      <th className="p-2" scope="col">Baseline</th>
+                      <th className="p-2" scope="col">Track Record</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {users.map((u: User) => (
+                      <tr key={u.id} className="border-t border-slate-800 hover:bg-slate-800/50">
+                        <td className="p-2">{u.id}</td>
+                        <td className="p-2 font-medium text-slate-200">{u.username}</td>
+                        <td className="p-2 font-mono text-violet-400">{u.authority_score?.toFixed(3)}</td>
+                        <td className="p-2 font-mono">{u.baseline_credential_score?.toFixed(3)}</td>
+                        <td className="p-2 font-mono">{u.track_record_score?.toFixed(3)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -478,22 +491,25 @@ export function AdminDashboard() {
         <Card>
           <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle>Task List</CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => refetchTasks()}><RefreshCw className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="sm" onClick={() => refetchTasks()} aria-label="Refresh task list" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><RefreshCw className="h-4 w-4" aria-hidden="true" /></Button>
           </CardHeader>
           <CardContent>
-            <div className="max-h-96 overflow-auto text-xs bg-slate-900 border border-slate-800 rounded">
-              <table className="w-full text-left">
+            <div className="max-h-96 overflow-x-auto overflow-y-auto text-xs bg-slate-900 border border-slate-800 rounded">
+              {(!tasks || tasks.length === 0) ? (
+                <p className="p-6 text-center text-slate-500">No tasks found. Create a task or upload a CSV to get started.</p>
+              ) : (
+              <table className="w-full text-left min-w-[500px]">
                 <thead className="sticky top-0 bg-slate-900">
                   <tr className="text-slate-400">
-                    <th className="p-2">ID</th>
-                    <th className="p-2">Type</th>
-                    <th className="p-2">Status</th>
-                    <th className="p-2">Input Data</th>
-                    <th className="p-2 text-right">Actions</th>
+                    <th className="p-2" scope="col">ID</th>
+                    <th className="p-2" scope="col">Type</th>
+                    <th className="p-2" scope="col">Status</th>
+                    <th className="p-2" scope="col">Input Data</th>
+                    <th className="p-2 text-right" scope="col">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {(tasks || []).map((t: LegalTask) => (
+                  {tasks.map((t: LegalTask) => (
                     <tr key={t.id} className="border-t border-slate-800 hover:bg-slate-800/50">
                       <td className="p-2">{t.id}</td>
                       <td className="p-2 font-medium text-slate-300">{t.task_type}</td>
@@ -510,6 +526,7 @@ export function AdminDashboard() {
                   ))}
                 </tbody>
               </table>
+              )}
             </div>
           </CardContent>
         </Card>

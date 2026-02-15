@@ -12,30 +12,36 @@ import type {
   TaskType
 } from '../types';
 
+// API keys and URLs from environment variables (see .env.example)
+const API_KEY = import.meta.env.VITE_MERLT_API_KEY || '';
+const ORCHESTRATION_URL = import.meta.env.VITE_ORCHESTRATION_URL || 'http://127.0.0.1:8000';
+const RLCF_URL = import.meta.env.VITE_RLCF_URL || 'http://127.0.0.1:8001';
+const INGESTION_URL = import.meta.env.VITE_INGESTION_URL || 'http://127.0.0.1:8002';
+
 // Orchestration API (porta 8000) - per query e orchestrazione
 const axiosInstance = axios.create({
-  baseURL: 'http://127.0.0.1:8000',
+  baseURL: ORCHESTRATION_URL,
   timeout: 70000, // 70s to allow for 60s backend timeout + margin
   headers: {
-    'X-API-KEY': 'merl-t-admin-key-dev-only-change-in-production'  // Development admin key from migration
+    ...(API_KEY && { 'X-API-KEY': API_KEY }),
   }
 });
 
 // RLCF API (porta 8001) - per utenti, tasks, feedback
 const rlcfAxios = axios.create({
-  baseURL: 'http://127.0.0.1:8001',
+  baseURL: RLCF_URL,
   timeout: 70000, // 70s to allow for 60s backend timeout + margin
   headers: {
-    'X-API-KEY': 'merl-t-admin-key-dev-only-change-in-production'  // Development admin key from migration
+    ...(API_KEY && { 'X-API-KEY': API_KEY }),
   }
 });
 
 // Ingestion API (porta 8002) - per KG ingestion e batch processing
 const ingestionAxios = axios.create({
-  baseURL: 'http://127.0.0.1:8002',
+  baseURL: INGESTION_URL,
   timeout: 60000, // Timeout più lungo per batch processing
   headers: {
-    'X-API-KEY': 'merl-t-admin-key-dev-only-change-in-production'  // Development admin key from migration
+    ...(API_KEY && { 'X-API-KEY': API_KEY }),
   }
 });
 

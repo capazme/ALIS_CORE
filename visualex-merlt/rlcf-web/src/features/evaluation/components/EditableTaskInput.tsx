@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import { useState, useId } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import type { LegalTask } from '../../../types/index';
 
 interface EditableTaskInputProps {
   task: LegalTask;
-  onInputChange: (updatedInputData: any) => void;
+  onInputChange: (updatedInputData: Record<string, unknown>) => void;
 }
 
 interface EditableFieldProps {
@@ -18,17 +18,18 @@ interface EditableFieldProps {
   required?: boolean;
 }
 
-function EditableField({ 
-  label, 
-  value, 
-  onChange, 
-  multiline = false, 
-  placeholder = '', 
+function EditableField({
+  label,
+  value,
+  onChange,
+  multiline = false,
+  placeholder = '',
   icon = '',
-  required = false 
+  required = false
 }: EditableFieldProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value || '');
+  const fieldId = useId();
 
   const handleSave = () => {
     onChange(editValue);
@@ -44,34 +45,36 @@ function EditableField({
     return (
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-slate-300">
-            {icon} {label} {required && <span className="text-red-400">*</span>}
+          <label htmlFor={fieldId} className="text-sm font-medium text-slate-300">
+            <span aria-hidden="true">{icon}</span> {label} {required && <span className="text-red-400" aria-label="required">*</span>}
           </label>
           <div className="flex gap-2">
-            <Button size="sm" onClick={handleSave} className="bg-green-600 hover:bg-green-700">
-              ✓ Save
+            <Button size="sm" onClick={handleSave} className="bg-green-600 hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label={`Save ${label}`}>
+              Save
             </Button>
-            <Button size="sm" variant="secondary" onClick={handleCancel}>
-              ✕ Cancel
+            <Button size="sm" variant="secondary" onClick={handleCancel} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label={`Cancel editing ${label}`}>
+              Cancel
             </Button>
           </div>
         </div>
         {multiline ? (
           <textarea
+            id={fieldId}
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             placeholder={placeholder}
-            className="w-full p-3 bg-slate-900 border border-blue-500 rounded-md text-slate-100 focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 bg-slate-900 border border-blue-500 rounded-md text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             rows={4}
             autoFocus
           />
         ) : (
           <input
+            id={fieldId}
             type="text"
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             placeholder={placeholder}
-            className="w-full p-3 bg-slate-900 border border-blue-500 rounded-md text-slate-100 focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 bg-slate-900 border border-blue-500 rounded-md text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             autoFocus
           />
         )}
@@ -82,16 +85,17 @@ function EditableField({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-slate-300">
-          {icon} {label} {required && <span className="text-red-400">*</span>}
-        </label>
-        <Button 
-          size="sm" 
-          variant="ghost" 
+        <span className="text-sm font-medium text-slate-300">
+          <span aria-hidden="true">{icon}</span> {label} {required && <span className="text-red-400" aria-label="required">*</span>}
+        </span>
+        <Button
+          size="sm"
+          variant="ghost"
           onClick={() => setIsEditing(true)}
-          className="text-blue-400 hover:text-blue-300"
+          className="text-blue-400 hover:text-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+          aria-label={`Edit ${label}`}
         >
-          ✏️ Edit
+          Edit
         </Button>
       </div>
       <div className="bg-slate-800 p-3 rounded border border-slate-700 hover:border-slate-600 transition-colors">
@@ -163,14 +167,15 @@ function formatEditableTaskInput(taskType: string, inputData: any, onInputChange
           />
 
           <div>
-            <label className="text-sm font-medium text-slate-300 mb-2 block">
-              🔢 Context Count
+            <label htmlFor="context-count-input" className="text-sm font-medium text-slate-300 mb-2 block">
+              <span aria-hidden="true">&#128290;</span> Context Count
             </label>
             <input
+              id="context-count-input"
               type="number"
               value={inputData.context_count || 1}
               onChange={(e) => onInputChange('context_count', e.target.value)}
-              className="w-24 p-2 bg-slate-900 border border-slate-700 rounded text-slate-100"
+              className="w-24 p-2 bg-slate-900 border border-slate-700 rounded text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               min="1"
             />
           </div>
@@ -423,18 +428,18 @@ export function EditableTaskInput({ task, onInputChange }: EditableTaskInputProp
           </div>
           {hasChanges && (
             <div className="flex gap-2">
-              <Button size="sm" onClick={handleSaveAll} className="bg-green-600 hover:bg-green-700">
-                💾 Save All Changes
+              <Button size="sm" onClick={handleSaveAll} className="bg-green-600 hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Save all changes">
+                Save All Changes
               </Button>
-              <Button size="sm" variant="secondary" onClick={handleResetAll}>
-                🔄 Reset
+              <Button size="sm" variant="secondary" onClick={handleResetAll} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Reset all changes">
+                Reset
               </Button>
             </div>
           )}
         </CardTitle>
         {hasChanges && (
-          <div className="text-sm text-orange-400 bg-orange-900/20 px-3 py-2 rounded border border-orange-700">
-            ⚠️ You have unsaved changes to the task input
+          <div className="text-sm text-orange-400 bg-orange-900/20 px-3 py-2 rounded border border-orange-700" role="alert">
+            You have unsaved changes to the task input
           </div>
         )}
       </CardHeader>

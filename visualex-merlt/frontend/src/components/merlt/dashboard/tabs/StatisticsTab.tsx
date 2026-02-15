@@ -28,7 +28,7 @@ import {
   TrendingUp,
   Grid3X3,
 } from 'lucide-react';
-import { cn } from '../../../../../lib/utils';
+import { cn } from '../../../../lib/utils';
 import {
   getStatisticsOverview,
   exportStatistics,
@@ -41,7 +41,7 @@ import {
   type HypothesisTestSummary,
   type CorrelationMatrix,
   type ExportFormat,
-} from '../../../../../services/statisticsService';
+} from '../../../../services/statisticsService';
 
 // =============================================================================
 // HYPOTHESIS TEST CARD
@@ -57,7 +57,7 @@ function HypothesisTestCard({ test }: HypothesisTestCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        'bg-white dark:bg-gray-800 rounded-xl border-2 p-6',
+        'bg-white dark:bg-slate-800 rounded-xl border-2 p-6',
         test.supported
           ? 'border-green-200 dark:border-green-800'
           : 'border-red-200 dark:border-red-800'
@@ -68,15 +68,15 @@ function HypothesisTestCard({ test }: HypothesisTestCardProps) {
         <div className="flex items-center gap-3">
           {test.supported ? (
             <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <CheckCircle2 size={20} className="text-green-600 dark:text-green-400" />
+              <CheckCircle2 size={20} className="text-green-600 dark:text-green-400" aria-hidden="true" />
             </div>
           ) : (
             <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-              <XCircle size={20} className="text-red-600 dark:text-red-400" />
+              <XCircle size={20} className="text-red-600 dark:text-red-400" aria-hidden="true" />
             </div>
           )}
           <div>
-            <h3 className="font-bold text-gray-900 dark:text-gray-100">
+            <h3 className="font-bold text-slate-900 dark:text-slate-100">
               {test.hypothesis_id}
             </h3>
             <span
@@ -95,26 +95,26 @@ function HypothesisTestCard({ test }: HypothesisTestCardProps) {
       </div>
 
       {/* Description */}
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+      <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
         {test.description}
       </p>
 
       {/* Pre/Post Stats */}
       {test.pre_stats && test.post_stats && (
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Pre-training</p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Pre-training</p>
+            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               {(test.pre_stats.mean * 100).toFixed(1)}% ± {(test.pre_stats.std * 100).toFixed(1)}%
             </p>
-            <p className="text-xs text-gray-400">n = {test.pre_stats.n}</p>
+            <p className="text-xs text-slate-400">n = {test.pre_stats.n}</p>
           </div>
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Post-training</p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Post-training</p>
+            <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               {(test.post_stats.mean * 100).toFixed(1)}% ± {(test.post_stats.std * 100).toFixed(1)}%
             </p>
-            <p className="text-xs text-gray-400">n = {test.post_stats.n}</p>
+            <p className="text-xs text-slate-400">n = {test.post_stats.n}</p>
           </div>
         </div>
       )}
@@ -122,16 +122,16 @@ function HypothesisTestCard({ test }: HypothesisTestCardProps) {
       {/* Delta */}
       {test.delta !== undefined && (
         <div className="flex items-center gap-2 mb-4">
-          <TrendingUp size={16} className={test.delta >= 0 ? 'text-green-500' : 'text-red-500'} />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <TrendingUp size={16} className={test.delta >= 0 ? 'text-green-500' : 'text-red-500'} aria-hidden="true" />
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
             Δ = {test.delta >= 0 ? '+' : ''}{(test.delta * 100).toFixed(1)}%
           </span>
         </div>
       )}
 
       {/* Statistical test */}
-      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-4 font-mono text-sm">
-        <p className="text-gray-700 dark:text-gray-300">
+      <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 mb-4 font-mono text-sm">
+        <p className="text-slate-700 dark:text-slate-300">
           {test.test_type === 't-test' && `t(${test.df}) = ${test.statistic.toFixed(2)}`}
           {test.test_type === 'paired-t-test' && `t(${test.df}) = ${test.statistic.toFixed(2)}`}
           {test.test_type === 'anova' && `F(${test.df}, ${test.df2}) = ${test.statistic.toFixed(2)}`}
@@ -147,11 +147,11 @@ function HypothesisTestCard({ test }: HypothesisTestCardProps) {
 
       {/* Effect size */}
       <div className="flex items-center justify-between text-sm">
-        <span className={test.effect_size ? getEffectSizeColor(test.effect_size.interpretation) : 'text-gray-500'}>
+        <span className={test.effect_size ? getEffectSizeColor(test.effect_size.interpretation) : 'text-slate-500'}>
           {formatEffectSize(test.effect_size)}
         </span>
         {test.ci_lower != null && test.ci_upper != null && (
-          <span className="text-gray-500 dark:text-gray-400">
+          <span className="text-slate-500 dark:text-slate-400">
             {formatCI(test.ci_lower, test.ci_upper, test.ci_level)}
           </span>
         )}
@@ -159,7 +159,7 @@ function HypothesisTestCard({ test }: HypothesisTestCardProps) {
 
       {/* Notes */}
       {test.notes && (
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-3 italic">
+        <p className="text-xs text-slate-400 dark:text-slate-500 mt-3 italic">
           {test.notes}
         </p>
       )}
@@ -190,10 +190,10 @@ function CorrelationMatrixCard({ matrix }: CorrelationMatrixCardProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
       <div className="flex items-center gap-2 mb-4">
-        <Grid3X3 size={20} className="text-blue-500" />
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <Grid3X3 size={20} className="text-blue-500" aria-hidden="true" />
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
           Matrice di Correlazione
         </h3>
       </div>
@@ -204,7 +204,7 @@ function CorrelationMatrixCard({ matrix }: CorrelationMatrixCardProps) {
             <tr>
               <th className="p-2"></th>
               {matrix.variables.map((v) => (
-                <th key={v} className="p-2 text-center text-gray-600 dark:text-gray-400 font-medium">
+                <th key={v} className="p-2 text-center text-slate-600 dark:text-slate-400 font-medium">
                   {v}
                 </th>
               ))}
@@ -213,7 +213,7 @@ function CorrelationMatrixCard({ matrix }: CorrelationMatrixCardProps) {
           <tbody>
             {matrix.variables.map((rowVar, i) => (
               <tr key={rowVar}>
-                <td className="p-2 text-gray-600 dark:text-gray-400 font-medium">
+                <td className="p-2 text-slate-600 dark:text-slate-400 font-medium">
                   {rowVar}
                 </td>
                 {matrix.matrix[i].map((r, j) => (
@@ -222,7 +222,7 @@ function CorrelationMatrixCard({ matrix }: CorrelationMatrixCardProps) {
                       className={cn(
                         'w-12 h-12 flex items-center justify-center rounded text-xs font-medium',
                         i === j
-                          ? 'bg-gray-200 dark:bg-gray-700 text-gray-500'
+                          ? 'bg-slate-200 dark:bg-slate-700 text-slate-500'
                           : getCorrelationColor(r)
                       )}
                       title={`p = ${matrix.p_values[i][j].toFixed(4)}`}
@@ -238,7 +238,7 @@ function CorrelationMatrixCard({ matrix }: CorrelationMatrixCardProps) {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-4 mt-4 text-xs text-gray-500 dark:text-gray-400">
+      <div className="flex items-center justify-center gap-4 mt-4 text-xs text-slate-500 dark:text-slate-400">
         <span className="flex items-center gap-1">
           <span className="w-3 h-3 bg-red-500 rounded" /> Negativa
         </span>
@@ -249,8 +249,8 @@ function CorrelationMatrixCard({ matrix }: CorrelationMatrixCardProps) {
 
       {/* Significant pairs */}
       {matrix.significant_pairs.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
             Correlazioni significative:
           </p>
           <div className="flex flex-wrap gap-2">
@@ -301,19 +301,19 @@ function ExportPanel({ onExport, loading }: ExportPanelProps) {
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
       <div className="flex items-center gap-2 mb-4">
-        <Download size={20} className="text-blue-500" />
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <Download size={20} className="text-blue-500" aria-hidden="true" />
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
           Export Statistiche
         </h3>
       </div>
 
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
         Esporta i risultati statistici per analisi esterne o inclusione nella tesi.
       </p>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {formats.map((format) => (
           <button
             key={format.id}
@@ -321,16 +321,17 @@ function ExportPanel({ onExport, loading }: ExportPanelProps) {
             disabled={loading}
             className={cn(
               'flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors',
-              'border-gray-200 dark:border-gray-700',
+              'border-slate-200 dark:border-slate-700',
               'hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20',
-              'disabled:opacity-50 disabled:cursor-not-allowed'
+              'disabled:opacity-50 disabled:cursor-not-allowed',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
             )}
           >
-            {format.icon}
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <span aria-hidden="true">{format.icon}</span>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
               {format.label}
             </span>
-            <span className="text-xs text-gray-500 dark:text-gray-400 text-center">
+            <span className="text-xs text-slate-500 dark:text-slate-400 text-center">
               {format.description}
             </span>
           </button>
@@ -338,8 +339,8 @@ function ExportPanel({ onExport, loading }: ExportPanelProps) {
       </div>
 
       {loading && (
-        <div className="flex items-center justify-center gap-2 mt-4 text-gray-500">
-          <RefreshCw size={16} className="animate-spin" />
+        <div className="flex items-center justify-center gap-2 mt-4 text-slate-500" role="status">
+          <RefreshCw size={16} className="animate-spin" aria-hidden="true" />
           <span className="text-sm">Generazione in corso...</span>
         </div>
       )}
@@ -352,11 +353,11 @@ function ExportPanel({ onExport, loading }: ExportPanelProps) {
 // =============================================================================
 
 export function StatisticsTab() {
-  const [hypothesisTests, setHypothesisTests] = useState<HypothesisTestSummary | null>(null);
-  const [correlations, setCorrelations] = useState<CorrelationMatrix | null>(null);
+  const [hypothesisTests, setHypothesisTests] = useState(null as HypothesisTestSummary | null);
+  const [correlations, setCorrelations] = useState(null as CorrelationMatrix | null);
   const [loading, setLoading] = useState(true);
   const [exportLoading, setExportLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null as string | null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -406,20 +407,21 @@ export function StatisticsTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <RefreshCw size={24} className="animate-spin text-blue-500" />
+      <div className="flex items-center justify-center py-12" role="status">
+        <RefreshCw size={24} className="animate-spin text-blue-500" aria-hidden="true" />
+        <span className="sr-only">Caricamento statistiche in corso...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
-        <p className="text-gray-500 dark:text-gray-400">{error}</p>
+      <div className="text-center py-12" role="alert">
+        <AlertCircle size={48} className="mx-auto text-red-400 mb-4" aria-hidden="true" />
+        <p className="text-slate-500 dark:text-slate-400">{error}</p>
         <button
           onClick={fetchData}
-          className="mt-4 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="mt-4 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         >
           Riprova
         </button>
@@ -452,11 +454,11 @@ export function StatisticsTab() {
       {/* Hypothesis Tests Grid */}
       {hypothesisTests && (
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
             Test di Ipotesi
           </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {hypothesisTests.tests.map((test) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {hypothesisTests.tests.map((test: HypothesisTestResult) => (
               <HypothesisTestCard key={test.hypothesis_id} test={test} />
             ))}
           </div>
@@ -470,7 +472,7 @@ export function StatisticsTab() {
       <ExportPanel onExport={handleExport} loading={exportLoading} />
 
       {/* Academic note */}
-      <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+      <div className="text-center text-sm text-slate-500 dark:text-slate-400">
         <p>
           Tutti i test statistici seguono gli standard APA 7th Edition.
           <br />

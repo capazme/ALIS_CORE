@@ -76,7 +76,7 @@ class Experience:
     feedback_data: Dict[str, Any]
     reward: float
     priority: float = 1.0
-    timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -100,7 +100,7 @@ class Experience:
             feedback_data=data["feedback_data"],
             reward=data["reward"],
             priority=data.get("priority", 1.0),
-            timestamp=data.get("timestamp", datetime.now().isoformat()),
+            timestamp=data.get("timestamp", datetime.utcnow().isoformat()),
             metadata=data.get("metadata", {})
         )
 
@@ -194,7 +194,7 @@ class ExperienceReplayBuffer:
         trace_data = trace.to_dict() if hasattr(trace, 'to_dict') else trace
         feedback_data = feedback.to_dict() if hasattr(feedback, 'to_dict') else feedback
 
-        experience_id = f"exp_{self._total_added}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        experience_id = f"exp_{self._total_added}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
 
         experience = Experience(
             experience_id=experience_id,
@@ -270,6 +270,15 @@ class ExperienceReplayBuffer:
     def is_full(self) -> bool:
         """True se il buffer è pieno."""
         return len(self.buffer) >= self.capacity
+
+    def oldest_timestamp(self) -> Optional[datetime]:
+        """Return timestamp of the oldest experience in the buffer."""
+        with self._lock:
+            if not self.buffer:
+                return None
+            return min(
+                datetime.fromisoformat(e.timestamp) for e in self.buffer
+            )
 
     def get_stats(self) -> BufferStats:
         """
@@ -463,6 +472,7 @@ class PrioritizedReplayBuffer:
         self._total_added = 0
         self._total_sampled = 0
         self._max_priority = 1.0
+        self._oldest_ts: Optional[datetime] = None
 
         log.info(
             "PrioritizedReplayBuffer initialized",
@@ -503,7 +513,7 @@ class PrioritizedReplayBuffer:
         trace_data = trace.to_dict() if hasattr(trace, 'to_dict') else trace
         feedback_data = feedback.to_dict() if hasattr(feedback, 'to_dict') else feedback
 
-        experience_id = f"exp_{self._total_added}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        experience_id = f"exp_{self._total_added}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
 
         experience = Experience(
             experience_id=experience_id,
@@ -518,6 +528,11 @@ class PrioritizedReplayBuffer:
             self.tree.add(priority, experience)
             self._total_added += 1
             self._max_priority = max(self._max_priority, priority)
+
+            # Track oldest timestamp in O(1)
+            exp_ts = datetime.fromisoformat(experience.timestamp)
+            if self._oldest_ts is None or exp_ts < self._oldest_ts:
+                self._oldest_ts = exp_ts
 
         return experience_id
 
@@ -590,6 +605,13 @@ class PrioritizedReplayBuffer:
             weights.append(weight)
 
         return batch, indices, weights
+
+    def oldest_timestamp(self) -> Optional[datetime]:
+        """Return timestamp of the oldest experience in the buffer (O(1))."""
+        with self._lock:
+            if self.tree.n_entries == 0:
+                return None
+            return self._oldest_ts
 
     def update_priorities(
         self,

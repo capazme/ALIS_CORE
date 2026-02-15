@@ -164,6 +164,8 @@ export interface ExpertQueryRequest {
   user_id: string;
   context?: Record<string, unknown>;
   max_experts?: number;
+  include_trace?: boolean;
+  consent_level?: 'anonymous' | 'basic' | 'full';
 }
 
 export interface SourceReference {
@@ -219,6 +221,19 @@ export interface ExpertPreferenceFeedbackRequest {
   /** Expert preferito (literal, systemic, principles, precedent) */
   preferred_expert: string;
   /** Commento opzionale con motivazione */
+  comment?: string;
+}
+
+/** Router feedback request (F2) — only for users with authority >= 0.7 */
+export interface RouterFeedbackRequest {
+  trace_id: string;
+  user_id: string;
+  /** Whether the routing decision was appropriate */
+  routing_correct: boolean;
+  /** Suggested expert weights if routing was incorrect */
+  suggested_weights?: Record<string, number>;
+  /** Alternative query type classification */
+  suggested_query_type?: string;
   comment?: string;
 }
 
@@ -1158,6 +1173,37 @@ export interface CorrectNormReference {
   anno?: string;
   /** Articoli citati */
   articoli: string[];
+}
+
+// =============================================================================
+// CITATION EXPORT
+// =============================================================================
+
+export type CitationFormat = 'italian_legal' | 'bibtex' | 'plain_text' | 'json';
+
+export interface CitationExportRequest {
+  trace_id?: string;
+  sources?: Array<{
+    article_urn: string;
+    expert?: string;
+    relevance?: number;
+    title?: string;
+    source_type?: string;
+  }>;
+  format: CitationFormat;
+  include_query_summary?: boolean;
+  include_attribution?: boolean;
+}
+
+export interface CitationExportResponse {
+  success: boolean;
+  format: CitationFormat;
+  filename: string;
+  download_url: string;
+  citations_count: number;
+  alis_version: string;
+  generated_at: string;
+  message?: string;
 }
 
 // =============================================================================

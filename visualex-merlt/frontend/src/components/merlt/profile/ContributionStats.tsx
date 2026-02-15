@@ -18,7 +18,7 @@ import {
   Scale,
   TrendingUp,
 } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
+import { cn } from '../../../lib/utils';
 
 // =============================================================================
 // STAT ITEM
@@ -73,7 +73,7 @@ function StatItem({
             'bg-white/50 dark:bg-slate-800/50'
           )}
         >
-          <Icon size={16} className={color} />
+          <Icon size={16} className={color} aria-hidden="true" />
         </div>
       </div>
     </motion.div>
@@ -150,14 +150,14 @@ export function ContributionStats({
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
-        <BarChart3 size={18} className="text-slate-500" />
+        <BarChart3 size={18} className="text-slate-500" aria-hidden="true" />
         <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
           I Tuoi Contributi
         </h3>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         {stats.map((stat, index) => (
           <StatItem
             key={stat.label}
@@ -168,7 +168,7 @@ export function ContributionStats({
       </div>
 
       {/* Bottom row: Success Rate + Vote Weight */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {/* Success Rate */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -177,7 +177,7 @@ export function ContributionStats({
           className="p-3 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-800/30"
         >
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp size={14} className="text-blue-600 dark:text-blue-400" />
+            <TrendingUp size={14} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
             <span className="text-xs text-slate-600 dark:text-slate-400">
               Success Rate
             </span>
@@ -206,7 +206,7 @@ export function ContributionStats({
           className="p-3 rounded-lg bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-100 dark:border-purple-800/30"
         >
           <div className="flex items-center gap-2 mb-2">
-            <Scale size={14} className="text-purple-600 dark:text-purple-400" />
+            <Scale size={14} className="text-purple-600 dark:text-purple-400" aria-hidden="true" />
             <span className="text-xs text-slate-600 dark:text-slate-400">
               Peso Voto
             </span>

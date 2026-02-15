@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -18,7 +18,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/components/ui/Select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Sparkles, DollarSign, AlertTriangle } from 'lucide-react';
 
@@ -150,7 +150,7 @@ export const BatchConfigForm: React.FC<BatchConfigFormProps> = ({ onBatchStarted
   const isValid = startArticle > 0 && endArticle > 0 && startArticle <= endArticle && endArticle <= 2969;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" aria-label="Ingestion batch configuration">
       {/* Batch Name */}
       <div>
         <Label htmlFor="batch-name">Batch Name (Optional)</Label>
@@ -164,7 +164,7 @@ export const BatchConfigForm: React.FC<BatchConfigFormProps> = ({ onBatchStarted
       </div>
 
       {/* Article Range */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="start-article">Start Article *</Label>
           <Input
@@ -194,10 +194,10 @@ export const BatchConfigForm: React.FC<BatchConfigFormProps> = ({ onBatchStarted
       </div>
 
       {!isValid && (
-        <Alert className="border-red-400 bg-red-50">
-          <AlertTriangle className="h-4 w-4 text-red-600" />
+        <Alert className="border-red-400 bg-red-50" role="alert">
+          <AlertTriangle className="h-4 w-4 text-red-600" aria-hidden="true" />
           <AlertDescription className="text-red-800 text-sm">
-            Invalid article range. Must be 1-2969, and start ≤ end.
+            Invalid article range. Must be 1-2969, and start must be less than or equal to end.
           </AlertDescription>
         </Alert>
       )}
@@ -206,9 +206,10 @@ export const BatchConfigForm: React.FC<BatchConfigFormProps> = ({ onBatchStarted
       <div>
         <Label htmlFor="llm-model">LLM Model *</Label>
         {modelsLoading ? (
-          <div className="flex items-center mt-2 text-gray-500">
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Loading models...
+          <div className="flex items-center mt-2 text-slate-500" role="status">
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
+            <span>Loading models...</span>
+            <span className="sr-only">Loading available AI models</span>
           </div>
         ) : (
           <Select value={selectedModel} onValueChange={setSelectedModel}>
@@ -223,7 +224,7 @@ export const BatchConfigForm: React.FC<BatchConfigFormProps> = ({ onBatchStarted
                       <Sparkles className="h-3 w-3 mr-2 text-yellow-500" />
                     )}
                     <span className="font-medium">{model.name}</span>
-                    <span className="ml-2 text-xs text-gray-500">
+                    <span className="ml-2 text-xs text-slate-500">
                       (${model.cost_per_1m_input}/${model.cost_per_1m_output} per 1M tokens)
                     </span>
                   </div>
@@ -233,7 +234,7 @@ export const BatchConfigForm: React.FC<BatchConfigFormProps> = ({ onBatchStarted
           </Select>
         )}
         {models && (
-          <p className="text-xs text-gray-600 mt-1">
+          <p className="text-xs text-slate-600 mt-1">
             {models.find((m) => m.model_id === selectedModel)?.description}
           </p>
         )}
@@ -253,18 +254,18 @@ export const BatchConfigForm: React.FC<BatchConfigFormProps> = ({ onBatchStarted
           onValueChange={(values) => setTemperature(values[0])}
           className="mt-2"
         />
-        <p className="text-xs text-gray-600 mt-1">
+        <p className="text-xs text-slate-600 mt-1">
           Lower = more consistent, Higher = more creative (recommended: 0.1-0.3 for extraction)
         </p>
       </div>
 
       {/* BrocardiInfo Toggle */}
-      <div className="flex items-center justify-between p-4 bg-gray-50 rounded">
+      <div className="flex items-center justify-between p-4 bg-slate-50 rounded">
         <div>
           <Label htmlFor="include-brocardi" className="text-base">
             Include BrocardiInfo Enrichment
           </Label>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-slate-600">
             Adds doctrinal data (brocardi, ratio, spiegazione, massime)
           </p>
         </div>
@@ -315,13 +316,13 @@ export const BatchConfigForm: React.FC<BatchConfigFormProps> = ({ onBatchStarted
       </div>
 
       {/* Advanced Options */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="flex items-center justify-between p-4 bg-slate-50 rounded">
           <div>
             <Label htmlFor="dry-run" className="text-base">
               Dry Run Mode
             </Label>
-            <p className="text-xs text-gray-600">No database writes</p>
+            <p className="text-xs text-slate-600">No database writes</p>
           </div>
           <Switch id="dry-run" checked={dryRun} onCheckedChange={setDryRun} />
         </div>
@@ -353,8 +354,8 @@ export const BatchConfigForm: React.FC<BatchConfigFormProps> = ({ onBatchStarted
 
       {/* Error Display */}
       {startBatchMutation.isError && (
-        <Alert className="border-red-400 bg-red-50">
-          <AlertTriangle className="h-4 w-4 text-red-600" />
+        <Alert className="border-red-400 bg-red-50" role="alert">
+          <AlertTriangle className="h-4 w-4 text-red-600" aria-hidden="true" />
           <AlertDescription className="text-red-800">
             {startBatchMutation.error?.message || 'Failed to start batch'}
           </AlertDescription>
@@ -364,18 +365,18 @@ export const BatchConfigForm: React.FC<BatchConfigFormProps> = ({ onBatchStarted
       {/* Submit Button */}
       <Button
         type="submit"
-        className="w-full"
+        className="w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         size="lg"
         disabled={!isValid || startBatchMutation.isPending}
       >
         {startBatchMutation.isPending ? (
           <>
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
             Starting Batch...
           </>
         ) : (
           <>
-            <Sparkles className="h-4 w-4 mr-2" />
+            <Sparkles className="h-4 w-4 mr-2" aria-hidden="true" />
             Start Ingestion Batch
           </>
         )}

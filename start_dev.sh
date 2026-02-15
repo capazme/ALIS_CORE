@@ -60,71 +60,59 @@ print_banner() {
 }
 
 print_usage() {
-  echo -e "${BOLD}Usage:${NC} ./start_dev.sh <command> [options]"
+  echo -e "${BOLD}Usage:${NC} ./start_dev.sh [command] [options]"
   echo ""
-  echo -e "${BOLD}Commands:${NC}"
+  echo -e "  Senza argomenti: mostra menu interattivo"
   echo ""
-  echo -e "  ${GREEN}vanilla${NC}      Start platform only (no MERL-T)"
-  echo "               - Frontend (React) on :5173"
-  echo "               - Backend (Express) on :3001"
-  echo "               - Python API (visualex) on :5000"
-  echo "               - PostgreSQL on :5432"
+  echo -e "${BOLD}Dev Locale (veloce, senza Docker rebuild per frontend/backend):${NC}"
   echo ""
-  echo -e "  ${GREEN}platform${NC}     Alias for 'vanilla'"
+  echo -e "  ${GREEN}dev${NC} [target]   Avvio dev locale"
+  echo -e "                 target: ${CYAN}platform${NC} (p) | ${CYAN}merlt${NC} (m) | ${CYAN}all${NC} (a)"
+  echo -e "                 DB via Docker, frontend+backend nativi"
   echo ""
-  echo -e "  ${GREEN}frontend${NC}     Start platform frontend"
-  echo -e "  ${GREEN}backend${NC}      Start platform backend + postgres"
-  echo -e "  ${GREEN}python-api${NC}   Start platform Python API container"
+  echo -e "${BOLD}Docker Compose (tutto containerizzato):${NC}"
   echo ""
-  echo -e "  ${GREEN}merlt${NC}        Start platform + MERL-T plugin"
-  echo "               - Everything from 'vanilla' plus:"
-  echo "               - MERL-T API + databases + RLCF web"
+  echo -e "  ${GREEN}vanilla${NC}        Platform only (frontend+backend+DB+python-api)"
+  echo -e "  ${GREEN}merlt${NC}          Platform + MERL-T plugin"
+  echo -e "  ${GREEN}full${NC}           Ecosistema completo (Platform+MERL-T+ML)"
   echo ""
-  echo -e "  ${GREEN}full${NC}         Start complete ALIS ecosystem"
-  echo "               - Everything from 'merlt' plus:"
-  echo "               - MERL-T ML API (FastAPI) on :8000"
-  echo "               - FalkorDB (Knowledge Graph) on :6379"
-  echo "               - Qdrant (Vector DB) on :6333"
+  echo -e "${BOLD}Singoli Servizi:${NC}"
   echo ""
-  echo -e "  ${GREEN}merlt-stack${NC}  Start MERL-T stack (api + db + rlcf)"
-  echo -e "  ${GREEN}merlt-ui${NC}     Start MERL-T standalone UI"
-  echo -e "  ${GREEN}rlcf-web${NC}     Start RLCF web dashboard"
+  echo -e "  ${GREEN}frontend${NC}       Solo frontend platform (Docker)"
+  echo -e "  ${GREEN}backend${NC}        Solo backend + postgres"
+  echo -e "  ${GREEN}python-api${NC}     Solo Python API container"
+  echo -e "  ${GREEN}db${NC}             Solo database (PostgreSQL+FalkorDB+Qdrant+Redis)"
+  echo -e "  ${GREEN}ml${NC}             Solo MERL-T ML backend (FastAPI :8000)"
+  echo -e "  ${GREEN}api${NC}            Solo visualex-api (Python :5000)"
+  echo -e "  ${GREEN}merlt-stack${NC}    Stack MERL-T (api+db+rlcf)"
+  echo -e "  ${GREEN}merlt-ui${NC}       MERL-T standalone UI"
+  echo -e "  ${GREEN}rlcf-web${NC}       RLCF web dashboard"
   echo ""
-  echo -e "  ${GREEN}api${NC}          Start only visualex-api (Python scraping)"
-  echo "               - Python API on :5000"
+  echo -e "${BOLD}Utility:${NC}"
   echo ""
-  echo -e "  ${GREEN}ml${NC}           Start only MERL-T ML backend"
-  echo "               - FastAPI on :8000"
-  echo "               - Databases (FalkorDB, Qdrant)"
+  echo -e "  ${GREEN}install${NC}        Installa dipendenze (npm+pip) di tutti i moduli"
+  echo -e "  ${GREEN}test${NC} <target>  Esegui test (frontend|backend|python-api|merlt-*)"
+  echo -e "  ${GREEN}seed${NC}           Popola DB con utente admin"
+  echo -e "  ${GREEN}restart${NC} [cmd]  Stop + riavvio (opzionalmente con comando specifico)"
+  echo -e "  ${GREEN}status${NC}         Mostra stato di tutti i servizi"
+  echo -e "  ${GREEN}stop${NC}           Ferma tutti i servizi"
+  echo -e "  ${GREEN}logs${NC} [svc]     Visualizza log (frontend|backend|merlt|ml)"
+  echo -e "  ${GREEN}help${NC}           Questo messaggio"
   echo ""
-  echo -e "  ${GREEN}db${NC}           Start only databases"
-  echo "               - PostgreSQL, FalkorDB, Qdrant, Redis"
+  echo -e "${BOLD}Esempi:${NC}"
+  echo "  ./start_dev.sh                 # Menu interattivo"
+  echo "  ./start_dev.sh dev platform    # Dev veloce platform"
+  echo "  ./start_dev.sh dev merlt       # Dev veloce con MERL-T"
+  echo "  ./start_dev.sh vanilla         # Platform via Docker"
+  echo "  ./start_dev.sh full            # Tutto"
+  echo "  ./start_dev.sh status          # Stato servizi"
+  echo "  ./start_dev.sh stop            # Ferma tutto"
   echo ""
-  echo -e "  ${GREEN}test${NC} <svc>   Run component tests"
-  echo "               - frontend | backend | python-api"
-  echo "               - merlt-frontend | merlt-backend | merlt-ml"
-  echo ""
-  echo -e "  ${GREEN}seed${NC}         Seed platform database with admin user"
-  echo "               - uses ADMIN_PASSWORD from visualex-platform/.env"
-  echo ""
-  echo -e "  ${GREEN}status${NC}       Show status of all services"
-  echo ""
-  echo -e "  ${GREEN}stop${NC}         Stop all running services"
-  echo ""
-  echo -e "  ${GREEN}logs${NC} [svc]   View logs (optionally for specific service)"
-  echo ""
-  echo -e "  ${GREEN}help${NC}         Show this help message"
-  echo ""
-  echo -e "${BOLD}Examples:${NC}"
-  echo "  ./start_dev.sh vanilla     # Basic platform"
-  echo "  ./start_dev.sh full        # Everything"
-  echo "  ./start_dev.sh stop        # Stop all"
-  echo "  ./start_dev.sh logs merlt  # View MERL-T logs"
-  echo ""
-  echo -e "${BOLD}Documentation:${NC}"
-  echo "  README.md           - Project overview"
-  echo "  ARCHITETTURA.md     - Architecture (non-technical)"
-  echo "  GUIDA_NAVIGAZIONE.md - Codebase navigation"
+  echo -e "${BOLD}Porte:${NC}"
+  echo "  :5173  Frontend (Vite)      :3001  Backend (Express)"
+  echo "  :5000  Python API           :8000  MERL-T API (FastAPI)"
+  echo "  :5432  PostgreSQL           :6379  FalkorDB"
+  echo "  :6333  Qdrant               :6379  Redis"
   echo ""
 }
 
@@ -315,19 +303,26 @@ cmd_full() {
     compose -f docker-compose.dev.yml up -d
   fi
 
-  # Start MERL-T integration stack
+  # Start MERL-T integration UI only (DBs already running from merlt dev compose,
+  # API started via uvicorn below). --no-deps avoids starting duplicate DB containers.
   if [ -f "$ROOT/visualex-merlt/docker-compose.yml" ]; then
-    echo "Starting MERL-T integration stack..."
+    echo "Starting MERL-T UI containers..."
     cd "$ROOT/visualex-merlt"
-    compose up -d
+    compose up -d --no-deps merlt-frontend rlcf-web
   fi
 
-  # Start MERL-T ML API in background
+  # Start MERL-T ML API in background (prefer venv if available)
   echo "Starting MERL-T ML API on :8000..."
   cd "$ROOT/merlt"
-  if command -v python3 >/dev/null 2>&1; then
-    if python3 -c "import uvicorn" >/dev/null 2>&1; then
-      python3 -m uvicorn merlt.app:app --reload --port 8000 &
+  MERLT_PYTHON=""
+  if [ -f "$ROOT/merlt/.venv/bin/python" ]; then
+    MERLT_PYTHON="$ROOT/merlt/.venv/bin/python"
+  elif command -v python3 >/dev/null 2>&1; then
+    MERLT_PYTHON="python3"
+  fi
+  if [ -n "$MERLT_PYTHON" ]; then
+    if "$MERLT_PYTHON" -c "import uvicorn" >/dev/null 2>&1; then
+      "$MERLT_PYTHON" -m uvicorn merlt.app:app --reload --port 8000 &
       MERLT_PID=$!
       echo "MERL-T API started (PID: $MERLT_PID)"
     else
@@ -343,7 +338,7 @@ cmd_full() {
   export MERLT_ENABLED=true
   export MERLT_API_URL=http://localhost:8000
   MERLT_ENABLED=true print_ports
-  compose up --build frontend backend python-api postgres
+  compose up -d frontend backend python-api postgres
 }
 
 cmd_api() {
@@ -570,13 +565,297 @@ cmd_logs() {
 }
 
 # ============================================================================
+# Quick Dev Commands (native, no Docker rebuild for frontend/backend)
+# ============================================================================
+
+ensure_node_modules() {
+  local dir="$1"
+  local label="${2:-$(basename "$dir")}"
+  if [ ! -d "$dir/node_modules" ]; then
+    echo -e "${YELLOW}[$label] node_modules mancante, installo dipendenze...${NC}"
+    (cd "$dir" && npm install)
+  fi
+}
+
+cmd_dev() {
+  local target="${1:-platform}"
+
+  case "$target" in
+    platform|p)
+      cmd_dev_platform
+      ;;
+    merlt|m)
+      cmd_dev_merlt
+      ;;
+    all|a)
+      cmd_dev_all
+      ;;
+    *)
+      echo -e "${RED}Target sconosciuto: $target${NC}"
+      echo "Disponibili: platform (p), merlt (m), all (a)"
+      exit 1
+      ;;
+  esac
+}
+
+cmd_dev_platform() {
+  echo -e "${GREEN}Dev locale platform (no Docker build per frontend/backend)${NC}"
+  check_docker
+
+  ensure_env_file "visualex-platform"
+
+  # Start only databases and python-api via Docker
+  echo -e "${CYAN}Avvio servizi Docker (postgres, python-api)...${NC}"
+  cd "$ROOT/visualex-platform"
+  compose up -d postgres python-api
+
+  echo -e "${CYAN}Attendo PostgreSQL...${NC}"
+  local retries=0
+  while ! compose exec -T postgres pg_isready -q 2>/dev/null; do
+    retries=$((retries + 1))
+    if [ "$retries" -gt 30 ]; then
+      echo -e "${RED}PostgreSQL non disponibile dopo 30s${NC}"
+      break
+    fi
+    sleep 1
+  done
+  echo -e "${GREEN}PostgreSQL pronto.${NC}"
+
+  ensure_node_modules "$ROOT/visualex-platform/backend" "backend"
+  ensure_node_modules "$ROOT/visualex-platform/frontend" "frontend"
+
+  # Start backend in background
+  echo -e "${CYAN}Avvio backend Express (:3001)...${NC}"
+  (cd "$ROOT/visualex-platform/backend" && npm run dev) &
+  local BACKEND_PID=$!
+
+  # Give backend a moment to start
+  sleep 2
+
+  echo ""
+  echo -e "${BOLD}Servizi attivi:${NC}"
+  echo -e "  ${GREEN}PostgreSQL${NC}    :5432  (Docker)"
+  echo -e "  ${GREEN}Python API${NC}    :5000  (Docker)"
+  echo -e "  ${GREEN}Backend${NC}       :3001  (PID $BACKEND_PID)"
+  echo -e "  ${GREEN}Frontend${NC}      :5173  (avvio...)"
+  echo ""
+
+  # Trap to cleanup on exit
+  trap "echo -e '${YELLOW}Arresto servizi locali...${NC}'; kill $BACKEND_PID 2>/dev/null; exit 0" INT TERM
+
+  # Start frontend in foreground
+  cd "$ROOT/visualex-platform/frontend"
+  npm run dev
+
+  # Cleanup when frontend exits
+  kill $BACKEND_PID 2>/dev/null
+}
+
+cmd_dev_merlt() {
+  echo -e "${GREEN}Dev locale MERL-T (platform + plugin MERL-T)${NC}"
+  check_docker
+
+  ensure_env_file "visualex-platform"
+  ensure_env_file "visualex-merlt"
+
+  # Start platform databases
+  echo -e "${CYAN}Avvio servizi Docker (postgres, python-api)...${NC}"
+  cd "$ROOT/visualex-platform"
+  compose up -d postgres python-api
+
+  # Start MERL-T databases if available
+  if [ -f "$ROOT/merlt/docker-compose.dev.yml" ]; then
+    echo -e "${CYAN}Avvio database MERL-T (FalkorDB, Qdrant, Redis)...${NC}"
+    cd "$ROOT/merlt"
+    compose -f docker-compose.dev.yml up -d
+  fi
+
+  # Start MERL-T integration stack if available
+  if [ -f "$ROOT/visualex-merlt/docker-compose.yml" ]; then
+    echo -e "${CYAN}Avvio MERL-T stack (merlt-api, rlcf-web)...${NC}"
+    cd "$ROOT/visualex-merlt"
+    compose up -d merlt-api rlcf-web 2>/dev/null || true
+  fi
+
+  echo -e "${CYAN}Attendo PostgreSQL...${NC}"
+  cd "$ROOT/visualex-platform"
+  local retries=0
+  while ! compose exec -T postgres pg_isready -q 2>/dev/null; do
+    retries=$((retries + 1))
+    if [ "$retries" -gt 30 ]; then
+      echo -e "${RED}PostgreSQL non disponibile dopo 30s${NC}"
+      break
+    fi
+    sleep 1
+  done
+
+  ensure_node_modules "$ROOT/visualex-platform/backend" "backend"
+  ensure_node_modules "$ROOT/visualex-platform/frontend" "frontend"
+  ensure_node_modules "$ROOT/visualex-merlt/frontend" "merlt-frontend"
+
+  local PIDS=()
+
+  # Start platform backend
+  echo -e "${CYAN}Avvio backend Express (:3001)...${NC}"
+  (cd "$ROOT/visualex-platform/backend" && npm run dev) &
+  PIDS+=($!)
+
+  # Start MERL-T frontend dev
+  if [ -d "$ROOT/visualex-merlt/frontend" ]; then
+    echo -e "${CYAN}Avvio MERL-T frontend dev...${NC}"
+    (cd "$ROOT/visualex-merlt/frontend" && npm run dev) &
+    PIDS+=($!)
+  fi
+
+  sleep 2
+
+  echo ""
+  echo -e "${BOLD}Servizi attivi:${NC}"
+  echo -e "  ${GREEN}PostgreSQL${NC}       :5432  (Docker)"
+  echo -e "  ${GREEN}Python API${NC}       :5000  (Docker)"
+  echo -e "  ${GREEN}FalkorDB${NC}         :6379  (Docker)"
+  echo -e "  ${GREEN}Qdrant${NC}           :6333  (Docker)"
+  echo -e "  ${GREEN}Backend${NC}          :3001  (locale)"
+  echo -e "  ${GREEN}Frontend${NC}         :5173  (avvio...)"
+  echo -e "  ${GREEN}MERL-T Frontend${NC}  plugin (locale)"
+  echo ""
+
+  trap "echo -e '${YELLOW}Arresto servizi locali...${NC}'; for p in \${PIDS[*]}; do kill \$p 2>/dev/null; done; exit 0" INT TERM
+
+  # Start platform frontend in foreground
+  export VITE_MERLT_ENABLED=true
+  cd "$ROOT/visualex-platform/frontend"
+  npm run dev
+
+  for p in "${PIDS[@]}"; do kill "$p" 2>/dev/null; done
+}
+
+cmd_dev_all() {
+  cmd_dev_merlt
+}
+
+cmd_install() {
+  echo -e "${GREEN}Installazione dipendenze di tutti i moduli...${NC}"
+
+  local dirs=(
+    "visualex-platform/frontend"
+    "visualex-platform/backend"
+    "visualex-merlt/frontend"
+    "visualex-merlt/rlcf-web"
+  )
+
+  for dir in "${dirs[@]}"; do
+    local full_path="$ROOT/$dir"
+    if [ -f "$full_path/package.json" ]; then
+      echo -e "${CYAN}[$dir]${NC} npm install..."
+      (cd "$full_path" && npm install) || echo -e "${YELLOW}Warning: npm install fallito per $dir${NC}"
+    fi
+  done
+
+  # Python deps
+  if [ -f "$ROOT/visualex-api/setup.py" ] || [ -f "$ROOT/visualex-api/pyproject.toml" ]; then
+    if command -v python3 >/dev/null 2>&1; then
+      echo -e "${CYAN}[visualex-api]${NC} pip install..."
+      (cd "$ROOT/visualex-api" && python3 -m pip install -e . -q) || true
+    fi
+  fi
+
+  if [ -f "$ROOT/merlt/pyproject.toml" ]; then
+    if command -v python3 >/dev/null 2>&1; then
+      echo -e "${CYAN}[merlt]${NC} pip install..."
+      (cd "$ROOT/merlt" && python3 -m pip install -e ".[dev]" -q) || true
+    fi
+  fi
+
+  echo -e "${GREEN}Installazione completata.${NC}"
+}
+
+cmd_restart() {
+  local target="${1:-}"
+  echo -e "${YELLOW}Riavvio servizi...${NC}"
+  cmd_stop
+  echo ""
+  sleep 2
+  if [ -n "$target" ]; then
+    "$0" "$target"
+  else
+    cmd_menu
+  fi
+}
+
+# ============================================================================
+# Interactive Menu
+# ============================================================================
+
+cmd_menu() {
+  print_banner
+  echo -e "${BOLD}Cosa vuoi avviare?${NC}"
+  echo ""
+  echo -e "  ${BOLD}Dev locale${NC} ${CYAN}(veloce, no Docker rebuild per frontend/backend):${NC}"
+  echo -e "    ${GREEN}1${NC})  Platform frontend+backend       ${CYAN}dev platform${NC}"
+  echo -e "    ${GREEN}2${NC})  Platform + MERL-T                ${CYAN}dev merlt${NC}"
+  echo ""
+  echo -e "  ${BOLD}Docker compose${NC} ${CYAN}(tutto containerizzato):${NC}"
+  echo -e "    ${GREEN}3${NC})  Platform completa (vanilla)      ${CYAN}vanilla${NC}"
+  echo -e "    ${GREEN}4${NC})  Platform + MERL-T                ${CYAN}merlt${NC}"
+  echo -e "    ${GREEN}5${NC})  Full Stack (tutto)               ${CYAN}full${NC}"
+  echo ""
+  echo -e "  ${BOLD}Singoli servizi:${NC}"
+  echo -e "    ${GREEN}6${NC})  Solo Database                    ${CYAN}db${NC}"
+  echo -e "    ${GREEN}7${NC})  Solo Backend + DB                ${CYAN}backend${NC}"
+  echo -e "    ${GREEN}8${NC})  Solo MERL-T ML backend           ${CYAN}ml${NC}"
+  echo -e "    ${GREEN}9${NC})  Solo Python API (scraping)       ${CYAN}api${NC}"
+  echo ""
+  echo -e "  ${BOLD}Utility:${NC}"
+  echo -e "    ${GREEN}s${NC})  Status servizi                   ${CYAN}status${NC}"
+  echo -e "    ${GREEN}x${NC})  Stop tutto                       ${CYAN}stop${NC}"
+  echo -e "    ${GREEN}i${NC})  Installa tutte le dipendenze     ${CYAN}install${NC}"
+  echo -e "    ${GREEN}t${NC})  Test                             ${CYAN}test <target>${NC}"
+  echo -e "    ${GREEN}h${NC})  Help completo                    ${CYAN}help${NC}"
+  echo ""
+  echo -ne "  ${BOLD}Scegli [1-9, s/x/i/t/h]: ${NC}"
+  read -r choice
+  echo ""
+
+  case "$choice" in
+    1)    cmd_dev_platform ;;
+    2)    cmd_dev_merlt ;;
+    3)    cmd_vanilla ;;
+    4)    cmd_merlt ;;
+    5)    cmd_full ;;
+    6)    cmd_db ;;
+    7)    cmd_backend ;;
+    8)    cmd_ml ;;
+    9)    cmd_api ;;
+    s|S)  cmd_status ;;
+    x|X)  cmd_stop ;;
+    i|I)  cmd_install ;;
+    t|T)
+      echo -ne "  Target (frontend/backend/python-api/merlt-frontend): "
+      read -r test_target
+      cmd_test "$test_target"
+      ;;
+    h|H)  print_usage ;;
+    "")   echo -e "${YELLOW}Nessuna scelta. Usa './start_dev.sh help' per i comandi.${NC}" ;;
+    *)    echo -e "${RED}Scelta non valida: $choice${NC}" ;;
+  esac
+}
+
+# ============================================================================
 # Main
 # ============================================================================
 
-COMMAND="${1:-help}"
+COMMAND="${1:-menu}"
 shift || true
 
 case "$COMMAND" in
+  menu)
+    cmd_menu
+    ;;
+  dev)
+    print_banner
+    cmd_dev "$@"
+    ;;
   vanilla)
     print_banner
     cmd_vanilla
@@ -629,6 +908,13 @@ case "$COMMAND" in
   seed)
     cmd_seed
     ;;
+  install)
+    print_banner
+    cmd_install
+    ;;
+  restart)
+    cmd_restart "$@"
+    ;;
   test)
     cmd_test "$@"
     ;;
@@ -646,7 +932,7 @@ case "$COMMAND" in
     print_usage
     ;;
   *)
-    echo -e "${RED}Unknown command: $COMMAND${NC}"
+    echo -e "${RED}Comando sconosciuto: $COMMAND${NC}"
     echo ""
     print_usage
     exit 1

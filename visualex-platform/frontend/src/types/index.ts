@@ -86,6 +86,7 @@ export interface CrossReference {
 export interface BrocardiInfo {
     position: string | null;
     link: string | null;
+    Rubrica?: string | null;
     Brocardi: string[] | null;
     Ratio: string | null;
     Spiegazione: string | null;

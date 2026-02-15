@@ -111,6 +111,13 @@ class TestSearchResultItem:
 class TestSemanticSearchTool:
     """Test per SemanticSearchTool."""
 
+    @pytest.fixture(autouse=True)
+    def _clear_cache(self):
+        """Clear shared cache before each test to prevent cross-test pollution."""
+        SemanticSearchTool.clear_cache()
+        yield
+        SemanticSearchTool.clear_cache()
+
     def test_init(self):
         """Inizializza tool."""
         tool = SemanticSearchTool()
@@ -451,8 +458,8 @@ class TestGraphSearchTool:
         """Converte edge in dizionario."""
         tool = GraphSearchTool()
 
-        edge = {"type": "disciplina", "weight": 0.9}
+        edge = {"relation": "disciplina", "properties": {"weight": 0.9}}
         result = tool._edge_to_dict(edge)
 
         assert result["type"] == "disciplina"
-        assert "properties" in result
+        assert result["properties"]["weight"] == 0.9

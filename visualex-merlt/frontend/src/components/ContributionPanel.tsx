@@ -9,17 +9,18 @@ import { useProposals } from '../hooks/useProposals';
 
 interface ContributionPanelProps {
   articleUrn: string;
+  userId?: string;
 }
 
 type ProposalType = 'entity' | 'relation';
 
-export function ContributionPanel({ articleUrn }: ContributionPanelProps): React.ReactElement {
-  const [type, setType] = useState<ProposalType>('entity');
+export function ContributionPanel({ articleUrn, userId }: ContributionPanelProps): React.ReactElement {
+  const [type, setType] = useState('entity' as ProposalType);
   const [name, setName] = useState('');
   const [entityType, setEntityType] = useState('CONCEPT');
   const [description, setDescription] = useState('');
 
-  const { submitProposal, isSubmitting } = useProposals();
+  const { submitProposal, isSubmitting } = useProposals(userId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +50,8 @@ export function ContributionPanel({ articleUrn }: ContributionPanelProps): React
             onClick={() => setType('entity')}
             className={`
               flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors
-              ${type === 'entity' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+              ${type === 'entity' ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}
             `}
           >
             Entità
@@ -59,7 +61,8 @@ export function ContributionPanel({ articleUrn }: ContributionPanelProps): React
             onClick={() => setType('relation')}
             className={`
               flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors
-              ${type === 'relation' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+              ${type === 'relation' ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'}
             `}
           >
             Relazione
@@ -70,7 +73,7 @@ export function ContributionPanel({ articleUrn }: ContributionPanelProps): React
           <>
             {/* Entity name */}
             <div>
-              <label htmlFor="name" className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="name" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                 Nome entità
               </label>
               <input
@@ -81,8 +84,10 @@ export function ContributionPanel({ articleUrn }: ContributionPanelProps): React
                 placeholder="es. Risoluzione contrattuale"
                 className="
                   w-full px-3 py-2 text-sm
-                  border border-gray-300 rounded-lg
+                  border border-slate-300 dark:border-slate-600 rounded-lg
+                  bg-white dark:bg-slate-800 text-slate-900 dark:text-white
                   focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
                   outline-none transition-shadow
                 "
               />
@@ -90,7 +95,7 @@ export function ContributionPanel({ articleUrn }: ContributionPanelProps): React
 
             {/* Entity type */}
             <div>
-              <label htmlFor="entityType" className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="entityType" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                 Tipo
               </label>
               <select
@@ -99,8 +104,10 @@ export function ContributionPanel({ articleUrn }: ContributionPanelProps): React
                 onChange={(e) => setEntityType(e.target.value)}
                 className="
                   w-full px-3 py-2 text-sm
-                  border border-gray-300 rounded-lg
+                  border border-slate-300 dark:border-slate-600 rounded-lg
+                  bg-white dark:bg-slate-800 text-slate-900 dark:text-white
                   focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
                   outline-none
                 "
               >
@@ -114,7 +121,7 @@ export function ContributionPanel({ articleUrn }: ContributionPanelProps): React
 
             {/* Description */}
             <div>
-              <label htmlFor="description" className="block text-xs font-medium text-gray-700 mb-1">
+              <label htmlFor="description" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                 Descrizione (opzionale)
               </label>
               <textarea
@@ -125,8 +132,10 @@ export function ContributionPanel({ articleUrn }: ContributionPanelProps): React
                 rows={3}
                 className="
                   w-full px-3 py-2 text-sm
-                  border border-gray-300 rounded-lg
+                  border border-slate-300 dark:border-slate-600 rounded-lg
+                  bg-white dark:bg-slate-800 text-slate-900 dark:text-white
                   focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
                   outline-none transition-shadow resize-none
                 "
               />
@@ -135,7 +144,7 @@ export function ContributionPanel({ articleUrn }: ContributionPanelProps): React
         )}
 
         {type === 'relation' && (
-          <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-500">
+          <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg text-sm text-slate-500 dark:text-slate-400">
             <p>Per proporre una relazione:</p>
             <ol className="list-decimal list-inside mt-2 space-y-1 text-xs">
               <li>Seleziona un&apos;entità sorgente nella lista</li>
@@ -154,6 +163,7 @@ export function ContributionPanel({ articleUrn }: ContributionPanelProps): React
             bg-blue-600 text-white rounded-lg
             hover:bg-blue-700 transition-colors
             disabled:opacity-50 disabled:cursor-not-allowed
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
           "
         >
           {isSubmitting ? 'Invio in corso...' : 'Proponi'}

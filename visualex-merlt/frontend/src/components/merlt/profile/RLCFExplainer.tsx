@@ -28,7 +28,7 @@ import {
   GraduationCap,
   Zap,
 } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
+import { cn } from '../../../lib/utils';
 
 // =============================================================================
 // FAQ ITEM
@@ -47,16 +47,17 @@ function FAQItem({ question, answer, icon: Icon, isOpen, onToggle }: FAQItemProp
     <div className="border-b border-slate-100 dark:border-slate-800 last:border-0">
       <button
         onClick={onToggle}
-        className="w-full py-3 flex items-center gap-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-lg px-2 -mx-2"
+        aria-expanded={isOpen}
+        className="w-full py-3 flex items-center gap-3 text-left hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-lg px-2 -mx-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
       >
-        <Icon size={16} className="text-blue-500 flex-shrink-0" />
+        <Icon size={16} className="text-blue-500 flex-shrink-0" aria-hidden="true" />
         <span className="flex-1 text-sm font-medium text-slate-700 dark:text-slate-300">
           {question}
         </span>
         {isOpen ? (
-          <ChevronUp size={16} className="text-slate-400" />
+          <ChevronUp size={16} className="text-slate-400" aria-hidden="true" />
         ) : (
-          <ChevronDown size={16} className="text-slate-400" />
+          <ChevronDown size={16} className="text-slate-400" aria-hidden="true" />
         )}
       </button>
       <AnimatePresence>
@@ -89,7 +90,7 @@ interface RLCFExplainerProps {
 
 export function RLCFExplainer({ className, defaultExpanded = false }: RLCFExplainerProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
-  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  const [openFAQ, setOpenFAQ] = useState(null as number | null);
 
   const faqs = [
     {
@@ -208,10 +209,11 @@ export function RLCFExplainer({ className, defaultExpanded = false }: RLCFExplai
       {/* Header - Always visible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+        aria-expanded={isExpanded}
+        className="w-full p-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
       >
         <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center flex-shrink-0">
-          <HelpCircle size={20} className="text-white" />
+          <HelpCircle size={20} className="text-white" aria-hidden="true" />
         </div>
         <div className="flex-1 text-left">
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -225,7 +227,7 @@ export function RLCFExplainer({ className, defaultExpanded = false }: RLCFExplai
           animate={{ rotate: isExpanded ? 180 : 0 }}
           transition={{ duration: 0.2 }}
         >
-          <ChevronDown size={20} className="text-slate-400" />
+          <ChevronDown size={20} className="text-slate-400" aria-hidden="true" />
         </motion.div>
       </button>
 
@@ -241,19 +243,19 @@ export function RLCFExplainer({ className, defaultExpanded = false }: RLCFExplai
           >
             <div className="px-4 pb-4 border-t border-slate-100 dark:border-slate-800">
               {/* Quick intro */}
-              <div className="py-4 flex items-center gap-6 justify-center border-b border-slate-100 dark:border-slate-800">
+              <div className="py-4 flex flex-wrap items-center gap-4 sm:gap-6 justify-center border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <Users size={14} className="text-blue-500" />
+                  <Users size={14} className="text-blue-500" aria-hidden="true" />
                   <span>Community-driven</span>
                 </div>
-                <ArrowRight size={12} className="text-slate-300" />
+                <ArrowRight size={12} className="text-slate-300 hidden sm:block" aria-hidden="true" />
                 <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <Brain size={14} className="text-purple-500" />
+                  <Brain size={14} className="text-purple-500" aria-hidden="true" />
                   <span>AI-assisted</span>
                 </div>
-                <ArrowRight size={12} className="text-slate-300" />
+                <ArrowRight size={12} className="text-slate-300 hidden sm:block" aria-hidden="true" />
                 <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <Target size={14} className="text-emerald-500" />
+                  <Target size={14} className="text-emerald-500" aria-hidden="true" />
                   <span>Quality-focused</span>
                 </div>
               </div>

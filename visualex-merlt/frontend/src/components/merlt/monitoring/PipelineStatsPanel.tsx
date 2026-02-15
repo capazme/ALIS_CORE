@@ -7,8 +7,8 @@
  */
 
 import { Activity, CheckCircle2, XCircle, Clock, Database, AlertTriangle } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
-import type { PipelineStats } from '../../../../hooks/usePipelineMonitoring';
+import { cn } from '../../../lib/utils';
+import type { PipelineStats } from '../../../hooks/usePipelineMonitoring';
 
 interface PipelineStatsPanelProps {
   stats: PipelineStats;
@@ -32,16 +32,16 @@ function StatCard({ label, value, icon, color }: StatCardProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4">
       <div className="flex items-center gap-3">
-        <div className={cn('p-2.5 rounded-lg', colorClasses[color])}>
+        <div className={cn('p-2.5 rounded-lg', colorClasses[color])} aria-hidden="true">
           {icon}
         </div>
         <div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             {typeof value === 'number' ? value.toLocaleString() : value}
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
         </div>
       </div>
     </div>

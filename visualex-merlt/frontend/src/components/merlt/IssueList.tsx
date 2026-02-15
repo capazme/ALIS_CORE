@@ -30,17 +30,17 @@ import {
   Info,
   ExternalLink,
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { getOpenIssues, voteOnIssue } from '../../../services/merltService';
-import { formatUrnToReadable } from '../../../utils/normattivaParser';
-import { abbreviateCase } from '../../../utils/graphLabels';
+import { cn } from '../../lib/utils';
+import { getOpenIssues, voteOnIssue } from '../../services/merltService';
+import { formatUrnToReadable } from '../../utils/normattivaParser';
+import { abbreviateCase } from '../../utils/graphLabels';
 import type {
   EntityIssue,
   IssueStatus,
   IssueSeverity,
   IssueType,
-} from '../../../types/merlt';
-import { ISSUE_TYPE_LABELS, ISSUE_SEVERITY_LABELS } from '../../../types/merlt';
+} from '../../types/merlt';
+import { ISSUE_TYPE_LABELS, ISSUE_SEVERITY_LABELS } from '../../types/merlt';
 
 // =============================================================================
 // HELPER: Format entity label to readable form
@@ -226,9 +226,9 @@ function IssueCard({ issue, userId, onVote, isVoting }: IssueCardProps) {
               <Link2 size={12} />
               <span>Relazione segnalata</span>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap overflow-hidden">
               {/* Source Node */}
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-600">
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-600 min-w-0">
                 <Box size={14} className="text-purple-500" />
                 <div>
                   <p className="text-xs text-slate-500 dark:text-slate-400">{details.source_type || 'Nodo'}</p>
@@ -558,7 +558,8 @@ function IssueCard({ issue, userId, onVote, isVoting }: IssueCardProps) {
                 'flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all',
                 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
                 'hover:bg-green-200 dark:hover:bg-green-900/50',
-                'disabled:opacity-50 disabled:cursor-not-allowed'
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
               )}
             >
               {isVoting ? (
@@ -575,7 +576,8 @@ function IssueCard({ issue, userId, onVote, isVoting }: IssueCardProps) {
                 'flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all',
                 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
                 'hover:bg-red-200 dark:hover:bg-red-900/50',
-                'disabled:opacity-50 disabled:cursor-not-allowed'
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
               )}
             >
               {isVoting ? (
@@ -587,10 +589,12 @@ function IssueCard({ issue, userId, onVote, isVoting }: IssueCardProps) {
             </button>
             <button
               onClick={() => setShowCommentInput(!showCommentInput)}
-              className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               title="Aggiungi commento"
+              aria-label="Aggiungi commento"
+              aria-expanded={showCommentInput}
             >
-              <MessageSquare size={16} />
+              <MessageSquare size={16} aria-hidden="true" />
             </button>
           </div>
         )}
@@ -605,14 +609,14 @@ function IssueCard({ issue, userId, onVote, isVoting }: IssueCardProps) {
 
 export function IssueList({ userId, className }: IssueListProps) {
   // State
-  const [issues, setIssues] = useState<EntityIssue[]>([]);
+  const [issues, setIssues] = useState([] as EntityIssue[]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [votingIssueId, setVotingIssueId] = useState<string | null>(null);
+  const [error, setError] = useState(null as string | null);
+  const [votingIssueId, setVotingIssueId] = useState(null as string | null);
 
   // Filters
-  const [statusFilter, setStatusFilter] = useState<IssueStatus | 'all'>('open');
-  const [severityFilter, setSeverityFilter] = useState<IssueSeverity | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState('open' as IssueStatus | 'all');
+  const [severityFilter, setSeverityFilter] = useState('all' as IssueSeverity | 'all');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
   // Pagination
@@ -659,7 +663,7 @@ export function IssueList({ userId, className }: IssueListProps) {
       });
 
       // Update issue in list
-      setIssues(prev => prev.map(issue => {
+      setIssues((prev: EntityIssue[]) => prev.map((issue: EntityIssue) => {
         if (issue.issue_id === issueId) {
           return {
             ...issue,
@@ -675,7 +679,6 @@ export function IssueList({ userId, className }: IssueListProps) {
       // Show success message if entity was reopened
       if (response.entity_reopened) {
         // Could show a toast here
-        console.log('Entity reopened for validation!');
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Errore nel voto';
@@ -704,11 +707,13 @@ export function IssueList({ userId, className }: IssueListProps) {
           <div className="relative">
             <button
               onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              aria-label="Apri filtri"
+              aria-expanded={showFilterDropdown}
             >
-              <Filter size={16} />
+              <Filter size={16} aria-hidden="true" />
               Filtri
-              <ChevronDown size={14} />
+              <ChevronDown size={14} aria-hidden="true" />
             </button>
 
             {showFilterDropdown && (
@@ -778,24 +783,25 @@ export function IssueList({ userId, className }: IssueListProps) {
           <button
             onClick={fetchIssues}
             disabled={loading}
-            className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+            className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            aria-label="Aggiorna segnalazioni"
           >
-            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} aria-hidden="true" />
           </button>
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
-          <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+        <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400" role="alert">
+          <AlertCircle size={16} className="flex-shrink-0 mt-0.5" aria-hidden="true" />
           {error}
         </div>
       )}
 
       {/* Loading */}
       {loading ? (
-        <div className="space-y-4">
+        <div className="space-y-4" role="status" aria-label="Caricamento segnalazioni">
           {[...Array(3)].map((_, i) => (
             <div
               key={i}
@@ -811,7 +817,7 @@ export function IssueList({ userId, className }: IssueListProps) {
           ))}
         </div>
       ) : issues.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-12" role="status">
           <AlertTriangle size={48} className="mx-auto text-slate-300 dark:text-slate-600 mb-4" />
           <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
             Nessuna segnalazione
@@ -824,7 +830,7 @@ export function IssueList({ userId, className }: IssueListProps) {
         </div>
       ) : (
         <div className="space-y-4">
-          {issues.map((issue) => (
+          {issues.map((issue: EntityIssue) => (
             <IssueCard
               key={issue.issue_id}
               issue={issue}

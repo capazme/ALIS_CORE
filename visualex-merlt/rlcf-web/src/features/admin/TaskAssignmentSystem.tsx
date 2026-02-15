@@ -220,11 +220,11 @@ export function TaskAssignmentSystem({ autoAssign = false }: TaskAssignmentSyste
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 md:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">🎯 Task Assignment System</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">Task Assignment System</h1>
           <p className="text-slate-400">
             Intelligent task distribution with bias minimization and expertise matching
           </p>
@@ -245,20 +245,24 @@ export function TaskAssignmentSystem({ autoAssign = false }: TaskAssignmentSyste
           {/* Strategy Selection */}
           <Card className="border-slate-700">
             <CardHeader>
-              <CardTitle>🧠 Assignment Strategy</CardTitle>
+              <CardTitle>Assignment Strategy</CardTitle>
               <p className="text-slate-400">Choose the algorithm for task-evaluator matching</p>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3" role="radiogroup" aria-label="Assignment strategy selection">
                 {ASSIGNMENT_STRATEGIES.map((strategy) => (
                   <div
                     key={strategy.id}
-                    className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                    role="radio"
+                    aria-checked={selectedStrategy === strategy.id}
+                    tabIndex={0}
+                    className={`p-4 rounded-lg border cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
                       selectedStrategy === strategy.id
                         ? 'border-purple-500 bg-purple-950/20'
                         : 'border-slate-700 hover:border-slate-600'
                     }`}
                     onClick={() => setSelectedStrategy(strategy.id)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedStrategy(strategy.id); } }}
                   >
                     <h4 className="font-semibold text-slate-200 mb-2">{strategy.name}</h4>
                     <p className="text-sm text-slate-400 mb-3">{strategy.description}</p>
@@ -282,7 +286,7 @@ export function TaskAssignmentSystem({ autoAssign = false }: TaskAssignmentSyste
           {/* Devil's Advocate Configuration */}
           <Card className="border-slate-700">
             <CardHeader>
-              <CardTitle>👹 Devil's Advocate System</CardTitle>
+              <CardTitle>Devil's Advocate System</CardTitle>
               <p className="text-slate-400">
                 Automatic assignment for constructive criticism
               </p>
@@ -334,7 +338,7 @@ export function TaskAssignmentSystem({ autoAssign = false }: TaskAssignmentSyste
           <Card className="border-slate-700">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>📋 Pending Task Assignments</CardTitle>
+                <CardTitle>Pending Task Assignments</CardTitle>
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -358,8 +362,9 @@ export function TaskAssignmentSystem({ autoAssign = false }: TaskAssignmentSyste
             </CardHeader>
             <CardContent>
               {loadingTasks ? (
-                <div className="flex items-center justify-center h-32">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400"></div>
+                <div className="flex items-center justify-center h-32" role="status">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-400" aria-hidden="true"></div>
+                  <span className="sr-only">Loading pending tasks...</span>
                 </div>
               ) : pendingTasks?.length ? (
                 <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -412,7 +417,7 @@ export function TaskAssignmentSystem({ autoAssign = false }: TaskAssignmentSyste
           {/* Quick Stats */}
           <Card className="border-slate-700">
             <CardHeader>
-              <CardTitle>📊 Assignment Statistics</CardTitle>
+              <CardTitle>Assignment Statistics</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
@@ -447,12 +452,13 @@ export function TaskAssignmentSystem({ autoAssign = false }: TaskAssignmentSyste
           {/* Available Evaluators */}
           <Card className="border-slate-700">
             <CardHeader>
-              <CardTitle>👥 Available Evaluators</CardTitle>
+              <CardTitle>Available Evaluators</CardTitle>
             </CardHeader>
             <CardContent>
               {loadingEvaluators ? (
-                <div className="flex items-center justify-center h-24">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-400"></div>
+                <div className="flex items-center justify-center h-24" role="status">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-400" aria-hidden="true"></div>
+                  <span className="sr-only">Loading evaluators...</span>
                 </div>
               ) : (
                 <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -487,7 +493,7 @@ export function TaskAssignmentSystem({ autoAssign = false }: TaskAssignmentSyste
           {/* Task Type Distribution */}
           <Card className="border-slate-700">
             <CardHeader>
-              <CardTitle>📈 Task Distribution</CardTitle>
+              <CardTitle>Task Distribution</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
@@ -517,7 +523,7 @@ export function TaskAssignmentSystem({ autoAssign = false }: TaskAssignmentSyste
       {/* Assignment History */}
       <Card className="border-slate-700">
         <CardHeader>
-          <CardTitle>📈 Assignment Performance</CardTitle>
+          <CardTitle>Assignment Performance</CardTitle>
           <p className="text-slate-400">Evaluator workload and completion rates</p>
         </CardHeader>
         <CardContent>
@@ -549,11 +555,11 @@ export function TaskAssignmentSystem({ autoAssign = false }: TaskAssignmentSyste
 
       {/* Batch Assignment Confirmation Modal */}
       {showBatchConfirmation && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="batch-confirm-title">
           <Card className="max-w-md w-full border-purple-600 bg-slate-900">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-purple-400">
-                ⚠️ Confirm Batch Assignment
+              <CardTitle id="batch-confirm-title" className="flex items-center gap-2 text-purple-400">
+                Confirm Batch Assignment
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
 
 interface EvaluationSummaryProps {
@@ -336,7 +335,7 @@ export function EvaluationSummary({ taskType, formData, scores, isDevilsAdvocate
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-400">{scores.accuracy}</div>
               <div className="text-sm text-slate-400">Accuracy</div>
@@ -349,7 +348,7 @@ export function EvaluationSummary({ taskType, formData, scores, isDevilsAdvocate
               <div className="text-2xl font-bold text-cyan-400">{scores.transparency}</div>
               <div className="text-sm text-slate-400">Transparency</div>
             </div>
-            <div className="text-center border-l border-slate-700">
+            <div className="text-center md:border-l md:border-slate-700">
               <div className="text-2xl font-bold text-green-400">{averageScore.toFixed(1)}</div>
               <div className="text-sm text-slate-400">Average</div>
             </div>

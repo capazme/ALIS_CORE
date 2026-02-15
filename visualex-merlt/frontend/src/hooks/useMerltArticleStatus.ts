@@ -105,7 +105,7 @@ export function useMerltArticleStatus(
   const isEnrichingGlobal = enrichmentJob?.status === 'in_progress';
   const progressMessage = enrichmentJob?.progressMessage;
 
-  const [state, setState] = useState<MerltArticleState>({
+  const [state, setState] = useState({
     isLoading: false,
     isValidating: false,
     isEnriching: false,
@@ -120,7 +120,7 @@ export function useMerltArticleStatus(
     votedRelationIds: new Set(),
     committedEntityIds: new Set(),
     committedRelationIds: new Set(),
-  });
+  } as MerltArticleState);
 
   // Track if local changes were made (validation) to prevent global store overwrite
   const [hasLocalChanges, setHasLocalChanges] = useState(false);
@@ -131,7 +131,7 @@ export function useMerltArticleStatus(
 
     // Reset local changes flag when explicitly refreshing
     setHasLocalChanges(false);
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    setState((prev: MerltArticleState) =>({ ...prev, isLoading: true, error: null }));
 
     try {
       // Check if article is in graph
@@ -169,7 +169,7 @@ export function useMerltArticleStatus(
       // Article is considered "processed" if it has validated entities OR pending entities
       const hasBeenProcessed = (graphStatus.entity_count || 0) > 0 || pendingEntities.length > 0;
 
-      setState(prev => ({
+      setState((prev: MerltArticleState) =>({
         ...prev,
         isLoading: false,
         graphStatus,
@@ -182,7 +182,7 @@ export function useMerltArticleStatus(
 
       return { graphStatus, pendingEntities, hasBeenProcessed };
     } catch (err) {
-      setState(prev => ({
+      setState((prev: MerltArticleState) =>({
         ...prev,
         isLoading: false,
         error: err instanceof Error ? err.message : 'Errore nel caricamento',
@@ -199,14 +199,14 @@ export function useMerltArticleStatus(
   // Update state when enrichment job changes
   useEffect(() => {
     if (enrichmentJob?.status === 'in_progress') {
-      setState(prev => ({ ...prev, isEnriching: true }));
+      setState((prev: MerltArticleState) =>({ ...prev, isEnriching: true }));
     } else if (enrichmentJob?.status === 'completed') {
-      setState(prev => ({ ...prev, isEnriching: false }));
+      setState((prev: MerltArticleState) =>({ ...prev, isEnriching: false }));
 
       // Refresh status after enrichment completes
       fetchStatus();
     } else if (enrichmentJob?.status === 'failed') {
-      setState(prev => ({
+      setState((prev: MerltArticleState) =>({
         ...prev,
         isEnriching: false,
         error: enrichmentJob.error || 'Errore enrichment',
@@ -218,7 +218,7 @@ export function useMerltArticleStatus(
   useEffect(() => {
     if (!enrichmentResult || hasLocalChanges) return;
 
-    setState(prev => ({
+    setState((prev: MerltArticleState) =>({
       ...prev,
       pendingEntities: enrichmentResult.pending_entities || prev.pendingEntities,
       pendingRelations: enrichmentResult.pending_relations || prev.pendingRelations,
@@ -228,7 +228,7 @@ export function useMerltArticleStatus(
 
   const validateEntity = useCallback(async (entityId: string, vote: VoteType, comment?: string) => {
     if (!user_id) return null;
-    setState(prev => ({ ...prev, isValidating: true }));
+    setState((prev: MerltArticleState) =>({ ...prev, isValidating: true }));
     setHasLocalChanges(true);
 
     try {
@@ -239,7 +239,7 @@ export function useMerltArticleStatus(
         comment,
       });
 
-      setState(prev => ({
+      setState((prev: MerltArticleState) =>({
         ...prev,
         isValidating: false,
         votedEntityIds: new Set(prev.votedEntityIds).add(entityId),
@@ -247,7 +247,7 @@ export function useMerltArticleStatus(
 
       return response;
     } catch (err) {
-      setState(prev => ({
+      setState((prev: MerltArticleState) =>({
         ...prev,
         isValidating: false,
         error: err instanceof Error ? err.message : 'Errore nella validazione',
@@ -258,7 +258,7 @@ export function useMerltArticleStatus(
 
   const validateRelation = useCallback(async (relationId: string, vote: VoteType, comment?: string) => {
     if (!user_id) return null;
-    setState(prev => ({ ...prev, isValidating: true }));
+    setState((prev: MerltArticleState) =>({ ...prev, isValidating: true }));
     setHasLocalChanges(true);
 
     try {
@@ -269,7 +269,7 @@ export function useMerltArticleStatus(
         comment,
       });
 
-      setState(prev => ({
+      setState((prev: MerltArticleState) =>({
         ...prev,
         isValidating: false,
         votedRelationIds: new Set(prev.votedRelationIds).add(relationId),
@@ -277,7 +277,7 @@ export function useMerltArticleStatus(
 
       return response;
     } catch (err) {
-      setState(prev => ({
+      setState((prev: MerltArticleState) =>({
         ...prev,
         isValidating: false,
         error: err instanceof Error ? err.message : 'Errore nella validazione',
@@ -288,7 +288,7 @@ export function useMerltArticleStatus(
 
   const requestEnrichment = useCallback(() => {
     if (!user_id) return;
-    setState(prev => ({ ...prev, isEnriching: true }));
+    setState((prev: MerltArticleState) =>({ ...prev, isEnriching: true }));
 
     startEnrichmentStreaming({
       tipo_atto,
@@ -300,7 +300,7 @@ export function useMerltArticleStatus(
   }, [startEnrichmentStreaming, tipo_atto, articolo, numero_atto, data, user_id]);
 
   const commitFeedback = useCallback(() => {
-    setState(prev => ({
+    setState((prev: MerltArticleState) =>({
       ...prev,
       committedEntityIds: new Set(prev.votedEntityIds),
       committedRelationIds: new Set(prev.votedRelationIds),
@@ -317,10 +317,10 @@ export function useMerltArticleStatus(
 
   const uncommittedVoteCount = useMemo(() => {
     let count = 0;
-    state.votedEntityIds.forEach(id => {
+    state.votedEntityIds.forEach((id: string) => {
       if (!state.committedEntityIds.has(id)) count += 1;
     });
-    state.votedRelationIds.forEach(id => {
+    state.votedRelationIds.forEach((id: string) => {
       if (!state.committedRelationIds.has(id)) count += 1;
     });
     return count;

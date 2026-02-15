@@ -1,19 +1,19 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
 import type { LegalTask, Response } from '../../../types/index';
 import { cn } from '@/lib/utils';
 
 interface TaskDisplayProps {
   task: LegalTask;
-  mode: 'standard' | 'preference';
+  mode: 'standard' | 'preference' | 'blind';
   responseA: Response;
   responseB?: Response | null;
 }
 
-function ReadOnlyField({ label, value, icon, isCode = false }: { label: string; value: React.ReactNode; icon: string; isCode?: boolean }) {
+function ReadOnlyField({ label, value, icon, isCode = false }: { label: string; value: ReactNode; icon: string; isCode?: boolean }) {
   return (
     <div>
-      <div className="text-sm font-medium text-slate-400 flex items-center gap-2 mb-1">{icon} {label}</div>
+      <div className="text-sm font-medium text-slate-400 flex items-center gap-2 mb-1"><span aria-hidden="true">{icon}</span> {label}</div>
       <div className={cn(
         "text-slate-200 bg-slate-900/70 p-3 rounded border border-slate-700",
         isCode ? 'font-mono text-xs' : 'whitespace-pre-wrap'
@@ -85,7 +85,7 @@ export function TaskDisplay({ task, mode, responseA, responseB }: TaskDisplayPro
         <CardHeader className="flex-row items-center justify-between">
             <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-900/50 ring-1 ring-violet-500/30">
-                    <span className="text-xl">📋</span>
+                    <span className="text-xl" aria-hidden="true">&#128203;</span>
                 </div>
                 <div>
                     <CardTitle className="text-lg">Task Input</CardTitle>
@@ -98,7 +98,7 @@ export function TaskDisplay({ task, mode, responseA, responseB }: TaskDisplayPro
         </CardContent>
       </Card>
 
-      {mode === 'standard' ? (
+      {mode !== 'preference' ? (
         <AIResponseCard response={responseA} title="🤖 Response to Evaluate" borderColor="border-transparent" />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

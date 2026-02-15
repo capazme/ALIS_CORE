@@ -14,9 +14,9 @@
 
 import { motion } from 'framer-motion';
 import { GraduationCap, TrendingUp, Zap, Info, Calculator } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
-import { Tooltip } from '../../../ui/Tooltip';
-import type { AuthorityBreakdown as AuthorityBreakdownType } from '../../../../types/merlt';
+import { cn } from '../../../lib/utils';
+import { Tooltip } from '../../ui/Tooltip';
+import type { AuthorityBreakdown as AuthorityBreakdownType } from '../../../types/merlt';
 
 // =============================================================================
 // RLCF CONSTANTS
@@ -116,7 +116,7 @@ function BreakdownBar({
               'bg-slate-100 dark:bg-slate-800'
             )}
           >
-            <Icon size={14} className={config.color} />
+            <Icon size={14} className={config.color} aria-hidden="true" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
@@ -124,7 +124,7 @@ function BreakdownBar({
                 {config.label}
               </span>
               <Tooltip content={config.tooltip} placement="top">
-                <Info size={12} className="text-slate-400 cursor-help" />
+                <Info size={12} className="text-slate-400 cursor-help" aria-hidden="true" />
               </Tooltip>
             </div>
             <span className="text-[10px] text-slate-500 dark:text-slate-400">
@@ -200,7 +200,7 @@ export function AuthorityBreakdown({
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <Calculator size={18} className="text-slate-500" />
+          <Calculator size={18} className="text-slate-500" aria-hidden="true" />
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
             Composizione Authority
           </h3>

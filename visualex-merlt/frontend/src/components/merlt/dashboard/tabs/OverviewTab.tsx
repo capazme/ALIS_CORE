@@ -33,16 +33,17 @@ import {
   Clock,
   RefreshCw,
 } from 'lucide-react';
-import { cn } from '../../../../../lib/utils';
+import { cn } from '../../../../lib/utils';
 import {
   getDashboardOverview,
   getStatusColor,
   getSeverityColor,
   formatUptime,
   type DashboardOverview,
+  type ServiceHealth,
   type ServiceStatus,
   type ActivityEntry,
-} from '../../../../../services/dashboardService';
+} from '../../../../services/dashboardService';
 
 // =============================================================================
 // KPI CARD
@@ -70,7 +71,7 @@ function KPICard({ title, value, icon, subtitle, trend, color = 'blue' }: KPICar
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+      className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow"
     >
       <div className="flex items-start justify-between">
         <div className={cn('p-2.5 rounded-lg', colorClasses[color])}>
@@ -92,14 +93,14 @@ function KPICard({ title, value, icon, subtitle, trend, color = 'blue' }: KPICar
       </div>
 
       <div className="mt-4">
-        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
+        <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400">
           {title}
         </h3>
-        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">
+        <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">
           {typeof value === 'number' ? value.toLocaleString('it-IT') : value}
         </p>
         {subtitle && (
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
             {subtitle}
           </p>
         )}
@@ -124,7 +125,7 @@ function ServiceStatusCard({ name, status, latencyMs }: ServiceStatusCardProps) 
     online: <CheckCircle2 size={16} className="text-green-500" />,
     offline: <XCircle size={16} className="text-red-500" />,
     degraded: <AlertCircle size={16} className="text-yellow-500" />,
-    unknown: <Clock size={16} className="text-gray-500" />,
+    unknown: <Clock size={16} className="text-slate-500" />,
   };
 
   const statusLabel = {
@@ -135,16 +136,16 @@ function ServiceStatusCard({ name, status, latencyMs }: ServiceStatusCardProps) 
   };
 
   return (
-    <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+    <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700 last:border-0">
       <div className="flex items-center gap-3">
         {statusIcon[status]}
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
           {name}
         </span>
       </div>
       <div className="flex items-center gap-4">
         {latencyMs !== undefined && (
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-slate-500 dark:text-slate-400">
             {latencyMs}ms
           </span>
         )}
@@ -173,12 +174,12 @@ function ActivityItem({ entry }: ActivityItemProps) {
   };
 
   return (
-    <div className="flex items-start gap-3 py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
-      <div className="text-xs text-gray-400 dark:text-gray-500 w-12 flex-shrink-0">
+    <div className="flex items-start gap-3 py-2 border-b border-slate-100 dark:border-slate-700 last:border-0">
+      <div className="text-xs text-slate-400 dark:text-slate-500 w-12 flex-shrink-0">
         {formatTime(entry.timestamp)}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-gray-700 dark:text-gray-300 truncate">
+        <p className="text-sm text-slate-700 dark:text-slate-300 truncate">
           {entry.message}
         </p>
         <span className={cn('inline-block text-xs px-2 py-0.5 rounded mt-1', getSeverityColor(entry.severity))}>
@@ -194,9 +195,9 @@ function ActivityItem({ entry }: ActivityItemProps) {
 // =============================================================================
 
 export function OverviewTab() {
-  const [data, setData] = useState<DashboardOverview | null>(null);
+  const [data, setData] = useState(null as DashboardOverview | null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null as string | null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -218,20 +219,21 @@ export function OverviewTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <RefreshCw size={24} className="animate-spin text-blue-500" />
+      <div className="flex items-center justify-center py-12" role="status">
+        <RefreshCw size={24} className="animate-spin text-blue-500" aria-hidden="true" />
+        <span className="sr-only">Caricamento dati overview in corso...</span>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="text-center py-12">
-        <AlertCircle size={48} className="mx-auto text-red-400 mb-4" />
-        <p className="text-gray-500 dark:text-gray-400">{error}</p>
+      <div className="text-center py-12" role="alert">
+        <AlertCircle size={48} className="mx-auto text-red-400 mb-4" aria-hidden="true" />
+        <p className="text-slate-500 dark:text-slate-400">{error}</p>
         <button
           onClick={fetchData}
-          className="mt-4 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="mt-4 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         >
           Riprova
         </button>
@@ -243,10 +245,10 @@ export function OverviewTab() {
     <div className="space-y-6">
       {/* Knowledge Graph KPIs */}
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
           Knowledge Graph
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <KPICard
             title="Nodi Totali"
             value={data.knowledge_graph.total_nodes}
@@ -287,13 +289,13 @@ export function OverviewTab() {
       </div>
 
       {/* RLCF + Expert KPIs */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* RLCF KPIs */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
             RLCF System
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <KPICard
               title="Total Feedback"
               value={data.rlcf.total_feedback}
@@ -329,10 +331,10 @@ export function OverviewTab() {
 
         {/* Expert System KPIs */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
             Expert System
           </h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <KPICard
               title="Total Queries"
               value={data.experts.total_queries}
@@ -362,11 +364,11 @@ export function OverviewTab() {
       </div>
 
       {/* System Health + Activity */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* System Health */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               System Health
             </h2>
             <div className="flex items-center gap-2">
@@ -378,14 +380,14 @@ export function OverviewTab() {
                   data.health.overall_status === 'offline' && 'bg-red-500'
                 )}
               />
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+              <span className="text-sm text-slate-500 dark:text-slate-400">
                 Uptime: {formatUptime(data.health.uptime_seconds)}
               </span>
             </div>
           </div>
 
           <div className="space-y-1">
-            {data.health.services.map((service) => (
+            {data.health.services.map((service: ServiceHealth) => (
               <ServiceStatusCard
                 key={service.name}
                 name={service.name}
@@ -398,19 +400,19 @@ export function OverviewTab() {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
             Recent Activity
           </h2>
 
           <div className="space-y-1 max-h-64 overflow-y-auto">
-            {data.recent_activity.entries.slice(0, 10).map((entry) => (
+            {data.recent_activity.entries.slice(0, 10).map((entry: ActivityEntry) => (
               <ActivityItem key={entry.id} entry={entry} />
             ))}
           </div>
 
           {data.recent_activity.has_more && (
-            <button className="w-full mt-3 text-center text-sm text-blue-600 dark:text-blue-400 hover:underline">
+            <button className="w-full mt-3 text-center text-sm text-blue-600 dark:text-blue-400 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded">
               Mostra altre {data.recent_activity.total_count - 10} attività
             </button>
           )}

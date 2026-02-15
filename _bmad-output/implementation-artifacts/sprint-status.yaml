@@ -117,24 +117,24 @@ development_status:
   # ============================================
   # Epic 5: Traceability & Source Verification
   # ============================================
-  epic-5: in-progress  # Started 2026-02-02 with Story 5.0
+  epic-5: done  # All stories completed
   5-0-expert-pipeline-orchestrator: done  # Completed 2026-02-02 - Foundation for tracing, connects all Epic 4 components
-  5-1-reasoning-trace-storage: backlog
-  5-2-trace-viewer-ui: backlog
-  5-3-source-navigation: backlog
-  5-4-temporal-validity-check: backlog
-  5-5-citation-export: backlog
+  5-1-reasoning-trace-storage: done  # Completed 2026-02-05 - TraceStorageService, consent-aware filtering, CRUD endpoints, 18 tests
+  5-2-trace-viewer-ui: done  # Completed 2026-02-10 - Sprint 1: TraceViewer, ExpertAccordion, SourcesList, ConfidenceMeter, SynthesisWithSources, SourceSplitView, SourceDetailPanel, CitationExportButton, QueryInputForm
+  5-3-source-navigation: done  # Completed 2026-02-10 - Sprint 1: useSourceNavigation, useTraceData hooks, SourceSplitView, SourceDetailPanel with validity badges
+  5-4-temporal-validity-check: done  # Completed 2026-02-06 - TemporalValidityService, cache 24h, validity_router, 27 tests
+  5-5-citation-export: done  # Completed 2026-02-06 - Citation export 4 formats, URN parser, BaseFormat ABC, 108 tests
   epic-5-retrospective: optional
 
   # ============================================
   # Epic 6: RLCF Feedback Collection
   # ============================================
-  epic-6: backlog
-  6-1-feedback-data-model: backlog
-  6-2-ner-feedback-f1: backlog
-  6-3-expert-output-feedback-f3-f6: backlog
-  6-4-synthesizer-feedback-f7: backlog
-  6-5-bridge-quality-feedback-f8: backlog
+  epic-6: in-progress  # Sprint 2 completed core feedback UI + backend wiring
+  6-1-feedback-data-model: done  # Completed 2026-02-12 - Sprint 2: qa_feedback table (from 5-1), _wire_feedback_to_training helper in experts_router.py, wires all 5 feedback endpoints to TrainingScheduler
+  6-2-ner-feedback-f1: done  # Completed 2026-02-12 - Sprint 2: MerltContentOverlay with "Corretto" confirm button (confidence>0.8), CitationCorrectionCard flow, userId via getCurrentUserId
+  6-3-expert-output-feedback-f3-f6: done  # Completed 2026-02-12 - Sprint 2: ExpertFeedbackPanel with 5-star rating, reason select (Accurata/Incompleta/Non pertinente/Altro), differentiated dimension mapping, integrated in ExpertAccordion
+  6-4-synthesizer-feedback-f7: done  # Completed 2026-02-12 - Sprint 2: InlineFeedbackPanel with thumbs up/down, integrated in TraceViewer after synthesis section
+  6-5-bridge-quality-feedback-f8: done  # Completed 2026-02-12 - Sprint 2: SourceRatingWidget 5-star per source, integrated in SourcesList. Implicit F8 inference deferred to Epic 7
   6-6-fonti-usate-panel: backlog
   6-7-feedback-history: backlog
   6-8-pii-anonymization: backlog
@@ -145,21 +145,21 @@ development_status:
   # ============================================
   # Epic 7: Authority & Learning Loop
   # ============================================
-  epic-7: backlog
-  7-1-authority-score-computation: backlog
-  7-2-router-feedback-f2: backlog
-  7-3-feedback-aggregation: backlog
-  7-4-training-buffer-trigger: backlog
-  7-5-expert-affinity-update-f8c: backlog
-  7-6-traversalpolicy-training-f8d: backlog
-  epic-7-retrospective: optional
+  epic-7: done  # Sprint 3 completed 2026-02-13 - all 6 stories + retrospective
+  7-1-authority-score-computation: done  # Completed 2026-02-13 - _update_user_authority helper, wired into all 5 feedback endpoints, RLCF User lookup/create, track_record + authority update
+  7-2-router-feedback-f2: done  # Completed 2026-02-13 - POST /feedback/router endpoint, RouterFeedbackRequest, authority>=0.7 threshold, frontend submitRouterFeedback()
+  7-3-feedback-aggregation: done  # Completed 2026-02-13 - FeedbackAggregationService, AggregatedFeedback model, authority-weighted avg, Shannon entropy disagreement, POST/GET /rlcf/aggregation endpoints
+  7-4-training-buffer-trigger: done  # Completed 2026-02-13 - oldest_timestamp() on both buffers, idle timeout 7d, versioned checkpoints via PolicyManager, on_training_start/complete/error callbacks
+  7-5-expert-affinity-update-f8c: done  # Completed 2026-02-13 - expert_affinity JSONB on bridge table, AffinityUpdateService with lr=0.1 bounded [0.1,0.95], wired to source feedback endpoint
+  7-6-traversalpolicy-training-f8d: done  # Completed 2026-02-13 - TraversalTrainingService, REINFORCE training from F8 samples, integrated in training_scheduler run_training_epoch()
+  epic-7-retrospective: done  # Completed 2026-02-13
 
   # ============================================
   # Epic 8: Research & Academic Support
   # ============================================
-  epic-8: backlog
-  8-1-policy-evolution-dashboard: backlog
-  8-2-dataset-export: backlog
-  8-3-query-reproducibility: backlog
-  8-4-devils-advocate: backlog
-  epic-8-retrospective: optional
+  epic-8: done  # Sprint 4 completed 2026-02-14 - all 4 stories + test debt Story 0 + code review fixes
+  8-1-policy-evolution-dashboard: done  # Completed 2026-02-14 - policy_evolution_router (time-series, expert-evolution, aggregation-history), PolicyEvolutionChart.tsx, usePolicyEvolution.ts
+  8-2-dataset-export: done  # Completed 2026-02-14 - DatasetExportService (GDPR, anonymization, CSV/JSON), export_router, EXPORT_ANON_SALT env var
+  8-3-query-reproducibility: done  # Completed 2026-02-14 - ReproducibilityService (diff, Jaccard, score), POST /traces/{id}/reproduce, ephemeral traces
+  8-4-devils-advocate: done  # Completed 2026-02-14 - devils_advocate_router (check/feedback/effectiveness), DevilsAdvocatePanel.tsx, bounded deque + thread-safe
+  epic-8-retrospective: done  # Completed 2026-02-14

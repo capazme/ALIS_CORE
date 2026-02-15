@@ -48,25 +48,28 @@ export function Leaderboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" role="main" aria-label="RLCF Leaderboard">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">🏆 RLCF Leaderboard</h1>
+          <h1 className="text-2xl font-bold text-white mb-2 sm:text-3xl">RLCF Leaderboard</h1>
           <p className="text-slate-400">Authority rankings based on dynamic scoring model</p>
         </div>
-        <div className="flex gap-2">
+        <nav className="flex gap-2" aria-label="Time period filter">
           {(['all', '30d', '7d'] as const).map((period) => (
             <Button
               key={period}
               variant={timeframe === period ? 'default' : 'outline'}
               size="sm"
               onClick={() => setTimeframe(period)}
+              className="focus-visible:ring-2 focus-visible:ring-blue-500"
+              aria-pressed={timeframe === period}
+              aria-label={`Show ${period === 'all' ? 'all time' : `last ${period}`} rankings`}
             >
               {period.toUpperCase()}
             </Button>
           ))}
-        </div>
+        </nav>
       </div>
 
       {/* Current User Rank Card */}
@@ -109,16 +112,18 @@ export function Leaderboard() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div className="space-y-2" role="list" aria-label="Authority rankings">
             {leaderboard?.map((entry) => {
               const isCurrentUser = entry.user_id === user?.id;
               const isTopTen = entry.rank <= 10;
               const medalEmoji = entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : '';
               
               return (
-                <div 
+                <div
                   key={entry.user_id}
-                  className={`flex items-center justify-between p-4 rounded-lg transition-all ${
+                  role="listitem"
+                  aria-label={`Rank ${entry.rank}: ${entry.username}, authority score ${entry.authority_score.toFixed(3)}`}
+                  className={`flex flex-col gap-3 p-4 rounded-lg transition-all sm:flex-row sm:items-center sm:justify-between ${
                     isCurrentUser 
                       ? 'bg-purple-950/30 border-2 border-purple-700' 
                       : isTopTen
@@ -180,9 +185,10 @@ export function Leaderboard() {
           {/* Load More */}
           {leaderboard && leaderboard.length >= limit && (
             <div className="text-center mt-6">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setLimit(prev => prev + 25)}
+                className="focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 Load More Rankings
               </Button>
@@ -194,7 +200,7 @@ export function Leaderboard() {
       {/* Legend */}
       <Card className="border-slate-700">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <span className="text-slate-400">Authority Components:</span>
               <div className="flex items-center gap-2">

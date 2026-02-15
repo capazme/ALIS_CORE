@@ -61,28 +61,28 @@ export function ExpertOpinionPanel({ experts, opinions }: ExpertOpinionPanelProp
         {!hasDetailedOpinions ? (
           // Fallback: Show consulted experts
           <div className="space-y-3">
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="text-sm text-slate-400 mb-4">
               The following experts were consulted for this query:
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {experts.map((expertType) => {
                 const config = expertConfig[expertType] || {
                   icon: <Brain className="w-5 h-5" />,
-                  color: 'text-gray-400',
+                  color: 'text-slate-400',
                   description: 'Expert analysis',
                 };
 
                 return (
                   <div
                     key={expertType}
-                    className="flex items-start gap-3 p-4 bg-gray-800 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors"
+                    className="flex items-start gap-3 p-4 bg-slate-800 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors"
                   >
-                    <div className={`${config.color} mt-1`}>{config.icon}</div>
+                    <div className={`${config.color} mt-1`} aria-hidden="true">{config.icon}</div>
                     <div className="flex-1">
                       <h4 className="font-medium text-white capitalize mb-1">
                         {expertType.replace(/_/g, ' ')}
                       </h4>
-                      <p className="text-sm text-gray-400">{config.description}</p>
+                      <p className="text-sm text-slate-400">{config.description}</p>
                       <Badge variant="outline" className="mt-2">
                         Consulted
                       </Badge>
@@ -105,16 +105,16 @@ export function ExpertOpinionPanel({ experts, opinions }: ExpertOpinionPanelProp
             {opinions.map((opinion, idx) => {
               const config = expertConfig[opinion.expert_type] || {
                 icon: <Brain className="w-5 h-5" />,
-                color: 'text-gray-400',
+                color: 'text-slate-400',
                 description: '',
               };
 
               return (
-                <Card key={idx} className="bg-gray-800 border-gray-700">
+                <Card key={idx} className="bg-slate-800 border-slate-700">
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className={config.color}>{config.icon}</div>
+                        <div className={config.color} aria-hidden="true">{config.icon}</div>
                         <h4 className="font-medium text-white capitalize">
                           {opinion.expert_type.replace(/_/g, ' ')}
                         </h4>
@@ -129,24 +129,24 @@ export function ExpertOpinionPanel({ experts, opinions }: ExpertOpinionPanelProp
                   <CardContent className="space-y-3">
                     {opinion.position && (
                       <div>
-                        <h5 className="text-sm font-medium text-gray-400 mb-1">Position</h5>
+                        <h5 className="text-sm font-medium text-slate-400 mb-1">Position</h5>
                         <p className="text-white">{opinion.position}</p>
                       </div>
                     )}
 
                     {opinion.reasoning && (
                       <div>
-                        <h5 className="text-sm font-medium text-gray-400 mb-1">Reasoning</h5>
-                        <p className="text-gray-300 text-sm leading-relaxed">{opinion.reasoning}</p>
+                        <h5 className="text-sm font-medium text-slate-400 mb-1">Reasoning</h5>
+                        <p className="text-slate-300 text-sm leading-relaxed">{opinion.reasoning}</p>
                       </div>
                     )}
 
                     {opinion.supporting_evidence && opinion.supporting_evidence.length > 0 && (
                       <div>
-                        <h5 className="text-sm font-medium text-gray-400 mb-2">Supporting Evidence</h5>
+                        <h5 className="text-sm font-medium text-slate-400 mb-2">Supporting Evidence</h5>
                         <ul className="space-y-1">
                           {opinion.supporting_evidence.map((evidence, i) => (
-                            <li key={i} className="text-sm text-gray-400 flex items-start gap-2">
+                            <li key={i} className="text-sm text-slate-400 flex items-start gap-2">
                               <span className="text-blue-400 mt-1">•</span>
                               <span>{evidence}</span>
                             </li>

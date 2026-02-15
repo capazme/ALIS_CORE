@@ -22,9 +22,9 @@ import {
   Globe,
   Info,
 } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
-import { Tooltip } from '../../../ui/Tooltip';
-import type { LegalDomain, DomainStats } from '../../../../types/merlt';
+import { cn } from '../../../lib/utils';
+import { Tooltip } from '../../ui/Tooltip';
+import type { LegalDomain, DomainStats } from '../../../types/merlt';
 
 // =============================================================================
 // DOMAIN CONFIG
@@ -132,6 +132,7 @@ function DomainCell({ domain, stats, index }: DomainCellProps) {
         <div className="flex items-start gap-2">
           <Icon
             size={16}
+            aria-hidden="true"
             className={cn(
               intensity > 0.5
                 ? 'text-white/90'
@@ -209,7 +210,7 @@ export function DomainHeatmap({ domains, className }: DomainHeatmapProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Globe size={18} className="text-slate-500" />
+          <Globe size={18} className="text-slate-500" aria-hidden="true" />
           <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
             Authority per Dominio
           </h3>
@@ -218,7 +219,7 @@ export function DomainHeatmap({ domains, className }: DomainHeatmapProps) {
           content="L'authority varia per dominio in base ai tuoi contributi specifici in quell'area"
           placement="left"
         >
-          <Info size={14} className="text-slate-400 cursor-help" />
+          <Info size={14} className="text-slate-400 cursor-help" aria-hidden="true" />
         </Tooltip>
       </div>
 
@@ -232,7 +233,7 @@ export function DomainHeatmap({ domains, className }: DomainHeatmapProps) {
           Il tuo dominio più forte
         </p>
         <div className="flex items-center gap-2">
-          <topConfig.icon size={18} className="text-blue-600 dark:text-blue-400" />
+          <topConfig.icon size={18} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
           <span className="font-semibold text-slate-700 dark:text-slate-200">
             {topConfig.label}
           </span>
@@ -243,7 +244,7 @@ export function DomainHeatmap({ domains, className }: DomainHeatmapProps) {
       </motion.div>
 
       {/* Domain Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
         {sortedDomains.map(([domain, stats], index) => (
           <DomainCell
             key={domain}
@@ -255,7 +256,7 @@ export function DomainHeatmap({ domains, className }: DomainHeatmapProps) {
       </div>
 
       {/* Legend */}
-      <div className="mt-4 flex items-center justify-center gap-4 text-[10px] text-slate-400">
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-[10px] text-slate-400">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-blue-100" />
           <span>Bassa</span>

@@ -9,8 +9,18 @@
  */
 
 import { create } from 'zustand';
-import { merltService, requestLiveEnrichmentStreaming } from '../services/merltService';
-import type { EnrichmentJobStatus, EnrichmentJobResult } from '../types/merlt';
+import { requestLiveEnrichment, requestLiveEnrichmentStreaming, type StreamingEvent } from '../services/merltService';
+import type { PendingEntity, PendingRelation } from '../types/merlt';
+
+/** Job status for enrichment process */
+export type EnrichmentJobStatus = 'pending' | 'in_progress' | 'completed' | 'failed';
+
+/** Result of an enrichment job */
+export interface EnrichmentJobResult {
+  pending_entities: PendingEntity[];
+  pending_relations: PendingRelation[];
+  article_urn: string;
+}
 
 export interface EnrichmentJob {
   id: string;
@@ -74,31 +84,50 @@ export const useEnrichmentStore = create<EnrichmentState>((set, get) => ({
     }));
 
     try {
-      // Kick off enrichment on backend
-      await merltService.requestLiveEnrichment(tipo_atto, articolo, user_id, numero_atto, data);
+      // Accumulate entities/relations as they arrive
+      const entities: PendingEntity[] = [];
+      const relations: PendingRelation[] = [];
+      let articleUrn = '';
 
-      // Start streaming updates
-      await requestLiveEnrichmentStreaming({
+      // Start streaming updates via SSE
+      const close = requestLiveEnrichmentStreaming(
         tipo_atto,
         articolo,
-        numero_atto,
-        data,
         user_id,
-        onProgress: (message) => {
-          get().updateJob(articleKey, { progressMessage: message });
-        },
-        onComplete: (result) => {
-          get().setResult(articleKey, result);
-          get().updateJob(articleKey, { status: 'completed', completedAt: Date.now() });
-        },
-        onError: (error) => {
-          get().updateJob(articleKey, { status: 'failed', error: error.message, completedAt: Date.now() });
-        },
-      });
-    } catch (error: any) {
+        (event: StreamingEvent) => {
+          switch (event.type) {
+            case 'progress':
+            case 'waiting':
+              get().updateJob(articleKey, { progressMessage: event.message });
+              break;
+            case 'start':
+              if (event.article) articleUrn = event.article.urn;
+              break;
+            case 'entity':
+              if (event.entity) entities.push(event.entity);
+              get().updateJob(articleKey, { progressMessage: `Estratte ${entities.length} entità...` });
+              break;
+            case 'relation':
+              if (event.relation) relations.push(event.relation);
+              break;
+            case 'complete':
+              get().setResult(articleKey, { pending_entities: entities, pending_relations: relations, article_urn: articleUrn });
+              get().updateJob(articleKey, { status: 'completed', completedAt: Date.now() });
+              break;
+            case 'error':
+              get().updateJob(articleKey, { status: 'failed', error: event.message, completedAt: Date.now() });
+              break;
+          }
+        }
+      );
+
+      // Store close function for potential cancellation (not used yet)
+      void close;
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Errore durante enrichment';
       get().updateJob(articleKey, {
         status: 'failed',
-        error: error.message || 'Errore durante enrichment',
+        error: errorMessage,
         completedAt: Date.now(),
       });
     }

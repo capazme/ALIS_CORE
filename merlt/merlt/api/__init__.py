@@ -14,6 +14,7 @@ Routers:
 - amendments_router: Submission e gestione amendments (multivigenza)
 - graph_router: API per visualizzazione Knowledge Graph
 - pipeline_router: Monitoring pipeline ingestion/enrichment
+- citation_router: Citation export in multiple formats
 
 Esempio:
     >>> from fastapi import FastAPI
@@ -26,6 +27,7 @@ Esempio:
     ...     amendments_router,
     ...     graph_router,
     ...     pipeline_router,
+    ...     citation_router,
     ... )
     >>>
     >>> app = FastAPI(title="MERL-T API")
@@ -48,6 +50,19 @@ from merlt.api.document_router import router as document_router, amendments_rout
 from merlt.api.graph_router import router as graph_router
 from merlt.api.pipeline_router import router as pipeline_router
 from merlt.api.training_router import router as training_router
+from merlt.api.validity_router import router as validity_router
+from merlt.api.citation_router import router as citation_router
+from merlt.api.trace_router import router as trace_router
+from merlt.api.dashboard_router import router as dashboard_router
+from merlt.api.profile_router import router as profile_router
+from merlt.api.statistics_router import router as statistics_router
+from merlt.api.rlcf_router import router as rlcf_router
+from merlt.api.expert_metrics_router import router as expert_metrics_router
+from merlt.api.ws_router import router as ws_router
+from merlt.api.tracking_router import router as tracking_router
+from merlt.api.policy_evolution_router import router as policy_evolution_router
+from merlt.api.export_router import router as export_router
+from merlt.api.devils_advocate_router import router as devils_advocate_router
 
 __all__ = [
     "ingestion_router",
@@ -60,4 +75,17 @@ __all__ = [
     "graph_router",
     "pipeline_router",
     "training_router",
+    "validity_router",
+    "citation_router",
+    "trace_router",
+    "dashboard_router",
+    "profile_router",
+    "statistics_router",
+    "rlcf_router",
+    "expert_metrics_router",
+    "ws_router",
+    "tracking_router",
+    "policy_evolution_router",
+    "export_router",
+    "devils_advocate_router",
 ]

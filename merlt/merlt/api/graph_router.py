@@ -81,12 +81,11 @@ async def check_article_in_graph(
 
     try:
         query = """
-        MATCH (a:Article {urn: $urn})
-        OPTIONAL MATCH (a)-[:HAS_PENDING_ENTITY]->(pe:PendingEntity)
-        WHERE pe.validation_status = 'pending'
+        MATCH (a:Norma)
+        WHERE a.URN = $urn OR a.node_id = $urn
         RETURN
-            a.id as node_id,
-            COUNT(pe) > 0 as pending_validation
+            COALESCE(a.node_id, a.URN) as node_id,
+            false as pending_validation
         """
 
         result = await graph_client.query(query, {"urn": article_urn})
@@ -194,6 +193,15 @@ async def get_node_details(
         await graph_client.close()
 
 
+@router.get("/article-entities")
+async def get_article_entities_query(
+    article_urn: str,
+    validation_status: Optional[str] = None
+) -> Dict[str, Any]:
+    """Query-parameter variant of article entities (avoids URN-in-path issues)."""
+    return await get_article_entities(article_urn, validation_status)
+
+
 @router.get("/article/{article_urn}/entities")
 async def get_article_entities(
     article_urn: str,
@@ -233,21 +241,27 @@ async def get_article_entities(
     await graph_client.connect()
 
     try:
-        # Build query with optional status filter
+        # Build query - match Norma by URN (uppercase property)
+        # then follow all outgoing relations to find connected entities
         query = """
-        MATCH (a:Article {urn: $urn})-[:HAS_ENTITY]->(e:Entity)
+        MATCH (a:Norma)
+        WHERE a.URN = $urn OR a.node_id = $urn
+        WITH a
+        MATCH (a)-[r]->(e)
+        WHERE NOT e:Comma
         """
 
         if validation_status:
-            query += " WHERE e.validation_status = $status"
+            query += " AND e.validation_status = $status"
 
         query += """
         RETURN
-            e.id as entity_id,
-            e.tipo as entity_type,
-            e.nome as entity_text,
-            e.validation_status as validation_status,
-            e.approval_score as approval_score
+            COALESCE(e.node_id, e.URN, id(e)) as entity_id,
+            labels(e)[0] as entity_type,
+            COALESCE(e.nome, e.estremi, e.titolo, e.testo_vigente) as entity_text,
+            COALESCE(e.validation_status, 'approved') as validation_status,
+            COALESCE(e.approval_score, 0.0) as approval_score,
+            type(r) as relation_type
         """
 
         params = {"urn": article_urn}
@@ -262,9 +276,11 @@ async def get_article_entities(
                 "entity_type": row["entity_type"],
                 "entity_text": row["entity_text"],
                 "validation_status": row["validation_status"],
-                "approval_score": row.get("approval_score", 0.0)
+                "approval_score": row.get("approval_score", 0.0),
+                "relation_type": row.get("relation_type"),
             }
             for row in result
+            if row.get("entity_text")  # Skip nodes without text
         ]
 
         log.info(
@@ -283,6 +299,15 @@ async def get_article_entities(
         raise HTTPException(status_code=500, detail=f"Graph query failed: {str(e)}")
     finally:
         await graph_client.close()
+
+
+@router.get("/article-relations")
+async def get_article_relations_query(
+    article_urn: str,
+    relation_type: Optional[str] = None
+) -> Dict[str, Any]:
+    """Query-parameter variant of article relations (avoids URN-in-path issues)."""
+    return await get_article_relations(article_urn, relation_type)
 
 
 @router.get("/article/{article_urn}/relations")
@@ -340,9 +365,12 @@ async def get_article_relations(
     await graph_client.connect()
 
     try:
-        # Build query con filtro opzionale per tipo relazione
+        # Build query - match Norma by URN (uppercase property)
         query = """
-        MATCH (a:Article {urn: $urn})-[r]-(target)
+        MATCH (a:Norma)
+        WHERE a.URN = $urn OR a.node_id = $urn
+        WITH a
+        MATCH (a)-[r]-(target)
         """
 
         if relation_type:
@@ -351,9 +379,9 @@ async def get_article_relations(
         query += """
         RETURN
             type(r) as relation_type,
-            target.urn as target_urn,
-            target.id as target_id,
-            COALESCE(target.nome, target.rubrica, target.estremi, target.id) as target_label,
+            COALESCE(target.URN, target.node_id) as target_urn,
+            COALESCE(target.node_id, target.URN) as target_id,
+            COALESCE(target.nome, target.rubrica, target.estremi, target.titolo) as target_label,
             labels(target)[0] as target_node_type,
             COALESCE(r.certezza, r.confidence, 0.5) as confidence
         ORDER BY confidence DESC, relation_type ASC
@@ -897,6 +925,108 @@ class SubgraphResponse(BaseModel):
     nodes: List[SubgraphNode]
     edges: List[SubgraphEdge]
     metadata: SubgraphMetadata
+
+
+@router.get("/overview", response_model=SubgraphResponse)
+async def get_graph_overview(
+    max_nodes: int = 50,
+) -> SubgraphResponse:
+    """
+    Return a sample of the knowledge graph for the bulletin board explorer.
+
+    Picks the most-connected Norma nodes and their immediate neighbors
+    so the user sees a representative slice of the graph.
+    """
+    import time
+    start_time = time.time()
+
+    if max_nodes > 200:
+        max_nodes = 200
+
+    graph_client = FalkorDBClient()
+    await graph_client.connect()
+
+    try:
+        # Get top-connected Norma nodes + a limited number of neighbors each
+        # This ensures diverse seeds rather than one dominating node
+        cypher = """
+        MATCH (n:Norma)-[r]-(m)
+        WITH n, count(r) as degree
+        ORDER BY degree DESC
+        LIMIT 8
+        WITH n as seed
+        MATCH (seed)-[r]-(neighbor)
+        WITH seed, r, neighbor
+        ORDER BY rand()
+        WITH seed, collect({r: r, neighbor: neighbor})[0..6] as neighbors
+        UNWIND neighbors as nb
+        RETURN seed, type(nb.r) as rel_type, nb.neighbor as neighbor,
+               id(seed) as source_id, id(nb.neighbor) as target_id
+        """
+
+        result = await graph_client.query(cypher, {"max_nodes": max_nodes})
+
+        nodes: List[SubgraphNode] = []
+        edges: List[SubgraphEdge] = []
+        seen_node_ids: Dict[str, str] = {}
+
+        if result and len(result) > 0:
+            for row in result:
+                seed = row.get("seed")
+                neighbor = row.get("neighbor")
+                rel_type = row.get("rel_type")
+                source_id = str(row.get("source_id", ""))
+                target_id = str(row.get("target_id", ""))
+
+                # Add seed node
+                if seed and source_id not in seen_node_ids:
+                    node = _parse_graph_node_v2(seed, True)
+                    nodes.append(node)
+                    seen_node_ids[source_id] = node.id
+
+                # Add neighbor node
+                if neighbor and target_id not in seen_node_ids:
+                    node = _parse_graph_node_v2(neighbor, True)
+                    nodes.append(node)
+                    seen_node_ids[target_id] = node.id
+
+                # Add edge
+                if source_id in seen_node_ids and target_id in seen_node_ids and rel_type:
+                    edge_id = f"{seen_node_ids[source_id]}-{rel_type}-{seen_node_ids[target_id]}"
+                    if not any(e.id == edge_id for e in edges):
+                        edges.append(SubgraphEdge(
+                            id=edge_id,
+                            source=seen_node_ids[source_id],
+                            target=seen_node_ids[target_id],
+                            type=rel_type,
+                            properties={},
+                        ))
+
+        query_time = (time.time() - start_time) * 1000
+
+        log.info(
+            "Graph overview fetched",
+            nodes_count=len(nodes),
+            edges_count=len(edges),
+            query_time_ms=query_time,
+        )
+
+        return SubgraphResponse(
+            nodes=nodes,
+            edges=edges,
+            metadata=SubgraphMetadata(
+                total_nodes=len(nodes),
+                total_edges=len(edges),
+                depth_reached=1,
+                root_node_id="overview",
+                query_time_ms=round(query_time, 2),
+            ),
+        )
+    except Exception as e:
+        log.error(f"Error fetching graph overview: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Graph overview failed: {str(e)}")
+    finally:
+        await graph_client.close()
 
 
 @router.get("/subgraph", response_model=SubgraphResponse)

@@ -35,8 +35,11 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 import structlog
-from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from merlt.rlcf.database import get_async_session_dep
 
 log = structlog.get_logger()
 
@@ -528,6 +531,63 @@ async def get_policy_history(
         history=history,
         epochs=epochs,
     )
+
+
+@router.post("/aggregation/run")
+async def run_aggregation(
+    session: AsyncSession = Depends(get_async_session_dep),
+):
+    """
+    Trigger periodic feedback aggregation across all components.
+
+    Returns aggregation results with disagreement flags.
+    """
+    try:
+        from merlt.rlcf.feedback_aggregation_service import FeedbackAggregationService
+        svc = FeedbackAggregationService()
+        result = await svc.run_periodic_aggregation(session)
+        return result.to_dict()
+    except Exception as e:
+        log.error("Aggregation run failed", error=str(e))
+        return {
+            "components_aggregated": 0,
+            "total_feedback_processed": 0,
+            "high_disagreement_components": [],
+            "error": str(e),
+        }
+
+
+@router.get("/aggregation/latest")
+async def get_latest_aggregation(
+    component: Optional[str] = Query(None, description="Filter by component"),
+    session: AsyncSession = Depends(get_async_session_dep),
+):
+    """
+    Get latest aggregation results, optionally filtered by component.
+    """
+    try:
+        from merlt.rlcf.feedback_aggregation_service import (
+            FeedbackAggregationService,
+            VALID_COMPONENTS,
+        )
+        svc = FeedbackAggregationService()
+
+        if component:
+            agg = await svc.aggregate_component_feedback(session, component)
+            return agg.to_dict()
+
+        # All components
+        results = {}
+        for comp in VALID_COMPONENTS:
+            agg = await svc.aggregate_component_feedback(session, comp)
+            if agg.total_feedback > 0:
+                results[comp] = agg.to_dict()
+
+        return {"components": results, "timestamp": datetime.now().isoformat()}
+
+    except Exception as e:
+        log.error("Get latest aggregation failed", error=str(e))
+        return {"components": {}, "error": str(e)}
 
 
 @router.websocket("/training/stream")

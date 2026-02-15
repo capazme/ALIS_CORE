@@ -52,16 +52,18 @@ export function Dashboard() {
       initial="hidden"
       animate="visible"
       className="space-y-6"
+      role="main"
+      aria-label="Dashboard"
     >
       {/* Header */}
       <motion.div variants={itemVariants}>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">
+            <h1 className="text-2xl font-bold text-white sm:text-3xl">
               Welcome back, {user?.username}
             </h1>
             <p className="text-slate-400">
-              {role === 'admin' 
+              {role === 'admin'
                 ? 'System administration and configuration'
                 : role === 'evaluator'
                 ? 'Ready to evaluate legal AI responses'
@@ -69,18 +71,18 @@ export function Dashboard() {
               }
             </p>
           </div>
-          
+
           {/* Quick Actions */}
           <div className="flex items-center space-x-3">
             {role === 'admin' && (
-              <Button variant="outline" size="sm">
-                <BarChart3 className="mr-2 h-4 w-4" />
+              <Button variant="outline" size="sm" className="focus-visible:ring-2 focus-visible:ring-blue-500">
+                <BarChart3 className="mr-2 h-4 w-4" aria-hidden="true" />
                 System Analytics
               </Button>
             )}
             {(role === 'admin' || role === 'evaluator') && (
-              <Button variant="primary" size="sm">
-                <ClipboardCheck className="mr-2 h-4 w-4" />
+              <Button variant="primary" size="sm" className="focus-visible:ring-2 focus-visible:ring-blue-500">
+                <ClipboardCheck className="mr-2 h-4 w-4" aria-hidden="true" />
                 Start Evaluation
               </Button>
             )}
@@ -89,15 +91,15 @@ export function Dashboard() {
       </motion.div>
 
       {/* Stats Overview */}
-      <motion.div variants={itemVariants}>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <motion.div variants={itemVariants} role="region" aria-label="System statistics">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-6">
           {/* Active Tasks */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-400">
                 Active Tasks
               </CardTitle>
-              <ClipboardCheck className="h-4 w-4 text-green-500" />
+              <ClipboardCheck className="h-4 w-4 text-green-500" aria-hidden="true" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">
@@ -115,7 +117,7 @@ export function Dashboard() {
               <CardTitle className="text-sm font-medium text-slate-400">
                 Evaluators
               </CardTitle>
-              <Users className="h-4 w-4 text-blue-500" />
+              <Users className="h-4 w-4 text-blue-500" aria-hidden="true" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">
@@ -133,7 +135,7 @@ export function Dashboard() {
               <CardTitle className="text-sm font-medium text-slate-400">
                 Consensus Rate
               </CardTitle>
-              <TrendingUp className="h-4 w-4 text-violet-500" />
+              <TrendingUp className="h-4 w-4 text-violet-500" aria-hidden="true" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">
@@ -154,7 +156,7 @@ export function Dashboard() {
               <CardTitle className="text-sm font-medium text-slate-400">
                 Completion Rate
               </CardTitle>
-              <AlertTriangle className="h-4 w-4 text-orange-500" />
+              <AlertTriangle className="h-4 w-4 text-orange-500" aria-hidden="true" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-white">
@@ -185,9 +187,9 @@ export function Dashboard() {
             </CardHeader>
             <CardContent>
               {tasksLoading ? (
-                <div className="space-y-4">
+                <div className="space-y-4" role="status" aria-label="Loading tasks">
                   {[...Array(3)].map((_, i) => (
-                    <div key={i} className="shimmer h-32 rounded-lg" />
+                    <div key={i} className="shimmer h-32 rounded-lg" aria-hidden="true" />
                   ))}
                 </div>
               ) : tasks && tasks.length > 0 ? (
@@ -202,8 +204,8 @@ export function Dashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <ClipboardCheck className="mb-4 h-12 w-12 text-slate-600" />
+                <div className="flex flex-col items-center justify-center py-12 text-center" role="status">
+                  <ClipboardCheck className="mb-4 h-12 w-12 text-slate-600" aria-hidden="true" />
                   <h3 className="mb-2 text-lg font-medium text-slate-400">
                     No tasks available
                   </h3>
@@ -242,7 +244,7 @@ export function Dashboard() {
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-4" role="list" aria-label="Recent activity feed">
               {/* Placeholder for recent activity - implement based on your needs */}
               <div className="flex items-center space-x-3">
                 <div className="h-2 w-2 rounded-full bg-green-500" />

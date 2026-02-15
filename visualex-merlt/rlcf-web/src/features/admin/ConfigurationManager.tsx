@@ -241,17 +241,18 @@ export function ConfigurationManager() {
 
   if (loadingModelConfig || loadingTaskConfig) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
+      <div className="flex items-center justify-center h-64" role="status">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400" aria-hidden="true"></div>
+        <span className="sr-only">Loading configuration...</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 md:p-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">⚙️ RLCF Configuration Manager</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">RLCF Configuration Manager</h1>
         <p className="text-slate-400">
           Manage model parameters and task definitions with live validation
         </p>
@@ -285,12 +286,14 @@ export function ConfigurationManager() {
       </Card>
 
       {/* Tab Navigation */}
-      <div className="flex space-x-1 border-b border-slate-700">
+      <div className="flex space-x-1 border-b border-slate-700 overflow-x-auto" role="tablist" aria-label="Configuration tabs">
         {(['model', 'tasks', 'preview'] as const).map((tab) => (
           <button
             key={tab}
+            role="tab"
+            aria-selected={activeTab === tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 font-medium text-sm transition-colors capitalize ${
+            className={`px-4 py-2 font-medium text-sm transition-colors capitalize whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
               activeTab === tab
                 ? 'text-purple-400 border-b-2 border-purple-400'
                 : 'text-slate-400 hover:text-slate-200'
@@ -303,23 +306,24 @@ export function ConfigurationManager() {
 
       {/* Model Configuration Tab */}
       {activeTab === 'model' && (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6" role="tabpanel" aria-label="Model configuration">
           <div className="xl:col-span-2">
             <Card className="border-slate-700">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <CardTitle>🧮 Model Configuration (YAML/JSON)</CardTitle>
+                    <CardTitle>Model Configuration (YAML/JSON)</CardTitle>
                     <p className="text-slate-400">
-                      Authority formula: A(t) = α·B + β·T(t-1) + γ·P(t)
+                      Authority formula: A(t) = alpha*B + beta*T(t-1) + gamma*P(t)
                     </p>
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setShowSyntaxPreview(!showSyntaxPreview)}
+                    className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   >
-                    {showSyntaxPreview ? '✏️ Edit Mode' : '👁️ Preview'}
+                    {showSyntaxPreview ? 'Edit Mode' : 'Preview'}
                   </Button>
                 </div>
               </CardHeader>
@@ -337,30 +341,33 @@ export function ConfigurationManager() {
                   <textarea
                     value={modelConfigText}
                     onChange={(e) => handleTextChange(e.target.value)}
-                    className="w-full h-96 p-4 bg-slate-900 border border-slate-600 rounded-lg font-mono text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
+                    className="w-full h-96 p-4 bg-slate-900 border border-slate-600 rounded-lg font-mono text-sm text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     spellCheck={false}
+                    aria-label="Model configuration JSON editor"
+                    aria-invalid={validationErrors.length > 0}
+                    aria-describedby={validationErrors.length > 0 ? 'model-validation-errors' : undefined}
                   />
                 )}
-                
+
                 {validationErrors.length > 0 && (
-                  <div className="mt-4 p-3 bg-red-950/20 border border-red-700 rounded-lg">
+                  <div id="model-validation-errors" className="mt-4 p-3 bg-red-950/20 border border-red-700 rounded-lg" role="alert">
                     <h4 className="text-red-400 font-semibold mb-2">Validation Errors:</h4>
                     <ul className="text-red-300 text-sm space-y-1">
                       {validationErrors.map((error, idx) => (
-                        <li key={idx}>• {error}</li>
+                        <li key={idx}>* {error}</li>
                       ))}
                     </ul>
                   </div>
                 )}
 
-                <div className="flex justify-between items-center mt-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mt-4">
                   <div className="text-sm text-slate-500">
-                    Live validation • Auto-save on change
+                    Live validation
                   </div>
-                  <Button 
+                  <Button
                     onClick={handleSaveModelConfig}
                     disabled={validationErrors.length > 0 || updateModelConfigMutation.isPending}
-                    className="bg-purple-600 hover:bg-purple-700"
+                    className="bg-purple-600 hover:bg-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   >
                     {updateModelConfigMutation.isPending ? 'Saving...' : 'Save Model Config'}
                   </Button>
@@ -372,7 +379,7 @@ export function ConfigurationManager() {
           {/* Model Config Helper */}
           <Card className="border-slate-700">
             <CardHeader>
-              <CardTitle>📋 Configuration Guide</CardTitle>
+              <CardTitle>Configuration Guide</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -409,13 +416,13 @@ export function ConfigurationManager() {
 
       {/* Task Configuration Tab */}
       {activeTab === 'tasks' && (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6" role="tabpanel" aria-label="Task configuration">
           <div className="xl:col-span-2">
             <Card className="border-slate-700">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <CardTitle>📋 Task Type Definitions</CardTitle>
+                    <CardTitle>Task Type Definitions</CardTitle>
                     <p className="text-slate-400">
                       Define input schemas and validation rules for each task type
                     </p>
@@ -424,8 +431,9 @@ export function ConfigurationManager() {
                     variant="outline"
                     size="sm"
                     onClick={() => setShowSyntaxPreview(!showSyntaxPreview)}
+                    className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   >
-                    {showSyntaxPreview ? '✏️ Edit Mode' : '👁️ Preview'}
+                    {showSyntaxPreview ? 'Edit Mode' : 'Preview'}
                   </Button>
                 </div>
               </CardHeader>
@@ -443,30 +451,33 @@ export function ConfigurationManager() {
                   <textarea
                     value={taskConfigText}
                     onChange={(e) => handleTextChange(e.target.value)}
-                    className="w-full h-96 p-4 bg-slate-900 border border-slate-600 rounded-lg font-mono text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
+                    className="w-full h-96 p-4 bg-slate-900 border border-slate-600 rounded-lg font-mono text-sm text-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     spellCheck={false}
+                    aria-label="Task configuration JSON editor"
+                    aria-invalid={validationErrors.length > 0}
+                    aria-describedby={validationErrors.length > 0 ? 'task-validation-errors' : undefined}
                   />
                 )}
-                
+
                 {validationErrors.length > 0 && (
-                  <div className="mt-4 p-3 bg-red-950/20 border border-red-700 rounded-lg">
+                  <div id="task-validation-errors" className="mt-4 p-3 bg-red-950/20 border border-red-700 rounded-lg" role="alert">
                     <h4 className="text-red-400 font-semibold mb-2">Validation Errors:</h4>
                     <ul className="text-red-300 text-sm space-y-1">
                       {validationErrors.map((error, idx) => (
-                        <li key={idx}>• {error}</li>
+                        <li key={idx}>* {error}</li>
                       ))}
                     </ul>
                   </div>
                 )}
 
-                <div className="flex justify-between items-center mt-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mt-4">
                   <div className="text-sm text-slate-500">
                     {currentTaskConfig ? `${Object.keys(currentTaskConfig).length} task types configured` : ''}
                   </div>
-                  <Button 
+                  <Button
                     onClick={handleSaveTaskConfig}
                     disabled={validationErrors.length > 0 || updateTaskConfigMutation.isPending}
-                    className="bg-purple-600 hover:bg-purple-700"
+                    className="bg-purple-600 hover:bg-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   >
                     {updateTaskConfigMutation.isPending ? 'Saving...' : 'Save Task Config'}
                   </Button>
@@ -478,7 +489,7 @@ export function ConfigurationManager() {
           {/* Task Config Helper */}
           <Card className="border-slate-700">
             <CardHeader>
-              <CardTitle>🎯 Task Types</CardTitle>
+              <CardTitle>Task Types</CardTitle>
             </CardHeader>
             <CardContent>
               {currentTaskConfig && (
@@ -503,10 +514,10 @@ export function ConfigurationManager() {
 
       {/* Preview Tab */}
       {activeTab === 'preview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" role="tabpanel" aria-label="Configuration preview">
           <Card className="border-slate-700">
             <CardHeader>
-              <CardTitle>📊 Current Model Parameters</CardTitle>
+              <CardTitle>Current Model Parameters</CardTitle>
             </CardHeader>
             <CardContent>
               {currentModelConfig ? (
@@ -561,7 +572,7 @@ export function ConfigurationManager() {
 
           <Card className="border-slate-700">
             <CardHeader>
-              <CardTitle>📝 Task Configuration Summary</CardTitle>
+              <CardTitle>Task Configuration Summary</CardTitle>
             </CardHeader>
             <CardContent>
               {currentTaskConfig ? (
@@ -586,11 +597,11 @@ export function ConfigurationManager() {
 
       {/* Confirmation Dialog */}
       {showSaveConfirmation && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="confirm-dialog-title">
           <Card className="max-w-md w-full border-yellow-600 bg-slate-900">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-yellow-400">
-                ⚠️ Confirm Configuration Change
+              <CardTitle id="confirm-dialog-title" className="flex items-center gap-2 text-yellow-400">
+                Confirm Configuration Change
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -599,7 +610,7 @@ export function ConfigurationManager() {
                   {pendingSaveType === 'model' ? 'Model Configuration' : 'Task Configuration'}
                 </strong>.
               </p>
-              <div className="p-3 bg-yellow-950/20 border border-yellow-700 rounded-lg">
+              <div className="p-3 bg-yellow-950/20 border border-yellow-700 rounded-lg" role="alert">
                 <p className="text-yellow-300 text-sm">
                   <strong>Warning:</strong> These changes will affect how the RLCF framework calculates authority scores
                   {pendingSaveType === 'model' ? ' and validates feedback' : ' and processes task inputs'}.
@@ -609,6 +620,7 @@ export function ConfigurationManager() {
               <div className="flex gap-3 justify-end">
                 <Button
                   variant="outline"
+                  className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   onClick={() => {
                     setShowSaveConfirmation(false);
                     setPendingSaveType(null);
@@ -618,7 +630,7 @@ export function ConfigurationManager() {
                 </Button>
                 <Button
                   onClick={confirmSave}
-                  className="bg-purple-600 hover:bg-purple-700"
+                  className="bg-purple-600 hover:bg-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   Confirm & Save
                 </Button>

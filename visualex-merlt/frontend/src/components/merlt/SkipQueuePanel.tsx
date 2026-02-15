@@ -16,8 +16,8 @@ import {
   Trash2,
   Clock,
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import type { SkipQueueItem } from '../../../hooks/useValidationState';
+import { cn } from '../../lib/utils';
+import type { SkipQueueItem } from '../../hooks/useValidationState';
 
 interface SkipQueuePanelProps {
   skipQueue: SkipQueueItem[];
@@ -60,10 +60,12 @@ export function SkipQueuePanel({
       {/* Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between px-3 py-2 hover:bg-amber-100/50 dark:hover:bg-amber-900/20 transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2 hover:bg-amber-100/50 dark:hover:bg-amber-900/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
+        aria-expanded={isExpanded}
+        aria-label={`Elementi saltati (${skipQueue.length})`}
       >
         <div className="flex items-center gap-2">
-          <SkipForward size={14} className="text-amber-600 dark:text-amber-400" />
+          <SkipForward size={14} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
           <span className="text-xs font-medium text-amber-700 dark:text-amber-300">
             Saltati ({skipQueue.length})
           </span>
@@ -120,11 +122,13 @@ export function SkipQueuePanel({
                       className={cn(
                         'p-1.5 rounded-md transition-colors',
                         'text-amber-600 hover:text-amber-700 hover:bg-amber-100',
-                        'dark:text-amber-400 dark:hover:text-amber-300 dark:hover:bg-amber-900/30'
+                        'dark:text-amber-400 dark:hover:text-amber-300 dark:hover:bg-amber-900/30',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                       )}
                       title="Torna a questo elemento"
+                      aria-label={`Ripristina ${getItemName(item.itemId)}`}
                     >
-                      <RotateCcw size={12} />
+                      <RotateCcw size={12} aria-hidden="true" />
                     </button>
                   </div>
                 ))}
@@ -136,10 +140,11 @@ export function SkipQueuePanel({
                 className={cn(
                   'w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium',
                   'text-amber-700 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-900/20',
-                  'transition-colors'
+                  'transition-colors',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
                 )}
               >
-                <Trash2 size={10} />
+                <Trash2 size={10} aria-hidden="true" />
                 Rimuovi tutti gli elementi saltati
               </button>
 

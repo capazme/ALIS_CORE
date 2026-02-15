@@ -47,6 +47,9 @@ const manifest: PluginManifest = {
     'search:performed',
   ],
 
+  // Events we emit (for documentation; emitted via EventBus.emit)
+  // 'merlt:source-navigate' - navigates to a source article in the platform
+
   // UI slots we provide
   contributedSlots: [
     'article-sidebar',
@@ -64,8 +67,6 @@ const merltPlugin: Plugin = {
   manifest,
 
   async initialize(context: PluginContext): Promise<() => void> {
-    console.log('[MERLT] Initializing plugin...');
-
     // Initialize MERLT backend connection
     await initializeMerltServices({
       apiBaseUrl: context.apiBaseUrl,
@@ -73,11 +74,8 @@ const merltPlugin: Plugin = {
       userId: context.user?.id,
     });
 
-    console.log('[MERLT] Plugin initialized');
-
     // Return cleanup function
     return () => {
-      console.log('[MERLT] Shutting down plugin...');
       shutdownMerltServices();
     };
   },
@@ -121,7 +119,7 @@ const merltPlugin: Plugin = {
       },
       {
         slot: 'admin-dashboard',
-        component: AcademicDashboard as any, // Includes pipeline monitoring
+        component: AcademicDashboard as unknown as SlotComponent['component'],
         priority: 100,
       },
     ];
@@ -133,17 +131,17 @@ const merltPlugin: Plugin = {
     'search:performed': PluginEventHandler<'search:performed'>;
   }> {
     return {
-      'article:viewed': (data) => {
+      'article:viewed': (data: { urn: string; articleId: string; userId: string }) => {
         // Track for research data collection
         trackArticleView(data.urn, data.articleId, data.userId);
       },
 
-      'article:highlighted': (data) => {
+      'article:highlighted': (data: { urn: string; text: string; startOffset: number; endOffset: number }) => {
         // Track text selections for potential entity proposals
         trackHighlight(data.urn, data.text, data.startOffset, data.endOffset);
       },
 
-      'search:performed': (data) => {
+      'search:performed': (data: { query: string; filters: Record<string, unknown>; resultCount: number }) => {
         // Track search patterns for research
         trackSearch(data.query, data.filters, data.resultCount);
       },

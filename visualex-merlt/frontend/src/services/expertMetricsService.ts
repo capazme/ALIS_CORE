@@ -15,7 +15,7 @@
 
 import { get } from './api';
 
-const PREFIX = 'merlt';
+const PREFIX = '/merlt';
 
 // =============================================================================
 // TYPES
@@ -170,7 +170,7 @@ export function formatAccuracy(accuracy: number, ci: [number, number]): string {
 export function getFeedbackColor(score: number): string {
   if (score >= 0.7) return 'text-green-600 dark:text-green-400';
   if (score >= 0.4) return 'text-yellow-600 dark:text-yellow-400';
-  if (score >= 0) return 'text-gray-600 dark:text-gray-400';
+  if (score >= 0) return 'text-slate-600 dark:text-slate-400';
   return 'text-red-600 dark:text-red-400';
 }
 
@@ -184,7 +184,7 @@ export function getModeBadge(mode: string): { text: string; color: string } {
   if (mode === 'divergent') {
     return { text: 'Divergent', color: 'bg-orange-100 text-orange-800' };
   }
-  return { text: mode, color: 'bg-gray-100 text-gray-800' };
+  return { text: mode, color: 'bg-slate-100 text-slate-800' };
 }
 
 /**

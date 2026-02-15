@@ -10,7 +10,7 @@ const TABS: Array<{ id: TabId; label: string }> = [
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<TabId>('dashboard');
+  const [activeTab, setActiveTab] = useState('dashboard' as TabId);
 
   return (
     <div style={{ minHeight: '100vh' }}>

@@ -14,10 +14,10 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y openssl ca-certificates wget && rm -rf /var/lib/apt/lists/*
 
 # Copy and build MERL-T backend package (if enabled and exists)
-COPY visualex-merlt/backend/package*.json ./visualex-merlt/backend/ 2>/dev/null || true
-COPY visualex-merlt/backend/tsconfig.json ./visualex-merlt/backend/ 2>/dev/null || true
-COPY visualex-merlt/backend/tsup.config.ts ./visualex-merlt/backend/ 2>/dev/null || true
-COPY visualex-merlt/backend/src ./visualex-merlt/backend/src 2>/dev/null || true
+COPY visualex-merlt/backend/package*.json ./visualex-merlt/backend/
+COPY visualex-merlt/backend/tsconfig.json ./visualex-merlt/backend/
+COPY visualex-merlt/backend/tsup.config.ts ./visualex-merlt/backend/
+COPY visualex-merlt/backend/src ./visualex-merlt/backend/src
 
 RUN if [ -f "./visualex-merlt/backend/package.json" ]; then \
       cd visualex-merlt/backend && npm install && npm run build; \
@@ -57,10 +57,10 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y openssl ca-certificates wget && rm -rf /var/lib/apt/lists/*
 
 # Copy and build MERL-T in production stage (if exists)
-COPY visualex-merlt/backend/package*.json ./visualex-merlt/backend/ 2>/dev/null || true
-COPY visualex-merlt/backend/tsconfig.json ./visualex-merlt/backend/ 2>/dev/null || true
-COPY visualex-merlt/backend/tsup.config.ts ./visualex-merlt/backend/ 2>/dev/null || true
-COPY visualex-merlt/backend/src ./visualex-merlt/backend/src 2>/dev/null || true
+COPY visualex-merlt/backend/package*.json ./visualex-merlt/backend/
+COPY visualex-merlt/backend/tsconfig.json ./visualex-merlt/backend/
+COPY visualex-merlt/backend/tsup.config.ts ./visualex-merlt/backend/
+COPY visualex-merlt/backend/src ./visualex-merlt/backend/src
 
 RUN if [ -f "./visualex-merlt/backend/package.json" ]; then \
       cd visualex-merlt/backend && npm install && npm run build; \

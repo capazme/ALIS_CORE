@@ -1,12 +1,38 @@
-html,
-body {
-  margin: 0;
-  padding: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  background: #0b1220;
-  color: #e2e8f0;
-}
+/* MERL-T Plugin Styles */
+
+/* Plugin components inherit Tailwind from the host app (visualex-platform).
+   This file provides only plugin-specific overrides and utilities. */
 
 * {
   box-sizing: border-box;
+}
+
+/* Focus ring utility */
+.merlt-focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(59 130 246 / 0.5);
+}
+
+/* Shimmer loading animation */
+@keyframes merlt-shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.merlt-shimmer {
+  background: linear-gradient(90deg, #1e293b 0%, #334155 50%, #1e293b 100%);
+  background-size: 200px 100%;
+  animation: merlt-shimmer 2s infinite;
+}
+
+/* Spinner animation */
+@keyframes merlt-spin {
+  to { transform: rotate(360deg); }
+}
+
+.merlt-spinner {
+  animation: merlt-spin 0.6s linear infinite;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 9999px;
 }

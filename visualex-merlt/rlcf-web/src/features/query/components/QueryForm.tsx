@@ -54,17 +54,17 @@ export function QueryForm({ onSubmit, isSubmitting = false, error }: QueryFormPr
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Search className="w-5 h-5 text-blue-400" />
+          <Search className="w-5 h-5 text-blue-400" aria-hidden="true" />
           Interroga il Sistema MERL-T
         </CardTitle>
-        <p className="text-sm text-gray-400 mt-2">
+        <p className="text-sm text-slate-400 mt-2">
           Poni una domanda legale e ricevi una risposta AI-powered basata su normativa,
           giurisprudenza e dottrina.
         </p>
       </CardHeader>
 
       <CardContent>
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6" role="form" aria-label="Interroga il Sistema MERL-T">
           {/* Query Input */}
           <Textarea
             {...register('query')}
@@ -89,11 +89,11 @@ export function QueryForm({ onSubmit, isSubmitting = false, error }: QueryFormPr
           />
 
           {/* Examples (Optional) */}
-          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-300 mb-2">
+          <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-slate-300 mb-2">
               Esempi di domande:
             </h4>
-            <ul className="text-sm text-gray-400 space-y-1.5">
+            <ul className="text-sm text-slate-400 space-y-1.5">
               <li className="flex items-start gap-2">
                 <span className="text-blue-400 mt-0.5">•</span>
                 <span>
@@ -120,14 +120,14 @@ export function QueryForm({ onSubmit, isSubmitting = false, error }: QueryFormPr
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4" role="alert">
               <p className="text-sm text-red-300">{error}</p>
             </div>
           )}
 
           {/* Submit Button */}
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-500">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-slate-500">
               La risposta sarà generata consultando 4 esperti legali AI e verrà fornita
               una traccia di esecuzione completa.
             </p>
@@ -136,16 +136,16 @@ export function QueryForm({ onSubmit, isSubmitting = false, error }: QueryFormPr
               type="submit"
               disabled={!isValid || isSubmitting}
               loading={isSubmitting}
-              className="min-w-[160px]"
+              className="min-w-[160px] min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
               {isSubmitting ? (
                 <>
-                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />
                   Elaborazione...
                 </>
               ) : (
                 <>
-                  <Search className="w-4 h-4 mr-2" />
+                  <Search className="w-4 h-4 mr-2" aria-hidden="true" />
                   Invia Query
                 </>
               )}
@@ -153,7 +153,7 @@ export function QueryForm({ onSubmit, isSubmitting = false, error }: QueryFormPr
           </div>
 
           {/* Query Stats */}
-          <div className="flex items-center gap-4 text-xs text-gray-500 pt-2 border-t border-gray-700">
+          <div className="flex items-center gap-4 text-xs text-slate-500 pt-2 border-t border-slate-700">
             <span>
               Caratteri: {queryValue?.length || 0} / 2000
             </span>
@@ -162,7 +162,7 @@ export function QueryForm({ onSubmit, isSubmitting = false, error }: QueryFormPr
               Parole: {queryValue?.trim().split(/\s+/).filter(Boolean).length || 0}
             </span>
             <span>•</span>
-            <span className={isValid ? 'text-green-400' : 'text-gray-500'}>
+            <span className={isValid ? 'text-green-400' : 'text-slate-500'}>
               {isValid ? '✓ Valida' : '✗ Invalida'}
             </span>
           </div>

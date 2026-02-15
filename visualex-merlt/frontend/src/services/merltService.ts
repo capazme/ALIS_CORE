@@ -19,6 +19,9 @@ import type {
   InlineFeedbackRequest,
   DetailedFeedbackRequest,
   SourceFeedbackRequest,
+  // Citation Export
+  CitationExportRequest,
+  CitationExportResponse,
   // Enrichment & Validation
   PendingEntity,
   PendingRelation,
@@ -66,6 +69,7 @@ import type {
   NERFeedbackRequest,
   NERFeedbackResponse,
   NERConfirmRequest,
+  RouterFeedbackRequest,
 } from '../types/merlt';
 
 // =============================================================================
@@ -81,15 +85,20 @@ const MERLT_PREFIX = '/merlt';  // apiClient adds /api prefix; Vite proxy rewrit
 /**
  * Invia una query al sistema multi-esperto MERL-T.
  *
+ * @param request.include_trace - Se true, salva il reasoning trace per consultazione successiva
+ * @param request.consent_level - Livello consenso GDPR: 'anonymous' | 'basic' | 'full'
+ *
  * @example
  * const response = await queryExperts({
  *   query: "Cos'è la legittima difesa?",
- *   user_id: "user123"
+ *   user_id: "user123",
+ *   include_trace: true,
+ *   consent_level: 'basic',
  * });
- * console.log(response.synthesis);
+ * console.log(response.trace_id);
  */
 export async function queryExperts(request: ExpertQueryRequest): Promise<ExpertQueryResponse> {
-  return post<ExpertQueryResponse>(`${MERLT_PREFIX}/api/experts/query`, request);
+  return post<ExpertQueryResponse>(`${MERLT_PREFIX}/experts/query`, request);
 }
 
 /**
@@ -105,7 +114,7 @@ export async function submitInlineFeedback(
   rating: 1 | 2 | 3 | 4 | 5
 ): Promise<{ success: boolean; message: string }> {
   const request: InlineFeedbackRequest = { trace_id, user_id, rating };
-  return post(`${MERLT_PREFIX}/api/experts/feedback/inline`, request);
+  return post(`${MERLT_PREFIX}/experts/feedback/inline`, request);
 }
 
 /**
@@ -116,12 +125,12 @@ export async function submitInlineFeedback(
 export async function submitDetailedFeedback(
   data: DetailedFeedbackRequest
 ): Promise<{ success: boolean; message: string }> {
-  return post(`${MERLT_PREFIX}/api/experts/feedback/detailed`, {
+  return post(`${MERLT_PREFIX}/experts/feedback/detailed`, {
     trace_id: data.trace_id,
     user_id: data.user_id,
-    retrieval_score: data.accuracy,  // Map frontend names to backend
-    reasoning_score: data.completeness,
-    synthesis_score: data.relevance,
+    retrieval_score: (data.accuracy - 1) / 4,      // 1→0, 5→1 (backend expects 0-1)
+    reasoning_score: (data.completeness - 1) / 4,
+    synthesis_score: (data.relevance - 1) / 4,
     comment: data.comment,
   });
 }
@@ -134,7 +143,7 @@ export async function submitDetailedFeedback(
 export async function submitSourceFeedback(
   data: SourceFeedbackRequest
 ): Promise<{ success: boolean; message: string }> {
-  return post(`${MERLT_PREFIX}/api/experts/feedback/source`, {
+  return post(`${MERLT_PREFIX}/experts/feedback/source`, {
     trace_id: data.trace_id,
     user_id: data.user_id,
     source_id: data.source_urn,
@@ -171,13 +180,26 @@ export async function submitExpertPreferenceFeedback(
   preferred_expert: string,
   comment?: string
 ): Promise<{ success: boolean; message: string }> {
-  return post(`${MERLT_PREFIX}/api/experts/feedback/preference`, {
+  return post(`${MERLT_PREFIX}/experts/feedback/preference`, {
     trace_id,
     user_id,
     preferred_expert,
     comment,
   });
 }
+
+/**
+ * Submit router feedback from high-authority users (F2).
+ *
+ * Only users with authority >= 0.7 can evaluate routing decisions.
+ * Authority is verified server-side — no need to send user_authority.
+ */
+export async function submitRouterFeedback(
+  data: RouterFeedbackRequest
+): Promise<{ success: boolean; message: string }> {
+  return post(`${MERLT_PREFIX}/experts/feedback/router`, data);
+}
+
 
 // =============================================================================
 // ENRICHMENT
@@ -861,6 +883,40 @@ export async function getOpenIssues(
 }
 
 // =============================================================================
+// GRAPH ARTICLE ENTITIES/RELATIONS
+// =============================================================================
+
+/**
+ * Recupera le entità associate a un articolo.
+ *
+ * @param articleUrn - URN dell'articolo
+ * @param validationStatus - Filtro opzionale per stato validazione
+ */
+export async function getArticleEntities(
+  articleUrn: string,
+  validationStatus?: string
+): Promise<{ entities: Array<{ id: string; name: string; type: string; confidence: number; position?: { start: number; end: number } }> }> {
+  const params = new URLSearchParams({ article_urn: articleUrn });
+  if (validationStatus) params.set('validation_status', validationStatus);
+  return get(`${MERLT_PREFIX}/graph/article-entities?${params}`);
+}
+
+/**
+ * Recupera le relazioni associate a un articolo.
+ *
+ * @param articleUrn - URN dell'articolo
+ * @param relationType - Filtro opzionale per tipo relazione
+ */
+export async function getArticleRelations(
+  articleUrn: string,
+  relationType?: string
+): Promise<{ relations: Array<{ id: string; sourceId: string; targetId: string; type: string; confidence: number }> }> {
+  const params = new URLSearchParams({ article_urn: articleUrn });
+  if (relationType) params.set('relation_type', relationType);
+  return get(`${MERLT_PREFIX}/graph/article-relations?${params}`);
+}
+
+// =============================================================================
 // GRAPH QUERIES (Future)
 // =============================================================================
 
@@ -928,6 +984,13 @@ export async function getSubgraph(request: SubgraphRequest): Promise<SubgraphRes
   return get<SubgraphResponse>(`${MERLT_PREFIX}/graph/subgraph?${params}`);
 }
 
+/**
+ * Get a graph overview (most-connected nodes) for the bulletin board explorer.
+ */
+export async function getGraphOverview(maxNodes: number = 50): Promise<SubgraphResponse> {
+  return get<SubgraphResponse>(`${MERLT_PREFIX}/graph/overview?max_nodes=${maxNodes}`);
+}
+
 // =============================================================================
 // DOSSIER TRAINING SET (R5)
 // =============================================================================
@@ -975,6 +1038,60 @@ export async function loadDossierTrainingSet(
     `${MERLT_PREFIX}/enrichment/load-dossier-training`,
     request
   );
+}
+
+// =============================================================================
+// CITATION EXPORT
+// =============================================================================
+
+/**
+ * Esporta citazioni da un trace in formato file scaricabile.
+ *
+ * Formati disponibili: italian_legal, bibtex, plain_text, json
+ *
+ * @param request - Richiesta di export con trace_id e formato
+ * @returns Response con download_url per il file generato
+ *
+ * @example
+ * const result = await exportCitations({
+ *   trace_id: "trace_123",
+ *   format: "bibtex",
+ *   include_query_summary: true
+ * });
+ * // Scarica il file da result.download_url
+ */
+export async function exportCitations(
+  request: CitationExportRequest
+): Promise<CitationExportResponse> {
+  return post<CitationExportResponse>(`${MERLT_PREFIX}/citations/export`, request);
+}
+
+/**
+ * Trigger file download via hidden <a> element.
+ *
+ * Rewrites the backend download URL through the frontend proxy path
+ * and initiates the download without popup blockers.
+ *
+ * @param downloadUrl - URL from exportCitations response (e.g. "/api/v1/citations/download/...")
+ * @param filename - Suggested filename for the download
+ */
+export function downloadCitationFile(downloadUrl: string, filename: string = 'citations'): void {
+  const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+  const downloadPath = downloadUrl.replace('/api/v1/', '/merlt/');
+  triggerFileDownload(`${API_BASE_URL}${downloadPath}`, filename);
+}
+
+/**
+ * Shared download helper — creates a hidden <a> element to trigger file download.
+ */
+export function triggerFileDownload(url: string, filename: string): void {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 // =============================================================================
@@ -1051,6 +1168,7 @@ export const merltService = {
   submitDetailedFeedback,
   submitSourceFeedback,
   submitExpertPreferenceFeedback,  // R4: Divergent interpretation feedback
+  submitRouterFeedback,            // F2: Router feedback (high-authority)
   // Enrichment
   checkArticleInGraph,
   requestLiveEnrichment,
@@ -1080,15 +1198,22 @@ export const merltService = {
   getEntityIssues,
   getOpenIssues,
   // Graph
+  getArticleEntities,
+  getArticleRelations,
   getNodeDetails,
   getArticleSubgraph,
   getSubgraph,  // Knowledge Graph visualization
+  getGraphOverview,  // Graph overview for bulletin board
   // Dossier Training Set (R5)
   exportDossierTrainingSet,
   loadDossierTrainingSet,
   // NER Feedback
   submitNERFeedback,
   confirmCitation,
+  // Citation Export
+  exportCitations,
+  downloadCitationFile,
+  triggerFileDownload,
 };
 
 export default merltService;

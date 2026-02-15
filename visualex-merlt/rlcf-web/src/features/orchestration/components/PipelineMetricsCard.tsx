@@ -62,7 +62,7 @@ export function PipelineMetricsCard({ stageTimings, totalTimeMs }: PipelineMetri
             Pipeline Performance
           </CardTitle>
         </CardHeader>
-        <CardContent className="py-8 text-center text-gray-400">
+        <CardContent className="py-8 text-center text-slate-400" role="status">
           <p>Stage timing data not available for this query.</p>
         </CardContent>
       </Card>
@@ -72,7 +72,7 @@ export function PipelineMetricsCard({ stageTimings, totalTimeMs }: PipelineMetri
   const stages = Object.entries(stageTimings).map(([stageName, timeMs]) => {
     const config = stageConfig[stageName] || {
       icon: <Activity className="w-4 h-4" />,
-      color: 'text-gray-400',
+      color: 'text-slate-400',
       label: stageName.replace(/_/g, ' '),
     };
 
@@ -106,25 +106,25 @@ export function PipelineMetricsCard({ stageTimings, totalTimeMs }: PipelineMetri
       <CardContent className="space-y-6">
         {/* Total Time Summary */}
         {totalTimeMs && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-4 border-b border-gray-700">
-            <div className="bg-gray-800 p-4 rounded-lg">
-              <div className="text-sm text-gray-400 mb-1">Total Time</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-4 border-b border-slate-700">
+            <div className="bg-slate-800 p-4 rounded-lg">
+              <div className="text-sm text-slate-400 mb-1">Total Time</div>
               <div className={`text-2xl font-semibold ${getPerformanceColor(totalTimeMs)}`}>
                 {totalTimeMs.toFixed(0)}ms
               </div>
             </div>
-            <div className="bg-gray-800 p-4 rounded-lg">
-              <div className="text-sm text-gray-400 mb-1">Stages</div>
+            <div className="bg-slate-800 p-4 rounded-lg">
+              <div className="text-sm text-slate-400 mb-1">Stages</div>
               <div className="text-2xl font-semibold text-white">{stages.length}</div>
             </div>
-            <div className="bg-gray-800 p-4 rounded-lg">
-              <div className="text-sm text-gray-400 mb-1">Slowest Stage</div>
+            <div className="bg-slate-800 p-4 rounded-lg">
+              <div className="text-sm text-slate-400 mb-1">Slowest Stage</div>
               <div className="text-lg font-semibold text-white capitalize">
                 {stages[0]?.stage_name.replace(/_/g, ' ')}
               </div>
             </div>
-            <div className="bg-gray-800 p-4 rounded-lg">
-              <div className="text-sm text-gray-400 mb-1">Fastest Stage</div>
+            <div className="bg-slate-800 p-4 rounded-lg">
+              <div className="text-sm text-slate-400 mb-1">Fastest Stage</div>
               <div className="text-lg font-semibold text-white capitalize">
                 {stages[stages.length - 1]?.stage_name.replace(/_/g, ' ')}
               </div>
@@ -134,7 +134,7 @@ export function PipelineMetricsCard({ stageTimings, totalTimeMs }: PipelineMetri
 
         {/* Stage Breakdown */}
         <div className="space-y-4">
-          <h4 className="text-sm font-medium text-gray-400">Stage Breakdown</h4>
+          <h4 className="text-sm font-medium text-slate-400">Stage Breakdown</h4>
           {stages.map((stage) => (
             <div key={stage.stage_name} className="space-y-2">
               <div className="flex items-center justify-between">
@@ -146,7 +146,7 @@ export function PipelineMetricsCard({ stageTimings, totalTimeMs }: PipelineMetri
                   <Badge variant="outline" className="font-mono">
                     {stage.avg_time_ms.toFixed(0)}ms
                   </Badge>
-                  <span className="text-sm text-gray-400 w-12 text-right">
+                  <span className="text-sm text-slate-400 w-12 text-right">
                     {stage.percentage.toFixed(1)}%
                   </span>
                 </div>
@@ -157,8 +157,8 @@ export function PipelineMetricsCard({ stageTimings, totalTimeMs }: PipelineMetri
         </div>
 
         {/* Performance Analysis */}
-        <div className="pt-4 border-t border-gray-700">
-          <h4 className="text-sm font-medium text-gray-400 mb-3">Performance Analysis</h4>
+        <div className="pt-4 border-t border-slate-700">
+          <h4 className="text-sm font-medium text-slate-400 mb-3">Performance Analysis</h4>
           <div className="space-y-2 text-sm">
             {totalTimeMs && totalTimeMs < 5000 && (
               <div className="flex items-start gap-2 text-green-400">
@@ -202,7 +202,7 @@ export function PipelineMetricsCard({ stageTimings, totalTimeMs }: PipelineMetri
         </div>
 
         {/* Future Metrics Placeholder */}
-        <div className="pt-4 border-t border-gray-700">
+        <div className="pt-4 border-t border-slate-700">
           <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
             <p className="text-sm text-blue-300">
               <strong>Coming Soon:</strong> P95 latency, success rate per stage, throughput metrics,

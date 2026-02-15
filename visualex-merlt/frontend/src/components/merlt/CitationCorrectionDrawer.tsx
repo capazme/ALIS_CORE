@@ -19,9 +19,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, AlertCircle, CheckCircle2, Loader2, Save } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { merltService } from '../../../services/merltService';
-import type { NERFeedbackRequest, NERFeedbackResponse, ParsedCitationData } from '../../../types/merlt';
+import { cn } from '../../lib/utils';
+import { merltService } from '../../services/merltService';
+import type { NERFeedbackRequest, NERFeedbackResponse, ParsedCitationData } from '../../types/merlt';
 
 // =============================================================================
 // TYPES
@@ -89,7 +89,7 @@ export function CitationCorrectionDrawer({
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null as string | null);
   const [success, setSuccess] = useState(false);
 
   // Pre-fill from original parsed data
@@ -176,7 +176,7 @@ export function CitationCorrectionDrawer({
 
     const articlesArray = articoli
       .split(',')
-      .map(a => a.trim())
+      .map((a: string) => a.trim())
       .filter(Boolean);
 
     if (articlesArray.length === 0) {
@@ -264,6 +264,8 @@ export function CitationCorrectionDrawer({
               damping: 30,
               stiffness: 300
             }}
+            role="dialog"
+            aria-label={originalParsed ? 'Correggi citazione' : 'Annota citazione'}
             className={cn(
               "fixed right-0 top-0 bottom-0 z-50",
               "w-full sm:w-[450px] md:w-[500px]",
@@ -276,7 +278,7 @@ export function CitationCorrectionDrawer({
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                  <Save size={20} className="text-blue-600 dark:text-blue-400" />
+                  <Save size={20} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
@@ -290,10 +292,11 @@ export function CitationCorrectionDrawer({
 
               <button
                 onClick={handleClose}
-                className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors group"
+                className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 title="Chiudi pannello (Esc)"
+                aria-label="Chiudi pannello"
               >
-                <X size={20} className="text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200" />
+                <X size={20} className="text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200" aria-hidden="true" />
               </button>
             </div>
 
@@ -302,9 +305,9 @@ export function CitationCorrectionDrawer({
               {success ? (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle2 size={28} />
+                    <CheckCircle2 size={28} aria-hidden="true" />
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2" role="status">
                     Feedback inviato!
                   </h3>
                   <p className="text-slate-500 dark:text-slate-400">
@@ -315,7 +318,7 @@ export function CitationCorrectionDrawer({
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {/* Info banner */}
                   <div className="flex items-start gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/30 rounded-lg">
-                    <AlertCircle size={18} className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                    <AlertCircle size={18} className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
                     <p className="text-sm text-blue-700 dark:text-blue-300">
                       Questo feedback migliora il riconoscimento automatico delle citazioni normative.
                     </p>
@@ -477,8 +480,8 @@ export function CitationCorrectionDrawer({
 
                   {/* Error */}
                   {error && (
-                    <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
-                      <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+                    <div className="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400" role="alert">
+                      <AlertCircle size={16} className="flex-shrink-0 mt-0.5" aria-hidden="true" />
                       {error}
                     </div>
                   )}
@@ -488,7 +491,7 @@ export function CitationCorrectionDrawer({
                     <button
                       type="button"
                       onClick={handleClose}
-                      className="px-4 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                      className="px-4 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     >
                       Annulla
                     </button>
@@ -498,17 +501,19 @@ export function CitationCorrectionDrawer({
                       className={cn(
                         'flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all',
                         'bg-blue-600 hover:bg-blue-700 text-white',
-                        'disabled:opacity-50 disabled:cursor-not-allowed'
+                        'disabled:opacity-50 disabled:cursor-not-allowed',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
                       )}
                     >
                       {isSubmitting ? (
                         <>
-                          <Loader2 size={18} className="animate-spin" />
-                          Invio...
+                          <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+                          <span>Invio...</span>
+                          <span className="sr-only">Invio in corso</span>
                         </>
                       ) : (
                         <>
-                          <Save size={18} />
+                          <Save size={18} aria-hidden="true" />
                           Salva Correzione
                         </>
                       )}

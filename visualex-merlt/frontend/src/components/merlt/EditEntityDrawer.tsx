@@ -10,10 +10,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, Loader2, CheckCircle2, AlertCircle, Edit3 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { merltService } from '../../../services/merltService';
-import { ENTITY_TYPE_OPTIONS, groupByCategory } from '../../../constants/merltTypes';
-import type { EntityType, PendingEntity } from '../../../types/merlt';
+import { cn } from '../../lib/utils';
+import { merltService } from '../../services/merltService';
+import { ENTITY_TYPE_OPTIONS, groupByCategory } from '../../constants/merltTypes';
+import type { EntityType, PendingEntity } from '../../types/merlt';
 
 // =============================================================================
 // TYPES
@@ -58,14 +58,14 @@ export function EditEntityDrawer({
 }: EditEntityDrawerProps) {
   // Form state - initialized with current entity values
   const [nome, setNome] = useState(entity.nome);
-  const [tipo, setTipo] = useState<EntityType>(entity.tipo);
+  const [tipo, setTipo] = useState(entity.tipo as EntityType);
   const [descrizione, setDescrizione] = useState(entity.descrizione || '');
   const [ambito, setAmbito] = useState(entity.ambito || 'generale');
   const [motivazione, setMotivazione] = useState('');
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null as string | null);
   const [success, setSuccess] = useState(false);
 
   // Reset form when entity changes
@@ -134,7 +134,6 @@ export function EditEntityDrawer({
         onClose();
       }, 1500);
     } catch (err) {
-      console.error('Failed to submit edit:', err);
       setError(err instanceof Error ? err.message : 'Errore nell\'invio della modifica');
     } finally {
       setIsSubmitting(false);
@@ -156,6 +155,9 @@ export function EditEntityDrawer({
 
           {/* Drawer */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Modifica Entità"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -165,16 +167,17 @@ export function EditEntityDrawer({
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
               <div className="flex items-center gap-2">
-                <Edit3 className="w-5 h-5 text-amber-500" />
+                <Edit3 className="w-5 h-5 text-amber-500" aria-hidden="true" />
                 <h2 className="font-semibold text-slate-900 dark:text-slate-100">
                   Modifica Entità
                 </h2>
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                aria-label="Chiudi pannello"
+                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
-                <X size={20} className="text-slate-500" />
+                <X size={20} className="text-slate-500" aria-hidden="true" />
               </button>
             </div>
 
@@ -208,10 +211,11 @@ export function EditEntityDrawer({
 
                   {/* Nome */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label htmlFor="edit-entity-nome" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                       Nome *
                     </label>
                     <input
+                      id="edit-entity-nome"
                       type="text"
                       value={nome}
                       onChange={(e) => setNome(e.target.value)}
@@ -233,10 +237,11 @@ export function EditEntityDrawer({
 
                   {/* Tipo */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label htmlFor="edit-entity-tipo" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                       Tipo *
                     </label>
                     <select
+                      id="edit-entity-tipo"
                       value={tipo}
                       onChange={(e) => setTipo(e.target.value as EntityType)}
                       className={cn(
@@ -265,10 +270,11 @@ export function EditEntityDrawer({
 
                   {/* Descrizione */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label htmlFor="edit-entity-descrizione" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                       Descrizione
                     </label>
                     <textarea
+                      id="edit-entity-descrizione"
                       value={descrizione}
                       onChange={(e) => setDescrizione(e.target.value)}
                       rows={4}
@@ -289,10 +295,11 @@ export function EditEntityDrawer({
 
                   {/* Ambito */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label htmlFor="edit-entity-ambito" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                       Ambito Giuridico
                     </label>
                     <select
+                      id="edit-entity-ambito"
                       value={ambito}
                       onChange={(e) => setAmbito(e.target.value)}
                       className={cn(
@@ -316,10 +323,11 @@ export function EditEntityDrawer({
 
                   {/* Motivazione (required) */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label htmlFor="edit-entity-motivazione" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                       Motivazione della modifica *
                     </label>
                     <textarea
+                      id="edit-entity-motivazione"
                       value={motivazione}
                       onChange={(e) => setMotivazione(e.target.value)}
                       rows={3}
@@ -337,8 +345,8 @@ export function EditEntityDrawer({
 
                   {/* Error message */}
                   {error && (
-                    <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                      <AlertCircle size={16} className="text-red-500 flex-shrink-0" />
+                    <div role="alert" className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                      <AlertCircle size={16} className="text-red-500 flex-shrink-0" aria-hidden="true" />
                       <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
                     </div>
                   )}
@@ -376,7 +384,7 @@ export function EditEntityDrawer({
                   <button
                     type="button"
                     onClick={onClose}
-                    className="flex-1 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                    className="flex-1 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 min-h-[44px]"
                   >
                     Annulla
                   </button>
@@ -384,19 +392,20 @@ export function EditEntityDrawer({
                     onClick={handleSubmit}
                     disabled={isSubmitting || !hasChanges || !motivazione.trim()}
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors",
+                      "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors min-h-[44px]",
                       "bg-amber-500 hover:bg-amber-600 text-white",
-                      "disabled:opacity-50 disabled:cursor-not-allowed"
+                      "disabled:opacity-50 disabled:cursor-not-allowed",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     )}
                   >
                     {isSubmitting ? (
                       <>
-                        <Loader2 size={16} className="animate-spin" />
+                        <Loader2 size={16} className="animate-spin" aria-hidden="true" />
                         Invio...
                       </>
                     ) : (
                       <>
-                        <Save size={16} />
+                        <Save size={16} aria-hidden="true" />
                         Invia Modifica
                       </>
                     )}

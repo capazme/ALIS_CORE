@@ -14,10 +14,10 @@ ARG VITE_MERLT_ENABLED=false
 WORKDIR /app
 
 # Copy and build MERL-T frontend package (if exists and enabled)
-COPY visualex-merlt/frontend/package*.json ./visualex-merlt/frontend/ 2>/dev/null || true
-COPY visualex-merlt/frontend/tsconfig*.json ./visualex-merlt/frontend/ 2>/dev/null || true
-COPY visualex-merlt/frontend/tsup.config.ts ./visualex-merlt/frontend/ 2>/dev/null || true
-COPY visualex-merlt/frontend/src ./visualex-merlt/frontend/src 2>/dev/null || true
+COPY visualex-merlt/frontend/package*.json ./visualex-merlt/frontend/
+COPY visualex-merlt/frontend/tsconfig*.json ./visualex-merlt/frontend/
+COPY visualex-merlt/frontend/tsup.config.ts ./visualex-merlt/frontend/
+COPY visualex-merlt/frontend/src ./visualex-merlt/frontend/src
 
 RUN if [ "$VITE_MERLT_ENABLED" = "true" ] && [ -f "./visualex-merlt/frontend/package.json" ]; then \
       cd visualex-merlt/frontend && npm install && npm run build:lib; \
@@ -40,7 +40,7 @@ COPY visualex-platform/frontend/tailwind.config.js ./
 COPY visualex-platform/frontend/postcss.config.js ./
 COPY visualex-platform/frontend/tsconfig*.json ./
 COPY visualex-platform/frontend/src ./src/
-COPY visualex-platform/frontend/public ./public/ 2>/dev/null || true
+COPY visualex-platform/frontend/public ./public/
 
 # Set Vite environment variables
 ENV VITE_API_URL=$VITE_API_URL
@@ -69,6 +69,19 @@ server {
     # Gzip compression
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
+
+    # MERL-T API proxy (must be before generic /api/)
+    location /api/merlt/ {
+        proxy_pass http://host.docker.internal:8000/api/v1/;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 300s;
+    }
 
     # Backend API proxy (same-origin for browser)
     location /api/ {

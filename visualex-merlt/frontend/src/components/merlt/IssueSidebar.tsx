@@ -29,10 +29,10 @@ import {
   ExternalLink,
   Sparkles,
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { getOpenIssues, voteOnIssue } from '../../../services/merltService';
-import type { EntityIssue, IssueStatus } from '../../../types/merlt';
-import { ISSUE_TYPE_LABELS, ISSUE_SEVERITY_LABELS } from '../../../types/merlt';
+import { cn } from '../../lib/utils';
+import { getOpenIssues, voteOnIssue } from '../../services/merltService';
+import type { EntityIssue, IssueStatus } from '../../types/merlt';
+import { ISSUE_TYPE_LABELS, ISSUE_SEVERITY_LABELS } from '../../types/merlt';
 
 // =============================================================================
 // TYPES
@@ -194,10 +194,11 @@ function DetailedIssueCard({
               {onNavigate && (
                 <button
                   onClick={() => onNavigate(issue.entity_id)}
-                  className="text-primary-400 hover:text-primary-300 transition-colors"
+                  className="text-primary-400 hover:text-primary-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
                   title="Vai all'entita' nel grafo"
+                  aria-label="Vai all'entita' nel grafo"
                 >
-                  <ExternalLink size={10} />
+                  <ExternalLink size={10} aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -299,7 +300,8 @@ function DetailedIssueCard({
                 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all',
                 'bg-green-500/20 text-green-400 border border-green-500/30',
                 'hover:bg-green-500/30 hover:border-green-500/50',
-                'disabled:opacity-50 disabled:cursor-not-allowed'
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
               )}
             >
               {isVoting ? (
@@ -316,7 +318,8 @@ function DetailedIssueCard({
                 'flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all',
                 'bg-red-500/20 text-red-400 border border-red-500/30',
                 'hover:bg-red-500/30 hover:border-red-500/50',
-                'disabled:opacity-50 disabled:cursor-not-allowed'
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
               )}
             >
               {isVoting ? (
@@ -335,8 +338,9 @@ function DetailedIssueCard({
                   : 'bg-slate-700/50 border-slate-600 text-slate-400 hover:text-white'
               )}
               title="Aggiungi commento"
+              aria-label="Aggiungi commento"
             >
-              <MessageSquare size={12} />
+              <MessageSquare size={12} aria-hidden="true" />
             </button>
           </div>
         )}
@@ -356,10 +360,10 @@ export function IssueSidebar({
   onNavigateToEntity,
   className,
 }: IssueSidebarProps) {
-  const [issues, setIssues] = useState<EntityIssue[]>([]);
+  const [issues, setIssues] = useState([] as EntityIssue[]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [votingIssueId, setVotingIssueId] = useState<string | null>(null);
+  const [error, setError] = useState(null as string | null);
+  const [votingIssueId, setVotingIssueId] = useState(null as string | null);
 
   // Fetch issues
   const fetchIssues = useCallback(async () => {
@@ -399,7 +403,7 @@ export function IssueSidebar({
       });
 
       // Update issue in list
-      setIssues(prev => prev.map(issue => {
+      setIssues((prev: EntityIssue[]) => prev.map((issue: EntityIssue) => {
         if (issue.issue_id === issueId) {
           return {
             ...issue,
@@ -412,14 +416,14 @@ export function IssueSidebar({
         return issue;
       }));
 
-    } catch (err) {
-      console.error('Vote error:', err);
+    } catch (_err) {
+      // Vote error handled silently - could show toast
     } finally {
       setVotingIssueId(null);
     }
   };
 
-  const openIssuesCount = issues.filter(i => i.status === 'open').length;
+  const openIssuesCount = issues.filter((i: EntityIssue) => i.status === 'open').length;
 
   return (
     <>
@@ -429,10 +433,13 @@ export function IssueSidebar({
         className={cn(
           'absolute top-4 right-4 z-30 flex items-center gap-2 px-3 py-2 rounded-lg transition-all',
           'bg-slate-800/90 backdrop-blur border border-slate-700 hover:border-slate-600',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
           isOpen && 'bg-amber-500/20 border-amber-500/30'
         )}
+        aria-label={isOpen ? 'Chiudi segnalazioni' : 'Apri segnalazioni'}
+        aria-expanded={isOpen}
       >
-        <AlertTriangle size={16} className={isOpen ? 'text-amber-400' : 'text-slate-400'} />
+        <AlertTriangle size={16} className={isOpen ? 'text-amber-400' : 'text-slate-400'} aria-hidden="true" />
         <span className="text-xs font-medium text-white">Segnalazioni</span>
         {openIssuesCount > 0 && (
           <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white">
@@ -480,9 +487,10 @@ export function IssueSidebar({
                 <button
                   onClick={fetchIssues}
                   disabled={loading}
-                  className="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 hover:text-white transition-colors disabled:opacity-50"
+                  className="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 hover:text-white transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                  aria-label="Aggiorna segnalazioni"
                 >
-                  <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                  <RefreshCw size={14} className={loading ? 'animate-spin' : ''} aria-hidden="true" />
                 </button>
               </div>
 
@@ -498,17 +506,17 @@ export function IssueSidebar({
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-3 space-y-3">
               {loading ? (
-                <div className="flex flex-col items-center justify-center py-8">
-                  <Loader2 size={24} className="animate-spin text-primary-500 mb-2" />
+                <div className="flex flex-col items-center justify-center py-8" role="status" aria-label="Caricamento segnalazioni">
+                  <Loader2 size={24} className="animate-spin text-primary-500 mb-2" aria-hidden="true" />
                   <p className="text-xs text-slate-500">Caricamento...</p>
                 </div>
               ) : error ? (
-                <div className="text-center py-8">
-                  <AlertTriangle size={24} className="mx-auto text-red-400 mb-2" />
+                <div className="text-center py-8" role="alert">
+                  <AlertTriangle size={24} className="mx-auto text-red-400 mb-2" aria-hidden="true" />
                   <p className="text-xs text-red-400">{error}</p>
                 </div>
               ) : issues.length === 0 ? (
-                <div className="text-center py-8">
+                <div className="text-center py-8" role="status">
                   <CheckCircle2 size={32} className="mx-auto text-green-400 mb-3" />
                   <p className="text-sm font-medium text-white mb-1">
                     Nessuna segnalazione
@@ -518,7 +526,7 @@ export function IssueSidebar({
                   </p>
                 </div>
               ) : (
-                issues.map((issue) => (
+                issues.map((issue: EntityIssue) => (
                   <DetailedIssueCard
                     key={issue.issue_id}
                     issue={issue}

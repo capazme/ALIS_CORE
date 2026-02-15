@@ -7,10 +7,10 @@
 
 import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Progress } from '@/components/ui/Progress';
+import { Badge } from '@/components/ui/Badge';
 import {
   Activity,
   CheckCircle,
@@ -129,8 +129,8 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
       try {
         await stopBatch(batchId);
         refetch();
-      } catch (err) {
-        console.error('Failed to stop batch:', err);
+      } catch (_err) {
+        // Error handled by UI state
       }
     }
   };
@@ -138,9 +138,10 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   if (isLoading) {
     return (
       <Card>
-        <CardContent className="p-12 text-center">
-          <Activity className="h-8 w-8 mx-auto mb-4 text-blue-500 animate-spin" />
-          <p className="text-gray-600">Loading batch status...</p>
+        <CardContent className="p-12 text-center" role="status">
+          <Activity className="h-8 w-8 mx-auto mb-4 text-blue-500 animate-spin" aria-hidden="true" />
+          <p className="text-slate-600">Loading batch status...</p>
+          <span className="sr-only">Loading batch status</span>
         </CardContent>
       </Card>
     );
@@ -148,8 +149,8 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
 
   if (error) {
     return (
-      <Alert className="border-red-400 bg-red-50">
-        <AlertTriangle className="h-5 w-5 text-red-600" />
+      <Alert className="border-red-400 bg-red-50" role="alert">
+        <AlertTriangle className="h-5 w-5 text-red-600" aria-hidden="true" />
         <AlertDescription className="text-red-800">
           Failed to load batch status: {error.message}
         </AlertDescription>
@@ -176,14 +177,14 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                   {status.batch_name || `Batch ${batchId.substring(0, 8)}`}
                 </span>
               </CardTitle>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-slate-600 mt-1">
                 Articles {status.articles_processed} / {status.articles_requested}
                 {status.current_article && ` (Current: ${status.current_article})`}
               </p>
             </div>
             {status.status === 'running' && (
-              <Button variant="destructive" onClick={handleStop}>
-                <StopCircle className="h-4 w-4 mr-2" />
+              <Button variant="destructive" onClick={handleStop} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                <StopCircle className="h-4 w-4 mr-2" aria-hidden="true" />
                 Stop Batch
               </Button>
             )}
@@ -193,7 +194,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
           {/* Progress Bar */}
           <div className="space-y-2">
             <Progress value={progress} className="h-3" />
-            <div className="flex justify-between text-sm text-gray-600">
+            <div className="flex justify-between text-sm text-slate-600">
               <span>{progress.toFixed(1)}% Complete</span>
               <span>
                 {status.elapsed_seconds !== undefined && (
@@ -216,7 +217,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center">
-              <Database className="h-4 w-4 mr-2 text-purple-600" />
+              <Database className="h-4 w-4 mr-2 text-purple-600" aria-hidden="true" />
               Entities Extracted
             </CardTitle>
           </CardHeader>
@@ -230,13 +231,13 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">Auto-approved:</span>
+                <span className="text-slate-600">Auto-approved:</span>
                 <span className="font-semibold text-green-600">
                   {status.entities_auto_approved}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Manual review:</span>
+                <span className="text-slate-600">Manual review:</span>
                 <span className="font-semibold text-yellow-600">
                   {status.entities_manual_review}
                 </span>
@@ -245,7 +246,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
 
             {/* Progress bar */}
             <div className="space-y-1">
-              <div className="h-2 bg-gray-200 rounded overflow-hidden">
+              <div className="h-2 bg-slate-200 rounded overflow-hidden">
                 <div
                   className="h-full bg-green-500"
                   style={{
@@ -256,7 +257,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                   }}
                 />
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-slate-500">
                 {status.total_entities_extracted > 0
                   ? ((status.entities_auto_approved / status.total_entities_extracted) * 100).toFixed(0)
                   : 0
@@ -270,7 +271,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center">
-              <GitBranch className="h-4 w-4 mr-2 text-blue-600" />
+              <GitBranch className="h-4 w-4 mr-2 text-blue-600" aria-hidden="true" />
               Relationships Extracted
             </CardTitle>
           </CardHeader>
@@ -284,13 +285,13 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">Auto-approved:</span>
+                <span className="text-slate-600">Auto-approved:</span>
                 <span className="font-semibold text-green-600">
                   {status.relationships_auto_approved}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Manual review:</span>
+                <span className="text-slate-600">Manual review:</span>
                 <span className="font-semibold text-yellow-600">
                   {status.relationships_manual_review}
                 </span>
@@ -299,7 +300,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
 
             {/* Progress bar */}
             <div className="space-y-1">
-              <div className="h-2 bg-gray-200 rounded overflow-hidden">
+              <div className="h-2 bg-slate-200 rounded overflow-hidden">
                 <div
                   className="h-full bg-green-500"
                   style={{
@@ -310,7 +311,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                   }}
                 />
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-slate-500">
                 {status.total_relationships_extracted > 0
                   ? ((status.relationships_auto_approved / status.total_relationships_extracted) * 100).toFixed(0)
                   : 0
@@ -328,7 +329,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <DollarSign className="h-5 w-5 text-green-600 mr-2" />
+                <DollarSign className="h-5 w-5 text-green-600 mr-2" aria-hidden="true" />
                 <span className="text-sm font-medium">Total LLM Cost</span>
               </div>
               <span className="text-xl font-bold text-green-600">
@@ -343,7 +344,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
+                <AlertTriangle className="h-5 w-5 text-red-600 mr-2" aria-hidden="true" />
                 <span className="text-sm font-medium">Errors</span>
               </div>
               <span className="text-xl font-bold text-red-600">
@@ -359,8 +360,8 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
 
       {/* Completion Message */}
       {status.status === 'completed' && (
-        <Alert className="border-green-400 bg-green-50">
-          <CheckCircle className="h-5 w-5 text-green-600" />
+        <Alert className="border-green-400 bg-green-50" role="status">
+          <CheckCircle className="h-5 w-5 text-green-600" aria-hidden="true" />
           <AlertDescription className="text-green-800">
             <strong>Batch Completed!</strong> Successfully processed {status.articles_processed} articles.
             Total cost: ${status.total_llm_cost_usd.toFixed(2)}
@@ -369,8 +370,8 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
       )}
 
       {status.status === 'failed' && (
-        <Alert className="border-red-400 bg-red-50">
-          <XCircle className="h-5 w-5 text-red-600" />
+        <Alert className="border-red-400 bg-red-50" role="alert">
+          <XCircle className="h-5 w-5 text-red-600" aria-hidden="true" />
           <AlertDescription className="text-red-800">
             <strong>Batch Failed!</strong> {status.last_error || 'Unknown error'}
           </AlertDescription>

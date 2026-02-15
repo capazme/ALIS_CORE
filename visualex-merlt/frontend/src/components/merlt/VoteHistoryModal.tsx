@@ -18,10 +18,10 @@ import {
   Circle,
   Undo2,
 } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import { Modal } from '../../ui/Modal';
-import type { VoteHistoryEntry, ValidationItemType } from '../../../hooks/useValidationState';
-import type { VoteType } from '../../../types/merlt';
+import { cn } from '../../lib/utils';
+import { Modal } from '../ui/Modal';
+import type { VoteHistoryEntry, ValidationItemType } from '../../hooks/useValidationState';
+import type { VoteType } from '../../types/merlt';
 
 interface VoteHistoryModalProps {
   isOpen: boolean;
@@ -168,10 +168,11 @@ export function VoteHistoryModal({
 
         {/* Empty State */}
         {history.length === 0 && (
-          <div className="text-center py-8">
+          <div className="text-center py-8" role="status">
             <History
               size={32}
               className="mx-auto text-slate-300 dark:text-slate-600 mb-3"
+              aria-hidden="true"
             />
             <p className="text-sm text-slate-500 dark:text-slate-400">
               Nessun voto registrato in questa sessione
@@ -296,11 +297,13 @@ function VoteHistoryItem({
           className={cn(
             'p-1.5 rounded-md text-slate-400 hover:text-red-500',
             'hover:bg-red-50 dark:hover:bg-red-900/20',
-            'transition-colors'
+            'transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
           )}
           title="Annulla voto"
+          aria-label={`Annulla voto per ${entry.itemName}`}
         >
-          <Undo2 size={14} />
+          <Undo2 size={14} aria-hidden="true" />
         </button>
       ) : (
         <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
