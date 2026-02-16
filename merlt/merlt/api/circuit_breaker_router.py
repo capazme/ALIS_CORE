@@ -14,10 +14,12 @@ Endpoints:
 from typing import Any, Dict, Optional
 
 import structlog
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from merlt.api.auth import verify_api_key, require_role
 from merlt.experts.circuit_breaker import CircuitBreakerRegistry
+from merlt.experts.models import ApiKey
 
 log = structlog.get_logger()
 
@@ -66,7 +68,9 @@ class CircuitBreakerResetResponse(BaseModel):
 
 
 @router.get("/status", response_model=CircuitBreakerStatusResponse)
-async def get_all_status() -> CircuitBreakerStatusResponse:
+async def get_all_status(
+    api_key: ApiKey = Depends(verify_api_key),
+) -> CircuitBreakerStatusResponse:
     """Stato di tutti i circuit breaker registrati."""
     registry = CircuitBreakerRegistry.get_instance()
     all_stats = registry.get_all_stats()
@@ -84,7 +88,10 @@ async def get_all_status() -> CircuitBreakerStatusResponse:
 
 
 @router.get("/{expert_type}", response_model=CircuitBreakerStatusItem)
-async def get_breaker_status(expert_type: str) -> CircuitBreakerStatusItem:
+async def get_breaker_status(
+    expert_type: str,
+    api_key: ApiKey = Depends(verify_api_key),
+) -> CircuitBreakerStatusItem:
     """Stato e stats di un circuit breaker specifico."""
     registry = CircuitBreakerRegistry.get_instance()
     breaker = registry.get(f"{expert_type}_expert")
@@ -100,7 +107,9 @@ async def get_breaker_status(expert_type: str) -> CircuitBreakerStatusItem:
 
 @router.put("/{expert_type}/config")
 async def update_breaker_config(
-    expert_type: str, update: CircuitBreakerConfigUpdate
+    expert_type: str,
+    update: CircuitBreakerConfigUpdate,
+    api_key: ApiKey = Depends(require_role("admin")),
 ) -> Dict[str, Any]:
     """Aggiorna configurazione di un circuit breaker."""
     registry = CircuitBreakerRegistry.get_instance()
@@ -121,7 +130,10 @@ async def update_breaker_config(
 
 
 @router.post("/{expert_type}/reset", response_model=CircuitBreakerResetResponse)
-async def reset_breaker(expert_type: str) -> CircuitBreakerResetResponse:
+async def reset_breaker(
+    expert_type: str,
+    api_key: ApiKey = Depends(require_role("admin")),
+) -> CircuitBreakerResetResponse:
     """Reset manuale di un circuit breaker."""
     registry = CircuitBreakerRegistry.get_instance()
     breaker = registry.get(f"{expert_type}_expert") or registry.get(expert_type)

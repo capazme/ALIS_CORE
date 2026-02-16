@@ -34,8 +34,10 @@ import structlog
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect
 
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 from merlt.api.models.pipeline_models import (
     PipelineError,
     PipelineRun,
@@ -72,6 +74,7 @@ async def list_pipeline_runs(
         le=200,
         description="Numero massimo di run da restituire",
     ),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> List[PipelineRun]:
     """
     Lista tutte le pipeline run con filtri opzionali.
@@ -304,7 +307,11 @@ async def get_pipeline_errors(run_id: str) -> List[PipelineError]:
 
 
 @router.post("/run/{run_id}/retry", response_model=RetryResponse)
-async def retry_failed_items(run_id: str, request: RetryRequest) -> RetryResponse:
+async def retry_failed_items(
+    run_id: str,
+    request: RetryRequest,
+    api_key: ApiKey = Depends(require_role("admin")),
+) -> RetryResponse:
     """
     Riprova item falliti per una pipeline run.
 
@@ -385,7 +392,10 @@ async def retry_failed_items(run_id: str, request: RetryRequest) -> RetryRespons
 # =============================================================================
 
 @router.post("/start", response_model=StartPipelineResponse)
-async def start_pipeline(request: StartPipelineRequest) -> StartPipelineResponse:
+async def start_pipeline(
+    request: StartPipelineRequest,
+    api_key: ApiKey = Depends(require_role("admin")),
+) -> StartPipelineResponse:
     """
     Avvia una nuova pipeline di batch ingestion.
 
@@ -741,7 +751,10 @@ async def get_dataset_stats() -> DatasetStats:
 
 
 @router.post("/dataset/export", response_model=DatasetExportResponse)
-async def export_dataset(request: DatasetExportRequest) -> DatasetExportResponse:
+async def export_dataset(
+    request: DatasetExportRequest,
+    api_key: ApiKey = Depends(require_role("admin")),
+) -> DatasetExportResponse:
     """
     Esporta il dataset in vari formati (JSON, CSV, Cypher).
 

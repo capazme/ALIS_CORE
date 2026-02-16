@@ -15,9 +15,11 @@ Endpoints:
 from typing import Any, Dict, List, Optional
 
 import structlog
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 from merlt.rlcf.database import get_async_session
 
 log = structlog.get_logger()
@@ -78,7 +80,9 @@ class ScheduleListResponse(BaseModel):
 
 
 @router.get("/schedules", response_model=ScheduleListResponse)
-async def list_schedules() -> ScheduleListResponse:
+async def list_schedules(
+    api_key: ApiKey = Depends(verify_api_key),
+) -> ScheduleListResponse:
     """Lista tutti gli schedule di ingestion."""
     scheduler = _get_scheduler()
     async with get_async_session() as session:
@@ -90,7 +94,10 @@ async def list_schedules() -> ScheduleListResponse:
 
 
 @router.post("/schedules", response_model=ScheduleResponse)
-async def create_schedule(request: ScheduleCreateRequest) -> ScheduleResponse:
+async def create_schedule(
+    request: ScheduleCreateRequest,
+    api_key: ApiKey = Depends(require_role("admin")),
+) -> ScheduleResponse:
     """Crea un nuovo schedule di ingestion."""
     scheduler = _get_scheduler()
     async with get_async_session() as session:
@@ -105,7 +112,11 @@ async def create_schedule(request: ScheduleCreateRequest) -> ScheduleResponse:
 
 
 @router.put("/schedules/{schedule_id}", response_model=ScheduleResponse)
-async def update_schedule(schedule_id: int, request: ScheduleUpdateRequest) -> ScheduleResponse:
+async def update_schedule(
+    schedule_id: int,
+    request: ScheduleUpdateRequest,
+    api_key: ApiKey = Depends(require_role("admin")),
+) -> ScheduleResponse:
     """Modifica uno schedule esistente."""
     scheduler = _get_scheduler()
     update_data = request.model_dump(exclude_none=True)
@@ -120,7 +131,10 @@ async def update_schedule(schedule_id: int, request: ScheduleUpdateRequest) -> S
 
 
 @router.delete("/schedules/{schedule_id}")
-async def delete_schedule(schedule_id: int) -> Dict[str, Any]:
+async def delete_schedule(
+    schedule_id: int,
+    api_key: ApiKey = Depends(require_role("admin")),
+) -> Dict[str, Any]:
     """Elimina uno schedule."""
     scheduler = _get_scheduler()
     async with get_async_session() as session:
@@ -131,7 +145,10 @@ async def delete_schedule(schedule_id: int) -> Dict[str, Any]:
 
 
 @router.post("/schedules/{schedule_id}/toggle", response_model=ScheduleResponse)
-async def toggle_schedule(schedule_id: int) -> ScheduleResponse:
+async def toggle_schedule(
+    schedule_id: int,
+    api_key: ApiKey = Depends(require_role("admin")),
+) -> ScheduleResponse:
     """Pausa/riprendi uno schedule."""
     scheduler = _get_scheduler()
     async with get_async_session() as session:

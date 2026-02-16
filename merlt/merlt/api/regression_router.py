@@ -19,8 +19,11 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import structlog
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 
 log = structlog.get_logger()
 
@@ -180,6 +183,7 @@ async def _run_regression_background(run_id: str, request: RegressionRunRequest)
 @router.post("/run", response_model=RegressionRunResponse)
 async def start_regression_run(
     request: RegressionRunRequest = RegressionRunRequest(),
+    api_key: ApiKey = Depends(require_role("admin")),
 ) -> RegressionRunResponse:
     """Avvia regression test suite in background."""
     run_id = f"reg_{uuid.uuid4().hex[:8]}"
@@ -207,7 +211,10 @@ async def start_regression_run(
 
 
 @router.get("/status/{run_id}", response_model=RegressionStatusResponse)
-async def get_regression_status(run_id: str) -> RegressionStatusResponse:
+async def get_regression_status(
+    run_id: str,
+    api_key: ApiKey = Depends(verify_api_key),
+) -> RegressionStatusResponse:
     """Stato esecuzione regression run."""
     if run_id not in _runs:
         raise HTTPException(status_code=404, detail=f"Run '{run_id}' not found")
@@ -225,7 +232,10 @@ async def get_regression_status(run_id: str) -> RegressionStatusResponse:
 
 
 @router.get("/results/{run_id}", response_model=RegressionResultsResponse)
-async def get_regression_results(run_id: str) -> RegressionResultsResponse:
+async def get_regression_results(
+    run_id: str,
+    api_key: ApiKey = Depends(verify_api_key),
+) -> RegressionResultsResponse:
     """Risultati dettagliati regression run."""
     if run_id not in _runs:
         raise HTTPException(status_code=404, detail=f"Run '{run_id}' not found")
@@ -300,7 +310,10 @@ async def get_baselines() -> BaselinesResponse:
 
 
 @router.post("/baselines/update")
-async def update_baselines(run_id: Optional[str] = None) -> Dict[str, Any]:
+async def update_baselines(
+    run_id: Optional[str] = None,
+    api_key: ApiKey = Depends(require_role("admin")),
+) -> Dict[str, Any]:
     """Aggiorna baseline con risultati di un run completato."""
     if run_id and run_id in _runs:
         run = _runs[run_id]

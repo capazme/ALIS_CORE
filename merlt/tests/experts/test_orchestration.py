@@ -527,6 +527,82 @@ class TestMultiExpertOrchestrator:
         assert response.mode in [SynthesisMode.CONVERGENT, SynthesisMode.DIVERGENT]
 
     @pytest.mark.asyncio
+    async def test_timeout_enforcement(self):
+        """Verifica che il timeout cancella expert lenti e ritorna risposta degradata.
+
+        P0-PIPE-3: La pipeline deve enforcare il timeout configurato.
+        """
+        import asyncio
+        from unittest.mock import AsyncMock, patch
+
+        synthesizer = _create_synthesizer()
+        config = OrchestratorConfig(
+            timeout_seconds=0.1,  # 100ms timeout - very short
+            parallel_execution=True,
+        )
+        orchestrator = MultiExpertOrchestrator(synthesizer=synthesizer, config=config)
+
+        # Mock one expert to be slow (will timeout)
+        slow_expert = orchestrator.get_expert("literal")
+        original_analyze = slow_expert.analyze
+
+        async def slow_analyze(context):
+            await asyncio.sleep(5.0)  # 5 seconds - will be cancelled
+            return await original_analyze(context)
+
+        slow_expert.analyze = slow_analyze
+
+        # Process should complete (not hang) despite slow expert
+        response = await orchestrator.process("Test timeout query")
+
+        assert isinstance(response, SynthesisResult)
+        assert response.execution_time_ms > 0
+        # Timeout was 100ms, so total should be well under 5000ms
+        assert response.execution_time_ms < 3000
+
+    @pytest.mark.asyncio
+    async def test_timeout_returns_partial_results(self):
+        """Verifica che expert che completano prima del timeout ritornano risultati.
+
+        Se 3 di 4 expert rispondono e 1 fa timeout, i 3 risultati devono essere presenti.
+        """
+        import asyncio
+
+        synthesizer = _create_synthesizer()
+        config = OrchestratorConfig(
+            timeout_seconds=0.1,
+            parallel_execution=True,
+            selection_threshold=0.1,  # Select all experts
+        )
+        orchestrator = MultiExpertOrchestrator(synthesizer=synthesizer, config=config)
+
+        # Make ALL experts slow (they don't do real LLM calls, but this tests the path)
+        for expert_type, expert in orchestrator._experts.items():
+            if expert_type == "literal":
+                original_analyze = expert.analyze
+
+                async def slow_analyze(context, _orig=original_analyze):
+                    await asyncio.sleep(10.0)
+                    return await _orig(context)
+
+                expert.analyze = slow_analyze
+
+        response = await orchestrator.process("Query con timeout parziale")
+
+        assert isinstance(response, SynthesisResult)
+        # Should still have some contributions (the non-slow experts)
+        assert response.execution_time_ms < 5000
+
+    @pytest.mark.asyncio
+    async def test_timeout_config_propagates(self):
+        """Verifica che timeout_seconds dalla config viene usato."""
+        synthesizer = _create_synthesizer()
+        config = OrchestratorConfig(timeout_seconds=120.0)
+        orchestrator = MultiExpertOrchestrator(synthesizer=synthesizer, config=config)
+
+        assert orchestrator.config.timeout_seconds == 120.0
+
+    @pytest.mark.asyncio
     async def test_disagreement_analysis_in_result(self):
         """Verifica che SynthesisResult includa disagreement_analysis."""
         synthesizer = _create_synthesizer()

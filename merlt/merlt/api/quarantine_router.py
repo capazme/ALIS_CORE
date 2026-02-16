@@ -16,9 +16,11 @@ Endpoints:
 from typing import Any, Dict, Optional
 
 import structlog
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 from merlt.rlcf.database import get_async_session
 from merlt.rlcf.quarantine_service import QuarantineService
 
@@ -54,7 +56,11 @@ class ApproveRequest(BaseModel):
 
 
 @router.post("/{feedback_id}/flag")
-async def flag_feedback(feedback_id: int, request: FlagRequest) -> Dict[str, Any]:
+async def flag_feedback(
+    feedback_id: int,
+    request: FlagRequest,
+    api_key: ApiKey = Depends(require_role("admin")),
+) -> Dict[str, Any]:
     """Flag un feedback come sospetto."""
     async with get_async_session() as session:
         result = await _service.flag_feedback(
@@ -66,7 +72,11 @@ async def flag_feedback(feedback_id: int, request: FlagRequest) -> Dict[str, Any
 
 
 @router.post("/{feedback_id}/quarantine")
-async def quarantine_feedback(feedback_id: int, request: QuarantineRequest) -> Dict[str, Any]:
+async def quarantine_feedback(
+    feedback_id: int,
+    request: QuarantineRequest,
+    api_key: ApiKey = Depends(require_role("admin")),
+) -> Dict[str, Any]:
     """Quarantina feedback (esclude da training)."""
     async with get_async_session() as session:
         result = await _service.quarantine_feedback(
@@ -78,7 +88,11 @@ async def quarantine_feedback(feedback_id: int, request: QuarantineRequest) -> D
 
 
 @router.post("/{feedback_id}/approve")
-async def approve_feedback(feedback_id: int, request: ApproveRequest = ApproveRequest()) -> Dict[str, Any]:
+async def approve_feedback(
+    feedback_id: int,
+    request: ApproveRequest = ApproveRequest(),
+    api_key: ApiKey = Depends(require_role("admin")),
+) -> Dict[str, Any]:
     """Approva feedback dopo review."""
     async with get_async_session() as session:
         result = await _service.approve_feedback(
@@ -93,6 +107,7 @@ async def approve_feedback(feedback_id: int, request: ApproveRequest = ApproveRe
 async def get_flagged(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> Dict[str, Any]:
     """Lista feedback flaggati con paginazione."""
     async with get_async_session() as session:
@@ -103,6 +118,7 @@ async def get_flagged(
 async def get_quarantined(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> Dict[str, Any]:
     """Lista feedback quarantinati."""
     async with get_async_session() as session:
@@ -110,7 +126,9 @@ async def get_quarantined(
 
 
 @router.post("/auto-detect")
-async def auto_detect_outliers() -> Dict[str, Any]:
+async def auto_detect_outliers(
+    api_key: ApiKey = Depends(require_role("admin")),
+) -> Dict[str, Any]:
     """Trigger rilevazione automatica outlier."""
     async with get_async_session() as session:
         return await _service.auto_detect_outliers(session)

@@ -14,9 +14,11 @@ import structlog
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import Response
 
+from merlt.api.auth import require_role
+from merlt.experts.models import ApiKey
 from merlt.rlcf.export_service import DatasetExportService
 from merlt.rlcf.database import get_async_session
 
@@ -32,6 +34,7 @@ async def export_feedback(
     since_days: int = Query(30, ge=1, le=365, description="Export data from last N days"),
     output_format: str = Query("json", description="json or csv"),
     anonymize: bool = Query(True, description="Anonymize user data"),
+    api_key: ApiKey = Depends(require_role("admin")),
 ):
     """Export QAFeedback dataset for academic analysis."""
     log.info("Exporting feedback dataset", since_days=since_days, output_format=output_format, anonymize=anonymize)
@@ -57,6 +60,7 @@ async def export_traces(
     since_days: int = Query(30, ge=1, le=365, description="Export data from last N days"),
     output_format: str = Query("json", description="json or csv"),
     anonymize: bool = Query(True, description="Anonymize user data"),
+    api_key: ApiKey = Depends(require_role("admin")),
 ):
     """Export QATrace dataset for academic analysis."""
     log.info("Exporting traces dataset", since_days=since_days, output_format=output_format, anonymize=anonymize)
@@ -80,6 +84,7 @@ async def export_traces(
 @router.get("/aggregation")
 async def export_aggregation(
     since_days: int = Query(30, ge=1, le=365, description="Export data from last N days"),
+    api_key: ApiKey = Depends(require_role("admin")),
 ):
     """Export AggregatedFeedback dataset (no user data)."""
     log.info("Exporting aggregation dataset", since_days=since_days)

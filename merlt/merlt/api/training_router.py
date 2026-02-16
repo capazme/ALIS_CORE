@@ -24,6 +24,8 @@ from pydantic import BaseModel, Field
 
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 from merlt.rlcf.training_scheduler import (
     get_scheduler,
     TrainingScheduler,
@@ -151,7 +153,8 @@ def get_training_scheduler() -> TrainingScheduler:
     summary="Stato training scheduler"
 )
 async def get_training_status(
-    scheduler: TrainingScheduler = Depends(get_training_scheduler)
+    scheduler: TrainingScheduler = Depends(get_training_scheduler),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> TrainingStatusResponse:
     """
     Ritorna lo stato corrente del training scheduler.
@@ -186,7 +189,8 @@ async def get_training_status(
 async def start_training(
     request: StartTrainingRequest = None,
     background_tasks: BackgroundTasks = None,
-    scheduler: TrainingScheduler = Depends(get_training_scheduler)
+    scheduler: TrainingScheduler = Depends(get_training_scheduler),
+    api_key: ApiKey = Depends(require_role("admin")),
 ) -> TrainingResultResponse:
     """
     Avvia un ciclo di training manualmente.
@@ -234,7 +238,8 @@ async def start_training(
     summary="Pausa training automatico"
 )
 async def pause_training(
-    scheduler: TrainingScheduler = Depends(get_training_scheduler)
+    scheduler: TrainingScheduler = Depends(get_training_scheduler),
+    api_key: ApiKey = Depends(require_role("admin")),
 ) -> dict:
     """Mette in pausa il training automatico."""
     scheduler.pause()
@@ -246,7 +251,8 @@ async def pause_training(
     summary="Riprende training automatico"
 )
 async def resume_training(
-    scheduler: TrainingScheduler = Depends(get_training_scheduler)
+    scheduler: TrainingScheduler = Depends(get_training_scheduler),
+    api_key: ApiKey = Depends(require_role("admin")),
 ) -> dict:
     """Riprende il training automatico."""
     scheduler.resume()
@@ -259,7 +265,8 @@ async def resume_training(
     summary="Statistiche buffer esperienze"
 )
 async def get_buffer_stats(
-    scheduler: TrainingScheduler = Depends(get_training_scheduler)
+    scheduler: TrainingScheduler = Depends(get_training_scheduler),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> BufferStatsResponse:
     """
     Ritorna statistiche del buffer di esperienze.
@@ -289,7 +296,8 @@ async def get_buffer_stats(
 )
 async def add_experience(
     request: AddExperienceRequest,
-    scheduler: TrainingScheduler = Depends(get_training_scheduler)
+    scheduler: TrainingScheduler = Depends(get_training_scheduler),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> AddExperienceResponse:
     """
     Aggiunge un'esperienza al buffer di replay.
@@ -322,7 +330,8 @@ async def add_experience(
     summary="Configurazione scheduler"
 )
 async def get_scheduler_config(
-    scheduler: TrainingScheduler = Depends(get_training_scheduler)
+    scheduler: TrainingScheduler = Depends(get_training_scheduler),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> SchedulerConfigResponse:
     """Ritorna configurazione corrente dello scheduler."""
     config = scheduler.config
@@ -346,7 +355,8 @@ async def get_scheduler_config(
 )
 async def update_scheduler_config(
     request: SchedulerConfigRequest,
-    scheduler: TrainingScheduler = Depends(get_training_scheduler)
+    scheduler: TrainingScheduler = Depends(get_training_scheduler),
+    api_key: ApiKey = Depends(require_role("admin")),
 ) -> SchedulerConfigResponse:
     """
     Aggiorna configurazione dello scheduler.
@@ -379,7 +389,8 @@ async def update_scheduler_config(
 )
 async def start_auto_training(
     check_interval: int = 60,
-    scheduler: TrainingScheduler = Depends(get_training_scheduler)
+    scheduler: TrainingScheduler = Depends(get_training_scheduler),
+    api_key: ApiKey = Depends(require_role("admin")),
 ) -> dict:
     """
     Avvia il training automatico in background.
@@ -404,7 +415,8 @@ async def start_auto_training(
     summary="Ferma training automatico"
 )
 async def stop_auto_training(
-    scheduler: TrainingScheduler = Depends(get_training_scheduler)
+    scheduler: TrainingScheduler = Depends(get_training_scheduler),
+    api_key: ApiKey = Depends(require_role("admin")),
 ) -> dict:
     """Ferma il training automatico in background."""
     await scheduler.stop_auto_training()

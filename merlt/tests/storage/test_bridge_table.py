@@ -188,3 +188,101 @@ async def test_filter_by_node_type(bridge_table):
 
     # Cleanup
     await bridge_table.delete_mappings_for_chunk(chunk_id)
+
+
+# ============================================================================
+# Partial Failure & Rollback Tests (P0-BRIDGE-2)
+# ============================================================================
+
+
+@pytest.mark.asyncio
+async def test_batch_insert_rollback_on_constraint_violation(bridge_table):
+    """Batch insert rolls back entirely on unique constraint violation.
+
+    If N of M mappings violate a constraint, the entire batch should fail
+    and no rows should be committed (atomic transaction).
+    """
+    chunk_id = uuid4()
+    node_urn = f"urn:test:norma:rollback-{uuid4().hex[:8]}"
+
+    # First: insert a single mapping that will conflict
+    await bridge_table.add_mapping(
+        chunk_id=chunk_id,
+        graph_node_urn=node_urn,
+        node_type="Norma",
+        source="test"
+    )
+
+    # Verify it exists
+    nodes_before = await bridge_table.get_nodes_for_chunk(chunk_id)
+    assert len(nodes_before) == 1
+
+    # Now: batch insert where the SECOND mapping conflicts with the existing one
+    conflicting_batch = [
+        {
+            "chunk_id": uuid4(),  # Different chunk, new mapping
+            "graph_node_urn": f"urn:test:norma:new-{uuid4().hex[:8]}",
+            "node_type": "Norma",
+            "source": "test"
+        },
+        {
+            "chunk_id": chunk_id,  # Same chunk+urn = CONFLICT
+            "graph_node_urn": node_urn,
+            "node_type": "Norma",
+            "source": "test"
+        },
+    ]
+
+    # Batch insert should raise due to unique constraint violation
+    from asyncpg.exceptions import UniqueViolationError
+    from sqlalchemy.exc import IntegrityError
+
+    with pytest.raises((IntegrityError, Exception)):
+        await bridge_table.add_mappings_batch(conflicting_batch)
+
+    # Verify original data is intact (no partial commit)
+    nodes_after = await bridge_table.get_nodes_for_chunk(chunk_id)
+    assert len(nodes_after) == 1
+    assert nodes_after[0]["graph_node_urn"] == node_urn
+
+    # Cleanup
+    await bridge_table.delete_mappings_for_chunk(chunk_id)
+
+
+@pytest.mark.asyncio
+async def test_batch_insert_empty_list(bridge_table):
+    """Batch insert with empty list returns 0 without error."""
+    count = await bridge_table.add_mappings_batch([])
+    assert count == 0
+
+
+@pytest.mark.asyncio
+async def test_batch_insert_invalid_confidence_rejected(bridge_table):
+    """Batch with invalid confidence (>1.0) is rejected by CHECK constraint."""
+    from sqlalchemy.exc import IntegrityError
+
+    chunk_id = uuid4()
+    bad_batch = [
+        {
+            "chunk_id": chunk_id,
+            "graph_node_urn": f"urn:test:norma:bad-{uuid4().hex[:8]}",
+            "node_type": "Norma",
+            "confidence": 5.0,  # Violates CHECK (0-1)
+            "source": "test"
+        },
+    ]
+
+    with pytest.raises((IntegrityError, Exception)):
+        await bridge_table.add_mappings_batch(bad_batch)
+
+    # Verify nothing was inserted
+    nodes = await bridge_table.get_nodes_for_chunk(chunk_id)
+    assert len(nodes) == 0
+
+
+@pytest.mark.asyncio
+async def test_delete_idempotent(bridge_table):
+    """Deleting mappings for non-existent chunk returns 0."""
+    non_existent = uuid4()
+    deleted = await bridge_table.delete_mappings_for_chunk(non_existent)
+    assert deleted == 0
