@@ -158,10 +158,10 @@ development_status:
   # Epic 8: Research & Academic Support
   # ============================================
   epic-8: done  # Sprint 4 completed 2026-02-14 - all 4 stories + test debt Story 0 + code review fixes
-  8-1-policy-evolution-dashboard: done  # Completed 2026-02-14 - policy_evolution_router (time-series, expert-evolution, aggregation-history), PolicyEvolutionChart.tsx, usePolicyEvolution.ts
+  8-1-policy-evolution-dashboard: done  # Completed 2026-02-14 - policy_evolution_router (time-series, expert-evolution, aggregation-history), PolicyEvolutionChart.tsx, usePolicyEvolution.ts, policyEvolutionService.ts
   8-2-dataset-export: done  # Completed 2026-02-14 - DatasetExportService (GDPR, anonymization, CSV/JSON), export_router, EXPORT_ANON_SALT env var
   8-3-query-reproducibility: done  # Completed 2026-02-14 - ReproducibilityService (diff, Jaccard, score), POST /traces/{id}/reproduce, ephemeral traces
-  8-4-devils-advocate: done  # Completed 2026-02-14 - devils_advocate_router (check/feedback/effectiveness), DevilsAdvocatePanel.tsx, bounded deque + thread-safe
+  8-4-devils-advocate: done  # Completed 2026-02-14 - devils_advocate_router (check/feedback/effectiveness), DevilsAdvocatePanel.tsx, devilsAdvocateService.ts, bounded deque + thread-safe
   epic-8-retrospective: done  # Completed 2026-02-14
 
   # ============================================
@@ -174,3 +174,17 @@ development_status:
   9-4-regression-test-runner-api: done  # Completed 2026-02-16 - regression_router (run/status/results/baselines), RegressionTestsSection in ExpertsTab
   9-5-feedback-quarantine: done  # Completed 2026-02-16 - QuarantineService, quarantine_router, QAFeedback status fields, FeedbackReviewSection in RLCFTab, training_scheduler filter
   epic-9-retrospective: optional
+
+  # ============================================
+  # Epic 10: API & External Integration
+  # ============================================
+  epic-10: done  # Completed 2026-02-16 - FR45 API credentials, FR43/44 pre-existing
+  10-1-api-key-model-migration: done  # Completed 2026-02-16 - ApiKey model (role/tier/expiration), Alembic 003_add_api_keys_table
+  10-2-auth-middleware-rate-limiting: done  # Completed 2026-02-16 - auth.py (verify_api_key, require_role, optional_api_key), rate_limit.py (Redis sliding window, graceful degradation), redis>=5.0.0
+  10-3-api-keys-crud-router: done  # Completed 2026-02-16 - api_keys_router.py (bootstrap, create, list, get, update, delete), wired auth+rate_limit into POST /experts/query
+  10-4-frontend-api-keys-ui: done  # Completed 2026-02-16 - apiKeyService.ts, ApiKeysSection.tsx (table, create form, copy-to-clipboard, bootstrap), integrated in ArchitectureTab
+  epic-10-retrospective: optional
+
+  # ============================================
+  # All gaps resolved as of 2026-02-16
+  # ============================================

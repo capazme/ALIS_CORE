@@ -19,6 +19,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { PolicyEvolutionChart } from './PolicyEvolutionChart';
+import { DevilsAdvocatePanel } from './DevilsAdvocatePanel';
 import {
   Play,
   Square,
@@ -734,6 +736,12 @@ export function RLCFTab() {
 
       {/* Feedback Review */}
       <FeedbackReviewSection />
+
+      {/* Policy Evolution */}
+      <PolicyEvolutionChart />
+
+      {/* Devil's Advocate */}
+      <DevilsAdvocatePanel />
 
       {/* Info text */}
       <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
