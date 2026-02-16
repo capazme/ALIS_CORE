@@ -275,6 +275,18 @@ class TrainingScheduler:
         Returns:
             ID dell'esperienza
         """
+        # Skip quarantined feedback (Story 9-5)
+        feedback_status = getattr(feedback, "status", None)
+        if metadata:
+            feedback_status = feedback_status or metadata.get("feedback_status")
+        if feedback_status in ("quarantined", "flagged", "deleted"):
+            log.debug(
+                "Experience rejected (quarantined/flagged)",
+                status=feedback_status,
+                reward=reward,
+            )
+            return ""
+
         if isinstance(self.buffer, PrioritizedReplayBuffer):
             exp_id = self.buffer.add(trace, feedback, reward, td_error, metadata)
         else:

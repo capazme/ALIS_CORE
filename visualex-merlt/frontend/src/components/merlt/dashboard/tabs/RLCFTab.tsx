@@ -17,7 +17,7 @@
  * ```
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   Play,
@@ -28,6 +28,11 @@ import {
   Clock,
   Activity,
   CheckCircle2,
+  Shield,
+  Flag,
+  Check,
+  Ban,
+  Search,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import {
@@ -45,6 +50,14 @@ import {
   type PolicyWeightsStatus,
   type TrainingConfig,
 } from '../../../../services/rlcfService';
+import {
+  getFlaggedFeedback,
+  getQuarantinedFeedback,
+  approveFeedback,
+  quarantineFeedback,
+  autoDetectOutliers,
+} from '../../../../services/quarantineService';
+import type { FeedbackItem } from '../../../../services/quarantineService';
 
 // =============================================================================
 // TRAINING STATUS CARD
@@ -363,6 +376,220 @@ function BufferStatusCard({ buffer }: BufferStatusCardProps) {
 }
 
 // =============================================================================
+// FEEDBACK REVIEW SECTION
+// =============================================================================
+
+function FeedbackReviewSection() {
+  const [activeView, setActiveView] = useState('flagged' as 'flagged' | 'quarantined');
+  const [items, setItems] = useState([] as FeedbackItem[]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [detectLoading, setDetectLoading] = useState(false);
+  const [error, setError] = useState(null as string | null);
+
+  const fetchItems = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = activeView === 'flagged'
+        ? await getFlaggedFeedback(50, 0)
+        : await getQuarantinedFeedback(50, 0);
+      setItems(data.items);
+      setTotal(data.total);
+    } catch (err) {
+      setError('Errore caricamento feedback');
+      console.error('Failed to load feedback:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [activeView]);
+
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems]);
+
+  const handleApprove = async (id: number) => {
+    try {
+      await approveFeedback(id);
+      await fetchItems();
+    } catch (err) {
+      console.error('Failed to approve:', err);
+    }
+  };
+
+  const handleQuarantine = async (id: number) => {
+    try {
+      await quarantineFeedback(id, 'Quarantined by admin');
+      await fetchItems();
+    } catch (err) {
+      console.error('Failed to quarantine:', err);
+    }
+  };
+
+  const handleAutoDetect = async () => {
+    setDetectLoading(true);
+    try {
+      const result = await autoDetectOutliers();
+      if (result.flagged_count > 0) {
+        await fetchItems();
+      }
+    } catch (err) {
+      console.error('Failed to auto-detect:', err);
+    } finally {
+      setDetectLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Shield size={20} className="text-slate-500" aria-hidden="true" />
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            Feedback Review
+          </h3>
+          <span className="text-sm text-slate-500 dark:text-slate-400">({total})</span>
+        </div>
+        <button
+          onClick={handleAutoDetect}
+          disabled={detectLoading}
+          className={cn(
+            'flex items-center gap-1 px-3 py-1.5 text-sm rounded-md transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+            detectLoading
+              ? 'bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
+              : 'bg-orange-600 text-white hover:bg-orange-700'
+          )}
+        >
+          <Search size={14} aria-hidden="true" />
+          {detectLoading ? 'Detecting...' : 'Auto-Detect'}
+        </button>
+      </div>
+
+      {/* Tab switcher */}
+      <div className="flex border-b border-slate-200 dark:border-slate-700">
+        <button
+          onClick={() => setActiveView('flagged')}
+          className={cn(
+            'flex-1 px-4 py-2 text-sm font-medium border-b-2 transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+            activeView === 'flagged'
+              ? 'border-orange-500 text-orange-700 dark:text-orange-400'
+              : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+          )}
+        >
+          <Flag size={14} className="inline mr-1" aria-hidden="true" />
+          Flagged
+        </button>
+        <button
+          onClick={() => setActiveView('quarantined')}
+          className={cn(
+            'flex-1 px-4 py-2 text-sm font-medium border-b-2 transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+            activeView === 'quarantined'
+              ? 'border-red-500 text-red-700 dark:text-red-400'
+              : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+          )}
+        >
+          <Ban size={14} className="inline mr-1" aria-hidden="true" />
+          Quarantined
+        </button>
+      </div>
+
+      {loading && (
+        <div className="flex items-center justify-center py-8" role="status">
+          <RefreshCw size={20} className="animate-spin text-blue-500" aria-hidden="true" />
+          <span className="sr-only">Caricamento...</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="p-4 text-center text-red-500 text-sm">{error}</div>
+      )}
+
+      {!loading && !error && items.length === 0 && (
+        <div className="p-8 text-center text-slate-400 dark:text-slate-500">
+          <p className="text-sm">
+            {activeView === 'flagged' ? 'Nessun feedback flaggato.' : 'Nessun feedback quarantinato.'}
+          </p>
+        </div>
+      )}
+
+      {!loading && !error && items.length > 0 && (
+        <div className="divide-y divide-slate-200 dark:divide-slate-700">
+          {items.map((item: FeedbackItem) => (
+            <div key={item.id} className="p-4 flex items-center justify-between">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                    #{item.id}
+                  </span>
+                  <span className="text-xs text-slate-500">trace: {item.trace_id}</span>
+                  {item.inline_rating != null && (
+                    <span className={cn(
+                      'px-2 py-0.5 rounded text-xs',
+                      item.inline_rating >= 4
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                        : item.inline_rating <= 2
+                          ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                          : 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300'
+                    )}>
+                      Rating: {item.inline_rating}
+                    </span>
+                  )}
+                  {item.user_authority != null && (
+                    <span className="text-xs text-slate-400">
+                      Authority: {item.user_authority.toFixed(2)}
+                    </span>
+                  )}
+                </div>
+                {item.quarantine_reason && (
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate">
+                    {item.quarantine_reason}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-1 ml-4">
+                {activeView === 'flagged' && (
+                  <>
+                    <button
+                      onClick={() => handleApprove(item.id)}
+                      className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                      title="Approva"
+                      aria-label="Approva"
+                    >
+                      <Check size={16} aria-hidden="true" />
+                    </button>
+                    <button
+                      onClick={() => handleQuarantine(item.id)}
+                      className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                      title="Quarantina"
+                      aria-label="Quarantina"
+                    >
+                      <Ban size={16} aria-hidden="true" />
+                    </button>
+                  </>
+                )}
+                {activeView === 'quarantined' && (
+                  <button
+                    onClick={() => handleApprove(item.id)}
+                    className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                    title="Riabilita"
+                    aria-label="Riabilita"
+                  >
+                    <Check size={16} aria-hidden="true" />
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// =============================================================================
 // MAIN COMPONENT
 // =============================================================================
 
@@ -504,6 +731,9 @@ export function RLCFTab() {
         {policyWeights && <PolicyWeightsCard weights={policyWeights} />}
         {bufferStatus && <BufferStatusCard buffer={bufferStatus} />}
       </div>
+
+      {/* Feedback Review */}
+      <FeedbackReviewSection />
 
       {/* Info text */}
       <p className="text-sm text-slate-500 dark:text-slate-400 text-center">

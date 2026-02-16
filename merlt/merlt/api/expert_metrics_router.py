@@ -10,8 +10,7 @@ Questo router espone API per:
 - Reasoning trace visualizzazione
 - Aggregation stats (agreement rate, divergence)
 
-NOTA: Attualmente restituisce dati vuoti/default.
-      Per popolare i dati, implementare tracking delle metriche nel sistema Expert.
+Dati reali da QATrace e QAFeedback (PostgreSQL).
 
 Endpoints:
 - GET /expert-metrics/performance - Metriche performance per expert
@@ -296,32 +295,70 @@ async def get_query_stats(
     period_days: int = Query(7, ge=1, le=90, description="Periodo in giorni"),
 ) -> QueryStatsResponse:
     """
-    Recupera statistiche classificazione query.
-
-    NOTA: Attualmente restituisce valori vuoti.
+    Recupera statistiche classificazione query da QATrace.
 
     Args:
         period_days: Periodo di riferimento
 
     Returns:
         QueryStatsResponse con breakdown per tipo
-
-    Example:
-        >>> GET /api/v1/expert-metrics/queries/stats
-        {
-          "total_queries": 0,
-          "by_type": []
-        }
     """
     log.info("Getting query stats", period_days=period_days)
 
-    return QueryStatsResponse(
-        total_queries=0,
-        by_type=[],
-        avg_latency_ms=0.0,
-        avg_confidence=0.0,
-        period_days=period_days,
-    )
+    try:
+        from merlt.rlcf.database import get_async_session
+        from merlt.experts.models import QATrace
+        from sqlalchemy import select, func
+        from datetime import timedelta
+
+        since = datetime.now(UTC) - timedelta(days=period_days)
+
+        async with get_async_session() as session:
+            # Total + averages
+            totals = await session.execute(
+                select(
+                    func.count(QATrace.trace_id),
+                    func.avg(QATrace.execution_time_ms),
+                    func.avg(QATrace.confidence),
+                ).where(QATrace.created_at >= since)
+            )
+            row = totals.one()
+            total_queries = row[0] or 0
+            avg_latency = float(row[1] or 0)
+            avg_conf = float(row[2] or 0)
+
+            # Breakdown by query_type
+            type_result = await session.execute(
+                select(
+                    QATrace.query_type,
+                    func.count(QATrace.trace_id),
+                    func.avg(QATrace.execution_time_ms),
+                    func.avg(QATrace.confidence),
+                )
+                .where(QATrace.created_at >= since, QATrace.query_type.isnot(None))
+                .group_by(QATrace.query_type)
+            )
+            by_type = []
+            for qtype, count, lat, conf in type_result.all():
+                pct = (count / total_queries * 100) if total_queries > 0 else 0
+                by_type.append(QueryTypeStats(
+                    type=qtype or "unknown",
+                    count=count,
+                    percentage=round(pct, 1),
+                    avg_latency_ms=round(float(lat or 0), 1),
+                    avg_confidence=round(float(conf or 0), 4),
+                ))
+
+        return QueryStatsResponse(
+            total_queries=total_queries,
+            by_type=by_type,
+            avg_latency_ms=round(avg_latency, 1),
+            avg_confidence=round(avg_conf, 4),
+            period_days=period_days,
+        )
+    except Exception as e:
+        log.warning("Failed to fetch query stats", error=str(e))
+        return QueryStatsResponse(period_days=period_days)
 
 
 @router.get("/queries/recent", response_model=RecentQueriesResponse)
@@ -330,9 +367,7 @@ async def get_recent_queries(
     offset: int = Query(0, ge=0, description="Offset per paginazione"),
 ) -> RecentQueriesResponse:
     """
-    Recupera query recenti con summary.
-
-    NOTA: Attualmente restituisce lista vuota.
+    Recupera query recenti con summary da QATrace + QAFeedback.
 
     Args:
         limit: Numero massimo di query
@@ -340,22 +375,61 @@ async def get_recent_queries(
 
     Returns:
         RecentQueriesResponse con lista query
-
-    Example:
-        >>> GET /api/v1/expert-metrics/queries/recent?limit=5
-        {
-          "queries": [],
-          "total_count": 0,
-          "has_more": false
-        }
     """
     log.info("Getting recent queries", limit=limit, offset=offset)
 
-    return RecentQueriesResponse(
-        queries=[],
-        total_count=0,
-        has_more=False,
-    )
+    try:
+        from merlt.rlcf.database import get_async_session
+        from merlt.experts.models import QATrace, QAFeedback
+        from sqlalchemy import select, func, exists
+
+        async with get_async_session() as session:
+            # Total count
+            count_result = await session.execute(
+                select(func.count(QATrace.trace_id))
+            )
+            total_count = count_result.scalar() or 0
+
+            # Recent traces with feedback existence check
+            traces_result = await session.execute(
+                select(
+                    QATrace.trace_id,
+                    QATrace.query,
+                    QATrace.created_at,
+                    QATrace.selected_experts,
+                    QATrace.confidence,
+                    QATrace.execution_time_ms,
+                    QATrace.synthesis_mode,
+                    exists(
+                        select(QAFeedback.id).where(QAFeedback.trace_id == QATrace.trace_id)
+                    ).label("has_feedback"),
+                )
+                .order_by(QATrace.created_at.desc())
+                .offset(offset)
+                .limit(limit)
+            )
+
+            queries = []
+            for row in traces_result.all():
+                queries.append(RecentQuery(
+                    trace_id=row.trace_id,
+                    query=row.query[:200] if row.query else "",
+                    timestamp=row.created_at.isoformat() if row.created_at else "",
+                    experts_used=row.selected_experts or [],
+                    confidence=float(row.confidence or 0),
+                    latency_ms=row.execution_time_ms or 0,
+                    mode=row.synthesis_mode or "unknown",
+                    feedback_received=row.has_feedback,
+                ))
+
+        return RecentQueriesResponse(
+            queries=queries,
+            total_count=total_count,
+            has_more=(offset + limit) < total_count,
+        )
+    except Exception as e:
+        log.warning("Failed to fetch recent queries", error=str(e))
+        return RecentQueriesResponse()
 
 
 @router.get("/trace/{trace_id}", response_model=ReasoningTrace)

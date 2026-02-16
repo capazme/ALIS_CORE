@@ -163,3 +163,14 @@ development_status:
   8-3-query-reproducibility: done  # Completed 2026-02-14 - ReproducibilityService (diff, Jaccard, score), POST /traces/{id}/reproduce, ephemeral traces
   8-4-devils-advocate: done  # Completed 2026-02-14 - devils_advocate_router (check/feedback/effectiveness), DevilsAdvocatePanel.tsx, bounded deque + thread-safe
   epic-8-retrospective: done  # Completed 2026-02-14
+
+  # ============================================
+  # Epic 9: Admin & Monitoring
+  # ============================================
+  epic-9: done  # Completed 2026-02-16 - all 5 stories, ad-hoc planned (post-thesis scope)
+  9-1-expert-metrics-real-data: done  # Completed 2026-02-16 - expert_metrics_router queries QATrace for real latency/confidence/usage, ExpertsTab auto-populated
+  9-2-ingestion-scheduling: done  # Completed 2026-02-16 - IngestionSchedule model, APScheduler service, schedule_router CRUD, SchedulesSection.tsx in PipelineTab
+  9-3-circuit-breaker-admin-api: done  # Completed 2026-02-16 - circuit_breaker_router (status/config/reset), CircuitBreakerStatus section in ArchitectureTab
+  9-4-regression-test-runner-api: done  # Completed 2026-02-16 - regression_router (run/status/results/baselines), RegressionTestsSection in ExpertsTab
+  9-5-feedback-quarantine: done  # Completed 2026-02-16 - QuarantineService, quarantine_router, QAFeedback status fields, FeedbackReviewSection in RLCFTab, training_scheduler filter
+  epic-9-retrospective: optional

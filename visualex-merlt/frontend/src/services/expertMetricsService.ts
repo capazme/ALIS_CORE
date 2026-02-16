@@ -13,7 +13,7 @@
  * - GET /expert-metrics/aggregation - Statistiche aggregazione
  */
 
-import { get } from './api';
+import { get, post } from './api';
 
 const PREFIX = '/merlt';
 
@@ -151,6 +151,61 @@ export async function getReasoningTrace(traceId: string): Promise<ReasoningTrace
  */
 export async function getAggregationStats(): Promise<AggregationStats> {
   return get(`${PREFIX}/expert-metrics/aggregation`);
+}
+
+// =============================================================================
+// REGRESSION TEST TYPES
+// =============================================================================
+
+export interface RegressionRunResponse {
+  run_id: string;
+  status: string;
+  message: string;
+}
+
+export interface RegressionStatusResponse {
+  run_id: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  started_at: string | null;
+  completed_at: string | null;
+  progress: number;
+  total_queries: number;
+  processed: number;
+}
+
+export interface RegressionResultsResponse {
+  run_id: string;
+  status: string;
+  suite_name: string;
+  pass_rate: number;
+  total_queries: number;
+  passed: number;
+  failed: number;
+  degraded: number;
+  improved: number;
+  errors: number;
+  duration_seconds: number;
+  results: Record<string, unknown>[];
+}
+
+// =============================================================================
+// REGRESSION TEST API FUNCTIONS
+// =============================================================================
+
+export async function startRegressionRun(): Promise<RegressionRunResponse> {
+  return post(`${PREFIX}/regression/run`);
+}
+
+export async function getRegressionStatus(
+  runId: string
+): Promise<RegressionStatusResponse> {
+  return get(`${PREFIX}/regression/status/${encodeURIComponent(runId)}`);
+}
+
+export async function getRegressionResults(
+  runId: string
+): Promise<RegressionResultsResponse> {
+  return get(`${PREFIX}/regression/results/${encodeURIComponent(runId)}`);
 }
 
 // =============================================================================

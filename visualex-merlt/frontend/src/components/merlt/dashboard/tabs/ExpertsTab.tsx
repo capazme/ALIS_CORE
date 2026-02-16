@@ -14,7 +14,7 @@
  * ```
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
   Users,
@@ -26,9 +26,14 @@ import {
   GitBranch,
   FileText,
   Scale,
+  Play,
+  CheckCircle,
+  XCircle,
+  TrendingUp,
+  TrendingDown,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
-import { get } from '../../../../services/api';
+import { get, post } from '../../../../services/api';
 
 // =============================================================================
 // TYPES (from expert_metrics_router.py)
@@ -506,6 +511,197 @@ function RecentQueriesList({ queries }: RecentQueriesListProps) {
 }
 
 // =============================================================================
+// REGRESSION TESTS SECTION
+// =============================================================================
+
+interface RegressionStatus {
+  run_id: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  progress: number;
+  total_queries: number;
+  processed: number;
+}
+
+interface RegressionResults {
+  run_id: string;
+  status: string;
+  suite_name: string;
+  pass_rate: number;
+  total_queries: number;
+  passed: number;
+  failed: number;
+  degraded: number;
+  improved: number;
+  errors: number;
+  duration_seconds: number;
+  results: Record<string, unknown>[];
+}
+
+function RegressionTestsSection() {
+  const [runStatus, setRunStatus] = useState(null as RegressionStatus | null);
+  const [results, setResults] = useState(null as RegressionResults | null);
+  const [isStarting, setIsStarting] = useState(false);
+  const [error, setError] = useState(null as string | null);
+  const pollingRef = useRef(null as ReturnType<typeof setInterval> | null);
+
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => stopPolling();
+  }, [stopPolling]);
+
+  const pollStatus = useCallback((runId: string) => {
+    stopPolling();
+    pollingRef.current = setInterval(async () => {
+      try {
+        const status: RegressionStatus = await get(
+          `${PREFIX}/regression/status/${encodeURIComponent(runId)}`
+        );
+        setRunStatus(status);
+
+        if (status.status === 'completed' || status.status === 'failed') {
+          stopPolling();
+          const res: RegressionResults = await get(
+            `${PREFIX}/regression/results/${encodeURIComponent(runId)}`
+          );
+          setResults(res);
+        }
+      } catch {
+        stopPolling();
+      }
+    }, 2000);
+  }, [stopPolling]);
+
+  const handleStartRun = async () => {
+    setIsStarting(true);
+    setError(null);
+    setResults(null);
+    setRunStatus(null);
+    try {
+      const response = await post(`${PREFIX}/regression/run`);
+      const runId = (response as { run_id: string }).run_id;
+      setRunStatus({ run_id: runId, status: 'pending', progress: 0, total_queries: 0, processed: 0 });
+      pollStatus(runId);
+    } catch (err) {
+      setError('Errore avvio regression suite');
+      console.error('Failed to start regression run:', err);
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
+  const isRunning = runStatus && (runStatus.status === 'pending' || runStatus.status === 'running');
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+          Regression Tests
+        </h3>
+        <button
+          onClick={handleStartRun}
+          disabled={isStarting || !!isRunning}
+          className={cn(
+            'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
+            isStarting || isRunning
+              ? 'bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          )}
+        >
+          {isRunning ? (
+            <RefreshCw size={16} className="animate-spin" aria-hidden="true" />
+          ) : (
+            <Play size={16} aria-hidden="true" />
+          )}
+          {isRunning ? 'In esecuzione...' : 'Run Regression Suite'}
+        </button>
+      </div>
+
+      {/* Progress */}
+      {isRunning && runStatus && (
+        <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+          <div className="flex items-center justify-between text-sm mb-2">
+            <span className="text-slate-600 dark:text-slate-400">
+              Progresso: {runStatus.processed}/{runStatus.total_queries || '?'} query
+            </span>
+            <span className="text-slate-700 dark:text-slate-300 font-medium">
+              {(runStatus.progress * 100).toFixed(0)}%
+            </span>
+          </div>
+          <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-blue-500 transition-all duration-500"
+              style={{ width: `${runStatus.progress * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* Results */}
+      {results && results.status === 'completed' && (
+        <div className="p-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 text-center">
+              <CheckCircle size={20} className="mx-auto text-green-600 dark:text-green-400 mb-1" aria-hidden="true" />
+              <p className="text-xl font-bold text-green-700 dark:text-green-300">{results.passed}</p>
+              <p className="text-xs text-green-600 dark:text-green-400">Passed</p>
+            </div>
+            <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 text-center">
+              <XCircle size={20} className="mx-auto text-red-600 dark:text-red-400 mb-1" aria-hidden="true" />
+              <p className="text-xl font-bold text-red-700 dark:text-red-300">{results.failed}</p>
+              <p className="text-xs text-red-600 dark:text-red-400">Failed</p>
+            </div>
+            <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 text-center">
+              <TrendingDown size={20} className="mx-auto text-orange-600 dark:text-orange-400 mb-1" aria-hidden="true" />
+              <p className="text-xl font-bold text-orange-700 dark:text-orange-300">{results.degraded}</p>
+              <p className="text-xs text-orange-600 dark:text-orange-400">Degraded</p>
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 text-center">
+              <TrendingUp size={20} className="mx-auto text-blue-600 dark:text-blue-400 mb-1" aria-hidden="true" />
+              <p className="text-xl font-bold text-blue-700 dark:text-blue-300">{results.improved}</p>
+              <p className="text-xs text-blue-600 dark:text-blue-400">Improved</p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+            <span>
+              Pass rate: <strong className="text-slate-900 dark:text-slate-100">{(results.pass_rate * 100).toFixed(1)}%</strong>
+            </span>
+            <span>Durata: {results.duration_seconds.toFixed(1)}s</span>
+            <span>Suite: {results.suite_name || 'default'}</span>
+          </div>
+        </div>
+      )}
+
+      {results && results.status === 'failed' && (
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-sm">
+          Regression run failed.
+        </div>
+      )}
+
+      {!isRunning && !results && !error && (
+        <div className="p-8 text-center text-slate-400 dark:text-slate-500">
+          <p className="text-sm">Nessun run recente. Avvia una regression suite per vedere i risultati.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// =============================================================================
 // MAIN COMPONENT
 // =============================================================================
 
@@ -585,6 +781,9 @@ export function ExpertsTab() {
 
       {/* Recent Queries */}
       {recentQueries && <RecentQueriesList queries={recentQueries.queries} />}
+
+      {/* Regression Tests */}
+      <RegressionTestsSection />
     </div>
   );
 }
