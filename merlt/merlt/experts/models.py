@@ -2,14 +2,15 @@
 SQLAlchemy Models for Expert System Q&A.
 =========================================
 
-Database models for storing Q&A traces and feedback.
+Database models for storing Q&A traces, feedback, and API keys.
 
 Tables:
 - qa_traces: Query execution traces
 - qa_feedback: Multi-level feedback (inline, detailed, source-specific, refinement)
+- api_keys: API key credentials for external access (FR45)
 
 Usage:
-    from merlt.experts.models import QATrace, QAFeedback
+    from merlt.experts.models import QATrace, QAFeedback, ApiKey
     from merlt.rlcf.database import get_async_session
 
     async with get_async_session() as session:
@@ -282,6 +283,14 @@ class QAFeedback(Base):
     # User authority (for weighted feedback)
     user_authority = Column(Float, nullable=True)
 
+    # Quarantine/moderation (Story 9-5)
+    status = Column(String(20), nullable=False, server_default="approved")  # approved/flagged/quarantined/deleted
+    quarantine_reason = Column(Text, nullable=True)
+    flagged_at = Column(DateTime, nullable=True)
+    flagged_by = Column(String(50), nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    reviewed_by = Column(String(50), nullable=True)
+
     # Timestamp
     created_at = Column(DateTime, nullable=False, server_default=func.now())
 
@@ -310,9 +319,14 @@ class QAFeedback(Base):
             "source_relevance IS NULL OR (source_relevance >= 1 AND source_relevance <= 5)",
             name="chk_source_relevance"
         ),
+        CheckConstraint(
+            "status IN ('approved', 'flagged', 'quarantined', 'deleted')",
+            name="chk_feedback_status"
+        ),
         Index("idx_qa_feedback_trace", "trace_id"),
         Index("idx_qa_feedback_user", "user_id"),
         Index("idx_qa_feedback_type", "inline_rating", "retrieval_score", "source_relevance"),
+        Index("idx_qa_feedback_status", "status"),
     )
 
     def __repr__(self) -> str:
@@ -386,3 +400,74 @@ class DevilsAdvocateLog(Base):
 
     def __repr__(self) -> str:
         return f"<DevilsAdvocateLog(id={self.id}, trace_id={self.trace_id})>"
+
+
+class IngestionSchedule(Base):
+    """
+    Scheduled ingestion job configuration.
+
+    Stores cron-based or interval-based schedules for automatic
+    norm ingestion from external sources.
+    """
+    __tablename__ = "ingestion_schedules"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    tipo_atto = Column(String(100), nullable=False)
+    cron_expr = Column(String(100), nullable=False)  # cron expression e.g. "0 3 * * *"
+    enabled = Column(Boolean, nullable=False, server_default="true")
+    description = Column(Text, nullable=True)
+    last_run_at = Column(DateTime, nullable=True)
+    last_run_status = Column(String(20), nullable=True)  # success, failed, running
+    next_run_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=True, onupdate=func.now())
+
+    __table_args__ = (
+        Index("idx_ingestion_schedules_tipo", "tipo_atto"),
+        Index("idx_ingestion_schedules_enabled", "enabled"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<IngestionSchedule(id={self.id}, tipo_atto={self.tipo_atto}, enabled={self.enabled})>"
+
+
+class ApiKey(Base):
+    """
+    API key for external access (FR45).
+
+    Stores hashed API keys with role-based access control and rate limit tiers.
+    Raw key is returned only once on creation (never stored).
+    """
+    __tablename__ = "api_keys"
+
+    key_id = Column(String(50), primary_key=True)
+    api_key_hash = Column(String(64), nullable=False, unique=True, index=True)
+    role = Column(String(20), server_default="user")  # admin / user / guest
+    rate_limit_tier = Column(String(20), server_default="standard")  # unlimited / premium / standard / limited
+    is_active = Column(Boolean, server_default="true")
+    expires_at = Column(DateTime, nullable=True)
+    user_id = Column(String(100), nullable=False, index=True)
+    description = Column(Text, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    last_used_at = Column(DateTime, nullable=True)
+
+    __table_args__ = (
+        CheckConstraint(
+            "role IN ('admin', 'user', 'guest')",
+            name="chk_api_key_role"
+        ),
+        CheckConstraint(
+            "rate_limit_tier IN ('unlimited', 'premium', 'standard', 'limited')",
+            name="chk_api_key_tier"
+        ),
+        Index("idx_api_keys_user", "user_id"),
+        Index("idx_api_keys_active", "is_active"),
+    )
+
+    def is_expired(self) -> bool:
+        if self.expires_at is None:
+            return False
+        return datetime.utcnow() > self.expires_at
+
+    def __repr__(self) -> str:
+        return f"<ApiKey(key_id={self.key_id}, role={self.role}, active={self.is_active})>"

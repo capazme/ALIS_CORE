@@ -58,6 +58,11 @@ from merlt.api import (
     export_router,
     devils_advocate_router,
     audit_router,
+    circuit_breaker_router,
+    regression_router,
+    schedule_router,
+    quarantine_router,
+    api_keys_router,
 )
 
 
@@ -187,6 +192,11 @@ app.include_router(policy_evolution_router, prefix="/api/v1", tags=["policy-evol
 app.include_router(export_router, prefix="/api/v1", tags=["export"])
 app.include_router(devils_advocate_router, prefix="/api/v1", tags=["devils-advocate"])
 app.include_router(audit_router, prefix="/api/v1", tags=["audit"])
+app.include_router(circuit_breaker_router, prefix="/api/v1", tags=["circuit-breaker"])
+app.include_router(regression_router, prefix="/api/v1", tags=["regression"])
+app.include_router(schedule_router, prefix="/api/v1", tags=["ingestion-schedules"])
+app.include_router(quarantine_router, prefix="/api/v1", tags=["feedback-quarantine"])
+app.include_router(api_keys_router, prefix="/api/v1", tags=["api-keys"])
 
 
 # Health check endpoint
@@ -237,6 +247,11 @@ async def root():
             "export": "/api/v1/export",
             "devils-advocate": "/api/v1/devils-advocate",
             "audit": "/api/v1/audit",
+            "circuit-breaker": "/api/v1/circuit-breaker",
+            "regression": "/api/v1/regression",
+            "ingestion-schedules": "/api/v1/ingestion/schedules",
+            "feedback-quarantine": "/api/v1/feedback",
+            "api-keys": "/api/v1/api-keys",
         },
     }
 

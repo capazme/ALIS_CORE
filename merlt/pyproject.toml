@@ -64,6 +64,9 @@ dependencies = [
     # Vector database
     "qdrant-client>=1.7.0",
 
+    # Cache / Rate limiting
+    "redis>=5.0.0",
+
     # Utilities
     "structlog>=23.0.0",
     "tenacity>=8.2.0",

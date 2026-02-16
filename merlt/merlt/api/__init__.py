@@ -64,6 +64,11 @@ from merlt.api.policy_evolution_router import router as policy_evolution_router
 from merlt.api.export_router import router as export_router
 from merlt.api.devils_advocate_router import router as devils_advocate_router
 from merlt.api.audit_router import router as audit_router
+from merlt.api.circuit_breaker_router import router as circuit_breaker_router
+from merlt.api.regression_router import router as regression_router
+from merlt.api.schedule_router import router as schedule_router
+from merlt.api.quarantine_router import router as quarantine_router
+from merlt.api.api_keys_router import router as api_keys_router
 
 __all__ = [
     "ingestion_router",
@@ -90,4 +95,9 @@ __all__ = [
     "export_router",
     "devils_advocate_router",
     "audit_router",
+    "circuit_breaker_router",
+    "regression_router",
+    "schedule_router",
+    "quarantine_router",
+    "api_keys_router",
 ]

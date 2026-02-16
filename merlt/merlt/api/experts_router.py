@@ -28,7 +28,9 @@ from pydantic import BaseModel, Field
 
 from merlt.experts.orchestrator import MultiExpertOrchestrator
 from merlt.experts.synthesizer import SynthesisMode
-from merlt.experts.models import QATrace, QAFeedback
+from merlt.experts.models import QATrace, QAFeedback, ApiKey
+from merlt.api.auth import verify_api_key
+from merlt.api.rate_limit import check_rate_limit
 from merlt.rlcf.database import get_async_session_dep
 from merlt.rlcf.training_scheduler import get_scheduler
 from merlt.rlcf.pii_service import PIIMaskingService
@@ -410,7 +412,9 @@ async def _update_user_authority(
 async def query_experts(
     request: ExpertQueryRequest,
     session: AsyncSession = Depends(get_async_session_dep),
-    orchestrator: MultiExpertOrchestrator = Depends(get_orchestrator)
+    orchestrator: MultiExpertOrchestrator = Depends(get_orchestrator),
+    api_key: ApiKey = Depends(verify_api_key),
+    _rate_limit: None = Depends(check_rate_limit),
 ):
     """
     Submit query to MultiExpertOrchestrator and save trace.

@@ -41,6 +41,13 @@ import {
   type ArchitectureNode,
   type NodeDetails,
 } from '../../../../services/dashboardService';
+import {
+  getCircuitBreakerStatus,
+  resetBreaker,
+  type CircuitBreakerStatus,
+  type CircuitBreakerStatusResponse,
+} from '../../../../services/circuitBreakerService';
+import { ApiKeysSection } from './ApiKeysSection';
 
 // =============================================================================
 // NODE ICON MAP
@@ -360,6 +367,136 @@ const NODE_POSITIONS: Record<string, { x: number; y: number }> = {
 };
 
 // =============================================================================
+// CIRCUIT BREAKERS SECTION
+// =============================================================================
+
+function CircuitBreakersSection() {
+  const [cbData, setCbData] = useState(null as CircuitBreakerStatusResponse | null);
+  const [cbLoading, setCbLoading] = useState(true);
+  const [resetting, setResetting] = useState(null as string | null);
+
+  const fetchCbStatus = async () => {
+    setCbLoading(true);
+    try {
+      const data = await getCircuitBreakerStatus();
+      setCbData(data);
+    } catch (err) {
+      console.error('Failed to load circuit breaker status:', err);
+    } finally {
+      setCbLoading(false);
+    }
+  };
+
+  const handleReset = async (name: string) => {
+    setResetting(name);
+    try {
+      await resetBreaker(name.replace(/_expert$/, ''));
+      await fetchCbStatus();
+    } catch (err) {
+      console.error('Failed to reset circuit breaker:', err);
+    } finally {
+      setResetting(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchCbStatus();
+  }, []);
+
+  const stateColor = (state: string) => {
+    if (state === 'closed') return 'text-green-600 dark:text-green-400';
+    if (state === 'open') return 'text-red-600 dark:text-red-400';
+    return 'text-yellow-600 dark:text-yellow-400';
+  };
+
+  const stateBg = (state: string) => {
+    if (state === 'closed') return 'bg-green-100 dark:bg-green-900/30';
+    if (state === 'open') return 'bg-red-100 dark:bg-red-900/30';
+    return 'bg-yellow-100 dark:bg-yellow-900/30';
+  };
+
+  if (cbLoading || !cbData) {
+    return null;
+  }
+
+  const entries = Object.entries(cbData.breakers) as [string, CircuitBreakerStatus][];
+  if (entries.length === 0) return null;
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            Circuit Breakers
+          </h3>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            {cbData.total_count} registrati, {cbData.open_count} aperti
+          </p>
+        </div>
+        <button
+          onClick={fetchCbStatus}
+          className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+          aria-label="Aggiorna stato circuit breaker"
+        >
+          <RefreshCw size={16} />
+        </button>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-slate-50 dark:bg-slate-700/50 text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+              <th className="px-4 py-3 text-left">Expert</th>
+              <th className="px-4 py-3 text-center">State</th>
+              <th className="px-4 py-3 text-right">Failures</th>
+              <th className="px-4 py-3 text-right">Times Opened</th>
+              <th className="px-4 py-3 text-right">Last Failure</th>
+              <th className="px-4 py-3 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+            {entries.map(([name, cb]) => (
+              <tr key={name} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">
+                  {name}
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <span className={cn('px-2 py-1 rounded text-xs font-medium', stateBg(cb.state), stateColor(cb.state))}>
+                    {cb.state}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right text-slate-700 dark:text-slate-300">
+                  {cb.failure_count} / {cb.total_failures}
+                </td>
+                <td className="px-4 py-3 text-right text-slate-700 dark:text-slate-300">
+                  {cb.times_opened}
+                </td>
+                <td className="px-4 py-3 text-right text-xs text-slate-500 dark:text-slate-400">
+                  {cb.last_failure_time
+                    ? new Date(cb.last_failure_time).toLocaleString('it-IT', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })
+                    : '-'}
+                </td>
+                <td className="px-4 py-3 text-center">
+                  {cb.state !== 'closed' && (
+                    <button
+                      onClick={() => handleReset(name)}
+                      disabled={resetting === name}
+                      className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    >
+                      {resetting === name ? 'Resetting...' : 'Reset'}
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
 // MAIN COMPONENT
 // =============================================================================
 
@@ -521,6 +658,12 @@ export function ArchitectureTab() {
           </div>
         )}
       </div>
+
+      {/* Circuit Breakers */}
+      <CircuitBreakersSection />
+
+      {/* API Keys */}
+      <ApiKeysSection />
 
       {/* Info text */}
       <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
