@@ -12,15 +12,26 @@ Il frontend si connette a WS /api/v1/ws?token=JWT e riceve tutti gli eventi
 relativi all'utente corrente.
 """
 
+import os
 import json
 import asyncio
 from typing import Dict, Set
 from datetime import datetime, timezone
 
+import jwt as pyjwt
 import structlog
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 
 log = structlog.get_logger()
+
+# JWT secret for WebSocket token verification.
+# When set, tokens are verified with signature check.
+# When unset, tokens are decoded without verification (dev mode) with a startup warning.
+_WS_JWT_SECRET: str | None = os.environ.get("MERLT_WS_JWT_SECRET")
+_WS_JWT_ALGORITHMS: list[str] = ["HS256"]
+
+if not _WS_JWT_SECRET:
+    log.warning("MERLT_WS_JWT_SECRET not set — WebSocket tokens will NOT be verified (dev mode only)")
 
 router = APIRouter(tags=["websocket"])
 
@@ -80,7 +91,7 @@ class MerltWebSocketManager:
         for ws in self._connections[user_id]:
             try:
                 await ws.send_json(message)
-            except Exception:
+            except (ConnectionError, RuntimeError):
                 dead.add(ws)
 
         # Cleanup dead connections
@@ -94,7 +105,7 @@ class MerltWebSocketManager:
         for ws in self._all_connections:
             try:
                 await ws.send_json(message)
-            except Exception:
+            except (ConnectionError, RuntimeError):
                 dead.add(ws)
 
         # Cleanup dead connections
@@ -110,30 +121,51 @@ merlt_ws_manager = MerltWebSocketManager()
 
 
 # =============================================================================
-# Helper: extract user_id from JWT token (lightweight, no full verification)
+# Helper: extract user_id from JWT token with proper verification
 # =============================================================================
 
 def _extract_user_id_from_token(token: str) -> str:
     """
-    Extract user_id from JWT without full verification.
-    In production, use proper JWT validation.
+    Extract user_id from JWT with signature verification.
+
+    When MERLT_WS_JWT_SECRET is set, tokens are verified (production).
+    When unset, tokens are decoded without verification (dev mode).
+    Invalid/expired tokens return "anonymous" with a warning log.
     """
+    if not token or not token.strip():
+        return "anonymous"
+
     try:
-        import base64
-        # JWT: header.payload.signature
-        parts = token.split(".")
-        if len(parts) != 3:
+        if _WS_JWT_SECRET:
+            # Production: full verification with signature check
+            payload = pyjwt.decode(
+                token,
+                _WS_JWT_SECRET,
+                algorithms=_WS_JWT_ALGORITHMS,
+            )
+        else:
+            # Dev mode: decode without verification (insecure, logged at startup)
+            payload = pyjwt.decode(
+                token,
+                options={"verify_signature": False, "verify_exp": True},
+                algorithms=_WS_JWT_ALGORITHMS,
+            )
+
+        user_id = (
+            payload.get("userId")
+            or payload.get("user_id")
+            or payload.get("sub")
+        )
+        if not user_id:
+            log.warning("ws_jwt_missing_user_id", claims=list(payload.keys()))
             return "anonymous"
+        return user_id
 
-        # Decode payload (add padding)
-        payload_b64 = parts[1]
-        padding = 4 - len(payload_b64) % 4
-        if padding != 4:
-            payload_b64 += "=" * padding
-
-        payload = json.loads(base64.urlsafe_b64decode(payload_b64))
-        return payload.get("userId") or payload.get("user_id") or payload.get("sub") or "anonymous"
-    except Exception:
+    except pyjwt.ExpiredSignatureError:
+        log.warning("ws_jwt_expired", token_prefix=token[:20])
+        return "anonymous"
+    except pyjwt.InvalidTokenError as e:
+        log.warning("ws_jwt_invalid", error=str(e), token_prefix=token[:20])
         return "anonymous"
 
 
@@ -176,8 +208,8 @@ async def merlt_websocket(
                 "server_version": "1.0.0",
             },
         })
-    except Exception:
-        pass
+    except (ConnectionError, RuntimeError) as e:
+        log.warning("ws_send_connected_failed", user_id=user_id, error=str(e))
 
     # Keepalive task
     async def keepalive():
@@ -190,7 +222,7 @@ async def merlt_websocket(
                         "timestamp": datetime.now(timezone.utc).isoformat(),
                     },
                 })
-            except Exception:
+            except (ConnectionError, RuntimeError):
                 break
 
     keepalive_task = asyncio.create_task(keepalive())
@@ -211,7 +243,12 @@ async def merlt_websocket(
         log.warning("MERLT WS error", user_id=user_id, error=str(e))
 
     finally:
-        keepalive_task.cancel()
+        if not keepalive_task.done():
+            keepalive_task.cancel()
+            try:
+                await keepalive_task
+            except asyncio.CancelledError:
+                pass
         await merlt_ws_manager.disconnect(websocket, user_id)
 
 

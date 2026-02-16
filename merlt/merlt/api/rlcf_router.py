@@ -223,7 +223,7 @@ async def _broadcast_training_update(data: dict):
     for ws in _connected_websockets:
         try:
             await ws.send_json(data)
-        except Exception:
+        except (ConnectionError, RuntimeError):
             dead_sockets.append(ws)
 
     for ws in dead_sockets:

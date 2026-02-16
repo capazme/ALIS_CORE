@@ -202,15 +202,63 @@ app.include_router(api_keys_router, prefix="/api/v1", tags=["api-keys"])
 # Health check endpoint
 @app.get("/health", tags=["health"])
 async def health_check():
-    """Health check endpoint."""
+    """Health check endpoint with infrastructure dependency checks."""
+    import os
     from merlt.storage.enrichment import check_db_health
 
-    db_healthy = await check_db_health()
+    checks: dict[str, str] = {}
+
+    # PostgreSQL
+    checks["postgresql"] = "healthy" if await check_db_health() else "unhealthy"
+
+    # FalkorDB
+    try:
+        from falkordb import FalkorDB as _FalkorDB
+        fdb = _FalkorDB(
+            host=os.environ.get("FALKORDB_HOST", "localhost"),
+            port=int(os.environ.get("FALKORDB_PORT", "6380")),
+        )
+        fdb.connection.ping()
+        checks["falkordb"] = "healthy"
+    except Exception as e:
+        log.debug("health_falkordb_failed", error=str(e))
+        checks["falkordb"] = "unhealthy"
+
+    # Qdrant
+    try:
+        from qdrant_client import QdrantClient as _QdrantClient
+        qc = _QdrantClient(
+            host=os.environ.get("QDRANT_HOST", "localhost"),
+            port=int(os.environ.get("QDRANT_PORT", "6333")),
+            timeout=3,
+        )
+        qc.get_collections()
+        checks["qdrant"] = "healthy"
+    except Exception as e:
+        log.debug("health_qdrant_failed", error=str(e))
+        checks["qdrant"] = "unhealthy"
+
+    # Redis
+    try:
+        import redis.asyncio as aioredis
+        r = aioredis.Redis(
+            host=os.environ.get("REDIS_HOST", "localhost"),
+            port=int(os.environ.get("REDIS_PORT", "6379")),
+            socket_connect_timeout=3,
+        )
+        await r.ping()
+        await r.aclose()
+        checks["redis"] = "healthy"
+    except Exception as e:
+        log.debug("health_redis_failed", error=str(e))
+        checks["redis"] = "unhealthy"
+
+    all_healthy = all(v == "healthy" for v in checks.values())
 
     return {
-        "status": "healthy" if db_healthy else "degraded",
-        "database": "healthy" if db_healthy else "unhealthy",
+        "status": "healthy" if all_healthy else "degraded",
         "version": "1.0.0",
+        "dependencies": checks,
     }
 
 

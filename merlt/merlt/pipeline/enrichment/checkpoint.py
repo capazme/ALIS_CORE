@@ -401,7 +401,8 @@ class CheckpointManager:
                     "last_updated": data.get("last_updated", ""),
                     "stats": data.get("stats", {}),
                 })
-            except Exception:
+            except Exception as e:
+                logger.debug("checkpoint_parse_skipped: %s", str(e))
                 continue
 
         return sorted(checkpoints, key=lambda x: x["last_updated"], reverse=True)

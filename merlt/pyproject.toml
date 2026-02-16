@@ -67,6 +67,9 @@ dependencies = [
     # Cache / Rate limiting
     "redis>=5.0.0",
 
+    # JWT verification
+    "PyJWT>=2.8.0",
+
     # Utilities
     "structlog>=23.0.0",
     "tenacity>=8.2.0",

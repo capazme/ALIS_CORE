@@ -239,5 +239,6 @@ class SyntheticFeedbackService:
                 1.0 - real_count / self.REAL_FEEDBACK_THRESHOLD,
             )
             return round(weight, 3)
-        except Exception:
+        except Exception as e:
+            log.warning("weight_calculation_failed", error=str(e))
             return 1.0

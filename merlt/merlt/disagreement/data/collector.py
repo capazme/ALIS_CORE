@@ -313,7 +313,8 @@ class RLCFSource(DataSource):
                 "SELECT COUNT(*) FROM rlcf_responses WHERE aggregation_metadata IS NOT NULL"
             )
             return result[0][0] if result else 0
-        except Exception:
+        except Exception as e:
+            log.warning("count_query_failed", error=str(e))
             return 0
 
 
@@ -448,7 +449,8 @@ class OverrulingSource(DataSource):
                 "MATCH ()-[r:SUPERA]->() RETURN COUNT(r) as count"
             )
             return result[0]["count"] if result else 0
-        except Exception:
+        except Exception as e:
+            log.warning("count_query_failed", error=str(e))
             return 0
 
 

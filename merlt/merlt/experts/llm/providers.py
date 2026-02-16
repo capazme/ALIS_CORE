@@ -472,7 +472,8 @@ class OllamaProvider(BaseLLMProvider):
             async with httpx.AsyncClient(timeout=5.0) as client:
                 response = await client.get(f"{self.base_url}/api/tags")
                 return response.status_code == 200
-        except Exception:
+        except Exception as e:
+            log.debug("ollama_health_check_failed", error=str(e))
             return False
 
 

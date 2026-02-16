@@ -359,8 +359,8 @@ class EnrichmentGraphWriter:
                             commenta_query,
                             {"dottrina_id": node_id, "urn": urn}
                         )
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug("dottrina_link_failed: %s", str(e))
 
             return node_id
 

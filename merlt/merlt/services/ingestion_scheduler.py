@@ -102,8 +102,8 @@ class IngestionScheduler:
         job_id = f"ingestion_{schedule_id}"
         try:
             self._scheduler.remove_job(job_id)
-        except Exception:
-            pass  # Job might not exist
+        except Exception as e:
+            log.debug("job_removal_skipped", job_id=job_id, error=str(e))
 
     async def _run_ingestion(self, schedule_id: int, tipo_atto: str):
         """Esegue ingestion per uno schedule."""

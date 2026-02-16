@@ -187,18 +187,24 @@ workflow_status:
           epic_7: 6
           epic_8: 4
       - id: "test-design"
-        status: "_bmad-output/planning-artifacts/test-design-system.md"
+        status: "_bmad-output/test-design-system.md"
         agent: "tea"
         command: "/bmad:bmm:workflows:testarch-test-design"
         completed: "2026-01-24"
+        last_run: "2026-02-16"
         outputs:
-          - "_bmad-output/planning-artifacts/test-design-system.md"
+          - "_bmad-output/planning-artifacts/test-design-system.md"  # Phase 3 pre-implementation
+          - "_bmad-output/test-design-system.md"  # Post-implementation comprehensive review
         key_findings:
-          - "5 high-risk ASRs identified (traceability, consent, audit, performance, degradation)"
-          - "6 testability concerns flagged (LLM non-determinism, distributed complexity, RLCF loop, 7-year audit, F8 bridge, legacy migration)"
-          - "80+ legacy tests need migration (prioritized P0/P1)"
-          - "Test pyramid: 65% unit, 25% integration, 10% E2E"
-          - "k6 for performance, Playwright for E2E, testcontainers for DB isolation"
+          - "6 high-priority risks (score>=6): 3 SEC, 1 TECH, 1 DATA, 1 PERF"
+          - "R-001 (Score 9): 26+ API endpoints lack auth — only query wired"
+          - "40+ bare except handlers cause silent error propagation"
+          - "JWT parsing without signature verification in ws_router.py"
+          - "Frontend has zero test infrastructure (no Vitest, no ESLint)"
+          - "Backend has 100+ test files with real DB isolation (zero-mock policy)"
+          - "Test pyramid: 45% unit, 40% integration, 15% E2E"
+          - "113 tests planned, ~97 hours (~12 days), Sprint 0: 19 hours infra"
+          - "Gate decision: CONCERNS — 6 high-risk items require mitigation"
       - id: "implementation-readiness"
         status: "_bmad-output/planning-artifacts/implementation-readiness-report-2026-01-25.md"
         agent: "architect"

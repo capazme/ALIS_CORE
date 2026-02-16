@@ -638,7 +638,8 @@ class BrocardiScraper:
                 text = info.get("Brocardi", "") or info.get("spiegazione", "")
                 return text, link
             return None
-        except Exception:
+        except Exception as e:
+            log.warning("extract_failed", error=str(e))
             return None
 
 

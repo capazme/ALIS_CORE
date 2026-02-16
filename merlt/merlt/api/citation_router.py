@@ -237,8 +237,8 @@ async def export_citations(
             if trace_service:
                 try:
                     await trace_service.close()
-                except Exception:
-                    pass
+                except Exception as e:
+                    log.debug("trace_service_close_failed", error=str(e))
 
     elif request.sources:
         # Use provided sources

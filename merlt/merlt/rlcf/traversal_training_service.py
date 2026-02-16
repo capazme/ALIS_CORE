@@ -174,7 +174,8 @@ class TraversalTrainingService:
             # Load or create policy
             try:
                 policy = pm.load_traversal_policy()
-            except Exception:
+            except Exception as e:
+                log.info("traversal_policy_load_fallback", error=str(e))
                 policy = TraversalPolicy(input_dim=1024, hidden_dim=128)
 
             total_loss = 0.0
@@ -262,10 +263,12 @@ class TraversalTrainingService:
                         # TODO: pass expert_type to forward() when policy supports it
                         w = policy.forward(dummy, rel_type)
                         table[expert][rel_type] = round(w.item(), 4)
-                    except Exception:
+                    except Exception as e:
+                        log.debug("traversal_weight_fallback", expert=expert, rel_type=rel_type, error=str(e))
                         table[expert][rel_type] = 0.25
             return table
-        except Exception:
+        except Exception as e:
+            log.warning("traversal_weight_table_failed", error=str(e))
             # Return uniform defaults
             return {
                 expert: {rel: 1.0 / len(RELATION_TYPES) for rel in RELATION_TYPES}

@@ -944,7 +944,8 @@ async def submit_router_feedback(
                 )
                 rlcf_user = result.scalar_one_or_none()
                 authority = rlcf_user.authority_score if rlcf_user else 0.0
-        except Exception:
+        except Exception as e:
+            log.debug("authority_lookup_failed", error=str(e))
             authority = 0.0
 
         if authority < ROUTER_FEEDBACK_AUTHORITY_THRESHOLD:

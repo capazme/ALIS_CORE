@@ -14,6 +14,7 @@ Endpoints:
 
 import asyncio
 import uuid
+from collections import OrderedDict
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -26,7 +27,9 @@ log = structlog.get_logger()
 router = APIRouter(prefix="/regression", tags=["regression"])
 
 # In-memory storage for regression runs (stateless across restarts)
-_runs: Dict[str, Dict[str, Any]] = {}
+# Bounded to MAX_RUNS entries with FIFO eviction to prevent OOM
+MAX_RUNS = 100
+_runs: OrderedDict[str, Dict[str, Any]] = OrderedDict()
 
 
 # =============================================================================
@@ -108,7 +111,8 @@ async def _run_regression_background(run_id: str, request: RegressionRunRequest)
             try:
                 suite = GoldStandardSuite.load(path)
                 break
-            except Exception:
+            except Exception as e:
+                log.debug("gold_standard_path_skipped", path=path, error=str(e))
                 continue
 
         if suite is None:
@@ -179,6 +183,11 @@ async def start_regression_run(
 ) -> RegressionRunResponse:
     """Avvia regression test suite in background."""
     run_id = f"reg_{uuid.uuid4().hex[:8]}"
+
+    # Evict oldest runs if at capacity
+    while len(_runs) >= MAX_RUNS:
+        evicted_id, _ = _runs.popitem(last=False)
+        log.info("regression_run_evicted", run_id=evicted_id, reason="capacity")
 
     _runs[run_id] = {
         "status": "pending",
@@ -265,7 +274,8 @@ async def get_baselines() -> BaselinesResponse:
             try:
                 suite = GoldStandardSuite.load(path)
                 break
-            except Exception:
+            except Exception as e:
+                log.debug("gold_standard_path_skipped", path=path, error=str(e))
                 continue
 
         if suite is None:

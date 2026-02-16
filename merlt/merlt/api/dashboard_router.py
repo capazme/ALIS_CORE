@@ -242,7 +242,8 @@ async def _get_knowledge_graph_kpis() -> KnowledgeGraphKPIs:
         try:
             collection_info = qdrant.get_collection("merl_t_dev_chunks")
             embeddings_count = collection_info.points_count or 0
-        except Exception:
+        except Exception as e:
+            log.debug("qdrant_collection_unavailable", error=str(e))
             # Collection might not exist
             embeddings_count = 0
     except Exception as e:
