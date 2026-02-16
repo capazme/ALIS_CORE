@@ -13,8 +13,11 @@ import structlog
 from typing import List, Dict, Any
 from datetime import datetime, timezone
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
+
+from merlt.api.auth import verify_api_key
+from merlt.experts.models import ApiKey
 
 log = structlog.get_logger()
 
@@ -53,7 +56,10 @@ _MAX_BUFFER = 10000
 # =============================================================================
 
 @router.post("/events", response_model=TrackingResponse)
-async def receive_tracking_events(batch: TrackingBatch) -> TrackingResponse:
+async def receive_tracking_events(
+    batch: TrackingBatch,
+    api_key: ApiKey = Depends(verify_api_key),
+) -> TrackingResponse:
     """
     Receive a batch of anonymized tracking events from the frontend.
 

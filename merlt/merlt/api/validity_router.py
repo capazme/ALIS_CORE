@@ -19,6 +19,8 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Depends, Query
 
+from merlt.api.auth import verify_api_key
+from merlt.experts.models import ApiKey
 from merlt.storage.graph import FalkorDBClient, FalkorDBConfig
 from merlt.storage.temporal import TemporalValidityService
 from merlt.storage.temporal.validity_service import validate_as_of_date
@@ -86,7 +88,8 @@ def initialize_validity_services(
 
 @router.get("/health")
 async def health_check(
-    graph: FalkorDBClient = Depends(get_graph_db)
+    graph: FalkorDBClient = Depends(get_graph_db),
+    api_key: ApiKey = Depends(verify_api_key),
 ):
     """
     Health check per FalkorDB.
@@ -116,7 +119,8 @@ async def check_validity(
         None,
         description="Data per verifica relativa (ISO format YYYY-MM-DD)"
     ),
-    service: TemporalValidityService = Depends(get_validity_service)
+    service: TemporalValidityService = Depends(get_validity_service),
+    api_key: ApiKey = Depends(verify_api_key),
 ):
     """
     Verifica la vigenza di una o più norme.

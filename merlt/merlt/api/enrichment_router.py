@@ -94,6 +94,8 @@ from merlt.pipeline.enrichment.models import EntityType, RelationType
 
 # Import mapping from local utilities
 from merlt.utils import NORMATTIVA_URN_CODICI
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 
 log = structlog.get_logger()
 
@@ -358,6 +360,7 @@ async def check_article_in_graph(
     articolo: str,
     numero_atto: Optional[str] = None,
     data: Optional[str] = None,
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> Dict:
     """Verifica se un articolo esiste nel grafo."""
     log.info(
@@ -668,6 +671,7 @@ async def live_enrich_stream(
     user_id: str,
     user_authority: float = 0.5,
     include_brocardi: bool = True,
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> StreamingResponse:
     """
     Esegue live enrichment in streaming via SSE.
@@ -911,6 +915,7 @@ async def live_enrich_stream(
 async def live_enrich(
     request: LiveEnrichmentRequest,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> LiveEnrichmentResponse:
     """Esegue live enrichment per un articolo e salva a DB."""
     log.info(
@@ -1062,6 +1067,7 @@ async def live_enrich(
 async def validate_entity(
     request: EntityValidationRequest,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> EntityValidationResponse:
     """
     Valida una singola entita' con voto pesato per authority.
@@ -1481,6 +1487,7 @@ async def _cascade_reset_relations_for_rejected_entity(
 async def get_pending(
     request: PendingQueueRequest = Depends(),
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> PendingQueueResponse:
     """Lista pending entities e relations per validazione.
 
@@ -1686,6 +1693,7 @@ async def get_pending(
 async def check_entity_duplicate(
     request: DuplicateCheckRequest,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> DuplicateCheckResponse:
     """
     Verifica se un'entita' simile esiste gia' nel sistema.
@@ -1780,6 +1788,7 @@ async def check_entity_duplicate(
 async def check_relation_duplicate(
     request: RelationDuplicateCheckRequest,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> RelationDuplicateCheckResponse:
     """Verifica se una relazione simile esiste gia'."""
     log.info(
@@ -1843,6 +1852,7 @@ async def check_relation_duplicate(
 async def propose_entity(
     request: EntityProposalRequest,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> EntityProposalResponse:
     """
     Proponi una nuova entita' per validazione community.
@@ -1998,6 +2008,7 @@ async def propose_entity(
 async def validate_relation(
     request: RelationValidationRequest,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> RelationValidationResponse:
     """Valida una singola relazione (similar to entity validation)."""
     relation_id = request.relation_id
@@ -2150,6 +2161,7 @@ async def validate_relation(
 async def propose_relation(
     request: RelationProposalRequest,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> RelationProposalResponse:
     """
     Proponi una nuova relazione per validazione.
@@ -2300,6 +2312,7 @@ ISSUE_THRESHOLDS = {
 async def report_issue(
     request: ReportIssueRequest,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> ReportIssueResponse:
     """
     Segnala un problema su un'entita' approvata nel Knowledge Graph.
@@ -2501,6 +2514,7 @@ async def report_issue(
 async def vote_issue(
     request: VoteIssueRequest,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> VoteIssueResponse:
     """
     Vota su una issue esistente (upvote = issue valida, downvote = issue non valida).
@@ -2722,6 +2736,7 @@ async def vote_issue(
 async def get_entity_issues(
     entity_id: str,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> GetEntityIssuesResponse:
     """
     Ritorna tutte le issue associate a un'entita'.
@@ -3050,6 +3065,7 @@ async def fetch_entity_details_from_graph(
 async def get_open_issues(
     request: OpenIssuesRequest = Depends(),
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> OpenIssuesResponse:
     """
     Ritorna lista di issue aperte per moderazione.
@@ -3162,6 +3178,7 @@ from merlt.experts.models import QATrace, QAFeedback
 async def export_dossier_training_set(
     request: DossierTrainingSetExportRequest,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> DossierTrainingSetExportResponse:
     """
     Esporta un dossier utente come training set per RLCF.
@@ -3252,6 +3269,7 @@ async def export_dossier_training_set_full(
     user_id: str = "anonymous",
     include_qa_sessions: bool = True,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> DossierTrainingSetExportResponse:
     """
     Esporta dossier completo con contenuti da VisuaLex.
@@ -3393,6 +3411,7 @@ async def export_dossier_training_set_full(
 )
 async def load_dossier_training_set(
     request: LoadDossierTrainingRequest,
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> LoadDossierTrainingResponse:
     """
     Carica un training set esportato nel buffer RLCF.
@@ -3499,6 +3518,7 @@ async def load_dossier_training_set(
 )
 async def submit_ner_feedback(
     request: NERFeedbackRequest,
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> NERFeedbackResponse:
     """
     Registra feedback NER su una citazione giuridica.
@@ -3582,6 +3602,7 @@ async def submit_ner_feedback(
 )
 async def confirm_citation(
     request: NERConfirmRequest,
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> NERFeedbackResponse:
     """
     Shortcut per confermare una citazione correttamente parsata.
@@ -3645,6 +3666,7 @@ async def get_ner_feedback_history(
     user_id: str,
     limit: int = 20,
     offset: int = 0,
+    api_key: ApiKey = Depends(verify_api_key),
 ):
     """
     Recupera cronologia feedback NER per un utente.
@@ -3684,6 +3706,7 @@ async def get_all_ner_feedback_history(
     limit: int = 50,
     offset: int = 0,
     feedback_type: Optional[str] = None,
+    api_key: ApiKey = Depends(verify_api_key),
 ):
     """
     Recupera cronologia globale feedback NER.
@@ -3720,7 +3743,9 @@ async def get_all_ner_feedback_history(
     "/ner-feedback/stats",
     summary="Statistiche feedback NER",
 )
-async def get_ner_feedback_stats():
+async def get_ner_feedback_stats(
+    api_key: ApiKey = Depends(verify_api_key),
+):
     """
     Statistiche aggregate feedback NER.
 

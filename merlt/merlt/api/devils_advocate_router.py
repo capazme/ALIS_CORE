@@ -21,6 +21,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
+from merlt.api.auth import verify_api_key
+from merlt.experts.models import ApiKey as ApiKeyModel
 from merlt.rlcf.devils_advocate import (
     DevilsAdvocateAssigner,
     TaskType,
@@ -82,6 +84,7 @@ async def check_devils_advocate(
     trace_id: str = Query(..., description="Trace ID to check"),
     disagreement_score: float = Query(..., ge=0.0, le=1.0, description="Current disagreement score"),
     session: AsyncSession = Depends(get_async_session_dep),
+    api_key: ApiKeyModel = Depends(verify_api_key),
 ):
     """
     Check if Devil's Advocate should trigger for a trace.
@@ -122,6 +125,7 @@ async def check_devils_advocate(
 async def submit_da_feedback(
     request: DAFeedbackRequest,
     session: AsyncSession = Depends(get_async_session_dep),
+    api_key: ApiKeyModel = Depends(verify_api_key),
 ):
     """
     Submit Devil's Advocate feedback and analyze engagement.
@@ -156,6 +160,7 @@ async def submit_da_feedback(
 @router.get("/effectiveness", response_model=DAEffectivenessResponse)
 async def get_da_effectiveness(
     session: AsyncSession = Depends(get_async_session_dep),
+    api_key: ApiKeyModel = Depends(verify_api_key),
 ):
     """Aggregate Devil's Advocate effectiveness metrics from DB."""
     # Count triggers (entries with critical_prompt)

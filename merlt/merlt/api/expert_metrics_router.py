@@ -30,8 +30,11 @@ from datetime import datetime, UTC
 from typing import List, Optional
 
 import structlog
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
+
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 
 log = structlog.get_logger()
 
@@ -253,6 +256,7 @@ async def _get_expert_list(period_days: int = 30) -> List[ExpertPerformance]:
 @router.get("/performance", response_model=ExpertPerformanceResponse)
 async def get_expert_performance(
     period_days: int = Query(7, ge=1, le=90, description="Periodo in giorni"),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> ExpertPerformanceResponse:
     """
     Recupera metriche performance per ogni expert.
@@ -293,6 +297,7 @@ async def get_expert_performance(
 @router.get("/queries/stats", response_model=QueryStatsResponse)
 async def get_query_stats(
     period_days: int = Query(7, ge=1, le=90, description="Periodo in giorni"),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> QueryStatsResponse:
     """
     Recupera statistiche classificazione query da QATrace.
@@ -365,6 +370,7 @@ async def get_query_stats(
 async def get_recent_queries(
     limit: int = Query(10, ge=1, le=50, description="Numero massimo di query"),
     offset: int = Query(0, ge=0, description="Offset per paginazione"),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> RecentQueriesResponse:
     """
     Recupera query recenti con summary da QATrace + QAFeedback.
@@ -433,7 +439,10 @@ async def get_recent_queries(
 
 
 @router.get("/trace/{trace_id}", response_model=ReasoningTrace)
-async def get_reasoning_trace(trace_id: str) -> ReasoningTrace:
+async def get_reasoning_trace(
+    trace_id: str,
+    api_key: ApiKey = Depends(verify_api_key),
+) -> ReasoningTrace:
     """
     Recupera reasoning trace completo per una query.
 
@@ -479,7 +488,9 @@ async def get_reasoning_trace(trace_id: str) -> ReasoningTrace:
 
 
 @router.get("/aggregation", response_model=AggregationStats)
-async def get_aggregation_stats() -> AggregationStats:
+async def get_aggregation_stats(
+    api_key: ApiKey = Depends(verify_api_key),
+) -> AggregationStats:
     """
     Recupera statistiche di aggregazione delle risposte.
 

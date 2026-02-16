@@ -11,6 +11,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from merlt.api.auth import verify_api_key
 from merlt.api.citation_router import (
     router,
     sanitize_filename,
@@ -22,6 +23,7 @@ from merlt.api.models.citation_models import (
     CitationSource,
     CitationExportRequest,
 )
+from merlt.experts.models import ApiKey
 
 
 # =============================================================================
@@ -29,11 +31,22 @@ from merlt.api.models.citation_models import (
 # =============================================================================
 
 
+def _make_fake_api_key():
+    """Create a fake ApiKey for test auth override."""
+    key = MagicMock(spec=ApiKey)
+    key.key_id = "test-key"
+    key.role = "admin"
+    key.is_active = True
+    key.rate_limit_tier = "unlimited"
+    return key
+
+
 @pytest.fixture
 def app():
-    """Create a FastAPI app with the citation router."""
+    """Create a FastAPI app with the citation router and mocked auth."""
     app = FastAPI()
     app.include_router(router, prefix="/api/v1")
+    app.dependency_overrides[verify_api_key] = lambda: _make_fake_api_key()
     return app
 
 

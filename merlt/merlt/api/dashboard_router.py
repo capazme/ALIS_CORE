@@ -30,7 +30,10 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 import structlog
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+
+from merlt.api.auth import verify_api_key
+from merlt.experts.models import ApiKey
 
 from merlt.api.models.dashboard_models import (
     ServiceStatus,
@@ -391,7 +394,9 @@ async def _get_activity_feed(
 
 
 @router.get("/overview", response_model=DashboardOverview)
-async def get_dashboard_overview() -> DashboardOverview:
+async def get_dashboard_overview(
+    api_key: ApiKey = Depends(verify_api_key),
+) -> DashboardOverview:
     """
     Recupera overview completo della dashboard.
 
@@ -437,7 +442,9 @@ async def get_dashboard_overview() -> DashboardOverview:
 
 
 @router.get("/health", response_model=SystemHealth)
-async def get_system_health() -> SystemHealth:
+async def get_system_health(
+    api_key: ApiKey = Depends(verify_api_key),
+) -> SystemHealth:
     """
     Health check di tutti i servizi.
 
@@ -491,7 +498,9 @@ async def get_system_health() -> SystemHealth:
 
 
 @router.get("/architecture", response_model=ArchitectureDiagram)
-async def get_architecture_diagram() -> ArchitectureDiagram:
+async def get_architecture_diagram(
+    api_key: ApiKey = Depends(verify_api_key),
+) -> ArchitectureDiagram:
     """
     Dati per diagramma architettura react-flow.
 
@@ -642,7 +651,10 @@ async def get_architecture_diagram() -> ArchitectureDiagram:
 
 
 @router.get("/architecture/node/{node_id}", response_model=NodeDetails)
-async def get_node_details(node_id: str) -> NodeDetails:
+async def get_node_details(
+    node_id: str,
+    api_key: ApiKey = Depends(verify_api_key),
+) -> NodeDetails:
     """
     Dettagli per un nodo specifico del diagramma.
 
@@ -805,6 +817,7 @@ async def get_activity_feed(
     limit: int = Query(20, ge=1, le=100, description="Numero massimo di entry"),
     offset: int = Query(0, ge=0, description="Offset per paginazione"),
     activity_type: Optional[ActivityType] = Query(None, description="Filtra per tipo"),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> ActivityFeed:
     """
     Feed di attività recenti.

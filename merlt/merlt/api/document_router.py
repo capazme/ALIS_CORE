@@ -42,6 +42,8 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 from merlt.storage.enrichment import (
     get_db_session_dependency,
     UserDocument,
@@ -103,6 +105,7 @@ async def upload_document(
     publication_year: Optional[int] = Form(None, description="Publication year"),
     user_id: str = Form(..., description="Uploader user ID"),
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> DocumentUploadResponse:
     """Upload document for later parsing."""
     log.info("API: upload_document", filename=file.filename, user_id=user_id)
@@ -208,6 +211,7 @@ async def parse_document(
     document_id: int,
     request: DocumentParseRequest,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> DocumentParseResponse:
     """Parse document to extract entities and amendments."""
     log.info("API: parse_document", document_id=document_id, user_id=request.user_id)
@@ -315,6 +319,7 @@ async def parse_document(
 async def get_document_info(
     document_id: int,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> DocumentInfo:
     """Get document metadata and processing status."""
     stmt = select(UserDocument).where(UserDocument.id == document_id)
@@ -358,6 +363,7 @@ async def list_user_documents(
     limit: int = 50,
     offset: int = 0,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> DocumentListResponse:
     """List documents uploaded by user."""
     stmt = (
@@ -427,6 +433,7 @@ Requires:
 async def submit_amendment(
     request: AmendmentSubmissionRequest,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> AmendmentSubmissionResponse:
     """Submit manual amendment for validation."""
     log.info(
@@ -497,6 +504,7 @@ async def list_pending_amendments(
     limit: int = 50,
     offset: int = 0,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> List[PendingAmendmentInfo]:
     """List pending amendments for validation."""
     stmt = select(PendingAmendment).order_by(PendingAmendment.created_at.desc()).limit(limit).offset(offset)

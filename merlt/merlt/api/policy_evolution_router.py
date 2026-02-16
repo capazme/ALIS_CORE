@@ -15,9 +15,12 @@ from collections import defaultdict
 from datetime import datetime, timedelta, UTC
 from typing import List, Optional
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import select, func
+
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 
 from merlt.experts.models import QATrace, QAFeedback, AggregatedFeedback
 from merlt.rlcf.database import get_async_session
@@ -66,6 +69,7 @@ async def get_time_series(
     window: int = Query(50, ge=5, le=500, description="Sliding window size (traces)"),
     offset: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum records to return"),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> List[TimeSeriesPoint]:
     """
     Confidence or reward time-series from QATrace data.
@@ -126,6 +130,7 @@ async def get_expert_evolution(
     days: int = Query(30, ge=1, le=180, description="Period in days"),
     offset: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum records to return"),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> List[ExpertEvolutionPoint]:
     """
     Expert usage evolution: how often each expert is selected, by day.
@@ -182,6 +187,7 @@ async def get_aggregation_history(
     days: int = Query(30, ge=1, le=180, description="Period in days"),
     offset: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum records to return"),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> List[AggregationHistoryPoint]:
     """
     Aggregated feedback trends per component from AggregatedFeedback table.

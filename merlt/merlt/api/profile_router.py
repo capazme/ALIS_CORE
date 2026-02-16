@@ -20,6 +20,8 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy import select, func, and_, or_, case
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 from merlt.api.models.profile_models import (
     FullProfileResponse,
     FullProfileResponseInternal,
@@ -585,6 +587,7 @@ Formula Authority: A_u(t) = 0.3*B_u + 0.5*T_u + 0.2*P_u
 async def get_full_profile(
     user_id: str = "current",  # TODO: Get from JWT token
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> FullProfileResponse:
     """Ritorna profilo completo utente."""
     log.info("API: get_full_profile", user_id=user_id)
@@ -689,6 +692,7 @@ L'authority per dominio è calcolata come:
 async def get_domain_authority(
     user_id: str = "current",
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> DomainAuthorityResponse:
     """Ritorna authority per dominio."""
     log.info("API: get_domain_authority", user_id=user_id)
@@ -726,6 +730,7 @@ Accuracy rate = votes_correct / votes_cast
 async def get_detailed_stats(
     user_id: str = "current",
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> DetailedContributionStats:
     """Ritorna statistiche dettagliate contributi."""
     log.info("API: get_detailed_stats", user_id=user_id)
@@ -778,6 +783,7 @@ async def update_qualification(
     request: UpdateQualificationRequest,
     user_id: str = "current",
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> FullProfileResponse:
     """Aggiorna qualifiche utente."""
     log.info(
@@ -880,6 +886,7 @@ Aggiorna le preferenze di notifica email:
 async def update_notifications(
     request: UpdateNotificationsRequest,
     user_id: str = "current",
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> NotificationPreferences:
     """Aggiorna preferenze notifiche."""
     log.info(

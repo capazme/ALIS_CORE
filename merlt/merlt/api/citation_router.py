@@ -41,6 +41,8 @@ import structlog
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import FileResponse
 
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 from merlt.api.models.citation_models import (
     CitationFormat,
     CitationSource,
@@ -158,6 +160,7 @@ def generate_filename(
 async def export_citations(
     request: CitationExportRequest,
     formatter: CitationFormatter = Depends(get_formatter),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> CitationExportResponse:
     """
     Export citations to a downloadable file.
@@ -295,7 +298,10 @@ async def export_citations(
 
 
 @router.get("/download/{filename}")
-async def download_citation_file(filename: str):
+async def download_citation_file(
+    filename: str,
+    api_key: ApiKey = Depends(verify_api_key),
+):
     """
     Download a generated citation export file.
 
@@ -351,6 +357,7 @@ async def download_citation_file(filename: str):
 async def format_citations_inline(
     request: CitationFormatRequest,
     formatter: CitationFormatter = Depends(get_formatter),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> CitationFormatResponse:
     """
     Format citations inline without generating a file.
@@ -404,7 +411,9 @@ async def format_citations_inline(
 
 
 @router.get("/formats", response_model=CitationFormatsListResponse)
-async def list_citation_formats() -> CitationFormatsListResponse:
+async def list_citation_formats(
+    api_key: ApiKey = Depends(verify_api_key),
+) -> CitationFormatsListResponse:
     """
     List all available citation export formats.
 

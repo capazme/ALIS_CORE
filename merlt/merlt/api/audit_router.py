@@ -16,6 +16,8 @@ from fastapi import APIRouter, Query, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 from merlt.rlcf.database import get_async_session_dep
 from merlt.rlcf.audit_service import AuditService
 
@@ -47,6 +49,7 @@ async def get_audit_logs(
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
     session: AsyncSession = Depends(get_async_session_dep),
+    api_key: ApiKey = Depends(require_role("admin")),
 ) -> List[AuditLogResponse]:
     """Query audit log entries with optional filters."""
     since_dt = datetime.fromisoformat(since) if since else None

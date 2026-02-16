@@ -28,6 +28,8 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel, Field
 
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 from merlt.storage.trace import TraceStorageService, TraceStorageConfig
 from merlt.storage.trace.trace_service import TraceFilter, TraceSummary, SourceResolution
 from merlt.storage.bridge import BridgeTable, BridgeTableConfig
@@ -206,7 +208,8 @@ def initialize_trace_services(
 
 @router.get("/health")
 async def health_check(
-    service: TraceStorageService = Depends(get_trace_service)
+    service: TraceStorageService = Depends(get_trace_service),
+    api_key: ApiKey = Depends(verify_api_key),
 ):
     """
     Health check for trace storage service.
@@ -232,7 +235,8 @@ async def health_check(
 @router.post("/archive", response_model=ArchiveResponse)
 async def archive_traces(
     request: ArchiveRequest,
-    service: TraceStorageService = Depends(get_trace_service)
+    service: TraceStorageService = Depends(get_trace_service),
+    api_key: ApiKey = Depends(require_role("admin")),
 ):
     """
     Archive traces older than specified days.
@@ -275,7 +279,8 @@ async def list_traces(
     limit: int = Query(20, ge=1, le=100, description="Results per page"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
     caller_consent: Optional[str] = Query(None, description="Caller's consent level for filtering"),
-    service: TraceStorageService = Depends(get_trace_service)
+    service: TraceStorageService = Depends(get_trace_service),
+    api_key: ApiKey = Depends(verify_api_key),
 ):
     """
     List traces with pagination and filtering.
@@ -349,7 +354,8 @@ async def list_traces(
 async def get_trace(
     trace_id: str,
     caller_consent: Optional[str] = Query(None, description="Caller's consent level"),
-    service: TraceStorageService = Depends(get_trace_service)
+    service: TraceStorageService = Depends(get_trace_service),
+    api_key: ApiKey = Depends(verify_api_key),
 ):
     """
     Get a single trace by ID with consent filtering.
@@ -386,7 +392,8 @@ async def get_trace_validity(
     as_of_date: Optional[str] = Query(None, description="Data per verifica relativa (ISO YYYY-MM-DD)"),
     caller_consent: Optional[str] = Query(None, description="Caller's consent level"),
     service: TraceStorageService = Depends(get_trace_service),
-    validity: TemporalValidityService = Depends(get_validity_service)
+    validity: TemporalValidityService = Depends(get_validity_service),
+    api_key: ApiKey = Depends(verify_api_key),
 ):
     """
     Verifica la vigenza temporale delle fonti citate in un trace.
@@ -458,7 +465,8 @@ async def get_trace_validity(
 async def get_trace_sources(
     trace_id: str,
     service: TraceStorageService = Depends(get_trace_service),
-    bridge: BridgeTable = Depends(get_bridge_table)
+    bridge: BridgeTable = Depends(get_bridge_table),
+    api_key: ApiKey = Depends(verify_api_key),
 ):
     """
     Resolve chunk_ids from trace sources to graph URNs via bridge_table.
@@ -493,7 +501,8 @@ async def get_trace_sources(
 @router.post("/{trace_id}/reproduce")
 async def reproduce_trace(
     trace_id: str,
-    service: TraceStorageService = Depends(get_trace_service)
+    service: TraceStorageService = Depends(get_trace_service),
+    api_key: ApiKey = Depends(verify_api_key),
 ):
     """
     Reproduce a historical query with pinned config and diff results.
@@ -525,7 +534,8 @@ async def reproduce_trace(
 @router.delete("/{trace_id}", response_model=DeleteResponse)
 async def delete_trace(
     trace_id: str,
-    service: TraceStorageService = Depends(get_trace_service)
+    service: TraceStorageService = Depends(get_trace_service),
+    api_key: ApiKey = Depends(require_role("admin")),
 ):
     """
     Hard delete a trace and all associated feedback (GDPR compliance).

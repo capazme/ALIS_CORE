@@ -39,6 +39,8 @@ from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 from merlt.rlcf.database import get_async_session_dep
 
 log = structlog.get_logger()
@@ -237,7 +239,9 @@ async def _broadcast_training_update(data: dict):
 
 
 @router.get("/training/status", response_model=TrainingStatus)
-async def get_training_status() -> TrainingStatus:
+async def get_training_status(
+    api_key: ApiKey = Depends(verify_api_key),
+) -> TrainingStatus:
     """
     Recupera stato corrente del training RLCF.
 
@@ -289,7 +293,10 @@ async def get_training_status() -> TrainingStatus:
 
 
 @router.post("/training/start", response_model=TrainingStartResponse)
-async def start_training(config: TrainingConfig) -> TrainingStartResponse:
+async def start_training(
+    config: TrainingConfig,
+    api_key: ApiKey = Depends(require_role("admin")),
+) -> TrainingStartResponse:
     """
     Avvia training RLCF con configurazione.
 
@@ -361,7 +368,9 @@ async def start_training(config: TrainingConfig) -> TrainingStartResponse:
 
 
 @router.post("/training/stop", response_model=TrainingStopResponse)
-async def stop_training() -> TrainingStopResponse:
+async def stop_training(
+    api_key: ApiKey = Depends(require_role("admin")),
+) -> TrainingStopResponse:
     """
     Ferma training in corso.
 
@@ -413,7 +422,9 @@ async def stop_training() -> TrainingStopResponse:
 
 
 @router.get("/buffer/status", response_model=BufferStatus)
-async def get_buffer_status() -> BufferStatus:
+async def get_buffer_status(
+    api_key: ApiKey = Depends(verify_api_key),
+) -> BufferStatus:
     """
     Recupera stato del feedback buffer.
 
@@ -466,7 +477,9 @@ async def get_buffer_status() -> BufferStatus:
 
 
 @router.get("/policies/weights", response_model=PolicyWeightsStatus)
-async def get_policy_weights() -> PolicyWeightsStatus:
+async def get_policy_weights(
+    api_key: ApiKey = Depends(verify_api_key),
+) -> PolicyWeightsStatus:
     """
     Recupera pesi correnti delle policy.
 
@@ -488,6 +501,7 @@ async def get_policy_weights() -> PolicyWeightsStatus:
 @router.get("/policies/history", response_model=PolicyWeightsHistory)
 async def get_policy_history(
     limit: int = Query(50, ge=1, le=500, description="Numero massimo di entry"),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> PolicyWeightsHistory:
     """
     Recupera storia dei pesi delle policy nel tempo.
@@ -536,6 +550,7 @@ async def get_policy_history(
 @router.post("/aggregation/run")
 async def run_aggregation(
     session: AsyncSession = Depends(get_async_session_dep),
+    api_key: ApiKey = Depends(require_role("admin")),
 ):
     """
     Trigger periodic feedback aggregation across all components.
@@ -561,6 +576,7 @@ async def run_aggregation(
 async def get_latest_aggregation(
     component: Optional[str] = Query(None, description="Filter by component"),
     session: AsyncSession = Depends(get_async_session_dep),
+    api_key: ApiKey = Depends(verify_api_key),
 ):
     """
     Get latest aggregation results, optionally filtered by component.
@@ -696,6 +712,7 @@ async def generate_synthetic_feedback(
     domain: Optional[str] = Query(None, description="Domain filter"),
     difficulty: Optional[int] = Query(None, ge=1, le=5, description="Difficulty filter"),
     session: AsyncSession = Depends(get_async_session_dep),
+    api_key: ApiKey = Depends(require_role("admin")),
 ):
     """Generate synthetic feedback for cold-start or testing."""
     from merlt.rlcf.synthetic_feedback_service import SyntheticFeedbackService

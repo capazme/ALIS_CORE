@@ -34,8 +34,11 @@ from pathlib import Path
 from typing import Dict, List
 
 import structlog
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
+
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 
 from merlt.api.models.statistics_models import (
     TestType,
@@ -326,7 +329,9 @@ Ipotesi & Effect Size & 95\% CI & Interpretazione \\
 
 
 @router.get("/overview", response_model=StatisticsOverview)
-async def get_statistics_overview() -> StatisticsOverview:
+async def get_statistics_overview(
+    api_key: ApiKey = Depends(verify_api_key),
+) -> StatisticsOverview:
     """
     Recupera tutte le statistiche accademiche.
 
@@ -383,7 +388,9 @@ async def get_statistics_overview() -> StatisticsOverview:
 
 
 @router.get("/hypothesis-tests", response_model=HypothesisTestSummary)
-async def get_hypothesis_tests() -> HypothesisTestSummary:
+async def get_hypothesis_tests(
+    api_key: ApiKey = Depends(verify_api_key),
+) -> HypothesisTestSummary:
     """
     Recupera risultati dei test di ipotesi H1-H4.
 
@@ -415,7 +422,9 @@ async def get_hypothesis_tests() -> HypothesisTestSummary:
 
 
 @router.get("/distributions")
-async def get_distributions() -> Dict[str, DistributionAnalysis]:
+async def get_distributions(
+    api_key: ApiKey = Depends(verify_api_key),
+) -> Dict[str, DistributionAnalysis]:
     """
     Recupera analisi delle distribuzioni.
 
@@ -439,7 +448,9 @@ async def get_distributions() -> Dict[str, DistributionAnalysis]:
 
 
 @router.get("/correlations", response_model=CorrelationMatrix)
-async def get_correlations() -> CorrelationMatrix:
+async def get_correlations(
+    api_key: ApiKey = Depends(verify_api_key),
+) -> CorrelationMatrix:
     """
     Recupera matrice di correlazione.
 
@@ -461,7 +472,10 @@ async def get_correlations() -> CorrelationMatrix:
 
 
 @router.post("/export", response_model=ExportResponse)
-async def export_statistics(request: ExportRequest) -> ExportResponse:
+async def export_statistics(
+    request: ExportRequest,
+    api_key: ApiKey = Depends(verify_api_key),
+) -> ExportResponse:
     """
     Esporta statistiche in vari formati.
 
@@ -547,7 +561,10 @@ async def export_statistics(request: ExportRequest) -> ExportResponse:
 
 
 @router.get("/download/{filename}")
-async def download_export(filename: str):
+async def download_export(
+    filename: str,
+    api_key: ApiKey = Depends(verify_api_key),
+):
     """
     Download file esportato.
 

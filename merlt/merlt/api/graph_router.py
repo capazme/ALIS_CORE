@@ -24,6 +24,8 @@ from typing import Optional, Dict, Any, List
 from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from merlt.api.auth import verify_api_key, require_role
+from merlt.experts.models import ApiKey
 from merlt.storage.graph.client import FalkorDBClient
 from merlt.storage.enrichment import get_db_session_dependency, PendingEntity
 from merlt.api.models.enrichment_models import NormResolveRequest, NormResolveResponse
@@ -50,7 +52,8 @@ router = APIRouter(prefix="/graph", tags=["graph"])
 
 @router.get("/check-article")
 async def check_article_in_graph(
-    article_urn: str
+    article_urn: str,
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> Dict[str, Any]:
     """
     Verifica se un articolo esiste nel knowledge graph.
@@ -116,7 +119,8 @@ async def check_article_in_graph(
 
 @router.get("/node/{node_id}")
 async def get_node_details(
-    node_id: str
+    node_id: str,
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> Dict[str, Any]:
     """
     Recupera dettagli completi di un nodo del grafo.
@@ -196,7 +200,8 @@ async def get_node_details(
 @router.get("/article-entities")
 async def get_article_entities_query(
     article_urn: str,
-    validation_status: Optional[str] = None
+    validation_status: Optional[str] = None,
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> Dict[str, Any]:
     """Query-parameter variant of article entities (avoids URN-in-path issues)."""
     return await get_article_entities(article_urn, validation_status)
@@ -205,7 +210,8 @@ async def get_article_entities_query(
 @router.get("/article/{article_urn}/entities")
 async def get_article_entities(
     article_urn: str,
-    validation_status: Optional[str] = None
+    validation_status: Optional[str] = None,
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> Dict[str, Any]:
     """
     Recupera tutte le entità associate a un articolo.
@@ -304,7 +310,8 @@ async def get_article_entities(
 @router.get("/article-relations")
 async def get_article_relations_query(
     article_urn: str,
-    relation_type: Optional[str] = None
+    relation_type: Optional[str] = None,
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> Dict[str, Any]:
     """Query-parameter variant of article relations (avoids URN-in-path issues)."""
     return await get_article_relations(article_urn, relation_type)
@@ -313,7 +320,8 @@ async def get_article_relations_query(
 @router.get("/article/{article_urn}/relations")
 async def get_article_relations(
     article_urn: str,
-    relation_type: Optional[str] = None
+    relation_type: Optional[str] = None,
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> Dict[str, Any]:
     """
     Recupera tutte le relazioni di un articolo nel grafo.
@@ -431,6 +439,7 @@ async def search_entities(
     include_pending: bool = True,
     limit: int = 10,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> List[Dict[str, Any]]:
     """
     Ricerca fuzzy entità per autocomplete (grafo + pending).
@@ -679,6 +688,7 @@ def _format_display_label(act_type: str, article: str, act_number: str = None, d
 async def resolve_norm(
     request: NormResolveRequest,
     session: AsyncSession = Depends(get_db_session_dependency),
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> NormResolveResponse:
     """
     Risolve una citazione normativa per ProposeRelationDrawer.
@@ -930,6 +940,7 @@ class SubgraphResponse(BaseModel):
 @router.get("/overview", response_model=SubgraphResponse)
 async def get_graph_overview(
     max_nodes: int = 50,
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> SubgraphResponse:
     """
     Return a sample of the knowledge graph for the bulletin board explorer.
@@ -1037,6 +1048,7 @@ async def get_subgraph(
     entity_types: Optional[str] = None,
     include_metadata: bool = True,
     max_nodes: int = 100,
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> SubgraphResponse:
     """
     Retrieve subgraph around a root node for visualization.
@@ -1287,6 +1299,7 @@ class GraphSearchResponse(BaseModel):
 @router.post("/search", response_model=GraphSearchResponse)
 async def search_graph(
     request: GraphSearchRequest,
+    api_key: ApiKey = Depends(verify_api_key),
 ) -> GraphSearchResponse:
     """
     Semantic search nel knowledge graph.
