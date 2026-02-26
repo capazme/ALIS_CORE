@@ -19,6 +19,7 @@ Usage:
     uvicorn merlt.app:app --host 0.0.0.0 --port 8000 --workers 4
 """
 
+import os
 import structlog
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -155,13 +156,10 @@ app = FastAPI(
 )
 
 # CORS middleware (configure for your frontend)
+_cors_origins = os.environ.get("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",  # React dev server
-        "http://localhost:5173",  # Vite dev server
-        # Add production origins
-    ],
+    allow_origins=[o.strip() for o in _cors_origins],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

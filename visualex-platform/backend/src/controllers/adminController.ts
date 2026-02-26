@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 const createUserSchema = z.object({
   email: z.string().email(),
   username: z.string().min(3).max(50),
-  password: z.string().min(3),
+  password: z.string().min(8).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain uppercase, lowercase and number'),
   isAdmin: z.boolean().optional().default(false),
   isActive: z.boolean().optional().default(true),
   isMerltEnabled: z.boolean().optional().default(false),
@@ -26,7 +26,7 @@ const updateUserSchema = z.object({
 });
 
 const resetPasswordSchema = z.object({
-  newPassword: z.string().min(3),
+  newPassword: z.string().min(8).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain uppercase, lowercase and number'),
 });
 
 /**

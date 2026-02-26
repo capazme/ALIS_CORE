@@ -17,6 +17,10 @@ import dossierRoutes from './routes/dossiers';
 import feedbackRoutes from './routes/feedback';
 import historyRoutes from './routes/history';
 import sharedEnvironmentRoutes from './routes/sharedEnvironments';
+import consentRoutes from './routes/consent';
+import privacyRoutes from './routes/privacy';
+import profileRoutes from './routes/profile';
+import authorityRoutes from './routes/authority';
 
 const app = express();
 
@@ -75,6 +79,10 @@ app.use('/api', dossierRoutes);
 app.use('/api', feedbackRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api', sharedEnvironmentRoutes);
+app.use('/api', consentRoutes);
+app.use('/api', privacyRoutes);
+app.use('/api', profileRoutes);
+app.use('/api', authorityRoutes);
 
 // 404 handler
 app.use((_req, res) => {

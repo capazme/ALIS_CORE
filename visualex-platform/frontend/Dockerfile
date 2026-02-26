@@ -20,7 +20,7 @@ COPY visualex-merlt/frontend/tsup.config.ts ./visualex-merlt/frontend/
 COPY visualex-merlt/frontend/src ./visualex-merlt/frontend/src
 
 RUN if [ "$VITE_MERLT_ENABLED" = "true" ] && [ -f "./visualex-merlt/frontend/package.json" ]; then \
-      cd visualex-merlt/frontend && npm install && npm run build:lib; \
+      cd visualex-merlt/frontend && npm install --legacy-peer-deps && npm run build:lib; \
     else \
       echo "MERL-T frontend skipped (disabled or not found)"; \
     fi
@@ -58,8 +58,10 @@ FROM nginx:alpine
 # Add curl for healthcheck
 RUN apk add --no-cache curl
 
-# Custom nginx config with API proxying
-COPY <<EOF /etc/nginx/conf.d/default.conf
+# Nginx config template — envsubst replaces $MERLT_API_KEY at container start
+# Nginx Docker image processes /etc/nginx/templates/*.template automatically
+ENV NGINX_ENVSUBST_FILTER=MERLT_API_KEY
+COPY <<'EOF' /etc/nginx/templates/default.conf.template
 server {
     listen 80;
     server_name localhost;
@@ -74,12 +76,13 @@ server {
     location /api/merlt/ {
         proxy_pass http://host.docker.internal:8000/api/v1/;
         proxy_http_version 1.1;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
+        proxy_set_header X-API-Key "${MERLT_API_KEY}";
         proxy_read_timeout 300s;
     }
 
@@ -87,25 +90,25 @@ server {
     location /api/ {
         proxy_pass http://backend:3001;
         proxy_http_version 1.1;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     # Python API proxy (visualex scrapers)
     location ~ ^/(fetch_|stream_|export_pdf|history|version) {
         proxy_pass http://python-api:5000;
         proxy_http_version 1.1;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     # SPA routing - serve index.html for all routes
     location / {
-        try_files \$uri \$uri/ /index.html;
+        try_files $uri $uri/ /index.html;
     }
 
     # Cache static assets

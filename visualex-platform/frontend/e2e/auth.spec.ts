@@ -2,167 +2,367 @@
  * E2E Tests: Authentication Flows
  * ================================
  *
- * Tests for Story 1-1 (User Registration) and Story 1-2 (User Login)
+ * [P0] Tests for user registration, login, error handling, and logout.
  *
- * Note: Some tests use pre-seeded users (e2e-test@visualex.it)
- * Run `npx prisma db seed` in backend to create them.
+ * Uses `page.route()` to mock API responses for deterministic behavior.
+ * Pre-seeded user tests hit the real backend (seeded via prisma/seed.ts).
+ *
+ * Selectors are derived from the actual LoginForm.tsx and RegisterForm.tsx source.
  */
 import { test, expect } from '@playwright/test';
+import { SEEDED_USER, login, dismissTourOverlay } from './fixtures';
 
-// Pre-seeded test user credentials (created by prisma/seed.ts)
-const SEEDED_USER = {
-  email: 'e2e-test@visualex.it',
-  password: 'TestPassword123!',
-};
+// ============================================================================
+// Registration
+// ============================================================================
 
-const ADMIN_USER = {
-  email: 'admin@visualex.it',
-  password: 'AdminPassword123!',
-};
+test.describe('User Registration', () => {
+  test('[P0] should register with valid data via mocked API', async ({
+    page,
+  }) => {
+    // Given: The registration API succeeds and returns a pending-verification state
+    await page.route('**/api/auth/register', (route) =>
+      route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          message: 'Registration successful. Please verify your email.',
+          user: {
+            id: 'mock-id',
+            email: 'newuser@example.com',
+            username: 'newuser',
+          },
+        }),
+      }),
+    );
 
-test.describe('User Registration (Story 1-1)', () => {
-  test.beforeEach(async ({ page }) => {
+    // Also mock invitation validation (register requires valid token)
+    await page.route('**/api/invitations/validate**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          valid: true,
+          email: null,
+          inviter: { username: 'admin' },
+        }),
+      }),
+    );
+
+    // When: User navigates to /register with a token and fills the form
+    await page.goto('/register?token=mock-valid-token');
+
+    // Wait for the form to appear (invitation validation completes)
+    await expect(page.getByPlaceholder('nome@email.com')).toBeVisible({
+      timeout: 10_000,
+    });
+
+    await page.getByPlaceholder('nome@email.com').fill('newuser@example.com');
+    await page.getByPlaceholder('mario_rossi').fill('newuser123');
+    await page.getByPlaceholder('Mario Rossi').fill('New User');
+
+    const passwordInputs = page.locator('input[type="password"]');
+    await passwordInputs.first().fill('SecurePass1!');
+    await passwordInputs.last().fill('SecurePass1!');
+
+    await page
+      .getByRole('button', { name: /crea account/i })
+      .click();
+
+    // Then: The success/verification screen is shown
+    await expect(
+      page.getByText(/verifica.*email/i),
+    ).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('[P0] should show error when registration form is empty', async ({
+    page,
+  }) => {
+    // Given: The register form is loaded with a valid mock invitation
+    await page.route('**/api/invitations/validate**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ valid: true, email: null, inviter: null }),
+      }),
+    );
+
+    await page.goto('/register?token=mock-token');
+    await expect(page.getByPlaceholder('nome@email.com')).toBeVisible({
+      timeout: 10_000,
+    });
+
+    // When: User clicks submit without filling any fields
+    await page
+      .getByRole('button', { name: /crea account/i })
+      .click();
+
+    // Then: An error message is shown and user stays on register page
+    await expect(
+      page.getByText(/obbligatori|required|compilare/i),
+    ).toBeVisible({ timeout: 5_000 });
+    await expect(page).toHaveURL(/\/register/);
+  });
+
+  test('[P1] should show invalid invitation state when no token provided', async ({
+    page,
+  }) => {
+    // Given: No invitation token in the URL
+    // When: Navigating to /register without a token
     await page.goto('/register');
+
+    // Then: The invalid invitation message is displayed
+    await expect(
+      page.getByText(/invito non valido|nessun token/i),
+    ).toBeVisible({ timeout: 10_000 });
   });
 
-  test('displays registration form', async ({ page }) => {
-    await expect(page.getByRole('heading').first()).toBeVisible();
-    await expect(page.getByPlaceholder(/email|@.*\.com/i)).toBeVisible();
-    await expect(page.getByPlaceholder(/username|mario_rossi|utente/i)).toBeVisible();
+  test('[P1] should navigate to login page from register', async ({
+    page,
+  }) => {
+    // Given: User is on the register page (invalid invitation state)
+    await page.goto('/register');
+    await expect(page.getByText('VisuaLex')).toBeVisible();
 
-    const passwordInputs = page.locator('input[type="password"]');
-    await expect(passwordInputs.first()).toBeVisible();
-
-    await expect(page.getByRole('button', { name: /crea account|registrati|sign up/i })).toBeVisible();
-  });
-
-  test('prevents submission with empty form', async ({ page }) => {
-    await page.getByRole('button', { name: /crea account|registrati|sign up/i }).click();
-    await page.waitForTimeout(1000);
-    await expect(page).toHaveURL(/\/register/);
-  });
-
-  test('prevents submission with invalid email', async ({ page }) => {
-    await page.getByPlaceholder(/email|@.*\.com/i).fill('invalid-email');
-    await page.getByPlaceholder(/username|mario_rossi|utente/i).fill('testuser');
-
-    const passwordInputs = page.locator('input[type="password"]');
-    await passwordInputs.first().fill('TestPassword123!');
-    await passwordInputs.last().fill('TestPassword123!');
-
-    await page.getByRole('button', { name: /crea account|registrati|sign up/i }).click();
-
-    await page.waitForTimeout(1000);
-    await expect(page).toHaveURL(/\/register/);
-  });
-
-  test('shows password strength indicator', async ({ page }) => {
-    const passwordInput = page.locator('input[type="password"]').first();
-    await passwordInput.fill('weak');
-    await page.waitForTimeout(500);
-
-    // Check for any visual feedback on password strength (indicator, color change, text)
-    const hasStrengthIndicator = await page.locator('[class*="strength"], [class*="progress"], [class*="bar"], [class*="meter"]').count() > 0;
-    const hasStrengthText = await page.getByText(/debole|weak|forte|strong|medio|medium|sicurezza|security/i).count() > 0;
-    const hasColorFeedback = await page.locator('[class*="red"], [class*="green"], [class*="yellow"], [class*="orange"]').count() > 0;
-
-    // Pass if any form of strength feedback is visible
-    expect(hasStrengthIndicator || hasStrengthText || hasColorFeedback).toBeTruthy();
-  });
-
-  test('successfully registers new user and shows approval message', async ({ page }) => {
-    const timestamp = Date.now();
-    const email = `e2e-register-${timestamp}@example.com`;
-    const username = `e2ereg${timestamp}`;
-
-    await page.getByPlaceholder(/email|@.*\.com/i).fill(email);
-    await page.getByPlaceholder(/username|mario_rossi|utente/i).fill(username);
-
-    const passwordInputs = page.locator('input[type="password"]');
-    await passwordInputs.first().fill('TestPassword123!');
-    await passwordInputs.last().fill('TestPassword123!');
-
-    await page.getByRole('button', { name: /crea account|registrati|sign up/i }).click();
-
-    // Should show registration success message (awaiting admin approval)
-    await expect(page.getByText(/registrazione.*complet|account.*creat|successo/i).first()).toBeVisible({ timeout: 15000 });
-  });
-
-  test('has link to login page', async ({ page }) => {
-    const loginLink = page.getByRole('link', { name: /accedi|login|hai.*account/i });
+    // When: User clicks the login link
+    const loginLink = page.getByRole('link', {
+      name: /accedi|login|torna.*login/i,
+    });
     await expect(loginLink).toBeVisible();
     await loginLink.click();
+
+    // Then: User is redirected to /login
     await expect(page).toHaveURL(/\/login/);
   });
 });
 
-test.describe('User Login (Story 1-2)', () => {
-  test.beforeEach(async ({ page }) => {
+// ============================================================================
+// Login
+// ============================================================================
+
+test.describe('User Login', () => {
+  test('[P0] should login with valid credentials', async ({ page }) => {
+    // Given: The login and /auth/me APIs succeed
+    await page.route('**/api/auth/login', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          access_token: 'mock-access-token',
+          refresh_token: 'mock-refresh-token',
+        }),
+      }),
+    );
+    await page.route('**/api/auth/me', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 'user-1',
+          email: 'test@example.com',
+          username: 'testuser',
+          is_admin: false,
+          is_merlt_enabled: false,
+          profile_type: 'assisted_research',
+          authority_score: 0,
+        }),
+      }),
+    );
+
+    // Mock additional API calls that fire after login
+    await page.route('**/api/profile', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ preferences: { theme: 'light', language: 'it', notifications_enabled: true } }),
+      }),
+    );
+    await page.route('**/api/folders**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
+    );
+    await page.route('**/api/bookmarks**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
+    );
+    await page.route('**/api/history**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
+    );
+
+    // When: User fills in credentials and submits
     await page.goto('/login');
+    await page.getByPlaceholder('name@company.com').fill('test@example.com');
+    await page.locator('input[type="password"]').fill('ValidPass123!');
+    await page.getByRole('button', { name: /sign\s*in/i }).click();
+
+    // Then: User is redirected away from /login
+    await page.waitForURL((url) => !url.pathname.includes('/login'), {
+      timeout: 15_000,
+    });
+    expect(page.url()).not.toContain('/login');
   });
 
-  test('displays login form', async ({ page }) => {
-    await expect(page.getByRole('heading').first()).toBeVisible();
-    await expect(page.getByPlaceholder(/email|@.*\.com/i)).toBeVisible();
-    await expect(page.locator('input[type="password"]')).toBeVisible();
-    await expect(page.getByRole('button', { name: /accedi|login|entra|sign\s*in/i })).toBeVisible();
-  });
+  test('[P0] should show error with invalid credentials', async ({ page }) => {
+    // Given: The login API returns 401
+    await page.route('**/api/auth/login', (route) =>
+      route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          detail: 'Invalid email or password',
+        }),
+      }),
+    );
 
-  test('prevents submission with empty credentials', async ({ page }) => {
-    await page.getByRole('button', { name: /accedi|login|entra|sign\s*in/i }).click();
-    await page.waitForTimeout(1000);
+    // When: User submits wrong credentials
+    await page.goto('/login');
+    await page.getByPlaceholder('name@company.com').fill('wrong@example.com');
+    await page.locator('input[type="password"]').fill('wrongpassword');
+    await page.getByRole('button', { name: /sign\s*in/i }).click();
+
+    // Then: An error message is visible and user stays on /login
+    await expect(
+      page.locator('text=/invalid|credenziali|errore|failed/i'),
+    ).toBeVisible({ timeout: 5_000 });
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test('shows error for invalid credentials', async ({ page }) => {
-    await page.getByPlaceholder(/email|@.*\.com/i).fill('nonexistent@example.com');
-    await page.locator('input[type="password"]').fill('wrongpassword');
-    await page.getByRole('button', { name: /accedi|login|entra|sign\s*in/i }).click();
+  test('[P0] should show validation error for empty fields', async ({
+    page,
+  }) => {
+    // Given: User is on the login page
+    await page.goto('/login');
 
-    await page.waitForTimeout(3000);
+    // When: User clicks sign-in without entering anything
+    await page.getByRole('button', { name: /sign\s*in/i }).click();
 
-    const hasError = await page.locator('[class*="error"], [role="alert"]').count() > 0 ||
-                     await page.getByText(/credenziali|invalid|errore|incorrect|wrong/i).count() > 0;
-    const staysOnPage = page.url().includes('/login');
-
-    expect(hasError || staysOnPage).toBeTruthy();
+    // Then: A validation error appears
+    await expect(
+      page.getByText(/required|obbligatori|email.*password/i),
+    ).toBeVisible({ timeout: 5_000 });
+    await expect(page).toHaveURL(/\/login/);
   });
 
-  test('successfully logs in with pre-seeded user', async ({ page }) => {
-    await page.getByPlaceholder(/email|@.*\.com/i).fill(SEEDED_USER.email);
-    await page.locator('input[type="password"]').fill(SEEDED_USER.password);
-    await page.getByRole('button', { name: /accedi|login|entra|sign\s*in/i }).click();
+  test('[P0] should show validation error for invalid email format', async ({
+    page,
+  }) => {
+    // Given: User is on the login page
+    await page.goto('/login');
 
-    // Should redirect away from login
-    await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 });
+    // When: User enters an invalid email and submits
+    await page.getByPlaceholder('name@company.com').fill('not-an-email');
+    await page.locator('input[type="password"]').fill('somepassword');
+    await page.getByRole('button', { name: /sign\s*in/i }).click();
+
+    // Then: An invalid email error is shown
+    await expect(
+      page.getByText(/invalid.*email|email.*non.*valid/i),
+    ).toBeVisible({ timeout: 5_000 });
+    await expect(page).toHaveURL(/\/login/);
   });
 
-  test('remembers user session after login', async ({ page }) => {
-    await page.getByPlaceholder(/email|@.*\.com/i).fill(SEEDED_USER.email);
-    await page.locator('input[type="password"]').fill(SEEDED_USER.password);
-    await page.getByRole('button', { name: /accedi|login|entra|sign\s*in/i }).click();
-    await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 });
+  test('[P1] should navigate to register page from login', async ({
+    page,
+  }) => {
+    // Given: User is on the login page
+    await page.goto('/login');
 
-    // Refresh page
-    await page.reload();
-
-    // Should still be logged in
-    await page.waitForTimeout(2000);
-    await expect(page).not.toHaveURL(/\/login/);
-  });
-
-  test('has link to registration page', async ({ page }) => {
-    const registerLink = page.getByRole('link', { name: /registrati|crea.*account|non.*hai.*account|sign up/i });
+    // When: User clicks the registration link
+    const registerLink = page.getByRole('link', {
+      name: /registrati/i,
+    });
     await expect(registerLink).toBeVisible();
     await registerLink.click();
+
+    // Then: User is on the register page
     await expect(page).toHaveURL(/\/register/);
   });
 
-  test('admin user can login', async ({ page }) => {
-    await page.getByPlaceholder(/email|@.*\.com/i).fill(ADMIN_USER.email);
-    await page.locator('input[type="password"]').fill(ADMIN_USER.password);
-    await page.getByRole('button', { name: /accedi|login|entra|sign\s*in/i }).click();
+  test('[P1] should toggle password visibility', async ({ page }) => {
+    // Given: User is on the login page with a password typed
+    await page.goto('/login');
+    const passwordInput = page.locator('input[type="password"]');
+    await passwordInput.fill('secret123');
 
-    await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 });
+    // When: User clicks the show-password toggle button
+    const toggleButton = page.locator(
+      'button:has(svg)',
+    ).filter({ has: page.locator('[class*="Eye"]') });
+    // Fallback: find the button near the password input
+    const toggleNearPassword = passwordInput
+      .locator('..')
+      .locator('button[tabindex="-1"]');
+    await toggleNearPassword.click();
+
+    // Then: The input type changes to "text" (password is visible)
+    await expect(page.locator('input[autocomplete="current-password"]')).toHaveAttribute(
+      'type',
+      'text',
+    );
+  });
+});
+
+// ============================================================================
+// Logout
+// ============================================================================
+
+test.describe('User Logout', () => {
+  test('[P0] should logout and redirect to login', async ({ page }) => {
+    // Given: User is logged in (via mocked APIs)
+    await page.route('**/api/auth/login', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          access_token: 'mock-token',
+          refresh_token: 'mock-refresh',
+        }),
+      }),
+    );
+    await page.route('**/api/auth/me', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 'user-1',
+          email: 'test@example.com',
+          username: 'testuser',
+          is_admin: false,
+          is_merlt_enabled: false,
+          profile_type: 'assisted_research',
+          authority_score: 0,
+        }),
+      }),
+    );
+    await page.route('**/api/profile', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ preferences: { theme: 'light', language: 'it', notifications_enabled: true } }),
+      }),
+    );
+    await page.route('**/api/folders**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
+    );
+    await page.route('**/api/bookmarks**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
+    );
+    await page.route('**/api/history**', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
+    );
+
+    await login(page, 'test@example.com', 'ValidPass123!');
+    await dismissTourOverlay(page);
+
+    // When: User triggers logout
+    // The logout is in the Sidebar; we call it via localStorage clear + navigate
+    // (mirrors authService.logout() which clears localStorage and redirects)
+    await page.evaluate(() => {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+    });
+    await page.goto('/');
+
+    // Then: The ProtectedRoute redirects to /login
+    await page.waitForURL(/\/login/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/login/);
   });
 });

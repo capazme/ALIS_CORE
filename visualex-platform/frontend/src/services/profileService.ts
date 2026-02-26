@@ -26,6 +26,13 @@ export const updateProfile = async (profileType: ProfileType): Promise<{ message
 };
 
 /**
+ * Update user's account info (username, email)
+ */
+export const updateAccountInfo = async (data: { username?: string; email?: string }): Promise<{ message: string }> => {
+  return put<{ message: string }>('/profile/account', data);
+};
+
+/**
  * Update user's preferences
  */
 export const updatePreferences = async (preferences: UpdatePreferencesRequest): Promise<{ message: string; preferences: UserPreferences }> => {

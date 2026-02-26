@@ -1,140 +1,201 @@
 /**
- * E2E Tests: Search & Norm Browsing (Epic 3)
- * ============================================
+ * E2E Tests: Search Functionality
+ * ================================
  *
- * Covers:
- * - Story 3-1: Hierarchical Norm Browser (Tree View)
- * - Story 3-2: Article Viewer
- * - Story 3-3: Search by Keyword / URN
- * - Story 3-4: Citation Highlighting & Linking
+ * [P1] Tests for the search page: searching by norm type, viewing results,
+ * and handling empty/error states.
  *
- * Priority Tags: [P0] Critical  [P1] High  [P2] Medium
+ * Uses `page.route()` to mock backend streaming responses for determinism.
+ * Selectors derived from SearchForm.tsx, SearchPanel.tsx, and CommandPalette.tsx.
  */
 import { test, expect, dismissTourOverlay } from './fixtures';
 
-test.describe('Search & Norm Browsing', () => {
-    test.describe('Search by Keyword (Story 3-3)', () => {
-        test('[P0] should display the search form on the main page', async ({ authenticatedPage: page }) => {
-            // GIVEN: User is authenticated and on the main page
-            await page.goto('/');
-            await dismissTourOverlay(page);
+// ---------------------------------------------------------------------------
+// Helpers: mock data for streaming search responses
+// ---------------------------------------------------------------------------
 
-            // WHEN: The page loads
+/** Build a mock NDJSON streaming response for /stream_article_text */
+function mockArticleStream(articles: Array<{ numero_articolo: string; testo: string }>) {
+  const lines = articles.map((a) =>
+    JSON.stringify({
+      norma_data: {
+        tipo_atto: 'codice civile',
+        data: '',
+        numero_atto: '',
+        numero_articolo: a.numero_articolo,
+        tipo_atto_reale: 'Codice Civile',
+        url: 'urn:nir:stato:codice.civile:1942-03-16',
+      },
+      testo: a.testo,
+    }),
+  );
+  return lines.join('\n');
+}
 
-            // THEN: The search form is visible with an input and a submit button
-            const searchInput = page.locator(
-                'input[type="text"], input[type="search"], textarea, [role="searchbox"], [role="combobox"]',
-            ).first();
-            await expect(searchInput).toBeVisible({ timeout: 10_000 });
-        });
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
 
-        test('[P0] should perform a keyword search and show results', async ({ authenticatedPage: page }) => {
-            // GIVEN: User is on the search page
-            await page.goto('/');
-            await dismissTourOverlay(page);
+test.describe('Search Functionality', () => {
+  test('[P1] should display the search form on the main page', async ({
+    authenticatedPage: page,
+  }) => {
+    // Given: User is authenticated and navigated to the home page
+    await page.goto('/');
+    await dismissTourOverlay(page);
 
-            // WHEN: User types a keyword and submits the search
-            const searchInput = page.locator(
-                'input[type="text"], input[type="search"], textarea, [role="searchbox"], [role="combobox"]',
-            ).first();
-            await searchInput.fill('codice civile');
-            await page.keyboard.press('Enter');
+    // When: The page loads fully
 
-            // THEN: Search results or a norm card are displayed
-            const hasResults = page.locator('[class*="card"], [class*="result"], [class*="norma"], article').first();
-            await expect(hasResults).toBeVisible({ timeout: 30_000 });
-        });
+    // Then: The search form with act-type select and article input are visible
+    await expect(page.locator('#search-act-type')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('#article')).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: /estrai contenuto/i }),
+    ).toBeVisible();
+  });
 
-        test('[P1] should perform a URN search', async ({ authenticatedPage: page }) => {
-            // GIVEN: User is on the search page
-            await page.goto('/');
-            await dismissTourOverlay(page);
+  test('[P1] should search by norm type and see results', async ({
+    authenticatedPage: page,
+  }) => {
+    // Given: The streaming search endpoint returns a mocked article
+    await page.route('**/stream_article_text', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/x-ndjson',
+        body: mockArticleStream([
+          {
+            numero_articolo: '1',
+            testo: 'Ogni persona ha la capacita\' giuridica dal momento della nascita.',
+          },
+        ]),
+      }),
+    );
 
-            // WHEN: User enters a valid URN
-            const searchInput = page.locator(
-                'input[type="text"], input[type="search"], textarea, [role="searchbox"], [role="combobox"]',
-            ).first();
-            await searchInput.fill('urn:nir:stato:legge:2024-01-01;1');
-            await page.keyboard.press('Enter');
+    await page.goto('/');
+    await dismissTourOverlay(page);
 
-            // THEN: The page processes the search without crashing
-            // (actual results depend on data availability — we verify no error state)
-            await page.waitForLoadState('domcontentloaded');
-            const errorAlert = page.locator('[role="alert"]');
-            const errorCount = await errorAlert.count();
-            // If there are errors, they should be user-friendly, not crashes
-            if (errorCount > 0) {
-                const alertText = await errorAlert.first().textContent();
-                expect(alertText).not.toContain('Unexpected');
-            }
-        });
+    // When: User selects "Codice Civile" and submits the search
+    await page.locator('#search-act-type').selectOption('codice civile');
+    await page.locator('#article').clear();
+    await page.locator('#article').fill('1');
+    await page.getByRole('button', { name: /estrai contenuto/i }).click();
+
+    // Then: A result card appears with article text
+    const resultArea = page.locator('[class*="card"], [class*="norma"], article').first();
+    await expect(resultArea).toBeVisible({ timeout: 15_000 });
+
+    // The result should contain recognizable article text
+    const pageText = await page.textContent('body');
+    expect(pageText).toContain('capacita');
+  });
+
+  test('[P1] should display article content from search results', async ({
+    authenticatedPage: page,
+  }) => {
+    // Given: The streaming endpoint returns multiple articles
+    await page.route('**/stream_article_text', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/x-ndjson',
+        body: mockArticleStream([
+          { numero_articolo: '1', testo: 'Articolo 1 - Capacita giuridica.' },
+          { numero_articolo: '2', testo: 'Articolo 2 - Maggiore eta.' },
+        ]),
+      }),
+    );
+
+    await page.goto('/');
+    await dismissTourOverlay(page);
+
+    // When: User searches for a range of articles
+    await page.locator('#search-act-type').selectOption('codice civile');
+    await page.locator('#article').clear();
+    await page.locator('#article').fill('1-2');
+    await page.getByRole('button', { name: /estrai contenuto/i }).click();
+
+    // Then: Both articles should appear in the workspace
+    await expect(page.getByText(/Capacita giuridica/)).toBeVisible({
+      timeout: 15_000,
     });
-
-    test.describe('Article Viewer (Story 3-2)', () => {
-        test('[P1] should display article content after search', async ({ authenticatedPage: page }) => {
-            // GIVEN: User has performed a search with results
-            await page.goto('/');
-            await dismissTourOverlay(page);
-
-            const searchInput = page.locator(
-                'input[type="text"], input[type="search"], textarea, [role="searchbox"], [role="combobox"]',
-            ).first();
-            await searchInput.fill('codice civile');
-            await page.keyboard.press('Enter');
-
-            // WHEN: Results are displayed
-            const resultCard = page.locator('[class*="card"], [class*="result"], [class*="norma"], article').first();
-            await expect(resultCard).toBeVisible({ timeout: 30_000 });
-
-            // THEN: Article content area should contain text
-            const textContent = await resultCard.textContent();
-            expect(textContent).toBeTruthy();
-            expect(textContent!.length).toBeGreaterThan(10);
-        });
+    await expect(page.getByText(/Maggiore eta/)).toBeVisible({
+      timeout: 10_000,
     });
+  });
 
-    test.describe('Tree View Navigation (Story 3-1)', () => {
-        test('[P1] should display tree view panel when available', async ({ authenticatedPage: page }) => {
-            // GIVEN: User is on the search page and has loaded norms
-            await page.goto('/');
-            await dismissTourOverlay(page);
+  test('[P1] should show empty state when no search has been performed', async ({
+    authenticatedPage: page,
+  }) => {
+    // Given: User is on the main page without having searched
+    await page.goto('/');
+    await dismissTourOverlay(page);
 
-            const searchInput = page.locator(
-                'input[type="text"], input[type="search"], textarea, [role="searchbox"], [role="combobox"]',
-            ).first();
-            await searchInput.fill('codice civile');
-            await page.keyboard.press('Enter');
+    // When: The page loads
 
-            // WHEN: Results load
-            await page.locator('[class*="card"], [class*="result"], [class*="norma"], article').first()
-                .waitFor({ state: 'visible', timeout: 30_000 });
+    // Then: The empty state with "Ricerca Intelligente" heading is visible
+    await expect(
+      page.getByText('Ricerca Intelligente'),
+    ).toBeVisible({ timeout: 10_000 });
+  });
 
-            // THEN: A tree view or structural navigator should be present
-            const hasTreeOrNav = await page.locator(
-                '[class*="tree"], [class*="navigator"], [class*="structure"], [role="tree"], [role="treeitem"], nav',
-            ).count();
-            // Tree view may load lazily — verify the container exists at minimum
-            expect(hasTreeOrNav).toBeGreaterThanOrEqual(0); // Non-blocking assertion; presence is architecture-dependent
-        });
-    });
+  test('[P1] should handle search errors gracefully', async ({
+    authenticatedPage: page,
+  }) => {
+    // Given: The streaming endpoint returns a server error
+    await page.route('**/stream_article_text', (route) =>
+      route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ detail: 'Internal Server Error' }),
+      }),
+    );
 
-    test.describe('Search Form Interactions', () => {
-        test('[P2] should clear search input', async ({ authenticatedPage: page }) => {
-            // GIVEN: User has typed text in the search field
-            await page.goto('/');
-            await dismissTourOverlay(page);
+    await page.goto('/');
+    await dismissTourOverlay(page);
 
-            const searchInput = page.locator(
-                'input[type="text"], input[type="search"], textarea, [role="searchbox"], [role="combobox"]',
-            ).first();
-            await searchInput.fill('test query');
+    // When: User submits a search
+    await page.locator('#search-act-type').selectOption('codice civile');
+    await page.getByRole('button', { name: /estrai contenuto/i }).click();
 
-            // WHEN: User clears the input
-            await searchInput.clear();
+    // Then: An error message is displayed (not a crash)
+    await expect(
+      page.getByText(/errore/i),
+    ).toBeVisible({ timeout: 10_000 });
+  });
 
-            // THEN: The input value should be empty
-            const value = await searchInput.inputValue().catch(() => '');
-            expect(value).toBe('');
-        });
-    });
+  test('[P2] should open command palette with keyboard shortcut', async ({
+    authenticatedPage: page,
+  }) => {
+    // Given: User is on the main page
+    await page.goto('/');
+    await dismissTourOverlay(page);
+
+    // When: User presses Cmd+K (Meta+K)
+    await page.keyboard.press('Meta+k');
+
+    // Then: The command palette overlay appears
+    // CommandPalette renders as a modal/dialog
+    const palette = page.locator('[class*="CommandPalette"], [role="dialog"]').first();
+    await expect(palette).toBeVisible({ timeout: 5_000 });
+  });
+
+  test('[P2] should reset the search form', async ({
+    authenticatedPage: page,
+  }) => {
+    // Given: User has selected values in the search form
+    await page.goto('/');
+    await dismissTourOverlay(page);
+
+    await page.locator('#search-act-type').selectOption('codice civile');
+    await page.locator('#article').clear();
+    await page.locator('#article').fill('42');
+
+    // When: User clicks the Reset button
+    await page
+      .getByRole('button', { name: /reset/i })
+      .click();
+
+    // Then: The form is cleared
+    await expect(page.locator('#search-act-type')).toHaveValue('');
+    await expect(page.locator('#article')).toHaveValue('1');
+  });
 });

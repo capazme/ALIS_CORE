@@ -39,6 +39,11 @@ const updateProfileSchema = z.object({
   profile_type: z.nativeEnum(ProfileType),
 });
 
+const updateAccountSchema = z.object({
+  username: z.string().min(2).max(50).optional(),
+  email: z.string().email().optional(),
+});
+
 const updatePreferencesSchema = z.object({
   theme: z.enum(['light', 'dark', 'system']).optional(),
   language: z.enum(['it', 'en']).optional(),
@@ -83,6 +88,55 @@ export const getProfile = async (req: Request, res: Response) => {
       ...value,
       available: key !== 'active_contributor' || user.authorityScore >= CONTRIBUTOR_MIN_AUTHORITY,
     })),
+  });
+};
+
+/**
+ * Update user's account info (username, email)
+ */
+export const updateAccount = async (req: Request, res: Response) => {
+  if (!req.user) {
+    throw new AppError(401, 'Not authenticated');
+  }
+
+  const data = updateAccountSchema.parse(req.body);
+
+  if (!data.username && !data.email) {
+    throw new AppError(400, 'At least one field (username or email) is required');
+  }
+
+  // Check for uniqueness
+  if (data.email) {
+    const existing = await prisma.user.findFirst({
+      where: { email: data.email, id: { not: req.user.id } },
+    });
+    if (existing) {
+      throw new AppError(409, 'Email già in uso da un altro account');
+    }
+  }
+
+  if (data.username) {
+    const existing = await prisma.user.findFirst({
+      where: { username: data.username, id: { not: req.user.id } },
+    });
+    if (existing) {
+      throw new AppError(409, 'Nome utente già in uso');
+    }
+  }
+
+  const updateData: Record<string, string> = {};
+  if (data.username) updateData.username = data.username;
+  if (data.email) updateData.email = data.email;
+
+  const updatedUser = await prisma.user.update({
+    where: { id: req.user.id },
+    data: updateData,
+  });
+
+  res.json({
+    message: 'Account aggiornato con successo',
+    username: updatedUser.username,
+    email: updatedUser.email,
   });
 };
 

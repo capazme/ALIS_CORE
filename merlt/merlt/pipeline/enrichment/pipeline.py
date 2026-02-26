@@ -116,14 +116,14 @@ class EnrichmentPipeline:
         """Genera run_id basato su config."""
         # Hash della config per identificare esecuzioni equivalenti
         config_str = str(self.config.to_dict())
-        config_hash = hashlib.md5(config_str.encode()).hexdigest()[:8]
+        config_hash = hashlib.md5(config_str.encode(), usedforsecurity=False).hexdigest()[:8]
         timestamp = datetime.now().strftime("%Y%m%d")
         return f"enrichment_{timestamp}_{config_hash}"
 
     def _config_hash(self) -> str:
         """Hash della config per validazione checkpoint."""
         config_str = str(self.config.to_dict())
-        return hashlib.md5(config_str.encode()).hexdigest()
+        return hashlib.md5(config_str.encode(), usedforsecurity=False).hexdigest()
 
     async def _init_components(self) -> None:
         """Inizializza componenti lazy."""

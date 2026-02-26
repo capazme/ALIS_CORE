@@ -191,8 +191,6 @@ export function CitationCorrectionDrawer({
       const context = getContextWindow(articleText, startOffset, endOffset, 250);
       const contextWindow = `${context.before}[${context.selected}]${context.after}`;
 
-      // TODO: Implement actual API call when backend is ready
-      // For now, simulate the request structure
       const request: NERFeedbackRequest = {
         article_urn: articleUrn,
         user_id: userId,

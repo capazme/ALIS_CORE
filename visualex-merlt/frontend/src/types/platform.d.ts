@@ -82,15 +82,22 @@ declare module '@visualex/platform/lib/plugins' {
     'article-toolbar': {
       urn: string;
       articleId: string;
+      tipo_atto?: string;
+      numero_atto?: string;
+      data_atto?: string;
     };
     'article-sidebar': {
       urn: string;
       articleId: string;
+      tipo_atto?: string;
+      numero_atto?: string;
+      data_atto?: string;
     };
     'article-content-overlay': {
       urn: string;
       articleId: string;
       contentRef: React.RefObject<HTMLElement>;
+      tipo_atto?: string;
     };
     'profile-tabs': {
       userId: string;

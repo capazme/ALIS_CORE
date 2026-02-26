@@ -3,6 +3,8 @@ Shared Test Fixtures
 ====================
 
 Fixtures condivisi tra tests/api/ e tests/storage/.
+
+NOTE: Tests skip gracefully when infrastructure is unavailable.
 """
 
 import asyncio
@@ -17,6 +19,34 @@ from merlt.storage.graph.client import FalkorDBClient
 from merlt.storage.vectors.embeddings import EmbeddingService
 
 
+def _postgres_available() -> bool:
+    """Check if PostgreSQL is reachable on the configured port."""
+    import socket
+    import os
+
+    host = os.getenv("ENRICHMENT_DB_HOST", "localhost")
+    port = int(os.getenv("ENRICHMENT_DB_PORT", "5433"))
+    try:
+        sock = socket.create_connection((host, port), timeout=2)
+        sock.close()
+        return True
+    except (OSError, ConnectionRefusedError):
+        return False
+
+
+def _falkordb_available() -> bool:
+    """Check if FalkorDB is reachable."""
+    try:
+        import redis
+
+        r = redis.Redis(host="localhost", port=6380, socket_connect_timeout=3)
+        r.ping()
+        r.close()
+        return True
+    except Exception:
+        return False
+
+
 @pytest.fixture(scope="session")
 def event_loop():
     """Create event loop per session."""
@@ -27,35 +57,41 @@ def event_loop():
 
 @pytest_asyncio.fixture(scope="function")
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
-    """PostgreSQL session with transaction rollback."""
+    """PostgreSQL session with transaction rollback. Skips when unavailable."""
+    if not _postgres_available():
+        pytest.skip("PostgreSQL not available on port 5433")
+
     engine = create_async_engine(get_database_url(), echo=False, poolclass=NullPool)
     async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-    
+
     async with engine.connect() as connection:
         transaction = await connection.begin()
         session = async_session(bind=connection)
-        
+
         try:
             yield session
         finally:
             await session.close()
             await transaction.rollback()
-    
+
     await engine.dispose()
 
 
 @pytest_asyncio.fixture(scope="function")
 async def falkordb_client() -> AsyncGenerator[FalkorDBClient, None]:
-    """FalkorDB client with isolated test graph."""
+    """FalkorDB client with isolated test graph. Skips when unavailable."""
+    if not _falkordb_available():
+        pytest.skip("FalkorDB not available on port 6380")
+
     client = FalkorDBClient(graph_name="merl_t_test")
     await client.connect()
     yield client
-    
+
     try:
         await client.query("MATCH (n) DETACH DELETE n")
     except Exception as e:
         print(f"Warning: Failed to cleanup test graph: {e}")
-    
+
     await client.close()
 
 

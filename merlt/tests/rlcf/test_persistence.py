@@ -13,7 +13,7 @@ import pytest
 import pytest_asyncio
 import asyncio
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import numpy as np
 import torch
 
@@ -248,7 +248,7 @@ class TestTrainingData:
 
         # Futuro - non dovrebbe trovare nulla
         training_data = await persistence.get_training_data(
-            min_date=datetime.utcnow() + timedelta(days=1)
+            min_date=datetime.now(UTC) + timedelta(days=1)
         )
 
         assert len(training_data) == 0

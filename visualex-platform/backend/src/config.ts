@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Validate required environment variables
-const requiredEnvVars = ['JWT_SECRET', 'DATABASE_URL'] as const;
+const requiredEnvVars = ['JWT_SECRET', 'DATABASE_URL', 'CONSENT_IP_SALT'] as const;
 
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
@@ -36,8 +36,8 @@ export const config = {
     enabled: process.env.MERLT_ENABLED === 'true',
   },
 
-  // Consent IP hashing (GDPR compliance)
-  consentIpSalt: process.env.CONSENT_IP_SALT || 'consent-ip-salt-change-in-production',
+  // Consent IP hashing (GDPR compliance) - required, validated above
+  consentIpSalt: process.env.CONSENT_IP_SALT!,
 
   // Legacy alias for backwards compatibility
   jwtSecret: process.env.JWT_SECRET!,

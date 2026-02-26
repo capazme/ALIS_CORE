@@ -15,7 +15,7 @@ Esempio:
         ],
         entity_types=["concetto", "principio", "definizione"],
         scope={"libro": "IV", "articoli": (1173, 2059)},
-        llm_model="${LLM_ENRICHMENT_MODEL}",  # Da .env
+        llm_model="google/gemini-2.5-flash",  # Da .env LLM_ENRICHMENT_MODEL
     )
 """
 
@@ -125,7 +125,7 @@ class EnrichmentConfig:
     # LLM Configuration
     llm_model: str = field(default_factory=lambda: _get_env_or_default(
         "LLM_ENRICHMENT_MODEL",
-        "anthropic/claude-3-5-sonnet-20241022"
+        "google/gemini-2.5-flash"
     ))
     llm_temperature: float = 0.0  # Deterministico per riproducibilità
 

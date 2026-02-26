@@ -61,12 +61,22 @@ export function MerltContentOverlay({ urn, articleId, contentRef }: Props): Reac
         return;
       }
 
-      // Calculate position for card (relative to content container)
-      // In a real implementation, you'd use Range API to get precise selection position
-      const position = {
-        top: 100, // Placeholder - should calculate from selection
-        left: 200, // Placeholder - should calculate from selection
-      };
+      // Calculate position from event data or Range API
+      let position = { top: 100, left: 200 };
+      if (data.position) {
+        position = data.position;
+      } else if (contentRef.current) {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          const rect = range.getBoundingClientRect();
+          const containerRect = contentRef.current.getBoundingClientRect();
+          position = {
+            top: rect.bottom - containerRect.top + 8,
+            left: rect.left - containerRect.left,
+          };
+        }
+      }
 
       setSelection({
         text: data.text,
@@ -96,7 +106,7 @@ export function MerltContentOverlay({ urn, articleId, contentRef }: Props): Reac
             text: data.text,
             startOffset: 0, // Unknown from hover
             endOffset: data.text.length,
-            position: { top: 100, left: 200 }, // Placeholder
+            position: (data as unknown as { position?: { top: number; left: number } }).position || prev?.position || { top: 100, left: 200 },
             parsed: data.parsed as unknown as ParsedCitationData,
             confidence: (data.parsed as unknown as { confidence?: number })?.confidence,
           };

@@ -24,6 +24,7 @@ Example:
 """
 
 import asyncio
+import os
 import time
 import uuid
 from datetime import datetime, timedelta
@@ -171,7 +172,11 @@ async def _check_redis_health() -> ServiceHealth:
     start = time.time()
     try:
         import redis.asyncio as redis
-        client = redis.Redis(host="localhost", port=6379, db=0)
+        client = redis.Redis(
+            host=os.environ.get("REDIS_HOST", "localhost"),
+            port=int(os.environ.get("REDIS_PORT", "6379")),
+            db=0,
+        )
 
         # Ping
         await client.ping()

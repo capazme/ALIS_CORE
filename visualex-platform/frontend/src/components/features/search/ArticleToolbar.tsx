@@ -16,6 +16,9 @@ export interface ArticleToolbarProps {
   // Data
   urn: string;
   articleId: string;
+  tipo_atto?: string;
+  numero_atto?: string;
+  data_atto?: string;
   url?: string;
   annotationsCount: number;
   highlightsCount: number;
@@ -42,6 +45,9 @@ export interface ArticleToolbarProps {
 export function ArticleToolbar({
   urn,
   articleId,
+  tipo_atto,
+  numero_atto,
+  data_atto,
   url,
   annotationsCount,
   highlightsCount,
@@ -131,7 +137,7 @@ export function ArticleToolbar({
       {/* Plugin Slot */}
       <PluginSlot
         name="article-toolbar"
-        props={{ urn, articleId }}
+        props={{ urn, articleId, tipo_atto, numero_atto, data_atto }}
         className="flex items-center gap-1"
       />
 

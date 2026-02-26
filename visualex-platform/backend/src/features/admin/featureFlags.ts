@@ -47,8 +47,8 @@ const AVAILABLE_FEATURES = [
  * Middleware to check admin role
  */
 function requireAdmin(req: Request, res: Response, next: NextFunction): void {
-  const user = (req as { user?: { role: string } }).user;
-  if (!user || user.role !== 'admin') {
+  const user = (req as { user?: { isAdmin: boolean } }).user;
+  if (!user || !user.isAdmin) {
     res.status(403).json({ error: 'Admin access required' });
     return;
   }

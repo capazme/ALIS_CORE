@@ -256,8 +256,7 @@ class LiveEnrichmentService:
             ValueError: Se articolo non trovato
         """
         from merlt.clients import Norma, NormaVisitata
-        # TODO: Implement generate_urn locally
-        # from merlt.utils.urngenerator import generate_urn
+        from merlt.utils import NORMATTIVA_URN_CODICI
 
         norma = Norma(tipo_atto=tipo_atto)
         nv = NormaVisitata(norma=norma, numero_articolo=articolo)
@@ -268,9 +267,14 @@ class LiveEnrichmentService:
             if not text:
                 raise ValueError(f"Articolo {articolo} non trovato in {tipo_atto}")
 
-            # Genera URN - TODO: use local implementation
-            # urn = generate_urn(tipo_atto, article=articolo)
-            urn = nv.urn  # Use URN from NormaVisitata
+            # Build URN: prefer NormaVisitata.urn, fallback to NORMATTIVA_URN_CODICI
+            urn = nv.urn
+            if not urn:
+                codice_urn = NORMATTIVA_URN_CODICI.get(tipo_atto.lower().strip(), "")
+                if codice_urn:
+                    urn = f"urn:nir:stato:{codice_urn}~art{articolo}!vig="
+                else:
+                    urn = f"urn:nir:stato:{tipo_atto.lower().replace(' ', '.')}~art{articolo}!vig="
 
             return ArticleData(
                 urn=urn,

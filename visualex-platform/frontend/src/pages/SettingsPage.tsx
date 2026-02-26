@@ -256,9 +256,7 @@ export function SettingsPage() {
     setProfileSuccess(false);
 
     try {
-      // TODO: Implement profile update API
-      // await updateProfile({ username, email });
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate
+      await profileService.updateAccountInfo({ username, email });
       setProfileSuccess(true);
       setTimeout(() => setProfileSuccess(false), 3000);
     } catch (err: unknown) {

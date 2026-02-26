@@ -16,6 +16,7 @@ Architettura:
                      Runtime Cache
 """
 
+import json
 import structlog
 import yaml
 from pathlib import Path
@@ -23,6 +24,10 @@ from typing import Dict, Optional, Any
 from datetime import datetime
 from uuid import uuid4
 
+from sqlalchemy import Column, String, Boolean, DateTime, Text, select, JSON as GenericJSON
+from sqlalchemy.sql import func
+
+from merlt.rlcf.database import Base
 from merlt.weights.config import (
     WeightConfig,
     WeightCategory,
@@ -34,6 +39,20 @@ from merlt.weights.config import (
 )
 
 log = structlog.get_logger()
+
+
+class WeightVersion(Base):
+    """SQLAlchemy model for weight version persistence."""
+    __tablename__ = "weight_versions"
+
+    id = Column(String(50), primary_key=True)
+    experiment_id = Column(String(100), nullable=False, index=True)
+    version_tag = Column(String(50), nullable=True)
+    config_json = Column(GenericJSON, nullable=True)
+    metrics_json = Column(GenericJSON, nullable=True)
+    is_active = Column(Boolean, server_default="false", nullable=False)
+    created_at = Column(DateTime, server_default=func.now(), nullable=True)
+    created_by = Column(String(100), nullable=True)
 
 
 class WeightStore:
@@ -268,15 +287,86 @@ class WeightStore:
         self._cache[cache_key] = config
         return config
 
+    def _config_to_dict(self, config: WeightConfig) -> Dict[str, Any]:
+        """Convert WeightConfig to a JSON-serializable dict (inverse of _parse_yaml_to_config)."""
+        def _lw_to_dict(lw: LearnableWeight) -> Dict[str, Any]:
+            return {
+                "default": lw.default,
+                "bounds": list(lw.bounds) if lw.bounds else [0.0, 1.0],
+                "learnable": lw.learnable,
+                "learning_rate": lw.learning_rate,
+            }
+
+        result: Dict[str, Any] = {
+            "version": config.version,
+            "schema_version": config.schema_version,
+        }
+
+        if config.retrieval:
+            result["retrieval"] = {
+                "alpha": _lw_to_dict(config.retrieval.alpha),
+                "over_retrieve_factor": config.retrieval.over_retrieve_factor,
+                "max_graph_hops": config.retrieval.max_graph_hops,
+                "default_graph_score": config.retrieval.default_graph_score,
+            }
+
+        if config.expert_traversal:
+            et = {}
+            for name, etw in config.expert_traversal.items():
+                et[name] = {k: _lw_to_dict(v) for k, v in etw.weights.items()}
+                et[name]["default"] = etw.default_weight
+            result["expert_traversal"] = et
+
+        if config.rlcf:
+            result["rlcf"] = {
+                "baseline_credentials": _lw_to_dict(config.rlcf.baseline_credentials),
+                "track_record": _lw_to_dict(config.rlcf.track_record),
+                "recent_performance": _lw_to_dict(config.rlcf.recent_performance),
+                "track_record_update_factor": _lw_to_dict(config.rlcf.track_record_update_factor),
+            }
+
+        if config.gating:
+            result["gating"] = {
+                "expert_priors": {k: _lw_to_dict(v) for k, v in config.gating.expert_priors.items()},
+            }
+
+        return result
+
     async def _load_from_database(self, experiment_id: str) -> Optional[WeightConfig]:
         """Carica pesi da database per un esperimento specifico."""
         if not self.database_url:
             return None
 
-        # TODO: Implementare query database quando schema creato
-        # Per ora ritorna None (fallback a YAML)
-        log.debug("Database weight loading not yet implemented", experiment_id=experiment_id)
-        return None
+        try:
+            from merlt.rlcf.database import get_async_session
+
+            async with get_async_session() as session:
+                stmt = (
+                    select(WeightVersion)
+                    .where(WeightVersion.experiment_id == experiment_id)
+                    .where(WeightVersion.is_active == True)
+                    .order_by(WeightVersion.created_at.desc())
+                    .limit(1)
+                )
+                result = await session.execute(stmt)
+                row = result.scalar_one_or_none()
+
+                if row is None:
+                    return None
+
+                config_data = row.config_json
+                if not config_data:
+                    return None
+
+                return self._parse_yaml_to_config(config_data)
+
+        except Exception as e:
+            log.warning(
+                "Failed to load weights from database, falling back to YAML",
+                experiment_id=experiment_id,
+                error=str(e),
+            )
+            return None
 
     async def save_weights(
         self,
@@ -301,13 +391,53 @@ class WeightStore:
         config.updated_at = datetime.now().isoformat()
         config.metrics = metrics
 
-        # TODO: Implementare salvataggio database quando schema creato
-        log.info(
-            "Weights saved (in-memory only)",
-            version_id=version_id,
-            experiment_id=experiment_id,
-            has_metrics=metrics is not None
-        )
+        if self.database_url:
+            try:
+                from merlt.rlcf.database import get_async_session
+
+                async with get_async_session() as session:
+                    # Deactivate previous active versions for this experiment
+                    from sqlalchemy import update
+                    await session.execute(
+                        update(WeightVersion)
+                        .where(WeightVersion.experiment_id == experiment_id)
+                        .where(WeightVersion.is_active == True)
+                        .values(is_active=False)
+                    )
+
+                    row = WeightVersion(
+                        id=version_id,
+                        experiment_id=experiment_id,
+                        version_tag=config.version,
+                        config_json=self._config_to_dict(config),
+                        metrics_json=metrics,
+                        is_active=True,
+                        created_by="weight_store",
+                    )
+                    session.add(row)
+
+                log.info(
+                    "Weights saved to database",
+                    version_id=version_id,
+                    experiment_id=experiment_id,
+                )
+
+            except Exception as e:
+                log.warning(
+                    "Failed to save weights to database, saved in-memory only. "
+                    "Weights will be LOST on restart.",
+                    version_id=version_id,
+                    experiment_id=experiment_id,
+                    error=str(e),
+                )
+        else:
+            log.warning(
+                "Weights saved in-memory only — no database_url configured. "
+                "Weights will be LOST on restart. Pass database_url to WeightStore for persistence.",
+                version_id=version_id,
+                experiment_id=experiment_id,
+                has_metrics=metrics is not None,
+            )
 
         # Invalida cache per questo esperimento
         cache_keys_to_remove = [

@@ -16,7 +16,7 @@ Run:
 """
 
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from fastapi import FastAPI
@@ -45,7 +45,7 @@ def _make_fake_api_key(role: str = "admin") -> ApiKey:
         rate_limit_tier="unlimited",
         is_active=True,
         description="Test consent key",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         expires_at=None,
         last_used_at=None,
     )
@@ -76,7 +76,7 @@ def _make_trace_dict(
         "routing_method": "neural",
         "is_archived": False,
         "archived_at": None,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
     }
 
 
@@ -93,7 +93,7 @@ def _make_trace_summary(
         synthesis_mode="convergent",
         confidence=0.85,
         execution_time_ms=1200,
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         is_archived=False,
     )
 
@@ -146,7 +146,7 @@ class TestApplyConsentFilter:
         trace.routing_method = "neural"
         trace.is_archived = False
         trace.archived_at = None
-        trace.created_at = datetime.utcnow()
+        trace.created_at = datetime.now(UTC)
         return trace
 
     def test_full_consent_no_redaction(self):
@@ -463,7 +463,7 @@ class TestStoredConsentPersistence:
         trace.routing_method = "neural"
         trace.is_archived = False
         trace.archived_at = None
-        trace.created_at = datetime.utcnow()
+        trace.created_at = datetime.now(UTC)
 
         result = service._apply_consent_filter(trace, "full")
 
@@ -499,7 +499,7 @@ class TestStoredConsentPersistence:
         trace.routing_method = "llm_fallback"
         trace.is_archived = False
         trace.archived_at = None
-        trace.created_at = datetime.utcnow()
+        trace.created_at = datetime.now(UTC)
 
         result = service._apply_consent_filter(trace, "full")
 

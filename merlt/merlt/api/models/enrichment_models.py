@@ -179,9 +179,9 @@ class LiveEnrichmentRequest(BaseModel):
         description="Numero articolo",
         examples=["1337", "52", "2043"]
     )
-    user_id: str = Field(..., description="UUID utente VisuaLex")
+    user_id: str = Field("anonymous", description="UUID utente VisuaLex")
     user_authority: float = Field(
-        ...,
+        0.5,
         ge=0.0,
         le=1.0,
         description="Authority score utente (0-1)"
@@ -477,7 +477,7 @@ class DocumentExtractionResponse(BaseModel):
 
 class PendingQueueRequest(BaseModel):
     """Request per ottenere la coda di pending per un utente."""
-    user_id: str
+    user_id: str = Field("anonymous", description="ID utente per escludere voti già espressi")
     legal_domain: Optional[str] = Field(
         None,
         description="Filtra per dominio giuridico (es. 'penale', 'civile')"

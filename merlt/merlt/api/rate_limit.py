@@ -29,6 +29,7 @@ Usage:
         ...
 """
 
+import os
 import time
 import structlog
 from typing import Optional
@@ -72,9 +73,9 @@ async def _get_redis():
     try:
         import redis.asyncio as aioredis
         client = aioredis.Redis(
-            host="localhost",
-            port=6379,
-            db=1,  # separate DB from FalkorDB (db=0)
+            host=os.environ.get("REDIS_HOST", "localhost"),
+            port=int(os.environ.get("REDIS_PORT", "6379")),
+            db=int(os.environ.get("REDIS_RATE_LIMIT_DB", "1")),
             decode_responses=True,
             socket_connect_timeout=2,
         )

@@ -79,10 +79,10 @@ export type PluginSlotName =
  * Props passed to slot components
  */
 export interface SlotProps {
-  'article-sidebar': { urn: string; articleId: string };
-  'article-toolbar': { urn: string; articleId: string };
-  'article-footer': { urn: string; articleId: string };
-  'article-content-overlay': { urn: string; articleId: string; contentRef: RefObject<HTMLElement> };
+  'article-sidebar': { urn: string; articleId: string; tipo_atto?: string; numero_atto?: string; data_atto?: string };
+  'article-toolbar': { urn: string; articleId: string; tipo_atto?: string; numero_atto?: string; data_atto?: string };
+  'article-footer': { urn: string; articleId: string; tipo_atto?: string; numero_atto?: string; data_atto?: string };
+  'article-content-overlay': { urn: string; articleId: string; contentRef: RefObject<HTMLElement>; tipo_atto?: string };
   'search-filters': { currentFilters: Record<string, unknown> };
   'user-menu': { userId: string };
   'settings-panel': { userId: string };

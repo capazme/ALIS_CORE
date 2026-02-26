@@ -621,12 +621,25 @@ class TestConstants:
 # TEST INTEGRATION
 # =============================================================================
 
+def _falkordb_available() -> bool:
+    """Check if FalkorDB is reachable."""
+    try:
+        import redis
+
+        r = redis.Redis(host="localhost", port=6380, socket_connect_timeout=3)
+        r.ping()
+        r.close()
+        return True
+    except Exception:
+        return False
+
+
 @pytest.mark.integration
 class TestIntegration:
     """Test di integrazione (richiedono FalkorDB running)."""
 
     @pytest.mark.asyncio
-    @pytest.mark.skip(reason="Richiede FalkorDB running")
+    @pytest.mark.skipif(not _falkordb_available(), reason="FalkorDB not available on port 6380")
     async def test_full_ingestion_flow(self):
         """Test flusso completo ingestion."""
         from merlt.api.models.ingestion import (

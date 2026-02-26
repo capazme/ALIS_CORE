@@ -349,7 +349,7 @@ async def get_statistics_overview(
           "correlations": {...}
         }
     """
-    log.info("Getting statistics overview")
+    log.warning("Statistics endpoints return empty data — RLCF data collection not yet implemented")
 
     hypothesis_tests = _get_empty_hypothesis_tests()
     distributions = _get_empty_distributions()

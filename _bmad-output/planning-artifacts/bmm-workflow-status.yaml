@@ -191,20 +191,21 @@ workflow_status:
         agent: "tea"
         command: "/bmad:bmm:workflows:testarch-test-design"
         completed: "2026-01-24"
-        last_run: "2026-02-16"
+        last_run: "2026-02-17"
         outputs:
           - "_bmad-output/planning-artifacts/test-design-system.md"  # Phase 3 pre-implementation
           - "_bmad-output/test-design-system.md"  # Post-implementation comprehensive review
+          - "_bmad-output/test-design-epic-all.md"  # Epic-Level post-implementation (all 10 epics)
         key_findings:
-          - "6 high-priority risks (score>=6): 3 SEC, 1 TECH, 1 DATA, 1 PERF"
-          - "R-001 (Score 9): 26+ API endpoints lack auth — only query wired"
-          - "40+ bare except handlers cause silent error propagation"
-          - "JWT parsing without signature verification in ws_router.py"
-          - "Frontend has zero test infrastructure (no Vitest, no ESLint)"
-          - "Backend has 100+ test files with real DB isolation (zero-mock policy)"
-          - "Test pyramid: 45% unit, 40% integration, 15% E2E"
-          - "113 tests planned, ~97 hours (~12 days), Sprint 0: 19 hours infra"
-          - "Gate decision: CONCERNS — 6 high-risk items require mitigation"
+          - "4 high-priority risks (score>=6) down from 6 — 2 mitigated (auth wired, CI created)"
+          - "R-001 (Score 9→3): Auth wired to all routers + 90 P1 coverage tests"
+          - "R-015 (Score 6): Zero E2E tests — Playwright config exists but no test files"
+          - "R-017 (Score 6): In-memory persistence (weights, training buffer, _runs)"
+          - "R-002 (Score 6): JWT ws_router still unverified"
+          - "R-004 (Score 6): Cross-store consistency still unaddressed"
+          - "142 test files exist (116 merlt, 12 platform-backend, 9 platform-frontend, 5 merlt-frontend)"
+          - "87 new tests planned, ~72.5 hours (~9 days)"
+          - "Gate decision: CONCERNS (Improved) — 4 high-risk items, down from 6"
       - id: "implementation-readiness"
         status: "_bmad-output/planning-artifacts/implementation-readiness-report-2026-01-25.md"
         agent: "architect"

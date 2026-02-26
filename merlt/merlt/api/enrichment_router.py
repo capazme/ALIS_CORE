@@ -16,6 +16,7 @@ Endpoint:
 """
 
 import asyncio
+import os
 import structlog
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
@@ -156,6 +157,15 @@ class ExtractionState:
 
 _extractions: Dict[str, ExtractionState] = {}  # article_key -> state
 _extractions_lock = asyncio.Lock()
+
+# Per-article locks for concurrent enrichment protection
+_article_locks: Dict[str, asyncio.Lock] = {}
+
+async def _get_article_lock(article_key: str) -> asyncio.Lock:
+    """Get or create an asyncio.Lock for a specific article."""
+    if article_key not in _article_locks:
+        _article_locks[article_key] = asyncio.Lock()
+    return _article_locks[article_key]
 
 
 async def _try_start_extraction(article_key: str, article_urn: str, user_id: str) -> tuple[bool, Optional[ExtractionState]]:
@@ -1006,7 +1016,7 @@ async def live_enrich(
                     ambito=entity_data.ambito,
                     fonte="llm_extraction",
                     llm_confidence=entity_data.llm_confidence,
-                    llm_model="gpt-4",  # TODO: get from service
+                    llm_model=os.environ.get("LLM_ENRICHMENT_MODEL", "google/gemini-2.5-flash"),
                     validation_status="pending",
                     contributed_by=request.user_id,
                     contributor_authority=voter_authority,
@@ -3364,11 +3374,11 @@ async def export_dossier_training_set_full(
                         synthesis=trace.synthesis_text or "",
                         mode=trace.synthesis_mode or "convergent",
                         experts_used=trace.selected_experts or [],
-                        confidence=0.85,  # Placeholder - would need to store confidence
+                        confidence=trace.confidence if hasattr(trace, 'confidence') and trace.confidence else 0.0,
                         feedback=feedback_data,
                         created_at=trace.created_at,
                     ))
-                    confidences.append(0.85)
+                    confidences.append(trace.confidence if hasattr(trace, 'confidence') and trace.confidence else 0.0)
 
         if confidences:
             avg_confidence = sum(confidences) / len(confidences)

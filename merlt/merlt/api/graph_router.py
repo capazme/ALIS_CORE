@@ -640,7 +640,7 @@ def _generate_norm_entity_id(urn: str) -> str:
         >>> _generate_norm_entity_id("urn:nir:stato:regio.decreto:1942-03-16;262:2~art1218")
         "norma:a1b2c3d4"
     """
-    hash_digest = hashlib.md5(urn.encode()).hexdigest()[:8]
+    hash_digest = hashlib.md5(urn.encode(), usedforsecurity=False).hexdigest()[:8]
     return f"norma:{hash_digest}"
 
 

@@ -138,7 +138,7 @@ function parseURN(urn: string): ParseResult {
     if (fullMatch) {
       date = fullMatch[1] || '';
       actNumber = fullMatch[2] || '';
-      article = fullMatch[3] || '1';
+      article = fullMatch[3] || '';
     } else {
       // Try simpler pattern for codici
       const simpleMatch = lastPart.match(/^(\d{4}-\d{2}-\d{2});?(\d+)?/);
@@ -163,7 +163,7 @@ function parseURN(urn: string): ParseResult {
         act_type: actType,
         date: date,
         act_number: actNumber,
-        article: article || '1',
+        article: article || '',
         version: 'vigente',
         show_brocardi_info: true
       }
@@ -217,7 +217,7 @@ export function parseNormattivaUrl(url: string): ParseResult {
           success: true,
           params: {
             date: dateMatch[1],
-            article: '1',
+            article: '',
             version: 'vigente',
             show_brocardi_info: true
           }

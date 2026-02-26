@@ -164,7 +164,7 @@ Estrai entità giuridiche strutturate. Rispondi SEMPRE in formato JSON valido.""
         return {
             "model": os.environ.get(
                 "LLM_ENRICHMENT_MODEL",
-                llm_config.get("default_model", "anthropic/claude-3-5-sonnet-20241022")
+                llm_config.get("default_model", "google/gemini-2.5-flash")
             ),
             "temperature": llm_config.get("temperature", 0.0),
             "max_tokens": llm_config.get("max_tokens", 2000),

@@ -20,7 +20,7 @@ Run:
 import hashlib
 import time
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from fastapi import HTTPException
@@ -46,8 +46,8 @@ def valid_api_key():
         rate_limit_tier="standard",
         is_active=True,
         description="Test user key",
-        created_at=datetime.utcnow(),
-        expires_at=datetime.utcnow() + timedelta(days=30),
+        created_at=datetime.now(UTC).replace(tzinfo=None),
+        expires_at=datetime.now(UTC).replace(tzinfo=None) + timedelta(days=30),
         last_used_at=None,
     )
 
@@ -63,7 +63,7 @@ def admin_api_key():
         rate_limit_tier="unlimited",
         is_active=True,
         description="Test admin key",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC).replace(tzinfo=None),
         expires_at=None,
         last_used_at=None,
     )
@@ -80,7 +80,7 @@ def inactive_api_key():
         rate_limit_tier="standard",
         is_active=False,
         description="Inactive test key",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC).replace(tzinfo=None),
         expires_at=None,
         last_used_at=None,
     )
@@ -97,8 +97,8 @@ def expired_api_key():
         rate_limit_tier="standard",
         is_active=True,
         description="Expired test key",
-        created_at=datetime.utcnow() - timedelta(days=60),
-        expires_at=datetime.utcnow() - timedelta(days=1),
+        created_at=datetime.now(UTC).replace(tzinfo=None) - timedelta(days=60),
+        expires_at=datetime.now(UTC).replace(tzinfo=None) - timedelta(days=1),
         last_used_at=None,
     )
 

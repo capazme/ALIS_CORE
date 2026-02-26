@@ -23,9 +23,11 @@ Esempio:
     >>> await tracker.record_outcome(exp.id, variant, {"mrr": 0.85})
 """
 
+import json
+import os
 import structlog
 from typing import Dict, Optional, List, Any
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from uuid import uuid4
 import hashlib
@@ -35,6 +37,43 @@ from merlt.weights.config import WeightConfig, ExperimentConfig, ExperimentVaria
 from merlt.weights.store import WeightStore
 
 log = structlog.get_logger()
+
+# Redis singleton for experiment persistence (db=2)
+_exp_redis_client = None
+_exp_redis_checked = False
+
+# TTL: 30 days in seconds
+_EXP_REDIS_TTL = 30 * 24 * 3600
+
+
+async def _get_exp_redis():
+    """Get or create Redis async client for experiment storage. Returns None if unavailable."""
+    global _exp_redis_client, _exp_redis_checked
+
+    if _exp_redis_checked and _exp_redis_client is None:
+        return None
+
+    if _exp_redis_client is not None:
+        return _exp_redis_client
+
+    _exp_redis_checked = True
+    try:
+        import redis.asyncio as aioredis
+        client = aioredis.Redis(
+            host=os.environ.get("REDIS_HOST", "localhost"),
+            port=int(os.environ.get("REDIS_PORT", "6379")),
+            db=2,
+            decode_responses=True,
+            socket_connect_timeout=2,
+        )
+        await client.ping()
+        _exp_redis_client = client
+        log.info("Experiment Redis connected (db=2)")
+        return _exp_redis_client
+    except Exception as e:
+        log.warning("Experiment Redis unavailable, using in-memory only", error=str(e))
+        _exp_redis_client = None
+        return None
 
 
 @dataclass
@@ -131,6 +170,60 @@ class ExperimentTracker:
 
         log.info("ExperimentTracker initialized")
 
+    def _experiment_to_dict(self, exp: Experiment) -> Dict[str, Any]:
+        """Serialize Experiment to JSON-safe dict (excluding WeightConfig variants)."""
+        return {
+            "id": exp.id,
+            "name": exp.name,
+            "description": exp.description,
+            "status": exp.status,
+            "allocation": exp.allocation,
+            "created_at": exp.created_at,
+            "completed_at": exp.completed_at,
+            "metrics_by_variant": exp.metrics_by_variant,
+            "user_assignments": exp.user_assignments,
+        }
+
+    def _experiment_from_dict(self, data: Dict[str, Any]) -> Experiment:
+        """Deserialize Experiment from dict (without variants — those stay in-memory)."""
+        return Experiment(
+            id=data["id"],
+            name=data["name"],
+            description=data.get("description"),
+            status=data.get("status", "draft"),
+            allocation=data.get("allocation", {}),
+            created_at=data.get("created_at", ""),
+            completed_at=data.get("completed_at"),
+            metrics_by_variant=data.get("metrics_by_variant", {}),
+            user_assignments=data.get("user_assignments", {}),
+        )
+
+    async def _persist_to_redis(self, exp: Experiment) -> None:
+        """Persist experiment state to Redis with graceful degradation."""
+        redis = await _get_exp_redis()
+        if redis is None:
+            return
+        try:
+            key = f"experiment:{exp.id}"
+            await redis.set(key, json.dumps(self._experiment_to_dict(exp)), ex=_EXP_REDIS_TTL)
+        except Exception as e:
+            log.warning("Failed to persist experiment to Redis", experiment_id=exp.id, error=str(e))
+
+    async def _load_from_redis(self, experiment_id: str) -> Optional[Experiment]:
+        """Load experiment from Redis on cache miss (cold-start recovery)."""
+        redis = await _get_exp_redis()
+        if redis is None:
+            return None
+        try:
+            key = f"experiment:{experiment_id}"
+            data = await redis.get(key)
+            if data is None:
+                return None
+            return self._experiment_from_dict(json.loads(data))
+        except Exception as e:
+            log.warning("Failed to load experiment from Redis", experiment_id=experiment_id, error=str(e))
+            return None
+
     async def create_experiment(
         self,
         name: str,
@@ -175,6 +268,9 @@ class ExperimentTracker:
 
         self._experiments[exp_id] = experiment
 
+        # Persist to Redis
+        await self._persist_to_redis(experiment)
+
         log.info(
             "Experiment created",
             experiment_id=exp_id,
@@ -203,7 +299,12 @@ class ExperimentTracker:
             Nome variante ("control" o "treatment")
         """
         if experiment_id not in self._experiments:
-            raise ValueError(f"Experiment {experiment_id} not found")
+            # Try loading from Redis (cold-start recovery)
+            recovered = await self._load_from_redis(experiment_id)
+            if recovered:
+                self._experiments[experiment_id] = recovered
+            else:
+                raise ValueError(f"Experiment {experiment_id} not found")
 
         exp = self._experiments[experiment_id]
 
@@ -213,7 +314,7 @@ class ExperimentTracker:
 
         # Deterministic assignment via hash
         hash_input = f"{experiment_id}:{user_id}"
-        hash_value = int(hashlib.md5(hash_input.encode()).hexdigest(), 16)
+        hash_value = int(hashlib.md5(hash_input.encode(), usedforsecurity=False).hexdigest(), 16)
         normalized = (hash_value % 10000) / 10000  # [0, 1)
 
         # Assign based on allocation
@@ -276,6 +377,9 @@ class ExperimentTracker:
             raise ValueError(f"Variant {variant} not in experiment")
 
         exp.metrics_by_variant[variant].append(metrics)
+
+        # Persist updated metrics to Redis
+        await self._persist_to_redis(exp)
 
         log.debug(
             "Outcome recorded",
@@ -391,6 +495,8 @@ class ExperimentTracker:
         exp.status = "stopped"
         exp.completed_at = datetime.now().isoformat()
 
+        await self._persist_to_redis(exp)
+
         log.info("Experiment stopped", experiment_id=experiment_id)
         return exp
 
@@ -415,6 +521,8 @@ class ExperimentTracker:
         exp = self._experiments[experiment_id]
         exp.status = "completed"
         exp.completed_at = datetime.now().isoformat()
+
+        await self._persist_to_redis(exp)
 
         # Se winner specificato, salva come nuovi pesi
         if winner and winner in exp.variants:

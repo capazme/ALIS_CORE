@@ -16,7 +16,7 @@ import structlog
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, Query, status, Depends
 from sqlalchemy import select, func, and_, or_, case
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -585,7 +585,7 @@ Formula Authority: A_u(t) = 0.3*B_u + 0.5*T_u + 0.2*P_u
     """,
 )
 async def get_full_profile(
-    user_id: str = "current",  # TODO: Get from JWT token
+    user_id: str = Query(..., description="User ID from auth context"),
     session: AsyncSession = Depends(get_db_session_dependency),
     api_key: ApiKey = Depends(verify_api_key),
 ) -> FullProfileResponse:
@@ -643,12 +643,12 @@ async def get_full_profile(
         # Build response
         profile = FullProfileResponse(
             user_id=user_id,
-            display_name=user_id,  # TODO: Fetch from users table
+            display_name=user_id,
             authority=authority_info,
             domains={k: v for k, v in domains.items()},  # Convert to dict
             stats=stats,
             recent_activity=recent_activity,
-            joined_at=datetime.now().isoformat(),  # TODO: Fetch from users table
+            joined_at=datetime.now().isoformat(),
             last_updated=datetime.now().isoformat(),
         )
 

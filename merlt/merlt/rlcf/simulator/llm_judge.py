@@ -232,8 +232,11 @@ Non aggiungere altro testo prima o dopo il JSON."""
                 from merlt.rlcf.ai_service import OpenRouterService
                 self.ai_service = OpenRouterService()
             except ImportError:
-                logger.warning("OpenRouterService non disponibile, usando mock")
-                self.ai_service = MockAIService()
+                raise RuntimeError(
+                    "OpenRouterService non disponibile. Installa le dipendenze AI "
+                    "o passa un ai_service esplicito a LLMJudge(). "
+                    "Per testing, usa LLMJudge(ai_service=MockAIService())."
+                )
 
         self._initialized = True
 
@@ -394,7 +397,11 @@ Non aggiungere altro testo prima o dopo il JSON."""
 
 
 class MockAIService:
-    """Mock AI service per testing senza API."""
+    """Mock AI service per testing senza API.
+
+    ATTENZIONE: produce punteggi randomizzati, NON usare in produzione.
+    Uso corretto: LLMJudge(ai_service=MockAIService()) nei test.
+    """
 
     async def generate_response_async(
         self,

@@ -1,0 +1,381 @@
+
+           Claude Code v2.1.42
+▗ ▗   ▖ ▖  Opus 4.6 · Claude Max
+           ~/Desktop/CODE/ALIS_CORE
+  ▘▘ ▝▝    Opus 4.6 is here · $50 free extra usage · /extra-usage to enable
+
+╭──────────────────────────────────────────────────────────────────────────────╮
+│ Plan to implement                                                            │
+│                                                                              │
+│ Epic 9: Admin & Monitoring — Implementation Plan                             │
+│                                                                              │
+│ Contesto                                                                     │
+│                                                                              │
+│ Epics 1-8 complete + Block A/B tech debt resolved. Epic 9 completa il layer  │
+│ admin.                                                                       │
+│ 5 gap identificati. Ordine di esecuzione: quick-win prima (wrappano logica   │
+│ esistente), poi nuove feature.                                               │
+│                                                                              │
+│ ---                                                                          │
+│ Story 9-1: Expert Metrics con dati reali (~200 LOC)                          │
+│                                                                              │
+│ Obiettivo: ExpertsTab mostra metriche reali, non placeholder.                │
+│                                                                              │
+│ Backend                                                                      │
+│                                                                              │
+│ Modifica: merlt/merlt/api/expert_metrics_router.py                           │
+│ - get_expert_performance(): query QATrace per calcolare:                     │
+│   - Per-expert latency da full_trace JSONB (p50, p95, p99)                   │
+│   - Per-expert usage count da selected_experts array                         │
+│   - Per-expert avg confidence da trace data                                  │
+│   - Feedback score medio da QAFeedback join                                  │
+│ - get_query_stats(): aggregare QATrace per tipo query (se categorizzato)     │
+│ - get_recent_queries(): query QATrace ORDER BY created_at DESC con join su   │
+│ QAFeedback                                                                   │
+│                                                                              │
+│ Schema: Nessuna modifica — i dati sono gia' in QATrace.full_trace (JSONB)    │
+│                                                                              │
+│ Frontend                                                                     │
+│                                                                              │
+│ Nessuna modifica — ExpertsTab gia' pronto, si popola automaticamente.        │
+│                                                                              │
+│ Verifica                                                                     │
+│                                                                              │
+│ # Endpoint deve ritornare dati reali (non vuoti)                             │
+│ curl http://localhost:8000/api/v1/expert-metrics/performance | python -m     │
+│ json.tool                                                                    │
+│                                                                              │
+│ ---                                                                          │
+│ Story 9-3: Circuit Breaker Admin API (~150 LOC)                              │
+│                                                                              │
+│ Obiettivo: Esporre via API la gestione dei circuit breaker gia'              │
+│ implementati.                                                                │
+│                                                                              │
+│ Backend                                                                      │
+│                                                                              │
+│ Nuovo file: merlt/merlt/api/circuit_breaker_router.py                        │
+│ - GET /circuit-breaker/status — stato di tutti i breaker (usa                │
+│ CircuitBreakerRegistry.get_instance())                                       │
+│ - GET /circuit-breaker/{expert_type} — stato + stats di un breaker specifico │
+│ - PUT /circuit-breaker/{expert_type}/config — aggiorna thresholds            │
+│ (failure_threshold, recovery_timeout)                                        │
+│ - POST /circuit-breaker/{expert_type}/reset — reset manuale                  │
+│                                                                              │
+│ Modifica: merlt/merlt/app.py — registrare il nuovo router                    │
+│                                                                              │
+│ Frontend                                                                     │
+│                                                                              │
+│ Modifica: visualex-merlt/frontend/src/components/merlt/dashboard/tabs/Archit │
+│ ectureTab.tsx                                                                │
+│ - Aggiungere sezione "Circuit Breakers" con:                                 │
+│   - Tabella stato (expert, state, failure_count, last_failure)               │
+│   - Bottone Reset per-expert                                                 │
+│   - Form per modificare thresholds                                           │
+│                                                                              │
+│ Nuovo service: aggiungere funzioni in dashboardService.ts o nuovo            │
+│ circuitBreakerService.ts                                                     │
+│                                                                              │
+│ Verifica                                                                     │
+│                                                                              │
+│ curl http://localhost:8000/api/v1/circuit-breaker/status | python -m         │
+│ json.tool                                                                    │
+│                                                                              │
+│ ---                                                                          │
+│ Story 9-4: Regression Test Runner API (~150 LOC)                             │
+│                                                                              │
+│ Obiettivo: Esporre via API il regression runner gia' implementato.           │
+│                                                                              │
+│ Backend                                                                      │
+│                                                                              │
+│ Nuovo file: merlt/merlt/api/regression_router.py                             │
+│ - POST /regression/run — avvia suite completa (async, ritorna run_id)        │
+│ - GET /regression/status/{run_id} — stato esecuzione                         │
+│ (pending/running/completed/failed)                                           │
+│ - GET /regression/results/{run_id} — risultati dettagliati (per-query        │
+│ scores, comparison)                                                          │
+│ - GET /regression/baselines — lista baseline correnti                        │
+│ - POST /regression/baselines/update — aggiorna baseline con risultati        │
+│ correnti                                                                     │
+│                                                                              │
+│ Modifica: merlt/merlt/app.py — registrare il nuovo router                    │
+│                                                                              │
+│ Pattern: Background task con asyncio.create_task() per non bloccare la       │
+│ request                                                                      │
+│                                                                              │
+│ Frontend                                                                     │
+│                                                                              │
+│ Modifica:                                                                    │
+│ visualex-merlt/frontend/src/components/merlt/dashboard/tabs/ExpertsTab.tsx   │
+│ - Aggiungere sezione "Regression Tests" con:                                 │
+│   - Bottone "Run Regression Suite"                                           │
+│   - Progress indicator durante esecuzione                                    │
+│   - Tabella risultati (query, expected score, actual score, delta)           │
+│                                                                              │
+│ Nuovo service: funzioni in expertMetricsService.ts                           │
+│                                                                              │
+│ Verifica                                                                     │
+│                                                                              │
+│ curl -X POST http://localhost:8000/api/v1/regression/run | python -m         │
+│ json.tool                                                                    │
+│ # Aspettare completamento                                                    │
+│ curl http://localhost:8000/api/v1/regression/results/{run_id} | python -m    │
+│ json.tool                                                                    │
+│                                                                              │
+│ ---                                                                          │
+│ Story 9-2: Ingestion Scheduling (~400 LOC)                                   │
+│                                                                              │
+│ Obiettivo: Admin puo' configurare schedule per ingestione automatica norme.  │
+│                                                                              │
+│ Backend                                                                      │
+│                                                                              │
+│ Nuovo file: merlt/merlt/services/ingestion_scheduler.py (~150 LOC)           │
+│ - Classe IngestionScheduler basata su APScheduler AsyncIOScheduler           │
+│ - Metodi: add_schedule(), remove_schedule(), list_schedules(), pause(),      │
+│ resume()                                                                     │
+│ - Tipi schedule: cron expression, interval (hours/days), one-time            │
+│ - Integrazione con ingestion_api.py per trigger effettivo                    │
+│ - Persistenza: schedules salvati in PostgreSQL (nuovo model                  │
+│ IngestionSchedule)                                                           │
+│                                                                              │
+│ Nuovo file: merlt/merlt/api/schedule_router.py (~100 LOC)                    │
+│ - GET /ingestion/schedules — lista schedule attivi                           │
+│ - POST /ingestion/schedules — crea nuovo schedule (tipo_atto, cron_expr,     │
+│ enabled)                                                                     │
+│ - PUT /ingestion/schedules/{schedule_id} — modifica                          │
+│ - DELETE /ingestion/schedules/{schedule_id} — elimina                        │
+│ - POST /ingestion/schedules/{schedule_id}/toggle — pausa/riprendi            │
+│                                                                              │
+│ Modifica: merlt/merlt/experts/models.py — aggiungere model IngestionSchedule │
+│ Modifica: merlt/merlt/app.py — registrare router + inizializzare scheduler   │
+│ Modifica: merlt/pyproject.toml — aggiungere apscheduler>=3.10.0              │
+│                                                                              │
+│ Alembic migration                                                            │
+│                                                                              │
+│ cd merlt && alembic revision --autogenerate -m                               │
+│ "add_ingestion_schedule_table"                                               │
+│                                                                              │
+│ Frontend                                                                     │
+│                                                                              │
+│ Nuovo componente: visualex-merlt/frontend/src/components/merlt/dashboard/tab │
+│ s/SchedulesSection.tsx (~100 LOC)                                            │
+│ - Tabella schedule con stato (attivo/pausa), prossima esecuzione, ultima     │
+│ esecuzione                                                                   │
+│ - Form creazione: dropdown tipo_atto, input cron expression, toggle attivo   │
+│ - Bottoni: Pausa, Riprendi, Elimina                                          │
+│ - Integrare nella PipelineTab o come sezione separata                        │
+│                                                                              │
+│ Nuovo service: scheduleService.ts o aggiungere in pipelineService.ts         │
+│                                                                              │
+│ Verifica                                                                     │
+│                                                                              │
+│ # Creare schedule                                                            │
+│ curl -X POST http://localhost:8000/api/v1/ingestion/schedules \              │
+│   -H "Content-Type: application/json" \                                      │
+│   -d '{"tipo_atto": "codice_civile", "cron_expr": "0 3 * * *", "enabled":    │
+│ true}'                                                                       │
+│ # Verificare lista                                                           │
+│ curl http://localhost:8000/api/v1/ingestion/schedules | python -m json.tool  │
+│                                                                              │
+│ ---                                                                          │
+│ Story 9-5: Feedback Quarantine (~350 LOC)                                    │
+│                                                                              │
+│ Obiettivo: Admin puo' flaggare/quarantinare feedback problematico per        │
+│ evitare training su dati cattivi.                                            │
+│                                                                              │
+│ Backend                                                                      │
+│                                                                              │
+│ Schema change in merlt/merlt/experts/models.py:                              │
+│ - QAFeedback: aggiungere colonne:                                            │
+│   - status: str = "approved" (approved/flagged/quarantined/deleted)          │
+│   - quarantine_reason: Optional[str]                                         │
+│   - flagged_at: Optional[datetime]                                           │
+│   - flagged_by: Optional[str]                                                │
+│   - reviewed_at: Optional[datetime]                                          │
+│   - reviewed_by: Optional[str]                                               │
+│                                                                              │
+│ Nuovo file: merlt/merlt/rlcf/quarantine_service.py (~100 LOC)                │
+│ - QuarantineService:                                                         │
+│   - flag_feedback(session, feedback_id, reason, flagged_by) — segna come     │
+│ flagged                                                                      │
+│   - quarantine_feedback(session, feedback_id, reason, reviewer) — quarantina │
+│  (escludi da training)                                                       │
+│   - approve_feedback(session, feedback_id, reviewer) — approva dopo review   │
+│   - auto_detect_outliers(session) — detection automatica: rating outlier,    │
+│ authority troppo bassa, testo sospetto                                       │
+│   - Integrazione: training_scheduler deve filtrare status != 'quarantined'   │
+│ quando costruisce il buffer                                                  │
+│                                                                              │
+│ Modifica: merlt/merlt/api/experts_router.py o nuovo quarantine_router.py:    │
+│ - POST /feedback/{feedback_id}/flag — flag da admin                          │
+│ - POST /feedback/{feedback_id}/quarantine — quarantina                       │
+│ - POST /feedback/{feedback_id}/approve — approva                             │
+│ - GET /feedback/flagged — lista flagged con paginazione                      │
+│ - GET /feedback/quarantined — lista quarantinati                             │
+│ - POST /feedback/auto-detect — trigger outlier detection                     │
+│                                                                              │
+│ Modifica: merlt/merlt/rlcf/training_scheduler.py — filtrare feedback         │
+│ quarantinati dal buffer                                                      │
+│                                                                              │
+│ Alembic migration                                                            │
+│                                                                              │
+│ cd merlt && alembic revision --autogenerate -m                               │
+│ "add_feedback_quarantine_fields"                                             │
+│                                                                              │
+│ Frontend                                                                     │
+│                                                                              │
+│ Nuovo componente: Sezione in AcademicDashboard o nuova tab "Feedback Review" │
+│ - Tabella feedback flaggati con: user, rating, trace link, reason, azioni    │
+│ - Bottoni: Approva / Quarantina / Elimina                                    │
+│ - Filtri: per status, per data, per expert                                   │
+│ - Auto-detect trigger con risultati                                          │
+│                                                                              │
+│ Verifica                                                                     │
+│                                                                              │
+│ # Flag un feedback                                                           │
+│ curl -X POST http://localhost:8000/api/v1/feedback/123/flag \                │
+│   -H "Content-Type: application/json" \                                      │
+│   -d '{"reason": "Rating outlier", "flagged_by": "admin"}'                   │
+│ # Verificare                                                                 │
+│ curl http://localhost:8000/api/v1/feedback/flagged | python -m json.tool     │
+│                                                                              │
+│ ---                                                                          │
+│ Ordine di Esecuzione                                                         │
+│                                                                              │
+│ Story 9-1 (Expert Metrics)        ~200 LOC   ← primo, popola ExpertsTab      │
+│ vuoto                                                                        │
+│     ↓                                                                        │
+│ Story 9-3 (Circuit Breaker API)   ~150 LOC   ← wrappa logica esistente       │
+│     ↓                                                                        │
+│ Story 9-4 (Regression Runner API) ~150 LOC   ← wrappa runner esistente       │
+│     ↓                                                                        │
+│ Story 9-2 (Ingestion Scheduling)  ~400 LOC   ← nuova feature, APScheduler    │
+│     ↓                                                                        │
+│ Story 9-5 (Feedback Quarantine)   ~350 LOC   ← schema change + service       │
+│     ↓                                                                        │
+│ Alembic migration (combina 9-2 + 9-5 schema changes)                         │
+│                                                                              │
+│ File Summary                                                                 │
+│                                                                              │
+│ Nuovi (~8 file)                                                              │
+│                                                                              │
+│ File: merlt/merlt/api/circuit_breaker_router.py                              │
+│ Story: 9-3                                                                   │
+│ ~LOC: 80                                                                     │
+│ ────────────────────────────────────────                                     │
+│ File: merlt/merlt/api/regression_router.py                                   │
+│ Story: 9-4                                                                   │
+│ ~LOC: 100                                                                    │
+│ ────────────────────────────────────────                                     │
+│ File: merlt/merlt/services/ingestion_scheduler.py                            │
+│ Story: 9-2                                                                   │
+│ ~LOC: 150                                                                    │
+│ ────────────────────────────────────────                                     │
+│ File: merlt/merlt/api/schedule_router.py                                     │
+│ Story: 9-2                                                                   │
+│ ~LOC: 100                                                                    │
+│ ────────────────────────────────────────                                     │
+│ File: merlt/merlt/rlcf/quarantine_service.py                                 │
+│ Story: 9-5                                                                   │
+│ ~LOC: 100                                                                    │
+│ ────────────────────────────────────────                                     │
+│ File: visualex-merlt/frontend/src/components/merlt/dashboard/tabs/SchedulesS │
+│ ection.tsx                                                                   │
+│ Story: 9-2                                                                   │
+│ ~LOC: 100                                                                    │
+│ ────────────────────────────────────────                                     │
+│ File: visualex-merlt/frontend/src/services/circuitBreakerService.ts          │
+│ Story: 9-3                                                                   │
+│ ~LOC: 50                                                                     │
+│ ────────────────────────────────────────                                     │
+│ File: merlt/alembic/versions/003_*.py                                        │
+│ Story: 9-2+9-5                                                               │
+│ ~LOC: autogen                                                                │
+│                                                                              │
+│ Modifiche (~8 file)                                                          │
+│                                                                              │
+│ File: merlt/merlt/api/expert_metrics_router.py                               │
+│ Cosa cambia: 9-1: query reali su QATrace                                     │
+│ ────────────────────────────────────────                                     │
+│ File: merlt/merlt/app.py                                                     │
+│ Cosa cambia: 9-2/3/4: registrare 3 nuovi router                              │
+│ ────────────────────────────────────────                                     │
+│ File: merlt/merlt/experts/models.py                                          │
+│ Cosa cambia: 9-2+9-5: IngestionSchedule + QAFeedback quarantine fields       │
+│ ────────────────────────────────────────                                     │
+│ File: merlt/merlt/rlcf/training_scheduler.py                                 │
+│ Cosa cambia: 9-5: filtrare quarantined dal buffer                            │
+│ ────────────────────────────────────────                                     │
+│ File: merlt/pyproject.toml                                                   │
+│ Cosa cambia: 9-2: aggiungere apscheduler                                     │
+│ ────────────────────────────────────────                                     │
+│ File: visualex-merlt/frontend/src/components/merlt/dashboard/tabs/Architectu │
+│ reTab.tsx                                                                    │
+│ Cosa cambia: 9-3: sezione circuit breakers                                   │
+│ ────────────────────────────────────────                                     │
+│ File:                                                                        │
+│ visualex-merlt/frontend/src/components/merlt/dashboard/tabs/ExpertsTab.tsx   │
+│ Cosa cambia: 9-4: sezione regression tests                                   │
+│ ────────────────────────────────────────                                     │
+│ File: visualex-merlt/frontend/src/services/expertMetricsService.ts           │
+│ Cosa cambia: 9-4: regression endpoints                                       │
+│                                                                              │
+│ Verifica Finale                                                              │
+│                                                                              │
+│ # Backend tests                                                              │
+│ cd merlt && pytest tests/ -v --ignore=tests/integration                      │
+│ --ignore=tests/_archive                                                      │
+│                                                                              │
+│ # Frontend type check                                                        │
+│ cd visualex-merlt/frontend && npx tsc --noEmit                               │
+│                                                                              │
+│ # Alembic                                                                    │
+│ cd merlt && alembic upgrade head && alembic current                          │
+│                                                                              │
+│ # API sanity check                                                           │
+│ curl http://localhost:8000/api/v1/expert-metrics/performance | python -m     │
+│ json.tool                                                                    │
+│ curl http://localhost:8000/api/v1/circuit-breaker/status | python -m         │
+│ json.tool                                                                    │
+│ curl http://localhost:8000/api/v1/ingestion/schedules | python -m json.tool  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+⏺ I'll implement Epic 9 following the execution order. Let me start by exploring
+   the existing codebase to understand the current state of all files that need
+  to be modified or referenced.
+
+⏺ Now let me explore all the key existing files in parallel to understand the
+  current state.
+
+⏺ 2 Explore agents launched (ctrl+o to expand)
+   ├─ Explore backend files for Epic 9
+   │  ⎿  Running in the background (shift+↑ to manage)
+   └─ Explore frontend files for Epic 9
+      ⎿  Running in the background (shift+↑ to manage)
+
+⏺ Let me check on the progress of the exploration agents while they work.
+
+⏺ Task Output(non-blocking) a418b41
+  ⎿  Task is still running…
+
+⏺ Task Output(non-blocking) adf5a81
+  ⎿  Task is still running…
+
+⏺ Both agents are still exploring. Let me wait for them to complete.
+
+⏺ Task Output a418b41
+  ⎿  Read output (ctrl+o to expand)
+
+⏺ Task Output adf5a81
+  ⎿  Read output (ctrl+o to expand)
+  ⎿  You've hit your limit · resets 1am (Europe/Rome)
+     /upgrade or /extra-usage to finish what you’re working on.
+
+✻ Brewed for 41s
+
+⏺ Agent "Explore backend files for Epic 9" completed
+  ⎿  You've hit your limit · resets 1am (Europe/Rome)
+     /upgrade or /extra-usage to finish what you’re working on.
+
+⏺ Agent "Explore frontend files for Epic 9" completed
+  ⎿  You've hit your limit · resets 1am (Europe/Rome)
+     /upgrade or /extra-usage to finish what you’re working on.

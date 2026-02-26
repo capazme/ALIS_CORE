@@ -21,6 +21,7 @@ Usage:
 from dotenv import load_dotenv
 load_dotenv()
 
+import os
 import structlog
 from typing import Dict, Any, Optional
 from datetime import datetime, timezone
@@ -186,16 +187,13 @@ Questa è la v1 dell'API. I path sono prefissati con `/api`.
 # CORS MIDDLEWARE
 # =============================================================================
 
+_bridge_cors_origins = os.environ.get(
+    "CORS_ORIGINS",
+    "http://localhost:5173,http://localhost:5174,http://localhost:3001,http://localhost:5000,https://visualex.it,https://api.visualex.it"
+).split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",   # Vite dev
-        "http://localhost:5174",   # Vite dev (alternate)
-        "http://localhost:3001",   # Express backend
-        "http://localhost:5000",   # Quart API
-        "https://visualex.it",     # Production
-        "https://api.visualex.it", # Production API
-    ],
+    allow_origins=[o.strip() for o in _bridge_cors_origins],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

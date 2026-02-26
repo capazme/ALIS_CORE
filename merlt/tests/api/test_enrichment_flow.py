@@ -621,13 +621,15 @@ class TestDomainAuthorityCalculation:
         await db_session.commit()
 
         # Altri user votano approve → consensus approved
+        # NOTE: net_score = approval - rejection must >= 2.0 for consensus
+        # With target_user rejection of 0.5, need approval >= 2.5
         for i in range(3):
             vote = EntityVote(
                 entity_id=entity.entity_id,
                 user_id=f"user_{i:03d}",
                 vote_value=1,  # approve
                 vote_type="accuracy",
-                voter_authority=0.8,
+                voter_authority=0.9,
                 legal_domain="penale",
             )
             db_session.add(vote)

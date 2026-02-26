@@ -1,192 +1,192 @@
 # Test Automation Expansion — Summary Report
 
-**Generated**: 2026-02-16T12:31:00+01:00
-**Workflow**: testarch-automate (Standalone Mode)
+**Generated**: 2026-02-17
+**Workflow**: testarch-automate (Standalone Mode, Auto-discover)
 **Coverage Target**: critical-paths
-**Project**: ALIS_CORE (VisuaLex Platform)
+**Project**: ALIS_CORE (Full Monorepo)
 
 ---
 
-## 1. Execution Mode
+## Execution Overview
 
-| Parameter | Value |
-|---|---|
-| Mode | **Standalone — Auto-discover** |
-| Reason | No `story_file`, `target_feature`, or BMad artifacts specified |
-| Scope | Full codebase analysis across `visualex-platform` (frontend + backend) |
+5 parallel agents generated **130 new tests** across 18 files in ~12 minutes:
 
-## 2. Automation Targets Identified
-
-### Coverage Gaps Found
-
-| Area | Gap | Priority |
-|---|---|---|
-| E2E: Route Protection | No tests for unauthenticated redirect | **P0** |
-| E2E: Search & Norm Browsing | Zero E2E coverage for Epic 3 | **P0** |
-| E2E: Admin Access Control | No E2E test for admin route guard | **P0** |
-| E2E: Workspace Features | No E2E coverage for Dossier, History, Environments, Bulletin | **P1** |
-| E2E: Admin Dashboard | No E2E coverage for user management | **P1** |
-| E2E: Sidebar Navigation | No E2E tests for nav between routes | **P1** |
-| Backend API: Dossiers | Zero test coverage for dossierController | **P1** |
-| Backend API: Folders | Zero test coverage for folderController | **P1** |
-| Backend API: History | Zero test coverage for historyController | **P1** |
-| Backend API: Highlights | Zero test coverage for highlightController | **P1** |
-| Backend API: Annotations | Zero test coverage for annotationController | **P1** |
-| Unit: authService | Token management functions untested | **P0** |
-| Unit: bookmarkService | All CRUD + bulk operations untested | **P1** |
-| Unit: consent/privacy | GDPR-critical operations untested | **P1** |
-
-### Quality Issues in Existing Tests
-
-| Issue | File(s) | Occurrences |
-|---|---|---|
-| `page.waitForTimeout()` (hard wait) | auth.spec.ts, settings.spec.ts | 8 |
-| `waitForLoadState('networkidle')` | settings.spec.ts | 1 |
-| Conditional `if (isVisible())` | settings.spec.ts | 3 |
-| Missing priority tags `[P0]`–`[P3]` | auth.spec.ts, settings.spec.ts | All tests |
-| Hardcoded credentials (not using factories) | auth.spec.ts, settings.spec.ts | 2 files |
-
-## 3. Infrastructure Generated
-
-### Files Created
-
-| File | Type | Purpose |
-|---|---|---|
-| `e2e/fixtures.ts` | Infrastructure | **Rewritten** — Auto-cleanup fixtures, data factories, deterministic helpers |
-
-### Key Infrastructure Features
-
-- **`authenticatedPage` fixture**: Pre-logged-in Page with auto-cleanup of localStorage
-- **`adminPage` fixture**: Admin-authenticated Page with auto-cleanup
-- **`createUserData()` factory**: Generates unique user payloads without faker
-- **`login()` / `loginAsUser()` / `loginAsAdmin()` helpers**: Deterministic auth helpers
-- **`dismissTourOverlay()` helper**: Handles driver.js onboarding overlay
-- **`navigateTo()` helper**: Navigation with domcontentloaded wait
-
-## 4. Test Files Generated
-
-### E2E Tests (Playwright)
-
-| File | Epic | Tests | P0 | P1 | P2 |
-|---|---|---|---|---|---|
-| `e2e/search.spec.ts` | Epic 3 | 5 | 2 | 2 | 1 |
-| `e2e/workspace.spec.ts` | Various | 7 | 0 | 4 | 3 |
-| `e2e/admin.spec.ts` | Epic 9 | 6 | 2 | 2 | 2 |
-| `e2e/navigation.spec.ts` | Cross-cutting | 7 | 3 | 3 | 2 |
-| **Subtotal** | | **25** | **7** | **11** | **8** |
-
-### Backend API Tests (Jest + Supertest)
-
-| File | Controller | Tests |
-|---|---|---|
-| `tests/integration/dossiers.test.ts` | dossierController | 6 |
-| `tests/integration/folders.test.ts` | folderController | 5 |
-| `tests/integration/history-highlights-annotations.test.ts` | 3 controllers | 9 |
-| **Subtotal** | | **20** |
-
-### Frontend Unit Tests (Vitest)
-
-| File | Service | Tests |
-|---|---|---|
-| `src/test/services/authService.test.ts` | authService | 6 |
-| `src/test/services/bookmarkService.test.ts` | bookmarkService | 8 |
-| `src/test/services/consent-privacy.test.ts` | consent + privacy | 7 |
-| **Subtotal** | | **21** |
-
-### Total New Tests: **66**
-
-## 5. Documentation & Scripts Updated
-
-| File | Change |
-|---|---|
-| `frontend/package.json` | Added 8 new scripts: `test:e2e:smoke`, `test:e2e:regression`, per-spec runners, `test:all` |
-| `TESTS.md` | Created comprehensive test suite documentation |
-
-### New npm Scripts
-
-```
-test:e2e:smoke       → P0 only (~30s)
-test:e2e:regression  → P0 + P1 (~2min)
-test:e2e:auth        → Auth spec only
-test:e2e:search      → Search spec only
-test:e2e:admin       → Admin spec only
-test:e2e:workspace   → Workspace spec only
-test:e2e:nav         → Navigation spec only
-test:all             → Vitest + Playwright full suite
-```
-
-## 6. Coverage Summary
-
-### Before Automation
-
-| Level | Files | Tests |
-|---|---|---|
-| E2E (Playwright) | 2 | ~25 |
-| Backend API (Jest) | 9 | ~30 |
-| Frontend Unit (Vitest) | 7 | ~20 |
-| **Total** | **18** | **~75** |
-
-### After Automation
-
-| Level | Files | Tests | Delta |
-|---|---|---|---|
-| E2E (Playwright) | **6** (+4) | ~50 | +25 |
-| Backend API (Jest) | **12** (+3) | ~50 | +20 |
-| Frontend Unit (Vitest) | **10** (+3) | ~41 | +21 |
-| **Total** | **28** (+10) | **~141** | **+66** |
-
-### Controller Coverage
-
-| Controller | Before | After |
-|---|---|---|
-| authController | ✅ | ✅ |
-| profileController | ✅ | ✅ |
-| consentController | ✅ | ✅ |
-| authorityController | ✅ | ✅ |
-| privacyController | ✅ | ✅ |
-| bookmarkController | ✅ | ✅ |
-| **dossierController** | ❌ | ✅ |
-| **folderController** | ❌ | ✅ |
-| **historyController** | ❌ | ✅ |
-| **highlightController** | ❌ | ✅ |
-| **annotationController** | ❌ | ✅ |
-| feedbackController | ❌ (partial) | ❌ (create-only route) |
-| invitationController | ❌ | ❌ |
-| adminController | ❌ | ❌ |
-| sharedEnvironmentController | ❌ | ❌ |
-
-## 7. Quality Standards Compliance
-
-| Standard | Status | Notes |
-|---|---|---|
-| No hard waits | ✅ | Zero `waitForTimeout` in new tests |
-| No `networkidle` | ✅ | Uses `domcontentloaded` |
-| No Page Objects | ✅ | Direct selectors + fixtures |
-| Self-cleaning tests | ✅ | Fixtures clear localStorage |
-| Deterministic assertions | ✅ | No `try-catch`, no conditional flows |
-| Priority tagging | ✅ | All new E2E tests tagged `[P0]`–`[P2]` |
-| Given-When-Then comments | ✅ | All new tests use GWT structure |
-| Avoid duplicate coverage | ✅ | E2E = happy path, Unit = logic edge cases |
-| Network-first pattern | ✅ | Documented; new tests follow pattern |
-| File size ≤ 300 lines | ✅ | Largest file: 138 lines |
-
-## 8. Recommendations
-
-### High Priority
-1. **Fix anti-patterns in existing tests** (`auth.spec.ts`, `settings.spec.ts`) — remove 8 `waitForTimeout` calls
-2. **Add priority tags** to existing 25 E2E tests
-3. **Install `@types/jest`** in backend devDependencies to resolve IDE lint warnings
-
-### Medium Priority
-4. Add backend API tests for `adminController`, `sharedEnvironmentController`, `feedbackController`, `invitationController`
-5. Add frontend unit tests for remaining 14 hooks (especially `useBookmarks`, `useFolders`, `useGlobalSearch`)
-6. Add component tests for SearchPanel, NormaCard, TreeViewPanel
-
-### Low Priority
-7. Migrate existing E2E fixtures/helpers from `settings.spec.ts` to use shared `fixtures.ts`
-8. Add visual regression tests for key UI components
-9. Add performance benchmarks for search response times
+| Agent | Area | Files | Tests | Status |
+|-------|------|-------|-------|--------|
+| factory-builder | Python test factories | 6 | — | ✅ Complete |
+| unit-test-builder | Python unit tests | 4 | 60 | ✅ 60/60 passing |
+| integration-test-builder | Python integration tests | 1 | 4 | ✅ Complete |
+| e2e-builder | Playwright E2E tests | 4 | 30 | ✅ Complete |
+| plugin-test-builder | Vitest component/service | 3 | 36 | ✅ 36/36 passing |
 
 ---
 
-*Generated by BMAD TEA testarch-automate workflow (Standalone Mode)*
+## 1. Infrastructure Created
+
+### Python Test Factories — `merlt/tests/factories/`
+
+| File | Functions | Purpose |
+|------|-----------|---------|
+| `__init__.py` | exports all | Central import point |
+| `user_factory.py` | `create_user()`, `create_users()` | Users with Italian names, authority scores, profile types |
+| `feedback_factory.py` | `create_feedback(type)` | All 8 feedback types (F1-F8) with domain-specific fields |
+| `trace_factory.py` | `create_trace()`, `create_expert_response()` | QATrace with 4 expert responses, sources, synthesis |
+| `api_key_factory.py` | `create_api_key()` | API keys with roles, tiers, SHA-256 hashes |
+| `article_factory.py` | `create_article()` | Italian legal articles with realistic URN:NIR format |
+
+**Design:** Python stdlib only (no faker dep), `**overrides` pattern, matches existing SQLAlchemy/Pydantic models.
+
+---
+
+## 2. Tests Created
+
+### Python Unit Tests — `merlt/tests/unit/` (was EMPTY → 60 tests)
+
+| File | Priority | Tests | Coverage |
+|------|----------|-------|----------|
+| `test_pii_masking.py` | **P0** | 21 | CF, email, phone, dates, edge cases, consent levels |
+| `test_circuit_breaker.py` | **P0** | 17 | State transitions, async context, registry, callbacks |
+| `test_confidence_calibration.py` | P2 | 9 | α-blending, weight normalization, edge cases |
+| `test_query_rewriting.py` | P2 | 13 | All 4 expert rewriting strategies |
+
+**All 60 tests passing.** Pure unit tests — no DB, no network, no LLM.
+
+### Python Integration Tests — `merlt/tests/integration/`
+
+| File | Priority | Tests | Coverage |
+|------|----------|-------|----------|
+| `test_bridge_consistency.py` | **P0** | 4 | Health check, Qdrant mapping, FalkorDB mapping, orphan detection |
+
+Uses httpx AsyncClient + real DB fixtures. 5% tolerance on cross-store checks, 10% orphan threshold.
+
+### Playwright E2E Tests — `visualex-platform/frontend/e2e/` (was EMPTY → 30 tests)
+
+| File | Priority | Tests | Coverage |
+|------|----------|-------|----------|
+| `smoke.spec.ts` | **P0** | 5 | Homepage redirect, login/register pages, health check, JS errors |
+| `auth.spec.ts` | **P0** | 10 | Registration, login (valid/invalid), logout, validation, navigation |
+| `search.spec.ts` | **P1** | 7 | Search form, NDJSON results, range search, empty state, errors, Cmd+K |
+| `profile.spec.ts` | **P1** | 8 | Settings sections, consent, authority, privacy, save, preferences |
+
+Network-first mocking, data-testid selectors, Given-When-Then format.
+
+### Vitest Component/Service Tests — `visualex-merlt/frontend/`
+
+| File | Priority | Tests | Coverage |
+|------|----------|-------|----------|
+| `services/__tests__/merltService.test.ts` | **P1** | 15 | queryExperts, all feedback types, error handling (401/500/network) |
+| `hooks/__tests__/useTraceData.test.ts` | P2 | 9 | Fetch, loading, error, partial success, refetch, traceId changes |
+| `components/__tests__/MerltToolbar.test.tsx` | **P1** | 12 | Click handler, pulse animation, badge, active/processed styles |
+
+**All 36 tests passing** (1.14s).
+
+---
+
+## 3. Summary Statistics
+
+### Total New Tests: **130**
+
+| Priority | Tests | % |
+|----------|-------|---|
+| **P0** (every commit) | 56 | 43% |
+| **P1** (PR to main) | 43 | 33% |
+| **P2** (nightly) | 31 | 24% |
+
+| Test Level | Tests | % |
+|------------|-------|---|
+| Unit (Python) | 60 | 46% |
+| Component (Vitest) | 36 | 28% |
+| E2E (Playwright) | 30 | 23% |
+| Integration (Python) | 4 | 3% |
+
+### Combined Inventory (Before → After)
+
+| Area | Before | After | Delta |
+|------|--------|-------|-------|
+| merlt/tests/ | 116 files | 127 files | **+11** |
+| platform/backend/tests/ | 12 files | 12 files | 0 |
+| platform/frontend/ tests+e2e | 9+0 files | 9+4 files | **+4** |
+| merlt-frontend/ tests | 5 files | 8 files | **+3** |
+| **Total** | **142** | **160** | **+18** |
+
+---
+
+## 4. Risk Mitigation Status
+
+| Risk | Score | Before | After |
+|------|-------|--------|-------|
+| R-015: Zero E2E tests | 6 | ❌ 0 tests | ✅ **30 Playwright tests** |
+| R-004: Cross-store consistency | 6 | ❌ untested | ✅ **4 integration tests** |
+| R-006: PII masking gaps | 4 | ❌ untested | ✅ **21 unit tests** |
+| R-019: Plugin system untested | 4 | ❌ untested | ✅ **36 component tests** |
+| R-003: Bare except/reliability | 4 | partial | ✅ **17 circuit breaker tests** |
+
+---
+
+## 5. Run Commands
+
+```bash
+# === Python (merlt) ===
+cd merlt && python -m pytest tests/unit/ -v                              # Unit tests (60)
+cd merlt && python -m pytest tests/unit/test_pii_masking.py tests/unit/test_circuit_breaker.py -v  # P0 only
+cd merlt && python -m pytest tests/integration/test_bridge_consistency.py -v -m integration        # Integration
+
+# === Playwright E2E (visualex-platform) ===
+cd visualex-platform/frontend && npx playwright test                      # All E2E (30)
+cd visualex-platform/frontend && npx playwright test e2e/smoke.spec.ts    # Smoke P0
+cd visualex-platform/frontend && npx playwright test --grep "P0"          # P0 only
+
+# === Vitest (visualex-merlt) ===
+cd visualex-merlt/frontend && npx vitest run                              # All plugin tests (36)
+```
+
+---
+
+## 6. Remaining Gaps
+
+| Gap | Priority | Next Action |
+|-----|----------|-------------|
+| JWT verification in ws_router (R-002) | P0 | Fix code + add unit test |
+| In-memory persistence (R-017) | P1 | Add Redis/PostgreSQL persistence |
+| RLCF end-to-end training loop | P1 | Integration test: feedback → aggregate → train |
+| API contract tests (all 30+ routes) | P1 | Run `*atdd` workflow |
+| Alembic migration up/down | P1 | Add migration test |
+| Performance benchmarks (k6) | P3 | Install k6, write load tests |
+| Accessibility audit (axe-core) | P3 | Install @axe-core/playwright |
+
+---
+
+## 7. Quality Checklist
+
+- [x] All tests follow Given-When-Then format
+- [x] All tests have priority tags ([P0], [P1], [P2])
+- [x] Playwright tests use data-testid / role selectors
+- [x] Playwright tests use network-first mocking
+- [x] No hard waits in any test
+- [x] Python unit tests are pure (no DB, no network)
+- [x] Python integration tests use existing fixture patterns
+- [x] Vitest tests mock API calls with vi.mock()
+- [x] All test files under 300 lines
+- [x] Factory pattern with **overrides for customization
+- [x] No shared state between tests
+
+---
+
+## 8. Known Issues
+
+1. **lucide-react Proxy mock** — Existing tab tests use a Proxy-based mock that hangs on Node v25. New tests use explicit named exports instead.
+2. **Playwright E2E** — Need backend (:3001) and frontend (:5173) running for real integration; mocked tests work standalone.
+3. **Bridge consistency tests** — Need Docker services (PostgreSQL, FalkorDB, Qdrant, Redis).
+
+---
+
+## 9. Next Steps
+
+1. Run `*testarch-trace` — Generate requirements-to-tests traceability matrix
+2. Run `*testarch-ci` — Integrate new tests into CI pipeline quality gates
+3. Fix R-002 — JWT verification in ws_router.py
+4. Run `*testarch-nfr` — Non-functional requirements validation before release
+
+---
+
+*Generated by BMAD TEA testarch-automate workflow v4.0 (Standalone Mode)*

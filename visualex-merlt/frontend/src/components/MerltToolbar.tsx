@@ -6,7 +6,6 @@
  * Pattern: single icon button with pending-count badge overlay (Legacy style).
  */
 
-import { useMemo } from 'react';
 import type { SlotProps } from '@visualex/platform/lib/plugins';
 import { Brain } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -15,14 +14,7 @@ import { useMerltPanelStore } from '../store/useMerltSidebarStore';
 
 type Props = SlotProps['article-toolbar'];
 
-export function MerltToolbar({ urn, articleId }: Props): React.ReactElement {
-  const articleMeta = useMemo(() => ({
-    tipo_atto: 'codice civile',
-    articolo: '1',
-    numero_atto: undefined,
-    data: undefined,
-    user_id: 'anonymous',
-  }), [urn, articleId]);
+export function MerltToolbar({ urn, articleId, tipo_atto, numero_atto, data_atto }: Props): React.ReactElement {
 
   const open = useMerltPanelStore((s) => s.open);
   const isOpen = useMerltPanelStore((s) => s.isOpen);
@@ -32,8 +24,12 @@ export function MerltToolbar({ urn, articleId }: Props): React.ReactElement {
     hasBeenProcessed,
     pendingCount,
   } = useMerltArticleStatus({
-    ...articleMeta,
-    enabled: true,
+    tipo_atto: tipo_atto || '',
+    articolo: articleId || '',
+    numero_atto,
+    data: data_atto,
+    user_id: 'anonymous',
+    enabled: Boolean(tipo_atto && articleId),
   });
 
   return (

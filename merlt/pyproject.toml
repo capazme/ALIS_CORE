@@ -84,10 +84,12 @@ dev = [
     "pytest-cov>=4.1.0",
     "pytest-asyncio>=0.21.0",
     "pytest-httpx>=0.22.0",  # For mocking HTTP requests
+    "pytest-benchmark>=4.0.0",
     "respx>=0.20.0",  # Alternative HTTP mocking
     "black>=23.0.0",
     "ruff>=0.1.0",
     "mypy>=1.5.0",
+    "bandit>=1.7.0",
     # Local visualex for development - install with: pip install -e ../visualex-api
     # "visualex @ file://../visualex-api",  # Uncomment if using pip local path
 ]
@@ -123,4 +125,5 @@ python_functions = "test_*"
 addopts = "-m 'not integration'"
 markers = [
     "integration: marks tests as integration tests requiring external services (Normattiva, Brocardi, FalkorDB, Qdrant, PostgreSQL)",
+    "benchmark: marks tests as performance benchmarks (use --benchmark-only to run)",
 ]

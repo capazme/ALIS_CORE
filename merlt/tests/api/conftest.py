@@ -10,6 +10,8 @@ Strategy:
 - Qdrant: usa collection separata per test
 
 Ogni test ha database pulito e isolato dagli altri.
+
+NOTE: Tests skip gracefully when infrastructure is unavailable.
 """
 
 import asyncio
@@ -35,6 +37,34 @@ from merlt.storage.graph.client import FalkorDBClient
 from merlt.storage.vectors.embeddings import EmbeddingService
 
 
+def _postgres_available() -> bool:
+    """Check if PostgreSQL is reachable on the configured port."""
+    import socket
+    import os
+
+    host = os.getenv("ENRICHMENT_DB_HOST", "localhost")
+    port = int(os.getenv("ENRICHMENT_DB_PORT", "5433"))
+    try:
+        sock = socket.create_connection((host, port), timeout=2)
+        sock.close()
+        return True
+    except (OSError, ConnectionRefusedError):
+        return False
+
+
+def _falkordb_available() -> bool:
+    """Check if FalkorDB is reachable."""
+    try:
+        import redis
+
+        r = redis.Redis(host="localhost", port=6380, socket_connect_timeout=3)
+        r.ping()
+        r.close()
+        return True
+    except Exception:
+        return False
+
+
 @pytest.fixture(scope="session")
 def event_loop():
     """Create event loop per session."""
@@ -50,10 +80,14 @@ async def db_session() -> AsyncGenerator[AsyncSession, None]:
 
     Ogni test ha una transazione che viene rollback automaticamente.
     Database rimane pulito tra test.
+    Skips gracefully when PostgreSQL is unavailable.
 
     Yields:
         AsyncSession: Session isolata per il test
     """
+    if not _postgres_available():
+        pytest.skip("PostgreSQL not available on port 5433")
+
     # Create engine con NullPool per evitare connection pooling in test
     engine = create_async_engine(
         get_database_url(),
@@ -90,10 +124,14 @@ async def falkordb_client() -> AsyncGenerator[FalkorDBClient, None]:
     Fixture che fornisce FalkorDB client isolato.
 
     Usa un graph separato 'merl_t_test' che viene pulito dopo ogni test.
+    Skips gracefully when FalkorDB is unavailable.
 
     Yields:
         FalkorDBClient: Client connesso al graph di test
     """
+    if not _falkordb_available():
+        pytest.skip("FalkorDB not available on port 6380")
+
     client = FalkorDBClient(graph_name="merl_t_test")
     await client.connect()
 

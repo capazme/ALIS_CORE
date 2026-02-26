@@ -329,7 +329,7 @@ class SemanticSearchTool(BaseTool):
             {"q": query, "k": top_k, "st": sorted(source_types or [])},
             sort_keys=True,
         )
-        return hashlib.md5(key_data.encode()).hexdigest()
+        return hashlib.md5(key_data.encode(), usedforsecurity=False).hexdigest()
 
     @classmethod
     def clear_cache(cls):

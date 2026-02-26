@@ -247,21 +247,13 @@ class TestTrainTraversalPolicy:
             )
         ] * 25
 
-        with patch.dict("sys.modules", {"torch": None}):
-            with patch(
-                "merlt.rlcf.traversal_training_service.TraversalTrainingService.train_traversal_policy",
-                new=TraversalTrainingService.train_traversal_policy,
-            ):
-                # Force ImportError by patching builtins
-                original_import = __builtins__.__import__ if hasattr(__builtins__, '__import__') else __import__
-
-                def mock_import(name, *args, **kwargs):
-                    if name == "torch":
-                        raise ImportError("No torch")
-                    return original_import(name, *args, **kwargs)
-
-                with patch("builtins.__import__", side_effect=mock_import):
-                    result = await svc.train_traversal_policy(samples)
+        # Setting sys.modules[name] = None causes ImportError on import
+        with patch.dict("sys.modules", {
+            "torch": None,
+            "merlt.rlcf.policy_gradient": None,
+            "merlt.rlcf.policy_manager": None,
+        }):
+            result = await svc.train_traversal_policy(samples)
 
         assert result.epochs_completed == 0
         assert result.checkpoint_name == "none"
@@ -406,8 +398,8 @@ class TestGetDomainWeightsTable:
         """ImportError → uniform defaults."""
         svc = TraversalTrainingService()
 
-        # Force the except path: import torch will fail
-        with patch("builtins.__import__", side_effect=ImportError("no torch")):
+        # Setting sys.modules[name] = None causes ImportError on import
+        with patch.dict("sys.modules", {"torch": None}):
             result = svc.get_domain_weights_table()
 
         assert isinstance(result, dict)
@@ -421,13 +413,29 @@ class TestGetDomainWeightsTable:
         """Forward raises → 0.25 fallback per relation."""
         svc = TraversalTrainingService()
 
-        # The method catches all exceptions and returns defaults
-        with patch("builtins.__import__", side_effect=RuntimeError("forward failed")):
+        mock_torch = MagicMock()
+        mock_torch.zeros.return_value = MagicMock()
+
+        mock_policy = MagicMock()
+        mock_policy.forward.side_effect = RuntimeError("forward failed")
+
+        mock_pm_instance = MagicMock()
+        mock_pm_instance.load_traversal_policy.return_value = mock_policy
+
+        mock_pm_module = MagicMock()
+        mock_pm_module.PolicyManager.return_value = mock_pm_instance
+
+        with patch.dict("sys.modules", {
+            "torch": mock_torch,
+            "merlt.rlcf.policy_manager": mock_pm_module,
+        }):
             result = svc.get_domain_weights_table()
 
         assert isinstance(result, dict)
         for expert in ["literal", "systemic", "principles", "precedent"]:
             assert expert in result
+            for rel in RELATION_TYPES:
+                assert result[expert][rel] == 0.25
 
 
 # =============================================================================

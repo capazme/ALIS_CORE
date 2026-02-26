@@ -28,11 +28,10 @@ import os
 # SQLAlchemy declarative base for all RLCF models
 Base = declarative_base()
 
-# Default database URLs
-# Note: Dev PostgreSQL on port 5433 (docker-compose.dev.yml)
-DEFAULT_DATABASE_URL = "postgresql://dev:devpassword@localhost:5433/rlcf_dev"
-DEFAULT_ASYNC_DATABASE_URL = "postgresql+asyncpg://dev:devpassword@localhost:5433/rlcf_dev"
-DEFAULT_POSTGRES_URL = "postgresql+asyncpg://dev:devpassword@localhost:5433/rlcf_dev"
+# Database URLs from environment (no hardcoded credentials)
+DEFAULT_DATABASE_URL = os.environ.get("RLCF_DATABASE_URL", "postgresql://dev:devpassword@localhost:5433/rlcf_dev")
+DEFAULT_ASYNC_DATABASE_URL = os.environ.get("RLCF_ASYNC_DATABASE_URL", os.environ.get("RLCF_DATABASE_URL", "postgresql+asyncpg://dev:devpassword@localhost:5433/rlcf_dev").replace("postgresql://", "postgresql+asyncpg://"))
+DEFAULT_POSTGRES_URL = DEFAULT_ASYNC_DATABASE_URL
 
 # Module-level engine and session factory (sync)
 _engine = None
@@ -93,7 +92,16 @@ def init_db(database_url: Optional[str] = None) -> None:
     _SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
 
     # Create all tables
-    Base.metadata.create_all(bind=_engine)
+    # For SQLite: create tables individually, skipping those with
+    # PostgreSQL-only types (e.g. JSONB, ARRAY)
+    if "sqlite" in url:
+        for table in Base.metadata.sorted_tables:
+            try:
+                table.create(_engine, checkfirst=True)
+            except Exception:
+                pass
+    else:
+        Base.metadata.create_all(bind=_engine)
 
 
 async def init_async_db(database_url: Optional[str] = None) -> None:
@@ -122,8 +130,19 @@ async def init_async_db(database_url: Optional[str] = None) -> None:
     )
 
     # Create all tables (need to run sync for metadata)
+    # For SQLite: create tables individually, skipping those with
+    # PostgreSQL-only types (e.g. JSONB, ARRAY) that can't be rendered
     async with _async_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        if "sqlite" in url:
+            def _create_tables_individually(sync_conn):
+                for table in Base.metadata.sorted_tables:
+                    try:
+                        table.create(sync_conn, checkfirst=True)
+                    except Exception:
+                        pass  # Skip tables with incompatible types
+            await conn.run_sync(_create_tables_individually)
+        else:
+            await conn.run_sync(Base.metadata.create_all)
 
 
 def get_session():

@@ -488,6 +488,9 @@ export function ArticleTabContent({ data, onCrossReferenceNavigate, onOpenStudyM
                         <ArticleToolbar
                             urn={norma_data.urn || ''}
                             articleId={uniqueArticleId}
+                            tipo_atto={norma_data.tipo_atto}
+                            numero_atto={norma_data.numero_atto}
+                            data_atto={norma_data.data}
                             url={url}
                             annotationsCount={itemAnnotations.length}
                             highlightsCount={articleHighlights.length}
@@ -567,7 +570,10 @@ export function ArticleTabContent({ data, onCrossReferenceNavigate, onOpenStudyM
                         name="article-toolbar"
                         props={{
                             urn: norma_data.urn || '',
-                            articleId: uniqueArticleId
+                            articleId: uniqueArticleId,
+                            tipo_atto: norma_data.tipo_atto,
+                            numero_atto: norma_data.numero_atto,
+                            data_atto: norma_data.data,
                         }}
                         className="flex items-center gap-1"
                     />
@@ -683,7 +689,8 @@ export function ArticleTabContent({ data, onCrossReferenceNavigate, onOpenStudyM
                     props={{
                         urn: norma_data.urn || '',
                         articleId: uniqueArticleId,
-                        contentRef
+                        contentRef,
+                        tipo_atto: norma_data.tipo_atto,
                     }}
                 />
                 </div>{/* end content column */}
@@ -694,6 +701,9 @@ export function ArticleTabContent({ data, onCrossReferenceNavigate, onOpenStudyM
                     props={{
                         urn: norma_data.urn || '',
                         articleId: uniqueArticleId,
+                        tipo_atto: norma_data.tipo_atto,
+                        numero_atto: norma_data.numero_atto,
+                        data_atto: norma_data.data,
                         articleData: data
                     }}
                     className="hidden xl:block w-80 shrink-0 sticky top-16 self-start max-h-[calc(100vh-5rem)] overflow-y-auto"

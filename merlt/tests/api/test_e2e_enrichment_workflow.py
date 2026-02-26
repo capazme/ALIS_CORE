@@ -50,9 +50,9 @@ class TestEndToEndEnrichmentWorkflow:
         Scenario Realistico:
         - Giurista A (esperto, authority 0.9) propone "Legittima difesa"
         - Giurista B (authority 0.7) vota approve
-        - Giurista C (authority 0.6) vota approve
+        - Giurista C (authority 0.8) vota approve
         - Giurista D (novizio, authority 0.4) vota reject
-        - Consensus: 0.9 + 0.7 + 0.6 = 2.2 approve vs 0.4 reject → APPROVED
+        - Consensus: net_score = (0.9+0.7+0.8) - 0.4 = 2.0 → APPROVED
         - Entity scritta su grafo
         - Authority aggiornate per tutti
 
@@ -92,10 +92,12 @@ class TestEndToEndEnrichmentWorkflow:
         # Giurista B, C votano approve
         # Giurista D vota reject
 
+        # NOTE: net_score = approval - rejection must >= 2.0 for consensus
+        # 0.9 + 0.7 + 0.8 = 2.4 approve, 0.4 reject → net_score = 2.0 → approved
         voters = [
             {"user_id": "giurista_a", "vote": 1, "authority": 0.9},  # approve
             {"user_id": "giurista_b", "vote": 1, "authority": 0.7},  # approve
-            {"user_id": "giurista_c", "vote": 1, "authority": 0.6},  # approve
+            {"user_id": "giurista_c", "vote": 1, "authority": 0.8},  # approve
             {"user_id": "giurista_d", "vote": -1, "authority": 0.4},  # reject
         ]
 
@@ -119,8 +121,8 @@ class TestEndToEndEnrichmentWorkflow:
         # === PHASE 3: Verifica Consensus ===
         assert entity.consensus_reached is True
         assert entity.consensus_type == "approved"
-        assert entity.approval_score == 2.2  # 0.9 + 0.7 + 0.6
-        assert entity.rejection_score == 0.4
+        assert entity.approval_score == pytest.approx(2.4)  # 0.9 + 0.7 + 0.8
+        assert entity.rejection_score == pytest.approx(0.4)
         assert entity.votes_count == 4
 
         print(f"✅ Phase 3: Consensus raggiunto - APPROVED (score: {entity.approval_score})")
@@ -141,6 +143,7 @@ class TestEndToEndEnrichmentWorkflow:
 
         # === PHASE 5: Verifica Graph ===
         # Verifica nodo esiste con proprietà corrette
+        # Use write_result.node_id (deduplicated) not entity.entity_id
         query = """
         MATCH (e:Entity:Principio {id: $entity_id})
         RETURN e.nome, e.tipo, e.community_validated, e.approval_score,
@@ -148,7 +151,7 @@ class TestEndToEndEnrichmentWorkflow:
         """
         graph_result = await falkordb_client.query(
             query,
-            params={"entity_id": entity.entity_id},
+            params={"entity_id": write_result.node_id},
         )
 
         assert len(graph_result) == 1
@@ -157,50 +160,41 @@ class TestEndToEndEnrichmentWorkflow:
         assert node["e.nome"] == "Legittima difesa"
         assert node["e.tipo"] == "principio"
         assert node["e.community_validated"] is True  # community_validated
-        assert node["e.approval_score"] == 2.2  # approval_score
+        assert node["e.approval_score"] == pytest.approx(2.4)  # approval_score
         assert node["e.votes_count"] == 4  # votes_count
         assert len(node["e.sources"]) > 0  # sources
 
         print(f"✅ Phase 5: Nodo verificato in FalkorDB")
 
         # Verifica relazione verso articolo
+        # NOTE: URN is stored uppercase (MERGE uses {URN: ...})
         rel_query = """
         MATCH (a:Norma)-[r:ESPRIME_PRINCIPIO]->(e:Entity:Principio {id: $entity_id})
-        RETURN a.urn, type(r)
+        RETURN a.URN AS urn, type(r) AS rel_type
         """
         rel_result = await falkordb_client.query(
             rel_query,
-            params={"entity_id": entity.entity_id},
+            params={"entity_id": write_result.node_id},
         )
 
         assert len(rel_result) >= 1
-        assert "art52" in rel_result[0]["a.urn"]
-        assert rel_result[0]["type(r)"] == "ESPRIME_PRINCIPIO"
+        assert "art52" in rel_result[0]["urn"]
+        assert rel_result[0]["rel_type"] == "ESPRIME_PRINCIPIO"
 
         print(f"✅ Phase 5b: Relazione verso articolo verificata")
 
         # === PHASE 6: Domain Authority Update ===
         service = DomainAuthorityService()
 
-        # Update authority per tutti i voters
+        # Update authority per tutti i voters (calculates and persists)
         authorities_after = {}
         for voter in voters:
-            auth = await service.calculate_user_authority(
+            record = await service.update_user_domain_authority(
                 db_session,
                 user_id=voter["user_id"],
                 legal_domain="penale",
             )
-            authorities_after[voter["user_id"]] = auth
-
-            # Persist update
-            await service.update_or_create_authority(
-                db_session,
-                user_id=voter["user_id"],
-                legal_domain="penale",
-                domain_authority=auth,
-            )
-
-        await db_session.commit()
+            authorities_after[voter["user_id"]] = record.domain_authority
 
         print(f"✅ Phase 6: Authority aggiornate")
 

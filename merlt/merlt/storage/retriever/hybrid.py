@@ -236,7 +236,7 @@ class GraphAwareRetriever:
                 if isinstance(r.id, int):
                     # For integer IDs, create a deterministic UUID from the int
                     import hashlib
-                    id_hash = hashlib.md5(str(r.id).encode()).hexdigest()
+                    id_hash = hashlib.md5(str(r.id).encode(), usedforsecurity=False).hexdigest()
                     chunk_id = UUID(id_hash[:8] + '-' + id_hash[8:12] + '-' + id_hash[12:16] + '-' + id_hash[16:20] + '-' + id_hash[20:32])
                 elif isinstance(r.id, UUID):
                     chunk_id = r.id
@@ -245,7 +245,7 @@ class GraphAwareRetriever:
                         chunk_id = UUID(str(r.id))
                     except ValueError:
                         # Fallback: create UUID from string hash
-                        id_hash = hashlib.md5(str(r.id).encode()).hexdigest()
+                        id_hash = hashlib.md5(str(r.id).encode(), usedforsecurity=False).hexdigest()
                         chunk_id = UUID(id_hash[:8] + '-' + id_hash[8:12] + '-' + id_hash[12:16] + '-' + id_hash[16:20] + '-' + id_hash[20:32])
 
                 results.append(VectorSearchResult(

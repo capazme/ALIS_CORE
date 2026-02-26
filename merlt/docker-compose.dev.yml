@@ -23,7 +23,7 @@ services:
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dev"]
+      test: ["CMD-SHELL", "pg_isready -U dev -d rlcf_dev"]
       interval: 10s
       timeout: 5s
       retries: 5

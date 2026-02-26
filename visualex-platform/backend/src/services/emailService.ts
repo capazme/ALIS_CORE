@@ -19,12 +19,20 @@ interface EmailOptions {
  * TODO: Replace with actual email provider in production
  */
 async function sendEmail(options: EmailOptions): Promise<void> {
-  if (process.env.NODE_ENV === 'production' && process.env.EMAIL_PROVIDER) {
-    // Production: send actual email
-    // Implement based on EMAIL_PROVIDER (sendgrid, ses, etc.)
-    console.log('[EmailService] Production email sending not configured yet');
-    console.log('[EmailService] Would send to:', options.to);
-    return;
+  if (process.env.NODE_ENV === 'production') {
+    if (!process.env.EMAIL_PROVIDER) {
+      throw new Error(
+        `[EmailService] EMAIL_PROVIDER not configured in production. ` +
+        `Cannot send email to: ${options.to}. ` +
+        `Set EMAIL_PROVIDER=sendgrid|ses to enable email delivery.`
+      );
+    }
+    // Production: implement based on EMAIL_PROVIDER
+    throw new Error(
+      `[EmailService] EMAIL_PROVIDER="${process.env.EMAIL_PROVIDER}" ` +
+      `is not yet implemented. Supported providers: none yet. ` +
+      `Email to ${options.to} was NOT sent.`
+    );
   }
 
   // Development: log email to console

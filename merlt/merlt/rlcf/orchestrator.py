@@ -471,13 +471,12 @@ class RLCFOrchestrator:
         Returns:
             List of weight update records
         """
-        # This would query weight history from WeightStore if implemented
-        # For now, return placeholder
-        return [{
-            "expert_type": expert_type,
-            "message": "Weight history tracking not yet implemented",
-            "timestamp": datetime.now().isoformat()
-        }]
+        log.warning(
+            "Weight history tracking not yet implemented",
+            expert_type=expert_type,
+            limit=limit,
+        )
+        return []
 
 
 # Singleton instance for easy access
