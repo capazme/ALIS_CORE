@@ -506,7 +506,7 @@ class MultiExpertOrchestrator:
                     "neural_weights": {k: round(v, 4) for k, v in routing_decision.neural_weights.items()} if routing_decision.neural_weights else {},
                     "confidence_threshold": self.hybrid_router.confidence_threshold if self.hybrid_router else None,
                     "expert_priors": self.hybrid_router.neural_gating.get_expert_priors() if self.hybrid_router else {},
-                    "trained": False,  # TODO: detect from checkpoint
+                    "trained": getattr(self.hybrid_router, 'loaded_from_checkpoint', False),
                 }
             pipeline_trace.routing_decision = routing_trace
             pipeline_trace.stage_times_ms["routing"] = routing_time_ms

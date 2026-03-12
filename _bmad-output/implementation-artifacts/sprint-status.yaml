@@ -196,5 +196,5 @@ development_status:
   # Sprint B — End-to-end training loop
   11-4-fix-traversal-training-service: done  # Completed 2026-03-12 - Fix 6 bugs: method call, optimizer, train/eval, latest alias, input_dim, device. 13 tests
   11-5-wire-weight-store-persistence: done  # Completed 2026-03-12 - _extract_weight_config, _persist_weight_config, WeightVersion dedup, 15 tests
-  11-6-checkpoint-serialization-trained-flag: backlog  # Fix named_parameters→state_dict + orchestrator trained flag
+  11-6-checkpoint-serialization-trained-flag: done  # Completed 2026-03-12 - state_dict() serialization, load_state_dict(), trained flag detection, 16 tests
   epic-11-retrospective: optional

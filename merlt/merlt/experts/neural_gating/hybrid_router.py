@@ -124,9 +124,14 @@ class HybridExpertRouter:
         }
 
         # Carica checkpoint se disponibile
+        self.loaded_from_checkpoint = False
         if checkpoint_path and checkpoint_path.exists():
-            self._load_checkpoint(checkpoint_path)
-            log.info(f"Loaded neural gating checkpoint from {checkpoint_path}")
+            try:
+                self._load_checkpoint(checkpoint_path)
+                self.loaded_from_checkpoint = True
+                log.info(f"Loaded neural gating checkpoint from {checkpoint_path}")
+            except Exception as e:
+                log.warning("Failed to load checkpoint, using warm-start priors", error=str(e))
         else:
             log.info("Neural gating initialized with warm-start priors")
 

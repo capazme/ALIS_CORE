@@ -833,7 +833,7 @@ class PolicyGradientTrainer:
         # State dict
         checkpoint = {
             "policy_state_dict": {
-                name: param.cpu() for name, param in self.policy.mlp.named_parameters()
+                k: v.cpu() for k, v in self.policy.mlp.state_dict().items()
             },
             "optimizer_state_dict": self.optimizer.state_dict(),
             "baseline": self.baseline,
@@ -883,9 +883,9 @@ class PolicyGradientTrainer:
 
         # Carica policy state
         policy_state = checkpoint["policy_state_dict"]
-        for name, param in self.policy.mlp.named_parameters():
-            if name in policy_state:
-                param.data = policy_state[name].to(self.policy.device)
+        self.policy.mlp.load_state_dict(
+            {k: v.to(self.policy.device) for k, v in policy_state.items()}
+        )
 
         # Carica optimizer state
         self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
