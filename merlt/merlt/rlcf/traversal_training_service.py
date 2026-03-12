@@ -23,6 +23,7 @@ import structlog
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional
+from pathlib import Path
 from collections import defaultdict
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -32,10 +33,11 @@ from merlt.experts.models import QATrace, QAFeedback
 
 log = structlog.get_logger()
 
-# Known relation types in the legal knowledge graph
+# Known relation types — aligned with TraversalPolicy.relation_types
 RELATION_TYPES = [
-    "RIFERIMENTO", "CITATO_DA", "MODIFICA", "ABROGA",
-    "DEFINISCE", "PARTE_DI", "HA_COMMA", "PRECEDE",
+    "RIFERIMENTO", "CITATO_DA", "MODIFICA", "MODIFICATO_DA",
+    "DEROGA", "DEROGATO_DA", "ABROGATO_DA", "ABROGA",
+    "INTERPRETED_BY", "RELATED_TO", "APPLIES_TO",
 ]
 
 
@@ -167,16 +169,22 @@ class TraversalTrainingService:
         try:
             import torch
             from .policy_gradient import TraversalPolicy
-            from .policy_manager import PolicyManager
+            from .policy_manager import PolicyManager, PolicyConfig
 
-            pm = PolicyManager()
+            pm = PolicyManager(config=PolicyConfig(
+                checkpoint_dir=Path("checkpoints"),
+            ))
 
             # Load or create policy
-            try:
-                policy = pm.load_traversal_policy()
-            except Exception as e:
-                log.info("traversal_policy_load_fallback", error=str(e))
+            policy = pm.get_traversal_policy()
+            if policy is None:
+                log.info("No traversal checkpoint, using fresh TraversalPolicy")
                 policy = TraversalPolicy(input_dim=1024, hidden_dim=128)
+
+            # Force CPU for training (avoids MPS allocation issues with small batches)
+            policy.to("cpu")
+            policy.train()
+            optimizer = torch.optim.Adam(policy.parameters(), lr=1e-4)
 
             total_loss = 0.0
             for epoch in range(epochs):
@@ -188,18 +196,21 @@ class TraversalTrainingService:
                             sample.query_embedding, dtype=torch.float32
                         ).unsqueeze(0)
 
-                        # Get relation weight from policy
-                        weight = policy.forward(query_tensor, sample.relation_type)
+                        # Convert relation_type string to index tensor
+                        rel_idx = policy.get_relation_index(sample.relation_type)
+                        rel_tensor = torch.tensor([rel_idx], dtype=torch.long)
 
-                        # REINFORCE loss: -log(weight) * reward
-                        log_prob = torch.log(weight + 1e-8)
+                        # Get relation weight and log_prob from policy
+                        weight, log_prob = policy.forward(query_tensor, rel_tensor)
+
+                        # REINFORCE loss: -log_prob * reward
                         loss = -log_prob * sample.reward
 
-                        # Backward
-                        if hasattr(policy, 'optimizer'):
-                            policy.optimizer.zero_grad()
-                            loss.backward()
-                            policy.optimizer.step()
+                        # Backward + step (with gradient clipping)
+                        optimizer.zero_grad()
+                        loss.backward()
+                        torch.nn.utils.clip_grad_norm_(policy.parameters(), max_norm=1.0)
+                        optimizer.step()
 
                         epoch_loss += loss.item()
                     except Exception as e:
@@ -208,11 +219,15 @@ class TraversalTrainingService:
                 if samples:
                     total_loss += epoch_loss / len(samples)
 
-            # Save versioned checkpoint
+            # Switch back to inference mode for checkpoint save
+            policy.eval()
+
+            # Save versioned checkpoint + latest alias
             version_tag = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
             checkpoint_name = f"traversal_v{version_tag}"
             try:
                 pm.save_traversal_policy(policy, name=checkpoint_name)
+                pm.save_traversal_policy(policy, name="latest")
             except Exception as e:
                 log.warning("Traversal checkpoint save failed", error=str(e))
 
@@ -250,18 +265,24 @@ class TraversalTrainingService:
         """
         try:
             import torch
-            from .policy_manager import PolicyManager
-            pm = PolicyManager()
-            policy = pm.load_traversal_policy()
+            from .policy_manager import PolicyManager, PolicyConfig
+            pm = PolicyManager(config=PolicyConfig(
+                checkpoint_dir=Path("checkpoints"),
+            ))
+            policy = pm.get_traversal_policy()
+            if policy is None:
+                raise ValueError("No traversal policy checkpoint available")
 
+            policy.to("cpu")
             table = {}
             dummy = torch.zeros(1, 1024)
             for expert in ["literal", "systemic", "principles", "precedent"]:
                 table[expert] = {}
                 for rel_type in RELATION_TYPES:
                     try:
-                        # TODO: pass expert_type to forward() when policy supports it
-                        w = policy.forward(dummy, rel_type)
+                        rel_idx = policy.get_relation_index(rel_type)
+                        rel_tensor = torch.tensor([rel_idx], dtype=torch.long)
+                        w, _ = policy.forward(dummy, rel_tensor)
                         table[expert][rel_type] = round(w.item(), 4)
                     except Exception as e:
                         log.debug("traversal_weight_fallback", expert=expert, rel_type=rel_type, error=str(e))

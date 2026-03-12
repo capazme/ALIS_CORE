@@ -182,6 +182,8 @@ class TrainingResult:
     loaded_from_checkpoint: bool = False
     duration_seconds: float = 0.0
     error: Optional[str] = None
+    traversal_trained: bool = False
+    traversal_samples: int = 0
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -194,6 +196,8 @@ class TrainingResult:
             "loaded_from_checkpoint": self.loaded_from_checkpoint,
             "duration_seconds": round(self.duration_seconds, 2),
             "error": self.error,
+            "traversal_trained": self.traversal_trained,
+            "traversal_samples": self.traversal_samples,
         }
 
 
@@ -515,6 +519,8 @@ class TrainingScheduler:
                 self._try_save_buffer()
 
             # TraversalPolicy training (F8d)
+            traversal_trained = False
+            traversal_samples = 0
             try:
                 from .traversal_training_service import TraversalTrainingService
                 from .database import get_async_session
@@ -523,6 +529,8 @@ class TrainingScheduler:
                     trav_samples = await traversal_svc.prepare_training_data(trav_session)
                     if len(trav_samples) >= traversal_svc.MIN_SAMPLES:
                         trav_result = await traversal_svc.train_traversal_policy(trav_samples)
+                        traversal_trained = trav_result.epochs_completed > 0
+                        traversal_samples = trav_result.samples_used
                         log.info("TraversalPolicy trained", **trav_result.to_dict())
             except Exception as e:
                 log.warning("TraversalPolicy training skipped", error=str(e))
@@ -534,7 +542,9 @@ class TrainingScheduler:
                 avg_reward=total_reward / self.config.epochs_per_run if self.config.epochs_per_run > 0 else 0,
                 checkpoint_version=checkpoint_version,
                 loaded_from_checkpoint=loaded_from_checkpoint,
-                duration_seconds=duration
+                duration_seconds=duration,
+                traversal_trained=traversal_trained,
+                traversal_samples=traversal_samples,
             )
 
             log.info(

@@ -259,77 +259,66 @@ class TestTrainTraversalPolicy:
         assert result.checkpoint_name == "none"
 
     @pytest.mark.asyncio
-    async def test_policy_load_failure(self):
-        """PolicyManager.load fails → creates new policy."""
+    async def test_policy_load_failure_uses_fresh_policy(self, tmp_path, monkeypatch):
+        """Corrupted checkpoint → falls back to fresh policy and trains."""
+        monkeypatch.chdir(tmp_path)
+        checkpoint_dir = tmp_path / "checkpoints"
+        checkpoint_dir.mkdir()
+
+        # Write a corrupted checkpoint file
+        corrupted = checkpoint_dir / "traversal_policy_latest.pt"
+        corrupted.write_bytes(b"corrupted data")
+
         svc = TraversalTrainingService()
         samples = [
             TraversalTrainingSample(
-                query_embedding=[0.0] * 1024,
+                query_embedding=[0.1] * 1024,
                 relation_type="RIFERIMENTO",
                 expert_type="literal",
                 reward=0.5,
             )
         ] * 25
 
-        mock_torch = MagicMock()
-        mock_torch.tensor.return_value = MagicMock(unsqueeze=MagicMock(return_value=MagicMock()))
-        mock_torch.log.return_value = MagicMock(__mul__=MagicMock(return_value=MagicMock(item=MagicMock(return_value=0.1), backward=MagicMock())))
+        # Should recover: corrupted checkpoint → get_traversal_policy returns None → fresh policy
+        result = await svc.train_traversal_policy(samples, epochs=1)
+        assert result.epochs_completed == 1
+        assert result.samples_used == 25
 
-        mock_policy_class = MagicMock()
-        mock_policy = MagicMock()
-        mock_policy.forward.return_value = MagicMock(item=MagicMock(return_value=0.5))
-        mock_policy.optimizer = MagicMock()
-        mock_policy_class.return_value = mock_policy
-
-        mock_pm_class = MagicMock()
-        mock_pm = MagicMock()
-        mock_pm.load_traversal_policy.side_effect = RuntimeError("Not found")
-        mock_pm.save_traversal_policy = MagicMock()
-        mock_pm_class.return_value = mock_pm
-
-        with patch.dict(
-            "sys.modules",
-            {
-                "merlt.rlcf.policy_gradient": MagicMock(TraversalPolicy=mock_policy_class),
-                "merlt.rlcf.policy_manager": MagicMock(PolicyManager=mock_pm_class),
-            },
-        ):
-            with patch("builtins.__import__", side_effect=lambda name, *a, **kw: __import__(name, *a, **kw) if name != "torch" else mock_torch):
-                # The actual train method tries import torch, so we mock at a higher level
-                pass
-
-        # Since mocking torch import is complex, test via the logic directly
-        # by verifying the early-return path (insufficient) works
-        few_samples = samples[:5]
-        result = await svc.train_traversal_policy(few_samples)
-        assert result.epochs_completed == 0
+        # Verify a valid checkpoint was saved over the corrupted one
+        import torch
+        ckpt = torch.load(corrupted, map_location="cpu")
+        assert "mlp_state_dict" in ckpt
+        assert ckpt["input_dim"] == 1024
 
     @pytest.mark.asyncio
-    async def test_successful_training(self):
-        """Mock full training → correct epochs."""
+    async def test_successful_training_saves_both_checkpoints(self, tmp_path, monkeypatch):
+        """Training saves both versioned and latest checkpoints."""
+        monkeypatch.chdir(tmp_path)
+        checkpoint_dir = tmp_path / "checkpoints"
+        checkpoint_dir.mkdir()
+
         svc = TraversalTrainingService()
         samples = [
             TraversalTrainingSample(
-                query_embedding=[0.0] * 1024,
-                relation_type="RIFERIMENTO",
+                query_embedding=[0.1 * (i % 5)] * 1024,
+                relation_type="CITATO_DA" if i % 2 else "RIFERIMENTO",
                 expert_type="literal",
-                reward=0.5,
+                reward=0.2 + (i % 4) * 0.2,
             )
-        ] * 25
+            for i in range(25)
+        ]
 
-        # Mock the entire training by patching at module level
-        mock_result = TraversalTrainingResult(
-            epochs_completed=5,
-            avg_loss=0.3,
-            samples_used=25,
-            checkpoint_name="traversal_v20260101_120000",
-        )
+        result = await svc.train_traversal_policy(samples, epochs=2)
 
-        with patch.object(svc, "train_traversal_policy", return_value=mock_result):
-            result = await svc.train_traversal_policy(samples)
-
-        assert result.epochs_completed == 5
+        assert result.epochs_completed == 2
         assert result.samples_used == 25
+        assert result.avg_loss != 0.0
+
+        # Verify both checkpoints exist
+        latest = checkpoint_dir / "traversal_policy_latest.pt"
+        assert latest.exists(), "latest checkpoint must be saved"
+        versioned = list(checkpoint_dir.glob("traversal_policy_traversal_v*.pt"))
+        assert len(versioned) >= 1, "versioned checkpoint must be saved"
 
     @pytest.mark.asyncio
     async def test_checkpoint_save_failure(self):
@@ -368,13 +357,16 @@ class TestGetDomainWeightsTable:
         mock_policy = MagicMock()
         mock_weight = MagicMock()
         mock_weight.item.return_value = 0.3
-        mock_policy.forward.return_value = mock_weight
+        mock_log_prob = MagicMock()
+        mock_policy.forward.return_value = (mock_weight, mock_log_prob)
+        mock_policy.get_relation_index.return_value = 0
 
         mock_pm_instance = MagicMock()
-        mock_pm_instance.load_traversal_policy.return_value = mock_policy
+        mock_pm_instance.get_traversal_policy.return_value = mock_policy
 
         mock_pm_module = MagicMock()
         mock_pm_module.PolicyManager.return_value = mock_pm_instance
+        mock_pm_module.PolicyConfig = MagicMock()
 
         # Local imports need sys.modules patching
         with patch.dict("sys.modules", {
@@ -418,12 +410,14 @@ class TestGetDomainWeightsTable:
 
         mock_policy = MagicMock()
         mock_policy.forward.side_effect = RuntimeError("forward failed")
+        mock_policy.get_relation_index.return_value = 0
 
         mock_pm_instance = MagicMock()
-        mock_pm_instance.load_traversal_policy.return_value = mock_policy
+        mock_pm_instance.get_traversal_policy.return_value = mock_policy
 
         mock_pm_module = MagicMock()
         mock_pm_module.PolicyManager.return_value = mock_pm_instance
+        mock_pm_module.PolicyConfig = MagicMock()
 
         with patch.dict("sys.modules", {
             "torch": mock_torch,

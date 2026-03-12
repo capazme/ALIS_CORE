@@ -193,4 +193,8 @@ development_status:
   11-1-weight-store-db-persistence: done  # Completed 2026-03-12 - WeightVersion ORM, save_weights() + _load_from_database() implemented, 20 tests
   11-2-replay-buffer-auto-persistence: done  # Completed 2026-03-12 - PrioritizedReplayBuffer.save()/load(), auto-save after training, auto-load on init, 21 tests, bug fix PolicyGradientTrainer kwarg
   11-3-training-scheduler-checkpoint-loading: done  # Completed 2026-03-12 - Load GatingPolicy from checkpoint, save latest alias, loaded_from_checkpoint flag, 18 tests
+  # Sprint B — End-to-end training loop
+  11-4-fix-traversal-training-service: done  # Completed 2026-03-12 - Fix 6 bugs: method call, optimizer, train/eval, latest alias, input_dim, device. 13 tests
+  11-5-wire-weight-store-persistence: backlog  # Wire WeightStore.save_weights() into training loop post-epoch
+  11-6-checkpoint-serialization-trained-flag: backlog  # Fix named_parameters→state_dict + orchestrator trained flag
   epic-11-retrospective: optional
