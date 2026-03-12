@@ -269,55 +269,161 @@ class WeightStore:
         return config
 
     async def _load_from_database(self, experiment_id: str) -> Optional[WeightConfig]:
-        """Carica pesi da database per un esperimento specifico."""
+        """
+        Carica pesi da database per un esperimento specifico.
+
+        Cerca la riga attiva (is_active=True) più recente per l'experiment_id.
+        Se non trova nulla o il DB non è disponibile, ritorna None (fallback a YAML).
+        """
         if not self.database_url:
             return None
 
-        # TODO: Implementare query database quando schema creato
-        # Per ora ritorna None (fallback a YAML)
-        log.debug("Database weight loading not yet implemented", experiment_id=experiment_id)
+        try:
+            session_factory = self._get_session_factory()
+            async with session_factory() as session:
+                from merlt.rlcf.persistence import WeightVersion
+                from sqlalchemy import select
+
+                result = await session.execute(
+                    select(WeightVersion)
+                    .where(WeightVersion.experiment_id == experiment_id)
+                    .where(WeightVersion.is_active.is_(True))
+                    .order_by(WeightVersion.created_at.desc())
+                    .limit(1)
+                )
+                row = result.scalar_one_or_none()
+
+                if row and row.config_json:
+                    config = WeightConfig.model_validate(row.config_json)
+                    log.info(
+                        "Weights loaded from database",
+                        experiment_id=experiment_id,
+                        version_tag=row.version_tag,
+                    )
+                    return config
+
+        except Exception as e:
+            log.warning(
+                "Database weight load failed, falling back to YAML",
+                experiment_id=experiment_id,
+                error=str(e),
+            )
         return None
 
     async def save_weights(
         self,
         config: WeightConfig,
         experiment_id: str,
-        metrics: Optional[Dict[str, float]] = None
+        metrics: Optional[Dict[str, float]] = None,
+        version_tag: Optional[str] = None,
+        created_by: Optional[str] = None,
     ) -> str:
         """
         Salva una versione di pesi nel database.
+
+        Deactivates previous active versions for the same experiment_id,
+        then inserts a new active row.
 
         Args:
             config: Configurazione pesi da salvare
             experiment_id: ID esperimento
             metrics: Metriche associate (es. {"accuracy": 0.85})
+            version_tag: Tag versione (auto-generated from timestamp if None)
+            created_by: Chi ha creato questa versione
 
         Returns:
-            ID della versione salvata
+            ID della versione salvata (UUID)
         """
         version_id = str(uuid4())
+        version_tag = version_tag or datetime.now().strftime("%Y%m%d_%H%M%S")
 
-        config.experiment_id = experiment_id
-        config.updated_at = datetime.now().isoformat()
-        config.metrics = metrics
+        # Deep copy to avoid mutating caller's config
+        config_to_save = config.model_copy(deep=True)
+        config_to_save.experiment_id = experiment_id
+        config_to_save.updated_at = datetime.now().isoformat()
+        config_to_save.metrics = metrics
 
-        # TODO: Implementare salvataggio database quando schema creato
-        log.info(
-            "Weights saved (in-memory only)",
-            version_id=version_id,
-            experiment_id=experiment_id,
-            has_metrics=metrics is not None
-        )
+        if not self.database_url:
+            log.warning(
+                "No database configured, weights saved in-memory only",
+                version_id=version_id,
+                experiment_id=experiment_id,
+            )
+            self._invalidate_cache(experiment_id)
+            return version_id
 
-        # Invalida cache per questo esperimento
-        cache_keys_to_remove = [
-            k for k in self._cache.keys()
-            if experiment_id in k
+        try:
+            session_factory = self._get_session_factory()
+            async with session_factory() as session:
+                from merlt.rlcf.persistence import WeightVersion
+                from sqlalchemy import update
+
+                async with session.begin():
+                    # Deactivate previous active versions for this experiment
+                    await session.execute(
+                        update(WeightVersion)
+                        .where(WeightVersion.experiment_id == experiment_id)
+                        .where(WeightVersion.is_active.is_(True))
+                        .values(is_active=False)
+                    )
+
+                    # Insert new active version
+                    row = WeightVersion(
+                        id=version_id,
+                        experiment_id=experiment_id,
+                        version_tag=version_tag,
+                        config_json=config_to_save.model_dump(mode="json"),
+                        metrics_json=metrics,
+                        is_active=True,
+                        created_by=created_by,
+                    )
+                    session.add(row)
+                # commit auto on exit, rollback on exception
+
+            log.info(
+                "Weights saved to database",
+                version_id=version_id,
+                experiment_id=experiment_id,
+                version_tag=version_tag,
+            )
+
+        except Exception as e:
+            log.error(
+                "Database weight save failed",
+                version_id=version_id,
+                experiment_id=experiment_id,
+                error=str(e),
+            )
+            raise
+
+        self._invalidate_cache(experiment_id)
+        return version_id
+
+    def _invalidate_cache(self, experiment_id: str) -> None:
+        """Remove cached entries for a given experiment_id."""
+        keys_to_remove = [
+            k for k in self._cache if k.endswith(f"_{experiment_id}")
         ]
-        for key in cache_keys_to_remove:
+        for key in keys_to_remove:
             del self._cache[key]
 
-        return version_id
+    def _get_session_factory(self):
+        """Lazy-create async session factory from database_url."""
+        if not hasattr(self, "_session_factory") or self._session_factory is None:
+            from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+
+            self._engine = create_async_engine(self.database_url, echo=False)
+            self._session_factory = async_sessionmaker(
+                bind=self._engine, class_=AsyncSession, expire_on_commit=False
+            )
+        return self._session_factory
+
+    async def close(self) -> None:
+        """Dispose the async engine and release connections."""
+        if hasattr(self, "_engine") and self._engine is not None:
+            await self._engine.dispose()
+            self._engine = None
+            self._session_factory = None
 
     def update_runtime(
         self,

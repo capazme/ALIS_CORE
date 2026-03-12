@@ -186,5 +186,11 @@ development_status:
   epic-10-retrospective: optional
 
   # ============================================
-  # All gaps resolved as of 2026-02-16
+  # Epic 11: RLCF Persistence (Infrastructure Debt)
+  # Sprint A — Make training incremental
   # ============================================
+  epic-11: in-progress
+  11-1-weight-store-db-persistence: done  # Completed 2026-03-12 - WeightVersion ORM, save_weights() + _load_from_database() implemented, 20 tests
+  11-2-replay-buffer-auto-persistence: done  # Completed 2026-03-12 - PrioritizedReplayBuffer.save()/load(), auto-save after training, auto-load on init, 21 tests, bug fix PolicyGradientTrainer kwarg
+  11-3-training-scheduler-checkpoint-loading: done  # Completed 2026-03-12 - Load GatingPolicy from checkpoint, save latest alias, loaded_from_checkpoint flag, 18 tests
+  epic-11-retrospective: optional

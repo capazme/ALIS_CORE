@@ -38,8 +38,9 @@ import asyncio
 import structlog
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, UTC
-from typing import Dict, Any, Optional, List, Callable
+from typing import Dict, Any, Optional, List, Callable, Tuple
 from enum import Enum
+from pathlib import Path
 import threading
 
 from .replay_buffer import ExperienceReplayBuffer, PrioritizedReplayBuffer, BufferStats
@@ -91,7 +92,9 @@ class SchedulerConfig:
     prioritized_replay: bool = True
     alpha: float = 0.6
     auto_save_checkpoint: bool = True
+    checkpoint_dir: str = "checkpoints"
     idle_timeout_days: int = 7
+    buffer_persistence_path: Optional[str] = "data/rlcf/replay_buffer.json"
     on_training_start: Optional[List[Callable]] = None
     on_training_complete_callbacks: Optional[List[Callable]] = None
     on_training_error_callbacks: Optional[List[Callable]] = None
@@ -106,7 +109,9 @@ class SchedulerConfig:
             "prioritized_replay": self.prioritized_replay,
             "alpha": self.alpha,
             "auto_save_checkpoint": self.auto_save_checkpoint,
+            "checkpoint_dir": self.checkpoint_dir,
             "idle_timeout_days": self.idle_timeout_days,
+            "buffer_persistence_path": self.buffer_persistence_path,
         }
 
 
@@ -174,6 +179,7 @@ class TrainingResult:
     total_loss: float = 0.0
     avg_reward: float = 0.0
     checkpoint_version: Optional[str] = None
+    loaded_from_checkpoint: bool = False
     duration_seconds: float = 0.0
     error: Optional[str] = None
 
@@ -185,6 +191,7 @@ class TrainingResult:
             "total_loss": round(self.total_loss, 6),
             "avg_reward": round(self.avg_reward, 4),
             "checkpoint_version": self.checkpoint_version,
+            "loaded_from_checkpoint": self.loaded_from_checkpoint,
             "duration_seconds": round(self.duration_seconds, 2),
             "error": self.error,
         }
@@ -245,9 +252,14 @@ class TrainingScheduler:
         self._on_training_complete: Optional[Callable] = None
         self._on_training_error: Optional[Callable] = None
 
+        # Auto-load buffer from disk if available
+        if self.config.buffer_persistence_path:
+            self._try_load_buffer()
+
         log.info(
             "TrainingScheduler initialized",
-            config=self.config.to_dict()
+            config=self.config.to_dict(),
+            buffer_size=len(self.buffer),
         )
 
     # -------------------------------------------------------------------------
@@ -419,13 +431,8 @@ class TrainingScheduler:
                 log.warning("on_training_start callback failed", error=str(e))
 
         try:
-            # Import trainer (lazy)
-            from .policy_gradient import PolicyGradientTrainer, GatingPolicy
-
-            # Get or create policy
-            # In produzione, caricheremmo da checkpoint
-            policy = GatingPolicy(input_dim=768, hidden_dim=256)
-            trainer = PolicyGradientTrainer(policy, learning_rate=1e-4)
+            # Load from checkpoint or create fresh policy
+            policy, trainer, loaded_from_checkpoint = self._get_or_create_policy()
 
             total_loss = 0.0
             total_reward = 0.0
@@ -498,18 +505,14 @@ class TrainingScheduler:
 
             duration = (datetime.now(UTC).replace(tzinfo=None) - start_time).total_seconds()
 
-            # Save versioned checkpoint
+            # Save versioned checkpoint + latest alias
             checkpoint_version = None
             if self.config.auto_save_checkpoint and samples_processed > 0:
-                version_tag = f"{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d_%H%M%S')}_{self._training_sessions_today}"
-                checkpoint_version = f"v{version_tag}"
-                try:
-                    from .policy_manager import PolicyManager
-                    pm = PolicyManager()
-                    pm.save_gating_policy(policy, name=f"gating_v{version_tag}")
-                    log.info("Versioned checkpoint saved", version=checkpoint_version)
-                except Exception as e:
-                    log.warning("Checkpoint save failed", error=str(e))
+                checkpoint_version = self._save_checkpoint(policy, trainer)
+
+            # Auto-save buffer to disk
+            if self.config.buffer_persistence_path:
+                self._try_save_buffer()
 
             # TraversalPolicy training (F8d)
             try:
@@ -530,6 +533,7 @@ class TrainingScheduler:
                 total_loss=total_loss / self.config.epochs_per_run if self.config.epochs_per_run > 0 else 0,
                 avg_reward=total_reward / self.config.epochs_per_run if self.config.epochs_per_run > 0 else 0,
                 checkpoint_version=checkpoint_version,
+                loaded_from_checkpoint=loaded_from_checkpoint,
                 duration_seconds=duration
             )
 
@@ -671,6 +675,112 @@ class TrainingScheduler:
             except Exception as e:
                 log.error("Error in auto training loop", error=str(e))
                 await asyncio.sleep(check_interval)
+
+    # -------------------------------------------------------------------------
+    # BUFFER PERSISTENCE
+    # -------------------------------------------------------------------------
+
+    def _try_load_buffer(self) -> None:
+        """Load buffer from disk if file exists. Graceful on errors."""
+        path = self.config.buffer_persistence_path
+        if not Path(path).exists():
+            log.info("No buffer file found, starting fresh", path=path)
+            return
+        try:
+            self.buffer.load(path)
+        except Exception as e:
+            log.warning(
+                "Buffer file corrupted, starting fresh",
+                path=path,
+                error=str(e),
+            )
+
+    def _try_save_buffer(self) -> None:
+        """Save buffer to disk. Graceful on errors."""
+        path = self.config.buffer_persistence_path
+        try:
+            Path(path).parent.mkdir(parents=True, exist_ok=True)
+            self.buffer.save(path)
+        except Exception as e:
+            log.warning("Buffer save failed", path=path, error=str(e))
+
+    # -------------------------------------------------------------------------
+    # POLICY CHECKPOINT MANAGEMENT
+    # -------------------------------------------------------------------------
+
+    def _get_or_create_policy(self) -> Tuple[Any, Any, bool]:
+        """
+        Load GatingPolicy from latest checkpoint, or create fresh if none exists.
+
+        Returns:
+            Tuple (policy, trainer, loaded_from_checkpoint)
+        """
+        from .policy_gradient import PolicyGradientTrainer, GatingPolicy
+
+        checkpoint_dir = Path(self.config.checkpoint_dir)
+        trainer_path = checkpoint_dir / "gating_trainer_latest.pt"
+
+        policy = GatingPolicy(input_dim=1024, hidden_dim=256)
+        trainer = PolicyGradientTrainer(policy)
+
+        if trainer_path.exists():
+            try:
+                trainer.load_checkpoint(str(trainer_path))
+                log.info(
+                    "GatingPolicy loaded from checkpoint",
+                    path=str(trainer_path),
+                    num_updates=trainer.num_updates,
+                    baseline=trainer.baseline,
+                )
+                return policy, trainer, True
+            except Exception as e:
+                log.warning(
+                    "Checkpoint load failed, using fresh policy",
+                    path=str(trainer_path),
+                    error=str(e),
+                )
+
+        log.info("No checkpoint found, using fresh GatingPolicy")
+        return policy, trainer, False
+
+    def _save_checkpoint(self, policy: Any, trainer: Any) -> Optional[str]:
+        """
+        Save versioned checkpoint AND latest alias.
+
+        Returns:
+            checkpoint_version string, or None on failure
+        """
+        checkpoint_dir = Path(self.config.checkpoint_dir)
+        checkpoint_dir.mkdir(parents=True, exist_ok=True)
+        version_tag = f"{datetime.now(UTC).replace(tzinfo=None).strftime('%Y%m%d_%H%M%S')}_{self._training_sessions_today}"
+        checkpoint_version = f"v{version_tag}"
+
+        try:
+            # Save versioned checkpoint (includes optimizer state + baseline)
+            versioned_path = checkpoint_dir / f"gating_{checkpoint_version}.pt"
+            trainer.save_checkpoint(str(versioned_path))
+
+            # Save trainer-format latest for training resumption
+            trainer_latest = checkpoint_dir / "gating_trainer_latest.pt"
+            trainer.save_checkpoint(str(trainer_latest))
+
+            # Save inference-format latest for PolicyManager loading
+            # Uses separate file with mlp_state_dict format
+            from .policy_manager import PolicyManager, PolicyConfig
+            pm = PolicyManager(config=PolicyConfig(checkpoint_dir=checkpoint_dir))
+            pm.save_gating_policy(policy, name="latest")
+
+            log.info(
+                "Checkpoint saved",
+                version=checkpoint_version,
+                versioned_path=str(versioned_path),
+                latest=True,
+            )
+            return checkpoint_version
+
+        except Exception as e:
+            log.warning("Checkpoint save failed", error=str(e))
+            return None
 
     # -------------------------------------------------------------------------
     # STATUS AND CONTROL

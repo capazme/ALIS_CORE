@@ -635,6 +635,85 @@ class PrioritizedReplayBuffer:
         """Numero di esperienze."""
         return self.tree.n_entries
 
+    def save(self, path: str) -> None:
+        """
+        Salva buffer su file.
+
+        Serializza le esperienze (non il SumTree). Il tree viene
+        ricostruito al load tramite re-add con priorità preservate.
+
+        Args:
+            path: Path del file JSON
+        """
+        with self._lock:
+            experiences = [
+                self.tree.data[i]
+                for i in range(self.tree.n_entries)
+                if self.tree.data[i] is not None
+            ]
+            data = {
+                "buffer_type": "prioritized",
+                "capacity": self.capacity,
+                "alpha": self.alpha,
+                "epsilon": self.epsilon,
+                "total_added": self._total_added,
+                "total_sampled": self._total_sampled,
+                "experiences": [exp.to_dict() for exp in experiences],
+            }
+            serialized = json.dumps(data, indent=2)
+
+        with open(path, "w") as f:
+            f.write(serialized)
+
+        log.info(f"PrioritizedReplayBuffer saved to {path}", size=len(experiences))
+
+    def load(self, path: str) -> None:
+        """
+        Carica buffer da file e ricostruisce il SumTree.
+
+        Args:
+            path: Path del file JSON
+
+        Raises:
+            ValueError: If buffer_type in the file is not 'prioritized'
+        """
+        with open(path, "r") as f:
+            data = json.load(f)
+
+        buf_type = data.get("buffer_type")
+        if buf_type and buf_type != "prioritized":
+            raise ValueError(
+                f"Expected buffer_type='prioritized', got '{buf_type}'"
+            )
+
+        with self._lock:
+            self.capacity = data.get("capacity", self.capacity)
+            self.alpha = data.get("alpha", self.alpha)
+            self.epsilon = data.get("epsilon", self.epsilon)
+            self._total_added = data.get("total_added", 0)
+            self._total_sampled = data.get("total_sampled", 0)
+
+            # Rebuild SumTree from scratch
+            self.tree = SumTree(self.capacity)
+            self._max_priority = 1.0
+            self._oldest_ts = None
+
+            for exp_data in data.get("experiences", []):
+                exp = Experience.from_dict(exp_data)
+                # Use the saved priority (computed from td_error at add time)
+                priority = exp.priority
+                self.tree.add(priority, exp)
+                self._max_priority = max(self._max_priority, priority)
+
+                exp_ts = datetime.fromisoformat(exp.timestamp)
+                if self._oldest_ts is None or exp_ts < self._oldest_ts:
+                    self._oldest_ts = exp_ts
+
+        log.info(
+            f"PrioritizedReplayBuffer loaded from {path}",
+            size=self.tree.n_entries,
+        )
+
     def get_stats(self) -> BufferStats:
         """Calcola statistiche."""
         with self._lock:

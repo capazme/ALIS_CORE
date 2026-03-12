@@ -376,6 +376,26 @@ class TrainingSession(Base):
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
 
+class WeightVersion(Base):
+    """
+    Versioned weight configuration for experiment tracking.
+
+    Maps to the `weight_versions` table created by Alembic migration 004.
+    Stores serialized WeightConfig JSON with experiment_id for A/B testing
+    and is_active flag for latest-version lookup.
+    """
+    __tablename__ = "weight_versions"
+
+    id = Column(String(50), primary_key=True)
+    experiment_id = Column(String(100), nullable=False, index=True)
+    version_tag = Column(String(50), nullable=True)
+    config_json = Column(GenericJSON, nullable=True)
+    metrics_json = Column(GenericJSON, nullable=True)
+    is_active = Column(Boolean, server_default="false", nullable=False, index=True)
+    created_at = Column(DateTime, server_default=func.now(), default=datetime.utcnow)
+    created_by = Column(String(100), nullable=True)
+
+
 # =============================================================================
 # PERSISTENCE SERVICE
 # =============================================================================
