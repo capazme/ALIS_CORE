@@ -15,7 +15,7 @@ Fondamento teorico:
 Esempio:
     >>> from merlt.rlcf.prompt_policy import PromptPolicy
     >>>
-    >>> policy = PromptPolicy(input_dim=768, prompt_dim=256)
+    >>> policy = PromptPolicy(input_dim=1024, prompt_dim=256)
     >>> query_embedding = get_embedding("Cos'e' la legittima difesa?")
     >>> modulation, log_prob = policy(query_embedding)
     >>> # modulation viene usato per adattare il prompt
@@ -123,7 +123,7 @@ class PromptPolicy(nn.Module):
 
     def __init__(
         self,
-        input_dim: int = 768,
+        input_dim: int = 1024,
         hidden_dim: int = 512,
         prompt_dim: int = 256,
         temperature: float = 1.0,

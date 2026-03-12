@@ -35,6 +35,7 @@ Esempio:
 """
 
 import asyncio
+import time
 import structlog
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, UTC
@@ -94,6 +95,7 @@ class SchedulerConfig:
     auto_save_checkpoint: bool = True
     checkpoint_dir: str = "checkpoints"
     idle_timeout_days: int = 7
+    error_cooldown_seconds: int = 300  # 5 min cooldown after ERROR before retry
     buffer_persistence_path: Optional[str] = "data/rlcf/replay_buffer.json"
     on_training_start: Optional[List[Callable]] = None
     on_training_complete_callbacks: Optional[List[Callable]] = None
@@ -111,6 +113,7 @@ class SchedulerConfig:
             "auto_save_checkpoint": self.auto_save_checkpoint,
             "checkpoint_dir": self.checkpoint_dir,
             "idle_timeout_days": self.idle_timeout_days,
+            "error_cooldown_seconds": self.error_cooldown_seconds,
             "buffer_persistence_path": self.buffer_persistence_path,
         }
 
@@ -142,6 +145,7 @@ class SchedulerStatus:
     total_epochs: int = 0
     training_sessions_today: int = 0
     avg_reward: float = 0.0
+    error_cooldown_remaining_seconds: Optional[float] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -155,6 +159,7 @@ class SchedulerStatus:
             "total_epochs": self.total_epochs,
             "training_sessions_today": self.training_sessions_today,
             "avg_reward": round(self.avg_reward, 4),
+            "error_cooldown_remaining_seconds": round(self.error_cooldown_remaining_seconds, 1) if self.error_cooldown_remaining_seconds is not None else None,
         }
 
 
@@ -239,6 +244,7 @@ class TrainingScheduler:
 
         # State
         self._status = TrainingStatus.IDLE
+        self._error_timestamp: Optional[float] = None
         self._last_training_at: Optional[datetime] = None
         self._current_epoch = 0
         self._total_epochs = 0
@@ -344,6 +350,22 @@ class TrainingScheduler:
             if self._status == TrainingStatus.PAUSED:
                 return False
 
+            # ERROR recovery: wait for cooldown then transition to IDLE
+            if self._status == TrainingStatus.ERROR:
+                if self._error_timestamp is not None:
+                    elapsed = time.monotonic() - self._error_timestamp
+                    if elapsed >= self.config.error_cooldown_seconds:
+                        self._status = TrainingStatus.IDLE
+                        self._error_timestamp = None
+                        log.info(
+                            "Training scheduler recovered from ERROR",
+                            cooldown_elapsed=round(elapsed, 1),
+                        )
+                    else:
+                        return False
+                else:
+                    return False
+
             # Check buffer threshold
             buffer_size = len(self.buffer)
 
@@ -414,6 +436,16 @@ class TrainingScheduler:
                     success=False,
                     error="Training already in progress"
                 )
+
+            if self._status == TrainingStatus.ERROR:
+                remaining = self._get_error_cooldown_remaining()
+                if remaining and remaining > 0:
+                    return TrainingResult(
+                        success=False,
+                        error=f"Error cooldown active: {remaining:.0f}s remaining"
+                    )
+                # Cooldown elapsed — allow training, clear error state
+                self._error_timestamp = None
 
             self._status = TrainingStatus.TRAINING
             self._total_epochs = self.config.epochs_per_run
@@ -506,6 +538,7 @@ class TrainingScheduler:
             with self._lock:
                 self._last_training_at = datetime.now(UTC).replace(tzinfo=None)
                 self._status = TrainingStatus.IDLE
+                self._error_timestamp = None
                 self._current_epoch = 0
                 self._update_sessions_today()
 
@@ -589,6 +622,7 @@ class TrainingScheduler:
         except Exception as e:
             with self._lock:
                 self._status = TrainingStatus.ERROR
+                self._error_timestamp = time.monotonic()
 
             log.error("Training failed", error=str(e))
 
@@ -961,8 +995,17 @@ class TrainingScheduler:
                 current_epoch=self._current_epoch,
                 total_epochs=self._total_epochs,
                 training_sessions_today=self._training_sessions_today,
-                avg_reward=buffer_stats.avg_reward
+                avg_reward=buffer_stats.avg_reward,
+                error_cooldown_remaining_seconds=self._get_error_cooldown_remaining(),
             )
+
+    def _get_error_cooldown_remaining(self) -> Optional[float]:
+        """Returns remaining cooldown seconds if in ERROR state, else None."""
+        if self._status == TrainingStatus.ERROR and self._error_timestamp is not None:
+            elapsed = time.monotonic() - self._error_timestamp
+            remaining = self.config.error_cooldown_seconds - elapsed
+            return max(0.0, remaining)
+        return None
 
     def pause(self):
         """Mette in pausa il training automatico."""

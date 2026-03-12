@@ -51,7 +51,7 @@ Esempio:
     from merlt.rlcf.multilevel_feedback import MultilevelFeedback
     from merlt.rlcf.policy_gradient import GatingPolicy, PolicyGradientTrainer
 
-    policy = GatingPolicy(input_dim=768)
+    policy = GatingPolicy(input_dim=1024)
     trainer = PolicyGradientTrainer(policy)
     metrics = trainer.update_from_feedback(trace, feedback)
 

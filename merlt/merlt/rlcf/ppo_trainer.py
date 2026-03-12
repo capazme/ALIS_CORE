@@ -22,7 +22,7 @@ Esempio:
     >>> from merlt.rlcf.ppo_trainer import PPOTrainer, PPOConfig
     >>> from merlt.rlcf.policy_gradient import GatingPolicy
     >>>
-    >>> policy = GatingPolicy(input_dim=768)
+    >>> policy = GatingPolicy(input_dim=1024)
     >>> config = PPOConfig(clip_ratio=0.2, num_epochs=4)
     >>> trainer = PPOTrainer(policy, config)
     >>>
@@ -125,7 +125,7 @@ class ValueNetwork:
     Predice il valore atteso di uno state (query embedding).
 
     Architettura:
-        input (768) -> hidden (256) -> ReLU -> hidden (128) -> ReLU -> output (1)
+        input (1024) -> hidden (256) -> ReLU -> hidden (128) -> ReLU -> output (1)
 
     Attributes:
         input_dim: Dimensione input
@@ -135,7 +135,7 @@ class ValueNetwork:
 
     def __init__(
         self,
-        input_dim: int = 768,
+        input_dim: int = 1024,
         hidden_dim: int = 256,
         device: Optional[str] = None
     ):

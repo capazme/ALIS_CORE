@@ -24,7 +24,7 @@ Esempio:
     >>> from merlt.rlcf.single_step_trainer import SingleStepTrainer, SingleStepConfig
     >>> from merlt.rlcf.policy_gradient import GatingPolicy
     >>>
-    >>> policy = GatingPolicy(input_dim=768)
+    >>> policy = GatingPolicy(input_dim=1024)
     >>> config = SingleStepConfig(learning_rate=1e-4)
     >>> trainer = SingleStepTrainer(policy, config)
     >>>

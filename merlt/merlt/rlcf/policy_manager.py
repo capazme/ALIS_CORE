@@ -241,7 +241,7 @@ class PolicyManager:
 
             # Reconstruct policy
             policy = TraversalPolicy(
-                input_dim=checkpoint.get("input_dim", 768),
+                input_dim=checkpoint.get("input_dim", 1024),
                 relation_dim=checkpoint.get("relation_dim", 64),
                 hidden_dim=checkpoint.get("hidden_dim", 128),
                 device=device
@@ -294,7 +294,7 @@ class PolicyManager:
 
             # Reconstruct policy
             policy = GatingPolicy(
-                input_dim=checkpoint.get("input_dim", 768),
+                input_dim=checkpoint.get("input_dim", 1024),
                 hidden_dim=checkpoint.get("hidden_dim", 256),
                 num_experts=checkpoint.get("num_experts", 4),
                 device=device
@@ -324,7 +324,7 @@ class PolicyManager:
         Computa peso per una relazione usando policy (se disponibile).
 
         Args:
-            query_embedding: Embedding della query [768]
+            query_embedding: Embedding della query [1024]
             relation_type: Tipo di relazione (es: "RIFERIMENTO")
             expert_type: Tipo di expert (es: "literal")
             trace: ExecutionTrace per registrare log_prob (opzionale)
@@ -346,7 +346,7 @@ class PolicyManager:
 
             # Convert to tensor
             query_tensor = torch.tensor(
-                [query_embedding],  # [1, 768]
+                [query_embedding],  # [1, 1024]
                 dtype=torch.float32,
                 device=policy.device
             )
@@ -409,7 +409,7 @@ class PolicyManager:
         Computa pesi per batch di relazioni (piu' efficiente).
 
         Args:
-            query_embedding: Embedding della query [768]
+            query_embedding: Embedding della query [1024]
             relation_types: Lista tipi relazione
             expert_type: Tipo di expert
             trace: ExecutionTrace per logging
@@ -435,7 +435,7 @@ class PolicyManager:
             # Batch tensors
             batch_size = len(relation_types)
             query_batch = torch.tensor(
-                [query_embedding] * batch_size,  # [batch, 768]
+                [query_embedding] * batch_size,  # [batch, 1024]
                 dtype=torch.float32,
                 device=policy.device
             )

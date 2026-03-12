@@ -189,7 +189,7 @@ development_status:
   # Epic 11: RLCF Persistence (Infrastructure Debt)
   # Sprint A — Make training incremental
   # ============================================
-  epic-11: in-progress
+  epic-11: done  # Completed 2026-03-12 - 6 stories, 22 pts, 97 new tests, retrospective done
   11-1-weight-store-db-persistence: done  # Completed 2026-03-12 - WeightVersion ORM, save_weights() + _load_from_database() implemented, 20 tests
   11-2-replay-buffer-auto-persistence: done  # Completed 2026-03-12 - PrioritizedReplayBuffer.save()/load(), auto-save after training, auto-load on init, 21 tests, bug fix PolicyGradientTrainer kwarg
   11-3-training-scheduler-checkpoint-loading: done  # Completed 2026-03-12 - Load GatingPolicy from checkpoint, save latest alias, loaded_from_checkpoint flag, 18 tests
@@ -197,4 +197,14 @@ development_status:
   11-4-fix-traversal-training-service: done  # Completed 2026-03-12 - Fix 6 bugs: method call, optimizer, train/eval, latest alias, input_dim, device. 13 tests
   11-5-wire-weight-store-persistence: done  # Completed 2026-03-12 - _extract_weight_config, _persist_weight_config, WeightVersion dedup, 15 tests
   11-6-checkpoint-serialization-trained-flag: done  # Completed 2026-03-12 - state_dict() serialization, load_state_dict(), trained flag detection, 16 tests
-  epic-11-retrospective: optional
+  epic-11-retrospective: done  # Completed 2026-03-12 - includes gap analysis for Sprint C-F
+
+  # ============================================
+  # Epic 12: RLCF Hardening (Production Reliability)
+  # Sprint C — Singleton Safety + Critical Fixes
+  # ============================================
+  epic-12: in-progress
+  12-1-fix-input-dim-768-fallback: done  # Completed 2026-03-12 - PolicyManager 768→1024, ValueNetwork, docstrings, PromptPolicy default. 9 tests
+  12-2-singleton-thread-safety: backlog  # Add threading.Lock to get_policy_manager, asyncio.Lock to get_orchestrator
+  12-3-error-state-recovery: done  # Completed 2026-03-12 - ERROR→IDLE cooldown recovery, error_cooldown_seconds config, get_status() cooldown info. 12 tests
+  12-4-torch-load-weights-only: backlog  # Add weights_only=True/False to all 13 torch.load calls
