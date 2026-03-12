@@ -24,10 +24,9 @@ from typing import Dict, Optional, Any
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import Column, String, Boolean, DateTime, Text, select, JSON as GenericJSON
-from sqlalchemy.sql import func
+from sqlalchemy import select
 
-from merlt.rlcf.database import Base
+from merlt.rlcf.persistence import WeightVersion  # single ORM definition
 from merlt.weights.config import (
     WeightConfig,
     WeightCategory,
@@ -39,20 +38,6 @@ from merlt.weights.config import (
 )
 
 log = structlog.get_logger()
-
-
-class WeightVersion(Base):
-    """SQLAlchemy model for weight version persistence."""
-    __tablename__ = "weight_versions"
-
-    id = Column(String(50), primary_key=True)
-    experiment_id = Column(String(100), nullable=False, index=True)
-    version_tag = Column(String(50), nullable=True)
-    config_json = Column(GenericJSON, nullable=True)
-    metrics_json = Column(GenericJSON, nullable=True)
-    is_active = Column(Boolean, server_default="false", nullable=False)
-    created_at = Column(DateTime, server_default=func.now(), nullable=True)
-    created_by = Column(String(100), nullable=True)
 
 
 class WeightStore:

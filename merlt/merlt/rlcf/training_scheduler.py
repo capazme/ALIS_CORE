@@ -184,6 +184,7 @@ class TrainingResult:
     error: Optional[str] = None
     traversal_trained: bool = False
     traversal_samples: int = 0
+    weight_version_id: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -198,6 +199,7 @@ class TrainingResult:
             "error": self.error,
             "traversal_trained": self.traversal_trained,
             "traversal_samples": self.traversal_samples,
+            "weight_version_id": self.weight_version_id,
         }
 
 
@@ -535,6 +537,22 @@ class TrainingScheduler:
             except Exception as e:
                 log.warning("TraversalPolicy training skipped", error=str(e))
 
+            # Persist weight config to database (gating priors + traversal weights)
+            traversal_weights = None
+            if traversal_trained:
+                try:
+                    from .traversal_training_service import TraversalTrainingService
+                    traversal_weights = TraversalTrainingService().get_domain_weights_table()
+                except Exception as e:
+                    log.debug("traversal_weights_extraction_skipped", error=str(e))
+
+            weight_version_id = await self._persist_weight_config(
+                policy=policy,
+                checkpoint_version=checkpoint_version,
+                samples_processed=samples_processed,
+                traversal_weights=traversal_weights,
+            )
+
             result = TrainingResult(
                 success=True,
                 epochs_completed=self.config.epochs_per_run,
@@ -545,6 +563,7 @@ class TrainingScheduler:
                 duration_seconds=duration,
                 traversal_trained=traversal_trained,
                 traversal_samples=traversal_samples,
+                weight_version_id=weight_version_id,
             )
 
             log.info(
@@ -790,6 +809,132 @@ class TrainingScheduler:
 
         except Exception as e:
             log.warning("Checkpoint save failed", error=str(e))
+            return None
+
+    # -------------------------------------------------------------------------
+    # WEIGHT PERSISTENCE
+    # -------------------------------------------------------------------------
+
+    def _extract_weight_config(
+        self,
+        policy: Any,
+        traversal_weights: Optional[Dict[str, Dict[str, float]]] = None,
+    ) -> "WeightConfig":
+        """
+        Extract current weight configuration from trained policy state.
+
+        Builds a WeightConfig from:
+        - GatingPolicy softmax output (expert priors)
+        - Traversal relation weights (if available)
+        - Default values for retrieval and RLCF (updated separately by WeightLearner)
+        """
+        from merlt.weights.config import (
+            WeightConfig,
+            GatingWeights,
+            ExpertTraversalWeights,
+            LearnableWeight,
+        )
+
+        # Extract expert priors from GatingPolicy
+        expert_names = ["LiteralExpert", "SystemicExpert", "PrinciplesExpert", "PrecedentExpert"]
+        expert_priors = {}
+
+        try:
+            import torch
+            policy.to("cpu")
+            was_training = policy.mlp.training
+            policy.mlp.eval()
+            try:
+                with torch.no_grad():
+                    dummy = torch.zeros(1, policy.input_dim)
+                    logits = policy.mlp(dummy)
+                    weights = torch.softmax(logits, dim=-1).squeeze(0)
+                    for i, name in enumerate(expert_names):
+                        w = float(weights[i].item())
+                        expert_priors[name] = LearnableWeight(
+                            default=round(w, 4),
+                            bounds=(0.1, 0.5),
+                            learnable=True,
+                        )
+            finally:
+                if was_training:
+                    policy.mlp.train()
+        except Exception as e:
+            log.debug("extract_gating_weights_fallback", error=str(e))
+            for name in expert_names:
+                expert_priors[name] = LearnableWeight(default=0.25, bounds=(0.1, 0.5))
+
+        # Build expert traversal weights from TraversalPolicy table
+        expert_traversal = {}
+        if traversal_weights:
+            for expert_key, rel_weights in traversal_weights.items():
+                # Map short expert name → PascalCase
+                pascal_name = {
+                    "literal": "LiteralExpert",
+                    "systemic": "SystemicExpert",
+                    "principles": "PrinciplesExpert",
+                    "precedent": "PrecedentExpert",
+                }.get(expert_key, expert_key)
+
+                lw_map = {}
+                for rel_type, w in rel_weights.items():
+                    lw_map[rel_type] = LearnableWeight(
+                        default=round(w, 4),
+                        bounds=(0.0, 1.0),
+                        learnable=True,
+                    )
+                expert_traversal[pascal_name] = ExpertTraversalWeights(weights=lw_map)
+
+        return WeightConfig(
+            gating=GatingWeights(expert_priors=expert_priors),
+            expert_traversal=expert_traversal,
+        )
+
+    async def _persist_weight_config(
+        self,
+        policy: Any,
+        checkpoint_version: Optional[str],
+        samples_processed: int,
+        traversal_weights: Optional[Dict[str, Dict[str, float]]] = None,
+    ) -> Optional[str]:
+        """
+        Persist current weight configuration to database via WeightStore.
+
+        Returns:
+            weight version ID, or None if persistence skipped/failed
+        """
+        import os
+
+        db_url = os.environ.get("RLCF_DATABASE_URL")
+        if not db_url:
+            log.debug("weight_persistence_skipped", reason="RLCF_DATABASE_URL not set")
+            return None
+
+        try:
+            from merlt.weights.store import WeightStore
+
+            config = self._extract_weight_config(policy, traversal_weights)
+            store = WeightStore(database_url=db_url)
+
+            version_id = await store.save_weights(
+                config=config,
+                experiment_id="rlcf_training",
+                metrics={
+                    "checkpoint_version": checkpoint_version or "none",
+                    "samples_processed": float(samples_processed),
+                    "epochs": float(self.config.epochs_per_run),
+                },
+            )
+
+            log.info(
+                "Weight config persisted to database",
+                weight_version_id=version_id,
+                checkpoint_version=checkpoint_version,
+            )
+            return version_id
+
+        except Exception as e:
+            log.warning("weight_persistence_failed", error=str(e))
             return None
 
     # -------------------------------------------------------------------------

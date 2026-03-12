@@ -195,6 +195,6 @@ development_status:
   11-3-training-scheduler-checkpoint-loading: done  # Completed 2026-03-12 - Load GatingPolicy from checkpoint, save latest alias, loaded_from_checkpoint flag, 18 tests
   # Sprint B — End-to-end training loop
   11-4-fix-traversal-training-service: done  # Completed 2026-03-12 - Fix 6 bugs: method call, optimizer, train/eval, latest alias, input_dim, device. 13 tests
-  11-5-wire-weight-store-persistence: backlog  # Wire WeightStore.save_weights() into training loop post-epoch
+  11-5-wire-weight-store-persistence: done  # Completed 2026-03-12 - _extract_weight_config, _persist_weight_config, WeightVersion dedup, 15 tests
   11-6-checkpoint-serialization-trained-flag: backlog  # Fix named_parameters→state_dict + orchestrator trained flag
   epic-11-retrospective: optional
