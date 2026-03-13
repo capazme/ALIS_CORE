@@ -37,6 +37,8 @@ Esempio:
     ... )
 """
 
+import threading
+
 import structlog
 from typing import Optional, List, Dict, Any, Tuple, TYPE_CHECKING
 from pathlib import Path
@@ -164,6 +166,7 @@ class PolicyManager:
         self._gating_policy: Optional["GatingPolicy"] = None
         self._traversal_loaded = False
         self._gating_loaded = False
+        self._load_lock = threading.Lock()
 
         # Device detection
         self._device: Optional[str] = self.config.device
@@ -207,7 +210,10 @@ class PolicyManager:
 
     def _load_traversal_policy(self) -> Optional["TraversalPolicy"]:
         """
-        Load TraversalPolicy da checkpoint (lazy).
+        Load TraversalPolicy da checkpoint (lazy, thread-safe).
+
+        Uses double-checked locking: fast path without lock, then full
+        loading inside lock to prevent concurrent torch.load races.
 
         Returns:
             TraversalPolicy o None se non disponibile
@@ -215,55 +221,67 @@ class PolicyManager:
         if self._traversal_loaded:
             return self._traversal_policy
 
-        self._traversal_loaded = True
+        with self._load_lock:
+            if self._traversal_loaded:
+                return self._traversal_policy
 
-        if not self.config.enable_traversal_policy:
-            log.info("TraversalPolicy disabled, using static weights")
-            return None
+            if not self.config.enable_traversal_policy:
+                log.info("TraversalPolicy disabled, using static weights")
+                self._traversal_loaded = True
+                return None
 
-        checkpoint_path = self.config.checkpoint_dir / "traversal_policy_latest.pt"
+            checkpoint_path = self.config.checkpoint_dir / "traversal_policy_latest.pt"
 
-        if not checkpoint_path.exists():
-            log.info(
-                f"No TraversalPolicy checkpoint at {checkpoint_path}, "
-                "using static weights"
-            )
-            return None
+            if not checkpoint_path.exists():
+                log.info(
+                    f"No TraversalPolicy checkpoint at {checkpoint_path}, "
+                    "using static weights"
+                )
+                self._traversal_loaded = True
+                return None
 
-        try:
-            from merlt.rlcf.policy_gradient import TraversalPolicy
-            import torch
+            try:
+                from merlt.rlcf.policy_gradient import TraversalPolicy
+                import torch
 
-            device = self._detect_device()
+                device = self._detect_device()
 
-            # Load checkpoint
-            checkpoint = torch.load(checkpoint_path, map_location=device)
+                checkpoint = torch.load(checkpoint_path, map_location=device)
 
-            # Reconstruct policy
-            policy = TraversalPolicy(
-                input_dim=checkpoint.get("input_dim", 1024),
-                relation_dim=checkpoint.get("relation_dim", 64),
-                hidden_dim=checkpoint.get("hidden_dim", 128),
-                device=device
-            )
+                policy = TraversalPolicy(
+                    input_dim=checkpoint.get("input_dim", 1024),
+                    relation_dim=checkpoint.get("relation_dim", 64),
+                    hidden_dim=checkpoint.get("hidden_dim", 128),
+                    device=device
+                )
 
-            # Load state dict
-            policy.mlp.load_state_dict(checkpoint["mlp_state_dict"])
-            policy.relation_embeddings.load_state_dict(checkpoint["relation_embeddings_state_dict"])
+                policy.mlp.load_state_dict(checkpoint["mlp_state_dict"])
+                policy.relation_embeddings.load_state_dict(
+                    checkpoint["relation_embeddings_state_dict"]
+                )
 
-            policy.eval()  # Inference mode
+                policy.mlp.requires_grad_(False)
+                policy.relation_embeddings.requires_grad_(False)
 
-            self._traversal_policy = policy
-            log.info(f"TraversalPolicy loaded from {checkpoint_path}", device=device)
-            return policy
+                self._traversal_policy = policy
+                self._traversal_loaded = True
+                log.info(
+                    f"TraversalPolicy loaded from {checkpoint_path}",
+                    device=device,
+                )
+                return policy
 
-        except Exception as e:
-            log.error(f"Failed to load TraversalPolicy: {e}")
-            return None
+            except Exception as e:
+                log.error(f"Failed to load TraversalPolicy: {e}")
+                self._traversal_loaded = True
+                return None
 
     def _load_gating_policy(self) -> Optional["GatingPolicy"]:
         """
-        Load GatingPolicy da checkpoint (lazy).
+        Load GatingPolicy da checkpoint (lazy, thread-safe).
+
+        Uses double-checked locking: fast path without lock, then full
+        loading inside lock to prevent concurrent torch.load races.
 
         Returns:
             GatingPolicy o None se non disponibile
@@ -271,47 +289,53 @@ class PolicyManager:
         if self._gating_loaded:
             return self._gating_policy
 
-        self._gating_loaded = True
+        with self._load_lock:
+            if self._gating_loaded:
+                return self._gating_policy
 
-        if not self.config.enable_gating_policy:
-            log.info("GatingPolicy disabled")
-            return None
+            if not self.config.enable_gating_policy:
+                log.info("GatingPolicy disabled")
+                self._gating_loaded = True
+                return None
 
-        checkpoint_path = self.config.checkpoint_dir / "gating_policy_latest.pt"
+            checkpoint_path = self.config.checkpoint_dir / "gating_policy_latest.pt"
 
-        if not checkpoint_path.exists():
-            log.info(f"No GatingPolicy checkpoint at {checkpoint_path}")
-            return None
+            if not checkpoint_path.exists():
+                log.info(f"No GatingPolicy checkpoint at {checkpoint_path}")
+                self._gating_loaded = True
+                return None
 
-        try:
-            from merlt.rlcf.policy_gradient import GatingPolicy
-            import torch
+            try:
+                from merlt.rlcf.policy_gradient import GatingPolicy
+                import torch
 
-            device = self._detect_device()
+                device = self._detect_device()
 
-            # Load checkpoint
-            checkpoint = torch.load(checkpoint_path, map_location=device)
+                checkpoint = torch.load(checkpoint_path, map_location=device)
 
-            # Reconstruct policy
-            policy = GatingPolicy(
-                input_dim=checkpoint.get("input_dim", 1024),
-                hidden_dim=checkpoint.get("hidden_dim", 256),
-                num_experts=checkpoint.get("num_experts", 4),
-                device=device
-            )
+                policy = GatingPolicy(
+                    input_dim=checkpoint.get("input_dim", 1024),
+                    hidden_dim=checkpoint.get("hidden_dim", 256),
+                    num_experts=checkpoint.get("num_experts", 4),
+                    device=device
+                )
 
-            # Load state dict
-            policy.mlp.load_state_dict(checkpoint["mlp_state_dict"])
+                policy.mlp.load_state_dict(checkpoint["mlp_state_dict"])
 
-            policy.eval()  # Inference mode
+                policy.mlp.requires_grad_(False)
 
-            self._gating_policy = policy
-            log.info(f"GatingPolicy loaded from {checkpoint_path}", device=device)
-            return policy
+                self._gating_policy = policy
+                self._gating_loaded = True
+                log.info(
+                    f"GatingPolicy loaded from {checkpoint_path}",
+                    device=device,
+                )
+                return policy
 
-        except Exception as e:
-            log.error(f"Failed to load GatingPolicy: {e}")
-            return None
+            except Exception as e:
+                log.error(f"Failed to load GatingPolicy: {e}")
+                self._gating_loaded = True
+                return None
 
     async def compute_relation_weight(
         self,
@@ -625,11 +649,12 @@ class PolicyManager:
         return self._load_gating_policy() is not None
 
     def reset_policies(self):
-        """Reset policies (forza reload)."""
-        self._traversal_policy = None
-        self._gating_policy = None
-        self._traversal_loaded = False
-        self._gating_loaded = False
+        """Reset policies (forza reload, thread-safe)."""
+        with self._load_lock:
+            self._traversal_policy = None
+            self._gating_policy = None
+            self._traversal_loaded = False
+            self._gating_loaded = False
         log.info("Policies reset")
 
     def save_traversal_policy(self, policy: "TraversalPolicy", name: str = "latest"):
@@ -658,8 +683,9 @@ class PolicyManager:
         log.info(f"TraversalPolicy saved to {checkpoint_path}")
 
         # Reset per forzare reload
-        self._traversal_policy = None
-        self._traversal_loaded = False
+        with self._load_lock:
+            self._traversal_policy = None
+            self._traversal_loaded = False
 
     def save_gating_policy(self, policy: "GatingPolicy", name: str = "latest"):
         """
@@ -685,12 +711,14 @@ class PolicyManager:
         log.info(f"GatingPolicy saved to {checkpoint_path}")
 
         # Reset per forzare reload
-        self._gating_policy = None
-        self._gating_loaded = False
+        with self._load_lock:
+            self._gating_policy = None
+            self._gating_loaded = False
 
 
 # Singleton instance
 _policy_manager: Optional[PolicyManager] = None
+_pm_lock = threading.Lock()
 
 
 def get_policy_manager(
@@ -698,7 +726,7 @@ def get_policy_manager(
     **kwargs
 ) -> PolicyManager:
     """
-    Ottieni PolicyManager singleton.
+    Ottieni PolicyManager singleton (thread-safe).
 
     Args:
         config: PolicyConfig (usato solo alla prima chiamata)
@@ -709,13 +737,14 @@ def get_policy_manager(
     """
     global _policy_manager
 
-    if _policy_manager is None:
-        _policy_manager = PolicyManager(config=config, **kwargs)
-
-    return _policy_manager
+    with _pm_lock:
+        if _policy_manager is None:
+            _policy_manager = PolicyManager(config=config, **kwargs)
+        return _policy_manager
 
 
 def reset_policy_manager():
-    """Reset PolicyManager singleton."""
+    """Reset PolicyManager singleton (thread-safe)."""
     global _policy_manager
-    _policy_manager = None
+    with _pm_lock:
+        _policy_manager = None

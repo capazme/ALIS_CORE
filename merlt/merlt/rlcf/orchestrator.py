@@ -20,6 +20,8 @@ References:
     merlt/rlcf/authority.py - Authority scoring
 """
 
+import asyncio
+
 import structlog
 from typing import Dict, Any, Optional, List
 from datetime import datetime
@@ -481,6 +483,7 @@ class RLCFOrchestrator:
 
 # Singleton instance for easy access
 _orchestrator_instance: Optional[RLCFOrchestrator] = None
+_orchestrator_lock = asyncio.Lock()
 
 
 async def get_orchestrator(
@@ -489,7 +492,7 @@ async def get_orchestrator(
     learner: Optional[WeightLearner] = None
 ) -> RLCFOrchestrator:
     """
-    Get or create RLCFOrchestrator singleton.
+    Get or create RLCFOrchestrator singleton (async-safe).
 
     Args:
         db_session: Database session
@@ -501,16 +504,17 @@ async def get_orchestrator(
     """
     global _orchestrator_instance
 
-    if _orchestrator_instance is None:
-        if store is None:
-            store = WeightStore()
-        if learner is None:
-            learner = WeightLearner(store)
+    async with _orchestrator_lock:
+        if _orchestrator_instance is None:
+            if store is None:
+                store = WeightStore()
+            if learner is None:
+                learner = WeightLearner(store)
 
-        _orchestrator_instance = RLCFOrchestrator(
-            db_session=db_session,
-            weight_store=store,
-            weight_learner=learner
-        )
+            _orchestrator_instance = RLCFOrchestrator(
+                db_session=db_session,
+                weight_store=store,
+                weight_learner=learner
+            )
 
-    return _orchestrator_instance
+        return _orchestrator_instance
