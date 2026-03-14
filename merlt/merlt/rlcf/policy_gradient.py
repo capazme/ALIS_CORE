@@ -879,7 +879,8 @@ class PolicyGradientTrainer:
         """
         torch, _, _, _ = _get_torch()
 
-        checkpoint = torch.load(path, map_location=self.policy.device)
+        # weights_only=False: checkpoint contains optimizer state (non-tensor)
+        checkpoint = torch.load(path, map_location=self.policy.device, weights_only=False)
 
         # Carica policy state
         policy_state = checkpoint["policy_state_dict"]

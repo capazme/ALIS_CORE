@@ -552,7 +552,8 @@ class SingleStepTrainer:
         """
         torch, _, _ = _get_torch()
 
-        checkpoint = torch.load(path, map_location=self.policy.device)
+        # weights_only=False: checkpoint contains optimizer state (non-tensor)
+        checkpoint = torch.load(path, map_location=self.policy.device, weights_only=False)
 
         self.policy.mlp.load_state_dict(checkpoint["policy_state_dict"])
         self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])

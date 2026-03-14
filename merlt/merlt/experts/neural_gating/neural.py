@@ -492,7 +492,8 @@ class NeuralGatingTrainer:
             log.warning(f"Checkpoint not found: {path}")
             return
 
-        checkpoint = torch.load(path, map_location=self.device)
+        # weights_only=False: checkpoint contains optimizer state (non-tensor)
+        checkpoint = torch.load(path, map_location=self.device, weights_only=False)
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         self.training_history = checkpoint.get('training_history', [])

@@ -304,7 +304,7 @@ class PromptPolicy(nn.Module):
 
     def load(self, path: str) -> None:
         """Carica i pesi del modello."""
-        self.load_state_dict(torch.load(path, map_location="cpu"))
+        self.load_state_dict(torch.load(path, map_location="cpu", weights_only=True))
         log.info(f"PromptPolicy loaded from {path}")
 
 
@@ -451,7 +451,8 @@ class PromptPolicyTrainer:
 
     def load_checkpoint(self, path: str) -> None:
         """Carica checkpoint."""
-        checkpoint = torch.load(path, map_location="cpu")
+        # weights_only=False: checkpoint contains optimizer state (non-tensor)
+        checkpoint = torch.load(path, map_location="cpu", weights_only=False)
         self.policy.load_state_dict(checkpoint["policy_state_dict"])
         self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         self.running_baseline = checkpoint["running_baseline"]

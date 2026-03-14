@@ -502,7 +502,7 @@ class LegalBertEncoder:
 
         self.initialize()
 
-        state_dict = torch.load(path, map_location=self.device)
+        state_dict = torch.load(path, map_location=self.device, weights_only=True)
 
         for name, lora in self.lora_layers.items():
             if f"{name}.lora_A" in state_dict:

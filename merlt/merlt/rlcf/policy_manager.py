@@ -246,7 +246,9 @@ class PolicyManager:
 
                 device = self._detect_device()
 
-                checkpoint = torch.load(checkpoint_path, map_location=device)
+                checkpoint = torch.load(
+                    checkpoint_path, map_location=device, weights_only=True
+                )
 
                 policy = TraversalPolicy(
                     input_dim=checkpoint.get("input_dim", 1024),
@@ -311,7 +313,9 @@ class PolicyManager:
 
                 device = self._detect_device()
 
-                checkpoint = torch.load(checkpoint_path, map_location=device)
+                checkpoint = torch.load(
+                    checkpoint_path, map_location=device, weights_only=True
+                )
 
                 policy = GatingPolicy(
                     input_dim=checkpoint.get("input_dim", 1024),

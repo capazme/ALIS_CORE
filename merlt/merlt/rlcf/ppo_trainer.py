@@ -850,7 +850,8 @@ class PPOTrainer:
         """
         torch, _, _, _ = _get_torch()
 
-        checkpoint = torch.load(path, map_location=self.policy.device)
+        # weights_only=False: checkpoint contains optimizer state (non-tensor)
+        checkpoint = torch.load(path, map_location=self.policy.device, weights_only=False)
 
         self.policy.mlp.load_state_dict(checkpoint["policy_state_dict"])
         self.value_net.mlp.load_state_dict(checkpoint["value_net_state_dict"])

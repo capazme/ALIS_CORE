@@ -878,7 +878,8 @@ class ReActPPOTrainer:
         """
         torch, _, _, _ = _get_torch()
 
-        checkpoint = torch.load(path, map_location=self.policy.device)
+        # weights_only=False: checkpoint contains optimizer state (non-tensor)
+        checkpoint = torch.load(path, map_location=self.policy.device, weights_only=False)
 
         self.policy.actor.load_state_dict(checkpoint["actor_state_dict"])
         self.policy.critic.load_state_dict(checkpoint["critic_state_dict"])

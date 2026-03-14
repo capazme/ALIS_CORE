@@ -309,7 +309,7 @@ class HybridExpertRouter:
     def _load_checkpoint(self, path: Path) -> None:
         """Carica weights da checkpoint."""
         import torch
-        checkpoint = torch.load(path, map_location=self.device)
+        checkpoint = torch.load(path, map_location=self.device, weights_only=True)
         self.neural_gating.load_state_dict(checkpoint['model_state_dict'])
         self.neural_gating.eval()
 

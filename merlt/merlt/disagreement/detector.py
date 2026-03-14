@@ -407,7 +407,7 @@ class LegalDisagreementNet:
         # Carica heads
         heads_path = os.path.join(path, "heads.pt")
         if os.path.exists(heads_path):
-            heads_state = torch.load(heads_path, map_location=self.device)
+            heads_state = torch.load(heads_path, map_location=self.device, weights_only=True)
             for i, param in enumerate(self.heads.parameters()):
                 if f"param_{i}" in heads_state:
                     param.data = heads_state[f"param_{i}"]
