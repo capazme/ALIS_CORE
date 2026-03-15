@@ -21,6 +21,14 @@ Esempio:
     >>> # modulation viene usato per adattare il prompt
 """
 
+import warnings
+warnings.warn(
+    "merlt.rlcf.prompt_policy is deprecated and has no active callers in production code. "
+    "This module will be removed in a future version.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
 import structlog
 import torch
 import torch.nn as nn

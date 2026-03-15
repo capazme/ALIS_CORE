@@ -458,27 +458,6 @@ class RLCFOrchestrator:
             "queried_at": datetime.now().isoformat()
         }
 
-    async def get_weight_evolution(
-        self,
-        expert_type: str,
-        limit: int = 10
-    ) -> List[Dict[str, Any]]:
-        """
-        Get history of weight updates for an expert.
-
-        Args:
-            expert_type: Type of expert
-            limit: Max number of records to return
-
-        Returns:
-            List of weight update records
-        """
-        log.warning(
-            "Weight history tracking not yet implemented",
-            expert_type=expert_type,
-            limit=limit,
-        )
-        return []
 
 
 # Singleton instance for easy access

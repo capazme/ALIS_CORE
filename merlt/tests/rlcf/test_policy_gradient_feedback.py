@@ -255,11 +255,15 @@ class TestFactoryFunctions:
         assert feedback.user_id == "user_123"
         assert feedback.is_complete() is True
 
-    def test_create_gating_policy(self):
-        """Verifica factory per gating policy."""
-        from merlt.rlcf.policy_gradient import create_gating_policy
+    def test_gating_policy_and_trainer(self):
+        """Verifica creazione GatingPolicy e PolicyGradientTrainer."""
+        import warnings
+        from merlt.rlcf.policy_gradient import GatingPolicy, PolicyGradientTrainer
 
-        policy, trainer = create_gating_policy(input_dim=768, hidden_dim=256)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            policy = GatingPolicy(input_dim=768, hidden_dim=256)
+            trainer = PolicyGradientTrainer(policy)
 
         assert policy.input_dim == 768
         assert policy.hidden_dim == 256

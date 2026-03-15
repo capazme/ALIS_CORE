@@ -20,6 +20,14 @@ Threshold Approvazione:
     Σ(weighted_votes) <= -2.0 per rifiuto
 """
 
+import warnings
+warnings.warn(
+    "merlt.rlcf.entity_feedback is deprecated and has no active callers. "
+    "This module will be removed in a future version.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Literal, Optional

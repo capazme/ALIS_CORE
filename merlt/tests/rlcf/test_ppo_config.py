@@ -166,7 +166,7 @@ class TestPPOBuffer:
         assert len(buffer) == 10
 
     def test_compute_advantages_simple(self):
-        """Test calcolo advantages semplice (episodi singoli)."""
+        """Test calcolo advantages semplice (episodi singoli) via compute_gae."""
         buffer = PPOBuffer(gamma=0.99)
 
         # Aggiungi esperienze con done=True (episodi singoli)
@@ -180,7 +180,7 @@ class TestPPOBuffer:
                 done=True
             )
 
-        buffer.compute_advantages()
+        buffer.compute_gae()
 
         # Per episodi singoli con done=True:
         # advantage = reward - value = 1.0 - 0.5 = 0.5
@@ -216,7 +216,7 @@ class TestPPOBuffer:
                 done=True
             )
 
-        buffer.compute_advantages()
+        buffer.compute_gae()
         batch = buffer.get_batch(device="cpu")
 
         assert "states" in batch

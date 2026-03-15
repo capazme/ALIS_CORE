@@ -288,41 +288,6 @@ class PPOBuffer:
         self.values.append(value)
         self.dones.append(done)
 
-    def compute_advantages(self, last_value: float = 0.0) -> None:
-        """
-        Calcola advantages usando GAE (Generalized Advantage Estimation).
-
-        GAE formula:
-            A_t = sum_{l=0}^{inf} (gamma * lambda)^l * delta_{t+l}
-            delta_t = r_t + gamma * V(s_{t+1}) - V(s_t)
-
-        Args:
-            last_value: Value dell'ultimo stato (per bootstrap)
-        """
-        torch, _, _, _ = _get_torch()
-
-        n = len(self.rewards)
-        self.advantages = [0.0] * n
-        self.returns = [0.0] * n
-
-        # Per MERL-T, ogni query e' un episodio singolo (done=True)
-        # Quindi calcoliamo advantage semplice: A = R - V
-        for i in range(n):
-            # Se e' l'ultimo step o done
-            if i == n - 1 or self.dones[i]:
-                next_value = last_value if i == n - 1 else 0.0
-            else:
-                next_value = self.values[i + 1]
-
-            # TD error: delta = r + gamma * V(s') - V(s)
-            delta = self.rewards[i] + self.gamma * next_value * (1 - int(self.dones[i])) - self.values[i]
-
-            # Per episodi single-step (MERL-T), advantage = delta
-            self.advantages[i] = delta
-
-            # Returns = advantage + value
-            self.returns[i] = self.advantages[i] + self.values[i]
-
     def compute_gae(self, last_value: float = 0.0) -> None:
         """
         Calcola GAE per trajectory multi-step.
