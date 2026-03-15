@@ -251,7 +251,7 @@ class SingleStepTrainer:
         expert_actions = [
             a for a in trace.actions
             if a.action_type == "expert_selection"
-            and a.metadata.get("source") == "gating_policy"
+            and a.metadata.get("source") in ("neural_gating", "gating_policy")
         ]
 
         if not expert_actions:
@@ -430,7 +430,7 @@ class SingleStepTrainer:
             expert_actions = [
                 a for a in trace.actions
                 if a.action_type == "expert_selection"
-                and a.metadata.get("source") == "gating_policy"
+                and a.metadata.get("source") in ("neural_gating", "gating_policy")
             ]
 
             if not expert_actions:

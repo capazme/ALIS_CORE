@@ -427,6 +427,28 @@ class MultiExpertOrchestrator:
                 log_prob=-0.1 if routing_decision.neural_used else -0.5,
             ))
 
+            # Register expert_selection actions for RLCF training
+            if routing_decision.neural_used and routing_decision.query_embedding is not None:
+                if not routing_decision.expert_log_probs:
+                    log.warning(
+                        "expert_log_probs missing from routing decision, "
+                        "RLCF trace will use fallback log_prob=-1.0"
+                    )
+                for expert_name, weight in routing_decision.expert_weights.items():
+                    log_prob_val = (
+                        routing_decision.expert_log_probs.get(expert_name, -1.0)
+                        if routing_decision.expert_log_probs else -1.0
+                    )
+                    trace.add_action(Action(
+                        action_type="expert_selection",
+                        parameters={"weight": weight, "expert_type": expert_name},
+                        log_prob=log_prob_val,
+                        metadata={
+                            "source": "neural_gating",
+                            "query_embedding": routing_decision.query_embedding,
+                        },
+                    ))
+
             selected_experts = routing_decision.get_selected_experts(
                 threshold=self.config.selection_threshold
             )[:self.config.max_experts]

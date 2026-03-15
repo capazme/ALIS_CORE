@@ -21,6 +21,7 @@ from merlt.rlcf.training_scheduler import (
     TrainingResult,
 )
 from merlt.rlcf.policy_gradient import GatingPolicy, PolicyGradientTrainer
+from merlt.experts.neural_gating.neural import ExpertGatingMLP, GatingConfig
 
 
 # =============================================================================
@@ -138,10 +139,10 @@ class TestGetOrCreatePolicy:
     """Test GatingPolicy checkpoint loading logic."""
 
     def test_fresh_policy_when_no_checkpoint(self, scheduler):
-        """Creates fresh policy when no checkpoint exists."""
+        """Creates fresh ExpertGatingMLP when no checkpoint exists."""
         policy, trainer, loaded = scheduler._get_or_create_policy()
 
-        assert isinstance(policy, GatingPolicy)
+        assert isinstance(policy, ExpertGatingMLP)
         assert isinstance(trainer, PolicyGradientTrainer)
         assert loaded is False
         assert trainer.num_updates == 0
@@ -150,12 +151,12 @@ class TestGetOrCreatePolicy:
     def test_fresh_policy_uses_1024_input_dim(self, scheduler):
         """Fresh policy uses input_dim=1024 matching E5-large embeddings."""
         policy, _, _ = scheduler._get_or_create_policy()
-        assert policy.input_dim == 1024
+        assert policy.config.input_dim == 1024
 
     def test_loads_from_existing_checkpoint(self, scheduler, checkpoint_dir):
         """Loads policy from trainer-format checkpoint when it exists."""
-        # Create and save a trainer checkpoint
-        policy = GatingPolicy(input_dim=1024, hidden_dim=256)
+        # Create and save a trainer checkpoint with ExpertGatingMLP
+        policy = ExpertGatingMLP(GatingConfig(input_dim=1024))
         trainer = PolicyGradientTrainer(policy)
         trainer.baseline = 0.42
         trainer.num_updates = 17
@@ -193,7 +194,7 @@ class TestGetOrCreatePolicy:
         scheduler = TrainingScheduler(config=config)
 
         # Create checkpoint in custom dir
-        policy = GatingPolicy(input_dim=1024, hidden_dim=256)
+        policy = ExpertGatingMLP(GatingConfig(input_dim=1024))
         trainer = PolicyGradientTrainer(policy)
         trainer.num_updates = 99
         trainer.save_checkpoint(str(custom_dir / "gating_trainer_latest.pt"))

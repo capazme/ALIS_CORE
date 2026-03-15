@@ -116,7 +116,9 @@ class TestExtractWeightConfig:
     def test_fallback_on_policy_error(self, scheduler):
         """If policy forward fails, uses uniform 0.25 defaults."""
         broken_policy = MagicMock()
-        broken_policy.to.side_effect = RuntimeError("broken")
+        broken_policy.get_expert_priors.side_effect = RuntimeError("broken")
+        # Remove hasattr shortcut — spec=[] ensures no auto-attributes
+        broken_policy.configure_mock(**{"get_expert_priors.side_effect": RuntimeError("broken")})
 
         config = scheduler._extract_weight_config(broken_policy)
 

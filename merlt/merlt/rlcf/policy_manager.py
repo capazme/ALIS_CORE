@@ -45,7 +45,8 @@ from pathlib import Path
 from dataclasses import dataclass, field
 
 if TYPE_CHECKING:
-    from merlt.rlcf.policy_gradient import TraversalPolicy, GatingPolicy
+    from merlt.rlcf.policy_gradient import TraversalPolicy
+    from merlt.experts.neural_gating.neural import ExpertGatingMLP
     from merlt.rlcf.execution_trace import ExecutionTrace
 
 log = structlog.get_logger()
@@ -163,7 +164,7 @@ class PolicyManager:
 
         # Lazy-loaded policies
         self._traversal_policy: Optional["TraversalPolicy"] = None
-        self._gating_policy: Optional["GatingPolicy"] = None
+        self._gating_policy: Optional["ExpertGatingMLP"] = None
         self._traversal_loaded = False
         self._gating_loaded = False
         self._load_lock = threading.Lock()
@@ -278,15 +279,17 @@ class PolicyManager:
                 self._traversal_loaded = True
                 return None
 
-    def _load_gating_policy(self) -> Optional["GatingPolicy"]:
+    def _load_gating_policy(self):
         """
-        Load GatingPolicy da checkpoint (lazy, thread-safe).
+        Load ExpertGatingMLP da checkpoint (lazy, thread-safe).
 
         Uses double-checked locking: fast path without lock, then full
         loading inside lock to prevent concurrent torch.load races.
 
+        Fallback chain: model_state_dict → mlp_state_dict (backward compat).
+
         Returns:
-            GatingPolicy o None se non disponibile
+            ExpertGatingMLP o None se non disponibile
         """
         if self._gating_loaded:
             return self._gating_policy
@@ -308,7 +311,7 @@ class PolicyManager:
                 return None
 
             try:
-                from merlt.rlcf.policy_gradient import GatingPolicy
+                from merlt.experts.neural_gating.neural import ExpertGatingMLP, GatingConfig
                 import torch
 
                 device = self._detect_device()
@@ -317,21 +320,26 @@ class PolicyManager:
                     checkpoint_path, map_location=device, weights_only=True
                 )
 
-                policy = GatingPolicy(
+                config = GatingConfig(
                     input_dim=checkpoint.get("input_dim", 1024),
-                    hidden_dim=checkpoint.get("hidden_dim", 256),
-                    num_experts=checkpoint.get("num_experts", 4),
-                    device=device
                 )
+                policy = ExpertGatingMLP(config)
+                policy = policy.to(device)
 
-                policy.mlp.load_state_dict(checkpoint["mlp_state_dict"])
+                state_dict = checkpoint.get("model_state_dict")
+                if state_dict is None:
+                    raise KeyError(
+                        "Checkpoint missing model_state_dict key. "
+                        "Legacy mlp_state_dict (GatingPolicy) is not compatible with ExpertGatingMLP."
+                    )
 
-                policy.mlp.requires_grad_(False)
+                policy.load_state_dict(state_dict)
+                policy.requires_grad_(False)
 
                 self._gating_policy = policy
                 self._gating_loaded = True
                 log.info(
-                    f"GatingPolicy loaded from {checkpoint_path}",
+                    f"ExpertGatingMLP loaded from {checkpoint_path}",
                     device=device,
                 )
                 return policy
@@ -640,8 +648,8 @@ class PolicyManager:
         """Ottieni TraversalPolicy (lazy load)."""
         return self._load_traversal_policy()
 
-    def get_gating_policy(self) -> Optional["GatingPolicy"]:
-        """Ottieni GatingPolicy (lazy load)."""
+    def get_gating_policy(self) -> Optional["ExpertGatingMLP"]:
+        """Ottieni ExpertGatingMLP (lazy load)."""
         return self._load_gating_policy()
 
     def is_traversal_policy_available(self) -> bool:
@@ -691,12 +699,12 @@ class PolicyManager:
             self._traversal_policy = None
             self._traversal_loaded = False
 
-    def save_gating_policy(self, policy: "GatingPolicy", name: str = "latest"):
+    def save_gating_policy(self, policy, name: str = "latest"):
         """
-        Salva GatingPolicy su checkpoint.
+        Salva GatingPolicy/ExpertGatingMLP su checkpoint.
 
         Args:
-            policy: GatingPolicy da salvare
+            policy: ExpertGatingMLP (nn.Module) o legacy GatingPolicy
             name: Nome checkpoint (default: latest)
         """
         import torch
@@ -704,12 +712,19 @@ class PolicyManager:
         checkpoint_path = self.config.checkpoint_dir / f"gating_policy_{name}.pt"
         self.config.checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
-        checkpoint = {
-            "input_dim": policy.input_dim,
-            "hidden_dim": policy.hidden_dim,
-            "num_experts": policy.num_experts,
-            "mlp_state_dict": policy.mlp.state_dict()
-        }
+        # ExpertGatingMLP (nn.Module) vs legacy GatingPolicy
+        if isinstance(policy, torch.nn.Module):
+            checkpoint = {
+                "input_dim": getattr(getattr(policy, 'config', None), 'input_dim', 1024),
+                "model_state_dict": policy.state_dict(),
+            }
+        else:
+            checkpoint = {
+                "input_dim": policy.input_dim,
+                "hidden_dim": policy.hidden_dim,
+                "num_experts": policy.num_experts,
+                "mlp_state_dict": policy.mlp.state_dict(),
+            }
 
         torch.save(checkpoint, checkpoint_path)
         log.info(f"GatingPolicy saved to {checkpoint_path}")

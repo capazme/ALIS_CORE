@@ -998,12 +998,14 @@ class LegalKnowledgeGraph:
             # Crea retriever se non esiste
             if not hasattr(self, '_retriever') or self._retriever is None:
                 try:
+                    from merlt.rlcf.policy_manager import get_policy_manager
                     retriever_config = RetrieverConfig()
                     self._retriever = GraphAwareRetriever(
                         vector_db=self._qdrant,
                         graph_db=self._falkordb,
                         bridge_table=self._bridge_table,
                         config=retriever_config,
+                        policy_manager=get_policy_manager(),
                     )
                 except Exception as e:
                     log.warning(f"Could not create GraphAwareRetriever: {e}")

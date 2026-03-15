@@ -45,6 +45,7 @@ Note:
 """
 
 import os
+import warnings
 import structlog
 from typing import Dict, Any, Optional, List, Tuple
 from dataclasses import dataclass, field
@@ -113,6 +114,12 @@ class GatingPolicy:
             num_experts: Numero di expert
             device: Device (cuda/mps/cpu)
         """
+        warnings.warn(
+            "GatingPolicy is deprecated and will be removed in a future version. "
+            "Use ExpertGatingMLP from merlt.rlcf.expert_gating_mlp instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         torch, nn, _, _ = _get_torch()
 
         self.input_dim = input_dim
@@ -180,36 +187,6 @@ class GatingPolicy:
         if return_logits:
             return weights, log_probs, logits
         return weights, log_probs
-
-    def sample_action(
-        self,
-        query_embedding: Any,  # torch.Tensor [batch, input_dim]
-        deterministic: bool = False
-    ) -> Tuple[Any, Any]:
-        """
-        Campiona azione dalla policy.
-
-        Args:
-            query_embedding: Embedding della query
-            deterministic: Se True, usa argmax invece di sampling
-
-        Returns:
-            Tuple (weights, log_probs_selected)
-            - weights: Expert weights sampled
-            - log_probs_selected: Log prob dei weights selezionati
-        """
-        torch, _, _, _ = _get_torch()
-
-        with torch.no_grad():
-            weights, log_probs = self.forward(query_embedding)
-
-            if deterministic:
-                # Usa distribuzione deterministica (softmax)
-                return weights, log_probs
-
-            # Sample da categorical (opzionale per exploration)
-            # Per gating, usiamo direttamente softmax weights
-            return weights, log_probs
 
     def parameters(self):
         """Restituisce parametri trainable."""
@@ -565,7 +542,7 @@ class PolicyGradientTrainer:
         expert_actions = [
             a for a in trace.actions
             if a.action_type == "expert_selection"
-            and a.metadata.get("source") == "gating_policy"
+            and a.metadata.get("source") in ("neural_gating", "gating_policy")
         ]
 
         if not expert_actions:
@@ -738,7 +715,7 @@ class PolicyGradientTrainer:
             expert_actions = [
                 a for a in trace.actions
                 if a.action_type == "expert_selection"
-                and a.metadata.get("source") == "gating_policy"
+                and a.metadata.get("source") in ("neural_gating", "gating_policy")
             ]
 
             if not expert_actions:
@@ -830,11 +807,15 @@ class PolicyGradientTrainer:
         # Crea directory se non esiste
         Path(path).parent.mkdir(parents=True, exist_ok=True)
 
-        # State dict
+        # State dict — uses model_state_dict for ExpertGatingMLP (nn.Module),
+        # falls back to policy.mlp for legacy GatingPolicy
+        if hasattr(self.policy, 'state_dict') and callable(getattr(self.policy, 'state_dict')) and isinstance(self.policy, torch.nn.Module):
+            model_sd = {k: v.cpu() for k, v in self.policy.state_dict().items()}
+        else:
+            model_sd = {k: v.cpu() for k, v in self.policy.mlp.state_dict().items()}
+
         checkpoint = {
-            "policy_state_dict": {
-                k: v.cpu() for k, v in self.policy.mlp.state_dict().items()
-            },
+            "model_state_dict": model_sd,
             "optimizer_state_dict": self.optimizer.state_dict(),
             "baseline": self.baseline,
             "num_updates": self.num_updates,
@@ -846,9 +827,9 @@ class PolicyGradientTrainer:
                 "entropy_coef": self.config.entropy_coef
             },
             "policy_config": {
-                "input_dim": self.policy.input_dim,
-                "hidden_dim": self.policy.hidden_dim,
-                "num_experts": getattr(self.policy, 'num_experts', None),
+                "input_dim": getattr(self.policy, 'input_dim', getattr(getattr(self.policy, 'config', None), 'input_dim', 1024)),
+                "hidden_dim": getattr(self.policy, 'hidden_dim', None),
+                "num_experts": getattr(self.policy, 'num_experts', getattr(getattr(self.policy, 'config', None), 'num_experts', None)),
                 "relation_dim": getattr(self.policy, 'relation_dim', None),
             },
             "timestamp": datetime.now().isoformat(),
@@ -880,13 +861,26 @@ class PolicyGradientTrainer:
         torch, _, _, _ = _get_torch()
 
         # weights_only=False: checkpoint contains optimizer state (non-tensor)
-        checkpoint = torch.load(path, map_location=self.policy.device, weights_only=False)
+        device = getattr(self.policy, 'device', 'cpu')
+        checkpoint = torch.load(path, map_location=device, weights_only=False)
 
-        # Carica policy state
-        policy_state = checkpoint["policy_state_dict"]
-        self.policy.mlp.load_state_dict(
-            {k: v.to(self.policy.device) for k, v in policy_state.items()}
-        )
+        # Load policy state with fallback chain:
+        # model_state_dict (new) → policy_state_dict (legacy)
+        if "model_state_dict" in checkpoint:
+            policy_state = checkpoint["model_state_dict"]
+        elif "policy_state_dict" in checkpoint:
+            log.warning(
+                "Loading legacy policy_state_dict format. "
+                "This may fail if policy architecture changed (e.g. GatingPolicy → ExpertGatingMLP).",
+                path=path,
+            )
+            policy_state = checkpoint["policy_state_dict"]
+        else:
+            raise KeyError("Checkpoint missing both model_state_dict and policy_state_dict")
+
+        state_to_load = {k: v.to(device) for k, v in policy_state.items()}
+
+        self.policy.load_state_dict(state_to_load)
 
         # Carica optimizer state
         self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
@@ -922,32 +916,6 @@ class PolicyGradientTrainer:
 # =============================================================================
 # UTILITIES
 # =============================================================================
-
-def create_gating_policy(
-    input_dim: int = 1024,
-    hidden_dim: int = 256,
-    checkpoint_path: Optional[str] = None
-) -> Tuple[GatingPolicy, PolicyGradientTrainer]:
-    """
-    Factory function per creare GatingPolicy e trainer.
-
-    Args:
-        input_dim: Dimensione input embedding
-        hidden_dim: Dimensione hidden layer
-        checkpoint_path: Path checkpoint da caricare (opzionale)
-
-    Returns:
-        Tuple (policy, trainer)
-    """
-    policy = GatingPolicy(input_dim=input_dim, hidden_dim=hidden_dim)
-    trainer = PolicyGradientTrainer(policy)
-
-    if checkpoint_path and os.path.exists(checkpoint_path):
-        trainer.load_checkpoint(checkpoint_path)
-        log.info(f"Loaded gating policy from {checkpoint_path}")
-
-    return policy, trainer
-
 
 def create_traversal_policy(
     input_dim: int = 1024,

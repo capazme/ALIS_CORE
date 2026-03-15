@@ -131,6 +131,7 @@ async def setup_infrastructure(cfg: dict):
 
     # 5. GraphAwareRetriever (hybrid vector + graph)
     ret_cfg = infra.get("retriever", {})
+    from merlt.rlcf.policy_manager import get_policy_manager
     retriever = GraphAwareRetriever(
         vector_db=qdrant,
         graph_db=falkordb,
@@ -139,6 +140,7 @@ async def setup_infrastructure(cfg: dict):
             alpha=ret_cfg.get("alpha", 0.7),
             collection_name=ret_cfg.get("collection_name", "merl_t_dev_chunks"),
         ),
+        policy_manager=get_policy_manager(),
     )
 
     # 6. Tools

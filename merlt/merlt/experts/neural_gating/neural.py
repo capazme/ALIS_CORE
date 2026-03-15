@@ -144,6 +144,11 @@ class ExpertGatingMLP(nn.Module):
             num_experts=self.config.num_experts
         )
 
+    @property
+    def device(self) -> "torch.device":
+        """Device del modello (dal primo parametro)."""
+        return next(self.parameters(), torch.empty(0)).device
+
     def forward(
         self,
         query_embedding: torch.Tensor
@@ -156,7 +161,7 @@ class ExpertGatingMLP(nn.Module):
 
         Returns:
             weights: (batch_size, num_experts) - Softmax su expert
-            confidence: (batch_size,) - Max probability
+            log_probs: (batch_size, num_experts) - Log softmax per REINFORCE
         """
         # Encode query
         encoded = self.encoder(query_embedding)
@@ -170,10 +175,10 @@ class ExpertGatingMLP(nn.Module):
         # Softmax → weights
         weights = F.softmax(scaled_logits, dim=-1)
 
-        # Confidence = max probability
-        confidence, _ = torch.max(weights, dim=-1)
+        # Log softmax per REINFORCE training
+        log_probs = F.log_softmax(scaled_logits, dim=-1)
 
-        return weights, confidence
+        return weights, log_probs
 
     def predict_single(
         self,
@@ -192,25 +197,35 @@ class ExpertGatingMLP(nn.Module):
                 "top_expert": "literal"
             }
         """
+        was_training = self.training
         self.eval()
-        with torch.no_grad():
-            emb = torch.tensor(query_embedding, dtype=torch.float32).unsqueeze(0)
-            weights, confidence = self(emb)
+        try:
+            with torch.no_grad():
+                emb = torch.tensor(query_embedding, dtype=torch.float32).unsqueeze(0)
+                weights, log_probs = self(emb)
 
-            weights_np = weights.squeeze(0).cpu().numpy()
-            conf_np = confidence.item()
+                weights_np = weights.squeeze(0).cpu().numpy()
+                log_probs_np = log_probs.squeeze(0).cpu().numpy()
+                conf_np = float(weights_np.max())
 
-            weight_dict = {
-                name: float(w) for name, w in zip(EXPERT_NAMES, weights_np)
-            }
+                weight_dict = {
+                    name: float(w) for name, w in zip(EXPERT_NAMES, weights_np)
+                }
+                log_prob_dict = {
+                    name: float(lp) for name, lp in zip(EXPERT_NAMES, log_probs_np)
+                }
 
-            top_expert = EXPERT_NAMES[weights_np.argmax()]
+                top_expert = EXPERT_NAMES[weights_np.argmax()]
 
-            return {
-                "weights": weight_dict,
-                "confidence": conf_np,
-                "top_expert": top_expert
-            }
+                return {
+                    "weights": weight_dict,
+                    "confidence": conf_np,
+                    "top_expert": top_expert,
+                    "log_probs": log_prob_dict,
+                }
+        finally:
+            if was_training:
+                self.train()
 
     def get_expert_priors(self) -> Dict[str, float]:
         """Ottiene prior correnti (dopo training)."""
@@ -315,7 +330,8 @@ class NeuralGatingTrainer:
         ).unsqueeze(0)
 
         # 2. Forward pass
-        weights, confidence = self.model(emb_tensor)
+        weights, log_probs = self.model(emb_tensor)
+        confidence = weights.max(dim=-1).values
 
         # 3. Ground truth: expert correctness scores
         correctness_values = [
@@ -331,12 +347,13 @@ class NeuralGatingTrainer:
         # Normalize to soft labels
         target_tensor = F.softmax(target_tensor * 2, dim=-1)  # Scale up for sharper targets
 
-        # 4. Loss: KL divergence
+        # 4. Loss: KL divergence (log_probs already available from forward)
         loss = F.kl_div(
-            F.log_softmax(weights, dim=-1),
+            log_probs,
             target_tensor,
-            reduction='batchmean'
-        )
+            reduction='batchmean',
+            log_target=False,
+        ).clamp(min=0.0)
 
         # Cap authority weight
         capped_authority = min(authority_weight, self.config.max_authority_weight)
@@ -397,7 +414,8 @@ class NeuralGatingTrainer:
             device=self.device
         ).unsqueeze(0)
 
-        weights, confidence = self.model(emb_tensor)
+        weights, log_probs = self.model(emb_tensor)
+        confidence = weights.max(dim=-1).values
 
         correctness_values = [
             expert_correctness.get(name, 0.0) for name in EXPERT_NAMES
@@ -412,10 +430,11 @@ class NeuralGatingTrainer:
         target_tensor = F.softmax(target_tensor * 2, dim=-1)
 
         loss = F.kl_div(
-            F.log_softmax(weights, dim=-1),
+            log_probs,
             target_tensor,
-            reduction='batchmean'
-        )
+            reduction='batchmean',
+            log_target=False,
+        ).clamp(min=0.0)
 
         capped_authority = min(authority_weight, self.config.max_authority_weight)
         weighted_loss = loss * capped_authority

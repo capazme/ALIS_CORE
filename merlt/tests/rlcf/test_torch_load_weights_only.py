@@ -47,20 +47,20 @@ def pm(checkpoint_dir):
 class TestWeightsOnlyTrue:
     """Inference checkpoint loads use weights_only=True."""
 
-    def test_gating_policy_loads_with_weights_only(self, pm, checkpoint_dir):
-        """PolicyManager._load_gating_policy() works with weights_only=True."""
-        policy = GatingPolicy(input_dim=1024, hidden_dim=256, num_experts=4)
+    def test_gating_policy_loads_with_model_state_dict(self, pm, checkpoint_dir):
+        """PolicyManager._load_gating_policy() works with model_state_dict format."""
+        from merlt.experts.neural_gating.neural import ExpertGatingMLP, GatingConfig
+
+        policy = ExpertGatingMLP(GatingConfig(input_dim=1024))
         ckpt = {
             "input_dim": 1024,
-            "hidden_dim": 256,
-            "num_experts": 4,
-            "mlp_state_dict": policy.mlp.state_dict(),
+            "model_state_dict": policy.state_dict(),
         }
         torch.save(ckpt, checkpoint_dir / "gating_policy_latest.pt")
 
         loaded = pm._load_gating_policy()
         assert loaded is not None
-        assert loaded.input_dim == 1024
+        assert loaded.config.input_dim == 1024
 
     def test_traversal_policy_loads_with_weights_only(self, pm, checkpoint_dir):
         """PolicyManager._load_traversal_policy() works with weights_only=True."""

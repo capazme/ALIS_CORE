@@ -47,35 +47,37 @@ class TestGatingPolicyFallback:
     """Gating policy checkpoint without input_dim key uses 1024."""
 
     def test_fallback_creates_1024_dim_policy(self, pm, checkpoint_dir):
-        """Checkpoint missing input_dim key -> GatingPolicy(input_dim=1024)."""
-        # Save a checkpoint WITHOUT input_dim key
+        """Checkpoint missing input_dim key -> ExpertGatingMLP(input_dim=1024)."""
+        from merlt.experts.neural_gating.neural import ExpertGatingMLP, GatingConfig
+
+        # Save a checkpoint WITHOUT input_dim key (uses model_state_dict format)
+        mlp = ExpertGatingMLP(GatingConfig(input_dim=1024))
         ckpt = {
-            "mlp_state_dict": GatingPolicy(input_dim=1024, hidden_dim=256).mlp.state_dict(),
-            "hidden_dim": 256,
-            "num_experts": 4,
-            # NOTE: no "input_dim" key — triggers fallback
+            "model_state_dict": mlp.state_dict(),
+            # NOTE: no "input_dim" key — triggers fallback to default 1024
         }
         ckpt_path = checkpoint_dir / "gating_policy_latest.pt"
         torch.save(ckpt, ckpt_path)
 
         policy = pm._load_gating_policy()
         assert policy is not None
-        assert policy.input_dim == 1024
+        assert policy.config.input_dim == 1024
 
     def test_explicit_input_dim_respected(self, pm, checkpoint_dir):
         """Checkpoint with explicit input_dim=512 -> uses 512."""
+        from merlt.experts.neural_gating.neural import ExpertGatingMLP, GatingConfig
+
+        mlp = ExpertGatingMLP(GatingConfig(input_dim=512))
         ckpt = {
-            "mlp_state_dict": GatingPolicy(input_dim=512, hidden_dim=256).mlp.state_dict(),
+            "model_state_dict": mlp.state_dict(),
             "input_dim": 512,
-            "hidden_dim": 256,
-            "num_experts": 4,
         }
         ckpt_path = checkpoint_dir / "gating_policy_latest.pt"
         torch.save(ckpt, ckpt_path)
 
         policy = pm._load_gating_policy()
         assert policy is not None
-        assert policy.input_dim == 512
+        assert policy.config.input_dim == 512
 
     def test_no_checkpoint_returns_none(self, pm):
         """No checkpoint file -> returns None."""

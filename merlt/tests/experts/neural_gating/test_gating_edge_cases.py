@@ -129,20 +129,21 @@ class TestSoftmaxEdgeCases:
 
         # Force all-negative logits via batch input
         x = torch.randn(1, 1024) * -10  # Very negative
-        weights, confidence = mlp(x)
+        weights, log_probs = mlp(x)
 
         total = weights.sum().item()
         assert abs(total - 1.0) < 1e-5
         assert (weights >= 0).all()
+        assert (log_probs <= 0 + 1e-6).all()
 
     def test_batch_size_one(self):
         """Forward pass con batch_size=1."""
         mlp = ExpertGatingMLP()
         x = torch.randn(1, 1024)
-        weights, confidence = mlp(x)
+        weights, log_probs = mlp(x)
 
         assert weights.shape == (1, 4)
-        assert confidence.shape == (1,)
+        assert log_probs.shape == (1, 4)
         assert abs(weights.sum().item() - 1.0) < 1e-5
 
 
@@ -180,7 +181,7 @@ class TestEvalModeDeterminism:
         # Train mode: may vary due to dropout
         mlp.train()
         x = torch.tensor(embedding, dtype=torch.float32).unsqueeze(0)
-        train_weights, _ = mlp(x)
+        train_weights, _log_probs = mlp(x)
 
         # Just verify both produce valid outputs
         assert abs(sum(eval_result["weights"].values()) - 1.0) < 1e-5

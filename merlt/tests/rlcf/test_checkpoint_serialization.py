@@ -62,7 +62,7 @@ class TestSaveCheckpointStateDict:
         assert Path(checkpoint_path).exists()
 
         checkpoint = torch.load(checkpoint_path, map_location="cpu")
-        assert "policy_state_dict" in checkpoint
+        assert "model_state_dict" in checkpoint
         assert "optimizer_state_dict" in checkpoint
         assert "baseline" in checkpoint
         assert "num_updates" in checkpoint
@@ -72,7 +72,7 @@ class TestSaveCheckpointStateDict:
         trainer.save_checkpoint(checkpoint_path)
         checkpoint = torch.load(checkpoint_path, map_location="cpu")
 
-        saved_keys = set(checkpoint["policy_state_dict"].keys())
+        saved_keys = set(checkpoint["model_state_dict"].keys())
         expected_keys = set(trainer.policy.mlp.state_dict().keys())
         assert saved_keys == expected_keys
 
@@ -81,7 +81,7 @@ class TestSaveCheckpointStateDict:
         trainer.save_checkpoint(checkpoint_path)
         checkpoint = torch.load(checkpoint_path, map_location="cpu")
 
-        state = checkpoint["policy_state_dict"]
+        state = checkpoint["model_state_dict"]
         # GatingPolicy MLP has 3 Linear layers (0, 3, 6 in Sequential)
         assert "0.weight" in state
         assert "0.bias" in state
@@ -95,7 +95,7 @@ class TestSaveCheckpointStateDict:
         trainer.save_checkpoint(checkpoint_path)
         checkpoint = torch.load(checkpoint_path, map_location="cpu")
 
-        for k, v in checkpoint["policy_state_dict"].items():
+        for k, v in checkpoint["model_state_dict"].items():
             assert v.device == torch.device("cpu"), f"{k} not on CPU"
 
     def test_metadata_preserved(self, trainer, checkpoint_path):
@@ -189,7 +189,7 @@ class TestBackwardCompatibility:
                 param.fill_(0.99)
 
         old_checkpoint = {
-            "policy_state_dict": {
+            "model_state_dict": {
                 name: param.cpu()
                 for name, param in policy.mlp.named_parameters()
             },

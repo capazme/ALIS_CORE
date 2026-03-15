@@ -54,10 +54,14 @@ class HybridRoutingDecision(RoutingDecision):
         neural_used: Se è stato usato neural gating
         neural_confidence: Confidence del neural gating
         neural_weights: Pesi calcolati dal neural (anche se non usati)
+        query_embedding: Embedding della query (per RLCF training)
+        expert_log_probs: Log probabilità per expert (per REINFORCE)
     """
     neural_used: bool = False
     neural_confidence: float = 0.0
     neural_weights: Dict[str, float] = field(default_factory=dict)
+    query_embedding: Optional[list] = None
+    expert_log_probs: Optional[Dict[str, float]] = None
 
 
 class HybridExpertRouter:
@@ -160,30 +164,41 @@ class HybridExpertRouter:
             log.warning(f"Embedding failed: {e}, using LLM fallback")
             return await self._llm_fallback(context, error=str(e))
 
-        # 2. Neural prediction
+        # 2. Neural prediction (includes log_probs from single forward pass)
         try:
             neural_pred = self.neural_gating.predict_single(query_embedding)
         except Exception as e:
             log.warning(f"Neural prediction failed: {e}, using LLM fallback")
             return await self._llm_fallback(context, error=str(e))
 
-        # 3. Aggiorna statistiche
+        # 3. Extract log_probs from predict_single result (no second forward pass)
+        expert_log_probs = neural_pred.get("log_probs")
+        if expert_log_probs is None:
+            log.warning("predict_single did not return log_probs")
+
+        # 4. Aggiorna statistiche
         self._update_stats(neural_pred["confidence"])
 
-        # 4. Decide: neural vs llm fallback
+        # 5. Decide: neural vs llm fallback
         if neural_pred["confidence"] >= self.confidence_threshold:
-            return self._neural_decision(context, neural_pred)
+            return self._neural_decision(
+                context, neural_pred, query_embedding, expert_log_probs
+            )
         else:
             return await self._llm_fallback(
                 context,
                 neural_pred=neural_pred,
-                reason="confidence_too_low"
+                reason="confidence_too_low",
+                query_embedding=query_embedding,
+                expert_log_probs=expert_log_probs,
             )
 
     def _neural_decision(
         self,
         context: ExpertContext,
-        neural_pred: Dict[str, Any]
+        neural_pred: Dict[str, Any],
+        query_embedding: Optional[np.ndarray] = None,
+        expert_log_probs: Optional[Dict[str, float]] = None,
     ) -> HybridRoutingDecision:
         """Crea decision usando neural weights."""
         self._routing_stats["neural_used"] += 1
@@ -208,7 +223,11 @@ class HybridExpertRouter:
             parallel=True,
             neural_used=True,
             neural_confidence=neural_pred["confidence"],
-            neural_weights=neural_pred["weights"]
+            neural_weights=neural_pred["weights"],
+            query_embedding=(
+                query_embedding.tolist() if hasattr(query_embedding, 'tolist') else query_embedding
+            ) if query_embedding is not None else None,
+            expert_log_probs=expert_log_probs,
         )
 
     async def _llm_fallback(
@@ -216,7 +235,9 @@ class HybridExpertRouter:
         context: ExpertContext,
         neural_pred: Optional[Dict[str, Any]] = None,
         reason: str = "unknown",
-        error: Optional[str] = None
+        error: Optional[str] = None,
+        query_embedding: Optional[np.ndarray] = None,
+        expert_log_probs: Optional[Dict[str, float]] = None,
     ) -> HybridRoutingDecision:
         """Fallback a LLM classification router."""
         self._routing_stats["llm_fallback"] += 1
@@ -250,7 +271,11 @@ class HybridExpertRouter:
             parallel=llm_decision.parallel,
             neural_used=False,
             neural_confidence=neural_pred["confidence"] if neural_pred else 0.0,
-            neural_weights=neural_pred["weights"] if neural_pred else {}
+            neural_weights=neural_pred["weights"] if neural_pred else {},
+            query_embedding=(
+                query_embedding.tolist() if hasattr(query_embedding, 'tolist') else query_embedding
+            ) if query_embedding is not None else None,
+            expert_log_probs=expert_log_probs,
         )
 
     def _hash_embedding(self, text: str, dim: int = 1024) -> np.ndarray:
@@ -261,9 +286,8 @@ class HybridExpertRouter:
         """
         import hashlib
         h = hashlib.sha256(text.encode()).hexdigest()
-        # Genera numeri deterministici dal hash
-        np.random.seed(int(h[:8], 16))
-        return np.random.randn(dim).astype(np.float32)
+        rng = np.random.default_rng(int(h[:8], 16))
+        return rng.standard_normal(dim).astype(np.float32)
 
     def _update_stats(self, neural_confidence: float) -> None:
         """Aggiorna statistiche rolling."""

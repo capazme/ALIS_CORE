@@ -94,6 +94,7 @@ class SchedulerConfig:
     alpha: float = 0.6
     auto_save_checkpoint: bool = True
     checkpoint_dir: str = "checkpoints"
+    experiment_id: str = "rlcf_training"
     idle_timeout_days: int = 7
     error_cooldown_seconds: int = 300  # 5 min cooldown after ERROR before retry
     buffer_persistence_path: Optional[str] = "data/rlcf/replay_buffer.json"
@@ -112,6 +113,7 @@ class SchedulerConfig:
             "alpha": self.alpha,
             "auto_save_checkpoint": self.auto_save_checkpoint,
             "checkpoint_dir": self.checkpoint_dir,
+            "experiment_id": self.experiment_id,
             "idle_timeout_days": self.idle_timeout_days,
             "error_cooldown_seconds": self.error_cooldown_seconds,
             "buffer_persistence_path": self.buffer_persistence_path,
@@ -574,8 +576,7 @@ class TrainingScheduler:
             traversal_weights = None
             if traversal_trained:
                 try:
-                    from .traversal_training_service import TraversalTrainingService
-                    traversal_weights = TraversalTrainingService().get_domain_weights_table()
+                    traversal_weights = traversal_svc.get_domain_weights_table()
                 except Exception as e:
                     log.debug("traversal_weights_extraction_skipped", error=str(e))
 
@@ -773,24 +774,25 @@ class TrainingScheduler:
 
     def _get_or_create_policy(self) -> Tuple[Any, Any, bool]:
         """
-        Load GatingPolicy from latest checkpoint, or create fresh if none exists.
+        Load ExpertGatingMLP from latest checkpoint, or create fresh if none exists.
 
         Returns:
             Tuple (policy, trainer, loaded_from_checkpoint)
         """
-        from .policy_gradient import PolicyGradientTrainer, GatingPolicy
+        from .policy_gradient import PolicyGradientTrainer
+        from merlt.experts.neural_gating.neural import ExpertGatingMLP, GatingConfig
 
         checkpoint_dir = Path(self.config.checkpoint_dir)
         trainer_path = checkpoint_dir / "gating_trainer_latest.pt"
 
-        policy = GatingPolicy(input_dim=1024, hidden_dim=256)
+        policy = ExpertGatingMLP(GatingConfig(input_dim=1024))
         trainer = PolicyGradientTrainer(policy)
 
         if trainer_path.exists():
             try:
                 trainer.load_checkpoint(str(trainer_path))
                 log.info(
-                    "GatingPolicy loaded from checkpoint",
+                    "ExpertGatingMLP loaded from checkpoint",
                     path=str(trainer_path),
                     num_updates=trainer.num_updates,
                     baseline=trainer.baseline,
@@ -803,7 +805,7 @@ class TrainingScheduler:
                     error=str(e),
                 )
 
-        log.info("No checkpoint found, using fresh GatingPolicy")
+        log.info("No checkpoint found, using fresh ExpertGatingMLP")
         return policy, trainer, False
 
     def _save_checkpoint(self, policy: Any, trainer: Any) -> Optional[str]:
@@ -869,30 +871,41 @@ class TrainingScheduler:
             LearnableWeight,
         )
 
-        # Extract expert priors from GatingPolicy
+        # Extract expert priors from policy (ExpertGatingMLP or GatingPolicy)
         expert_names = ["LiteralExpert", "SystemicExpert", "PrinciplesExpert", "PrecedentExpert"]
+        short_names = ["literal", "systemic", "principles", "precedent"]
         expert_priors = {}
 
         try:
-            import torch
-            policy.to("cpu")
-            was_training = policy.mlp.training
-            policy.mlp.eval()
-            try:
-                with torch.no_grad():
-                    dummy = torch.zeros(1, policy.input_dim)
-                    logits = policy.mlp(dummy)
-                    weights = torch.softmax(logits, dim=-1).squeeze(0)
-                    for i, name in enumerate(expert_names):
-                        w = float(weights[i].item())
-                        expert_priors[name] = LearnableWeight(
-                            default=round(w, 4),
-                            bounds=(0.1, 0.5),
-                            learnable=True,
-                        )
-            finally:
-                if was_training:
-                    policy.mlp.train()
+            if hasattr(policy, 'get_expert_priors'):
+                # ExpertGatingMLP: use get_expert_priors() directly
+                priors = policy.get_expert_priors()
+                for short, pascal in zip(short_names, expert_names):
+                    w = priors.get(short, 0.25)
+                    expert_priors[pascal] = LearnableWeight(
+                        default=round(w, 4),
+                        bounds=(0.1, 0.5),
+                        learnable=True,
+                    )
+            else:
+                # Legacy GatingPolicy fallback
+                import torch
+                orig_device = getattr(policy, 'device', 'cpu')
+                policy.to("cpu")
+                try:
+                    with torch.no_grad():
+                        dummy = torch.zeros(1, getattr(policy, 'input_dim', 1024))
+                        logits = policy.mlp(dummy)
+                        weights = torch.softmax(logits, dim=-1).squeeze(0)
+                        for i, name in enumerate(expert_names):
+                            w = float(weights[i].item())
+                            expert_priors[name] = LearnableWeight(
+                                default=round(w, 4),
+                                bounds=(0.1, 0.5),
+                                learnable=True,
+                            )
+                finally:
+                    policy.to(orig_device)
         except Exception as e:
             log.debug("extract_gating_weights_fallback", error=str(e))
             for name in expert_names:
@@ -952,7 +965,7 @@ class TrainingScheduler:
 
             version_id = await store.save_weights(
                 config=config,
-                experiment_id="rlcf_training",
+                experiment_id=self.config.experiment_id,
                 metrics={
                     "checkpoint_version": checkpoint_version or "none",
                     "samples_processed": float(samples_processed),
