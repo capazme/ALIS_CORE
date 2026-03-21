@@ -416,8 +416,9 @@ export function IssueSidebar({
         return issue;
       }));
 
-    } catch (_err) {
-      // Vote error handled silently - could show toast
+    } catch (err) {
+      console.error('Vote failed:', err);
+      setError(err instanceof Error ? err.message : 'Errore nel voto');
     } finally {
       setVotingIssueId(null);
     }
@@ -542,7 +543,7 @@ export function IssueSidebar({
             {/* Footer */}
             <div className="p-3 border-t border-slate-700/50">
               <p className="text-[10px] text-slate-500 text-center">
-                I voti sono pesati per la tua authority ({userId === 'anonymous' ? '0.50' : 'calcolata'})
+                I voti sono pesati per la tua authority ({userId === 'anonymous' ? '0.50' : 'N/D'})
               </p>
             </div>
           </motion.div>

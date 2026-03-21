@@ -88,18 +88,25 @@ export function ArticleTextMinimap({ contentRef, highlights = [], className }: A
       title="Naviga nel documento"
     >
       {/* Highlight markers */}
-      {highlights.map((h, i) => (
-        <div
-          key={i}
-          className="absolute left-0 right-0 h-1 rounded-full opacity-60"
-          style={{
-            top: `${(i / Math.max(highlights.length, 1)) * 100}%`,
-            backgroundColor: h.color === 'yellow' ? '#FCD34D' :
-              h.color === 'green' ? '#6EE7B7' :
-              h.color === 'red' ? '#FCA5A5' : '#93C5FD',
-          }}
-        />
-      ))}
+      {highlights.map((h, i) => {
+        const contentText = contentRef?.current?.textContent || '';
+        const highlightIndex = contentText.indexOf(h.text);
+        const position = highlightIndex >= 0
+          ? (highlightIndex / Math.max(contentText.length, 1)) * 100
+          : (i / Math.max(highlights.length, 1)) * 100;
+        return (
+          <div
+            key={i}
+            className="absolute left-0 right-0 h-1 rounded-full opacity-60"
+            style={{
+              top: `${position}%`,
+              backgroundColor: h.color === 'yellow' ? '#FCD34D' :
+                h.color === 'green' ? '#6EE7B7' :
+                h.color === 'red' ? '#FCA5A5' : '#93C5FD',
+            }}
+          />
+        );
+      })}
 
       {/* Viewport indicator */}
       <div

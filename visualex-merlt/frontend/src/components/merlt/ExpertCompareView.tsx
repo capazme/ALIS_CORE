@@ -19,8 +19,8 @@ import {
   BookOpen,
   Gavel,
   Building2,
+  TrendingUp,
   ThumbsUp,
-  ThumbsDown,
   AlertTriangle,
   Info,
   ChevronDown,
@@ -29,6 +29,8 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { EXPERT_CONFIG as PIPELINE_EXPERT_CONFIG } from '../../types/pipeline';
+import { submitExpertPreferenceFeedback } from '../../services/merltService';
 
 // =============================================================================
 // TYPES
@@ -79,39 +81,69 @@ interface ExpertCompareViewProps {
 // EXPERT CONFIG
 // =============================================================================
 
-const EXPERT_CONFIG: Record<
-  string,
-  { icon: typeof Scale; color: string; bgColor: string; borderColor: string; label: string }
-> = {
-  literal: {
-    icon: BookOpen,
+type ExpertIcon = typeof Scale;
+
+const ICON_MAP: Record<string, ExpertIcon> = {
+  BookOpen,
+  Scale,
+  TrendingUp,
+  Building2,
+  Gavel,
+};
+
+// Short-key alias mapping from canonical ExpertId to component key
+const EXPERT_ID_TO_KEY: Record<string, string> = {
+  literal_interpreter: 'literal',
+  systemic_teleological: 'systemic',
+  principles_balancer: 'principles',
+  precedent_analyst: 'precedent',
+};
+
+// Color → Tailwind class mapping derived from canonical hex colors
+const COLOR_CLASS_MAP: Record<string, { color: string; bgColor: string; borderColor: string }> = {
+  '#3b82f6': {
     color: 'text-blue-600 dark:text-blue-400',
     bgColor: 'bg-blue-50 dark:bg-blue-900/30',
     borderColor: 'border-blue-200 dark:border-blue-700',
-    label: 'Letterale',
   },
-  systemic: {
-    icon: Building2,
+  '#8b5cf6': {
     color: 'text-purple-600 dark:text-purple-400',
     bgColor: 'bg-purple-50 dark:bg-purple-900/30',
     borderColor: 'border-purple-200 dark:border-purple-700',
-    label: 'Sistematico',
   },
-  principles: {
-    icon: Scale,
+  '#f59e0b': {
     color: 'text-amber-600 dark:text-amber-400',
     bgColor: 'bg-amber-50 dark:bg-amber-900/30',
     borderColor: 'border-amber-200 dark:border-amber-700',
-    label: 'Teleologico',
   },
-  precedent: {
-    icon: Gavel,
+  '#10b981': {
     color: 'text-emerald-600 dark:text-emerald-400',
     bgColor: 'bg-emerald-50 dark:bg-emerald-900/30',
     borderColor: 'border-emerald-200 dark:border-emerald-700',
-    label: 'Giurisprudenziale',
   },
 };
+
+const EXPERT_CONFIG: Record<
+  string,
+  { icon: ExpertIcon; color: string; bgColor: string; borderColor: string; label: string }
+> = Object.fromEntries(
+  Object.entries(PIPELINE_EXPERT_CONFIG).map(([expertId, cfg]) => {
+    const shortKey = EXPERT_ID_TO_KEY[expertId] ?? expertId;
+    const classes = COLOR_CLASS_MAP[cfg.color] ?? {
+      color: 'text-slate-600 dark:text-slate-400',
+      bgColor: 'bg-slate-50 dark:bg-slate-900/30',
+      borderColor: 'border-slate-200 dark:border-slate-700',
+    };
+    return [
+      shortKey,
+      {
+        icon: ICON_MAP[cfg.icon] ?? Scale,
+        label: cfg.displayName,
+        ...classes,
+      },
+    ];
+  })
+);
 
 const getExpertConfig = (expertType: string) => {
   return (
@@ -357,9 +389,9 @@ function DisagreementBanner({ disagreement }: DisagreementBannerProps) {
             exit={{ height: 0, opacity: 0 }}
             className="mt-4 pt-4 border-t border-amber-200 dark:border-amber-700"
           >
-            <div className="prose prose-sm dark:prose-invert max-w-none text-amber-800 dark:text-amber-300">
-              <div dangerouslySetInnerHTML={{ __html: disagreement.explanation.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/_(.*?)_/g, '<em>$1</em>') }} />
-            </div>
+            <pre className="text-sm text-amber-800 dark:text-amber-300 whitespace-pre-wrap font-sans leading-relaxed">
+              {disagreement.explanation}
+            </pre>
           </motion.div>
         )}
       </AnimatePresence>
@@ -393,16 +425,31 @@ export function ExpertCompareView({
     }
   };
 
-  const handleSubmitFeedback = () => {
-    if (selectedExpert && traceId && userId && onDetailedFeedback) {
-      onDetailedFeedback({
-        traceId,
-        userId,
-        preferredExpert: selectedExpert,
-        comment: feedbackComment || undefined,
-      });
-      setFeedbackSent(true);
+  const handleSubmitFeedback = async () => {
+    if (!selectedExpert || !traceId || !userId) return;
+
+    const feedbackData = {
+      traceId,
+      userId,
+      preferredExpert: selectedExpert,
+      comment: feedbackComment || undefined,
+    };
+
+    if (onDetailedFeedback) {
+      onDetailedFeedback(feedbackData);
+    } else {
+      try {
+        await submitExpertPreferenceFeedback(
+          traceId,
+          userId,
+          selectedExpert,
+          feedbackComment || undefined,
+        );
+      } catch (err) {
+        console.error('Failed to submit feedback:', err);
+      }
     }
+    setFeedbackSent(true);
   };
 
   // Sort alternatives by confidence

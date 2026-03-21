@@ -47,8 +47,10 @@ const manifest: PluginManifest = {
     'search:performed',
   ],
 
-  // Events we emit (for documentation; emitted via EventBus.emit)
-  // 'merlt:source-navigate' - navigates to a source article in the platform
+  // Events we emit (via EventBus.emit):
+  // 'merlt:analysis-started', 'merlt:analysis-complete', 'merlt:expert-response',
+  // 'merlt:citation-correction', 'merlt:graph-node-selected', 'merlt:enrichment-requested',
+  // 'merlt:source-navigate', 'merlt:query-prefill'
 
   // UI slots we provide
   contributedSlots: [

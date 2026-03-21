@@ -979,7 +979,20 @@ export function AdminPage() {
         )}
 
         {/* ==================== PLUGINS TAB ==================== */}
-        {activeTab === 'plugins' && user && (
+        {activeTab === 'plugins' && user && !merltEnabled && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+            <div className="text-center text-gray-500">
+              <Brain size={48} className="mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Dashboard MERL-T non abilitata
+              </h3>
+              <p className="text-sm">
+                Imposta <code className="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">VITE_MERLT_ENABLED=true</code> per abilitare la dashboard MERL-T.
+              </p>
+            </div>
+          </div>
+        )}
+        {activeTab === 'plugins' && user && merltEnabled && (
           <PluginSlot
             name="admin-dashboard"
             props={{ userId: user.id }}

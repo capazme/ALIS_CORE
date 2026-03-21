@@ -101,8 +101,9 @@ export function ContributionStats({
   voteWeight,
   className,
 }: ContributionStatsProps) {
-  const successRate = totalContributions > 0
-    ? Math.round((approved / totalContributions) * 100)
+  const decided = approved + rejected;
+  const successRate = decided > 0
+    ? Math.round((approved / decided) * 100)
     : 0;
 
   const stats = [

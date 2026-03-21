@@ -12,6 +12,7 @@
  * Responsive design: stack verticale su mobile, layout a griglia su desktop.
  */
 
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { User, RefreshCw, AlertCircle, Calendar, Clock } from 'lucide-react';
 import { cn } from '../../../lib/utils';
@@ -85,8 +86,8 @@ function ErrorState({ message, onRetry }: ErrorStateProps) {
 interface ProfileHeaderProps {
   displayName?: string;
   userId: string;
-  joinedAt: string;
-  lastUpdated: string;
+  joinedAt?: string | null;
+  lastUpdated?: string | null;
   onRefresh: () => void;
   isRefreshing: boolean;
 }
@@ -99,7 +100,8 @@ function ProfileHeader({
   onRefresh,
   isRefreshing,
 }: ProfileHeaderProps) {
-  const formatDate = (isoString: string) => {
+  const formatDate = (isoString: string | null | undefined) => {
+    if (!isoString) return '—';
     return new Date(isoString).toLocaleDateString('it-IT', {
       day: 'numeric',
       month: 'long',
@@ -107,7 +109,8 @@ function ProfileHeader({
     });
   };
 
-  const formatRelativeTime = (isoString: string) => {
+  const formatRelativeTime = (isoString: string | null | undefined) => {
+    if (!isoString) return '—';
     const date = new Date(isoString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -115,6 +118,7 @@ function ProfileHeader({
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
+    if (diffMins < 1) return 'ora';
     if (diffMins < 60) return `${diffMins} minuti fa`;
     if (diffHours < 24) return `${diffHours} ore fa`;
     return `${diffDays} giorni fa`;
@@ -134,14 +138,18 @@ function ProfileHeader({
             {displayName || 'Il tuo profilo'}
           </h1>
           <div className="flex items-center gap-4 mt-1 text-xs text-slate-500 dark:text-slate-400">
-            <span className="flex items-center gap-1">
-              <Calendar size={12} aria-hidden="true" />
-              Iscritto dal {formatDate(joinedAt)}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock size={12} aria-hidden="true" />
-              Aggiornato {formatRelativeTime(lastUpdated)}
-            </span>
+            {joinedAt && (
+              <span className="flex items-center gap-1">
+                <Calendar size={12} aria-hidden="true" />
+                Iscritto dal {formatDate(joinedAt)}
+              </span>
+            )}
+            {lastUpdated && (
+              <span className="flex items-center gap-1">
+                <Clock size={12} aria-hidden="true" />
+                Aggiornato {formatRelativeTime(lastUpdated)}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -173,8 +181,18 @@ interface ProfilePageProps {
 
 export function ProfilePage({ userId, className }: ProfilePageProps) {
   const { profile, loading, error, refresh } = useProfile(userId);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  if (loading) {
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refresh();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refresh]);
+
+  if (loading && !profile) {
     return (
       <div className={cn('p-6', className)}>
         <ProfileSkeleton />
@@ -187,7 +205,7 @@ export function ProfilePage({ userId, className }: ProfilePageProps) {
       <div className={cn('p-6', className)}>
         <ErrorState
           message={error || 'Impossibile caricare il profilo'}
-          onRetry={refresh}
+          onRetry={handleRefresh}
         />
       </div>
     );
@@ -205,8 +223,8 @@ export function ProfilePage({ userId, className }: ProfilePageProps) {
         userId={profile.user_id}
         joinedAt={profile.joined_at}
         lastUpdated={profile.last_updated}
-        onRefresh={refresh}
-        isRefreshing={loading}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
       />
 
       {/* Authority Overview - Full width */}

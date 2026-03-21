@@ -716,23 +716,29 @@ export function ExpertsTab() {
   const fetchAllData = async () => {
     setLoading(true);
     setError(null);
-    try {
-      const [perf, stats, recent, agg] = await Promise.all([
-        getExpertPerformance(),
-        getQueryStats(),
-        getRecentQueries(),
-        getAggregationStats(),
-      ]);
-      setPerformance(perf);
-      setQueryStats(stats);
-      setRecentQueries(recent);
-      setAggregationStats(agg);
-    } catch (err) {
-      setError('Errore nel caricamento delle metriche expert');
-      console.error('Failed to load expert metrics:', err);
-    } finally {
-      setLoading(false);
+    const [perfResult, statsResult, recentResult, aggResult] = await Promise.allSettled([
+      getExpertPerformance(),
+      getQueryStats(),
+      getRecentQueries(),
+      getAggregationStats(),
+    ]);
+    if (perfResult.status === 'fulfilled') setPerformance(perfResult.value);
+    if (statsResult.status === 'fulfilled') setQueryStats(statsResult.value);
+    if (recentResult.status === 'fulfilled') setRecentQueries(recentResult.value);
+    if (aggResult.status === 'fulfilled') setAggregationStats(aggResult.value);
+    const anyRejected = [perfResult, statsResult, recentResult, aggResult].some(
+      r => r.status === 'rejected'
+    );
+    if (anyRejected) {
+      console.error('Some expert metrics failed to load:', { perfResult, statsResult, recentResult, aggResult });
     }
+    const allRejected = [perfResult, statsResult, recentResult, aggResult].every(
+      r => r.status === 'rejected'
+    );
+    if (allRejected) {
+      setError('Errore nel caricamento delle metriche expert');
+    }
+    setLoading(false);
   };
 
   useEffect(() => {

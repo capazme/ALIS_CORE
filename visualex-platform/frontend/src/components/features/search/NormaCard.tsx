@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Book, ChevronDown, X, GitBranch, Plus, ArrowRight, ExternalLink, Loader2 } from 'lucide-react';
 import type { Norma, ArticleData } from '../../../types';
@@ -34,7 +34,7 @@ const getUniqueId = (article: ArticleData) => {
     : article.norma_data.numero_articolo;
 };
 
-export function NormaCard({ norma, articles, onCloseArticle, onViewPdf, onCompareArticle: _onCompareArticle, onCrossReference, isNew, searchedArticle, tabId }: NormaCardProps) {
+function NormaCardComponent({ norma, articles, onCloseArticle, onViewPdf, onCompareArticle: _onCompareArticle, onCrossReference, isNew, searchedArticle, tabId }: NormaCardProps) {
   // Local UI state - defined first so we can derive activeArticle
   const [isOpen, setIsOpen] = useState(true);
   // Initialize with unique ID of the first article
@@ -66,6 +66,7 @@ export function NormaCard({ norma, articles, onCloseArticle, onViewPdf, onCompar
     tabId,
     activeArticle
   });
+  const [pendingArticle, setPendingArticle] = useState<string | null>(null);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [quickAddValue, setQuickAddValue] = useState('');
 
@@ -134,6 +135,13 @@ export function NormaCard({ norma, articles, onCloseArticle, onViewPdf, onCompar
     }
   }, [articles, activeTabId]);
 
+  useEffect(() => {
+    if (pendingArticle && articles.some(a => getUniqueId(a) === pendingArticle)) {
+      setActiveTabId(pendingArticle);
+      setPendingArticle(null);
+    }
+  }, [articles, pendingArticle]);
+
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Function to navigate to a loaded article or load it if not present
@@ -151,15 +159,7 @@ export function NormaCard({ norma, articles, onCloseArticle, onViewPdf, onCompar
       setActiveTabId(targetUniqueId);
     } else {
       handleLoadArticle(articleNumber);
-      // We rely on useEffect to switch tab once loaded, 
-      // or we could optimistically set it but it wouldn't match any article yet.
-      // Better to let useEffect handle the switch IF we want auto-switch on load (which we do logic for).
-      // But handleLoadArticle is async in hook.
-      // If we want immediate feedback, we might need to track "pending" state.
-      // For now, rely on previous logic + effect.
-      // Wait, effect logic selects FIRST article if active is missing.
-      // If we load a specific one, we want THAT one active.
-      // NormaBlockComponent handles this. NormaCard relies on user action?
+      setPendingArticle(targetUniqueId);
     }
   };
 
@@ -177,9 +177,11 @@ export function NormaCard({ norma, articles, onCloseArticle, onViewPdf, onCompar
         : "border-slate-200 dark:border-slate-800"
     )}>
       {/* Mobile Header */}
-      <div
+      <button
+        type="button"
+        aria-label={isOpen ? 'Chiudi norma' : 'Apri norma'}
         className={cn(
-          "md:hidden",
+          "md:hidden w-full text-left",
           "p-4 cursor-pointer",
           "border-b border-slate-200 dark:border-slate-800",
           "bg-slate-50 dark:bg-slate-900/50",
@@ -256,7 +258,7 @@ export function NormaCard({ norma, articles, onCloseArticle, onViewPdf, onCompar
             <ChevronDown className={cn("transition-transform duration-300", isOpen ? "rotate-180" : "")} size={20} />
           </button>
         </div>
-      </div>
+      </button>
 
       {/* Desktop Header */}
       <div
@@ -650,3 +652,5 @@ export function NormaCard({ norma, articles, onCloseArticle, onViewPdf, onCompar
     </div>
   );
 }
+
+export const NormaCard = memo(NormaCardComponent);

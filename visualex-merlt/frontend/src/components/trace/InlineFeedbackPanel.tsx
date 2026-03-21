@@ -89,7 +89,11 @@ export function InlineFeedbackPanel({ traceId, className }: InlineFeedbackPanelP
             "disabled:opacity-50 disabled:cursor-not-allowed",
           )}
         >
-          <ThumbsDown size={16} aria-hidden="true" />
+          {state.status === 'submitting' ? (
+            <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+          ) : (
+            <ThumbsDown size={16} aria-hidden="true" />
+          )}
         </button>
       </div>
 

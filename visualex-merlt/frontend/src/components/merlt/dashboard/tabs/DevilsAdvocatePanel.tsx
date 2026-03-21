@@ -64,7 +64,7 @@ function KpiCard({ label, value, icon, color }: KpiProps) {
 // =============================================================================
 
 interface TriggerTestProps {
-  onTriggered: (resp: DACheckResponse) => void;
+  onTriggered: (resp: DACheckResponse, traceId: string) => void;
 }
 
 function TriggerTestForm({ onTriggered }: TriggerTestProps) {
@@ -79,7 +79,7 @@ function TriggerTestForm({ onTriggered }: TriggerTestProps) {
     setChecking(true);
     try {
       const resp = await checkDevilsAdvocate(traceId.trim(), parseFloat(disagreement));
-      onTriggered(resp);
+      onTriggered(resp, traceId.trim());
     } catch (err) {
       console.error('DA check failed:', err);
     } finally {
@@ -207,6 +207,7 @@ export function DevilsAdvocatePanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null as string | null);
   const [triggerResult, setTriggerResult] = useState(null as DACheckResponse | null);
+  const [triggerTraceId, setTriggerTraceId] = useState('');
 
   const fetchEffectiveness = useCallback(async () => {
     setLoading(true);
@@ -310,7 +311,7 @@ export function DevilsAdvocatePanel() {
           <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
             Test Trigger
           </h4>
-          <TriggerTestForm onTriggered={setTriggerResult} />
+          <TriggerTestForm onTriggered={(resp, id) => { setTriggerResult(resp); setTriggerTraceId(id); }} />
         </div>
 
         {/* Trigger result */}
@@ -341,13 +342,13 @@ export function DevilsAdvocatePanel() {
             )}
 
             {/* Feedback form if triggered */}
-            {triggerResult.triggered && triggerResult.critical_prompt && (
+            {triggerResult.triggered && triggerResult.critical_prompt && triggerTraceId && (
               <div className="mt-3">
                 <h5 className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-2">
                   Rispondi al prompt critico:
                 </h5>
                 <DAFeedbackForm
-                  traceId="test"
+                  traceId={triggerTraceId}
                   onSubmitted={fetchEffectiveness}
                 />
               </div>

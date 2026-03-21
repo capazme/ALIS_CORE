@@ -7,6 +7,7 @@ import { X, BookOpen, Lightbulb, FileText, Scale, GitBranch } from 'lucide-react
 import { cn } from '../../../lib/utils';
 import type { BrocardiInfo } from '../../../types';
 import type { BrocardiTab } from '../../../hooks/useBrocardiSidebar';
+import { SafeHTML } from '../../../utils/sanitize';
 
 export interface BrocardiSidebarProps {
   isOpen: boolean;
@@ -97,7 +98,7 @@ export function BrocardiSidebar({ isOpen, activeTab, onClose, onSetTab, brocardi
                   {activeTab === 'brocardi' && brocardi.Brocardi && (
                     <div className="space-y-3">
                       {brocardi.Brocardi.map((b, i) => (
-                        <div key={i} className="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-300 italic">
+                        <div key={`brocardi-${i}-${typeof b === 'string' ? b.slice(0, 20) : i}`} className="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-300 italic">
                           {b}
                         </div>
                       ))}
@@ -105,31 +106,39 @@ export function BrocardiSidebar({ isOpen, activeTab, onClose, onSetTab, brocardi
                   )}
 
                   {activeTab === 'ratio' && brocardi.Ratio && (
-                    <div className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                      {brocardi.Ratio}
-                    </div>
+                    <SafeHTML
+                      html={brocardi.Ratio}
+                      className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed"
+                    />
                   )}
 
                   {activeTab === 'spiegazione' && brocardi.Spiegazione && (
-                    <div className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                      {brocardi.Spiegazione}
-                    </div>
+                    <SafeHTML
+                      html={brocardi.Spiegazione}
+                      className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed"
+                    />
                   )}
 
                   {activeTab === 'massime' && brocardi.Massime && (
                     <div className="space-y-3">
-                      {brocardi.Massime.map((m, i) => (
-                        <div key={i} className="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-300">
-                          {typeof m === 'string' ? m : m.massima || JSON.stringify(m)}
-                        </div>
-                      ))}
+                      {brocardi.Massime.map((m, i) => {
+                        const text = typeof m === 'string' ? m : m.massima || JSON.stringify(m);
+                        const key = typeof m === 'object' && m !== null && 'massima' in m
+                          ? `massima-${(m as { massima: string }).massima.slice(0, 20)}-${i}`
+                          : `massima-legacy-${i}`;
+                        return (
+                          <div key={key} className="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-300">
+                            {text}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
                   {activeTab === 'relazioni' && brocardi.Relazioni && (
                     <div className="space-y-2">
                       {brocardi.Relazioni.map((r, i) => (
-                        <div key={i} className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 text-sm">
+                        <div key={`relazione-${r.titolo || r.tipo || i}`} className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 text-sm">
                           <span className="font-medium text-primary-600 dark:text-primary-400">{r.titolo || r.tipo || 'Relazione'}</span>
                           {r.testo && (
                             <p className="text-xs text-slate-500 mt-1">{r.testo}</p>

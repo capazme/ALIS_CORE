@@ -49,10 +49,11 @@ export function NormeNavigator({ norme, onNavigateToNorma, className }: NormeNav
               {norme.map((item, index) => {
                 const norma = item.norma;
                 const articleCount = item.articles.length;
+                const normaKey = `${norma.tipo_atto}--${norma.numero_atto || ''}--${norma.data || ''}--${item.versionDate || ''}`;
 
                 return (
                   <button
-                    key={index}
+                    key={normaKey}
                     onClick={() => {
                       onNavigateToNorma(index);
                       setIsExpanded(false);

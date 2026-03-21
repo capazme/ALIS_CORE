@@ -77,6 +77,7 @@ export function ValidationBulkActionsBar({
     } finally {
       setProcessingAction(null);
       setShowConfirmDialog(null);
+      onClearSelection();
     }
   };
 
@@ -88,6 +89,7 @@ export function ValidationBulkActionsBar({
     } finally {
       setProcessingAction(null);
       setShowConfirmDialog(null);
+      onClearSelection();
     }
   };
 

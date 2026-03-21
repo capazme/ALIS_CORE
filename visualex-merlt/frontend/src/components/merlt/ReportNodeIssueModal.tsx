@@ -73,7 +73,7 @@ export function ReportNodeIssueModal({
     : node?.id;
 
   // Form state - default to wrong_relation for edges
-  const [issueType, setIssueType] = useState(isEdgeReport ? 'wrong_relation' : 'factual_error' as IssueType);
+  const [issueType, setIssueType] = useState((isEdgeReport ? 'wrong_relation' : 'factual_error') as IssueType);
   const [severity, setSeverity] = useState('medium' as IssueSeverity);
   const [description, setDescription] = useState('');
 
@@ -85,7 +85,7 @@ export function ReportNodeIssueModal({
 
   // Reset form
   const resetForm = () => {
-    setIssueType(isEdgeReport ? 'wrong_relation' : 'factual_error');
+    setIssueType((isEdgeReport ? 'wrong_relation' : 'factual_error') as IssueType);
     setSeverity('medium');
     setDescription('');
     setError(null);

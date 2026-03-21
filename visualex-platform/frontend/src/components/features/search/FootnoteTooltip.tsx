@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ArrowUpRight } from 'lucide-react';
 import type { Footnote } from '../../../types';
@@ -35,7 +35,10 @@ export function FootnoteTooltip({
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   // Estrai riferimenti ad articoli dal testo della nota
-  const articleRefs = extractArticleRefs(footnote.testo, defaultActType);
+  const articleRefs = useMemo(
+    () => extractArticleRefs(footnote.testo, defaultActType),
+    [footnote.testo, defaultActType]
+  );
 
   // Calcola posizione tooltip quando si apre
   const updatePosition = useCallback(() => {

@@ -665,6 +665,7 @@ export function RLCFTab() {
   const handleStartTraining = async () => {
     setActionLoading(true);
     try {
+      // TODO: make configurable via form
       const config: TrainingConfig = {
         epochs: 50,
         learning_rate: 0.001,

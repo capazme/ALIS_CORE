@@ -426,8 +426,20 @@ export function ProposeRelationDrawer({
       return;
     }
 
-    // If already acknowledged duplicate, skip deduplication check
-    await doSubmit(acknowledgedDuplicate);
+    // If already acknowledged duplicate, skip client-side check and submit directly
+    if (acknowledgedDuplicate) {
+      await doSubmit(true);
+      return;
+    }
+
+    // Client-side duplicate check before submitting
+    const hasDuplicates = await checkDuplicates();
+    if (hasDuplicates) {
+      // duplicatesFound state is set inside checkDuplicates — show dialog and wait for user action
+      return;
+    }
+
+    await doSubmit(false);
   };
 
   // Format article URN for display

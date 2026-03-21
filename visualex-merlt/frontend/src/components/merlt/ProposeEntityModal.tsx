@@ -7,23 +7,22 @@
  * Include gestione duplicati con warning e conferma.
  */
 
-import { useState } from 'react';
 import { Modal } from '../ui/Modal';
 import { Plus, Loader2, CheckCircle2, AlertCircle, Sparkles, AlertTriangle } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { merltService } from '../../services/merltService';
 import { ENTITY_TYPE_OPTIONS, groupByCategory } from '../../constants/merltTypes';
-import type { EntityType, PendingEntity, DuplicateCandidate } from '../../types/merlt';
+import type { EntityType, PendingEntity } from '../../types/merlt';
+import { useProposeEntityForm } from '../../hooks/useProposeEntityForm';
+import type { DuplicateCandidate } from '../../types/merlt';
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
-interface ProposeEntityModalProps {
+export interface ProposeEntityModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (entity: PendingEntity) => void;
-  // Context
   articleUrn: string;
   articleText?: string;
   userId: string;
@@ -46,115 +45,21 @@ export function ProposeEntityModal({
   userId,
   ambito = 'civile',
 }: ProposeEntityModalProps) {
-  // Form state
-  const [tipo, setTipo] = useState('concetto' as EntityType);
-  const [nome, setNome] = useState('');
-  const [descrizione, setDescrizione] = useState('');
-  const [evidence, setEvidence] = useState('');
-
-  // UI state
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null as string | null);
-  const [success, setSuccess] = useState(false);
-
-  // Duplicate detection state
-  const [duplicatesFound, setDuplicatesFound] = useState(false);
-  const [duplicates, setDuplicates] = useState([] as DuplicateCandidate[]);
-  const [selectedDuplicate, setSelectedDuplicate] = useState(null as string | null);
-
-  // Reset form
-  const resetForm = () => {
-    setTipo('concetto');
-    setNome('');
-    setDescrizione('');
-    setEvidence('');
-    setError(null);
-    setSuccess(false);
-    setDuplicatesFound(false);
-    setDuplicates([]);
-    setSelectedDuplicate(null);
-  };
-
-  // Go back from duplicates view to form
-  const handleBackToForm = () => {
-    setDuplicatesFound(false);
-    setDuplicates([]);
-    setSelectedDuplicate(null);
-  };
-
-  const handleClose = () => {
-    resetForm();
-    onClose();
-  };
-
-  // Submit - handles both initial check and confirmed submission
-  const handleSubmit = async (e: React.FormEvent, skipDuplicateCheck = false) => {
-    e.preventDefault();
-
-    // Validation
-    if (!nome.trim()) {
-      setError('Il nome è obbligatorio');
-      return;
-    }
-    if (nome.trim().length < 3) {
-      setError('Il nome deve essere di almeno 3 caratteri');
-      return;
-    }
-    if (!descrizione.trim()) {
-      setError('La descrizione è obbligatoria');
-      return;
-    }
-    if (descrizione.trim().length < 10) {
-      setError('La descrizione deve essere di almeno 10 caratteri');
-      return;
-    }
-
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const result = await merltService.proposeEntity({
-        tipo,
-        nome: nome.trim(),
-        descrizione: descrizione.trim(),
-        article_urn: articleUrn,
-        ambito,
-        evidence: evidence.trim() || `Proposto manualmente per ${articleUrn}`,
-        user_id: userId,
-        skip_duplicate_check: skipDuplicateCheck,
-        acknowledged_duplicate_of: skipDuplicateCheck ? selectedDuplicate || undefined : undefined,
-      });
-
-      // Check if duplicates were found (blocking = exact match only)
-      if (result.duplicate_action_required && result.duplicates.length > 0) {
-        setDuplicates(result.duplicates);
-        setDuplicatesFound(true);
-        setIsSubmitting(false);
-        return;
-      }
-
-      setSuccess(true);
-
-      // Callback after short delay
-      setTimeout(() => {
-        if (result.pending_entity) {
-          onSuccess?.(result.pending_entity);
-        }
-        handleClose();
-      }, 1500);
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Errore nella proposta dell\'entità';
-      setError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Confirm creation despite duplicates
-  const handleConfirmCreate = async () => {
-    const syntheticEvent = { preventDefault: () => {} } as React.FormEvent;
-    await handleSubmit(syntheticEvent, true);
-  };
+  const {
+    formData,
+    setFormField,
+    error,
+    duplicates,
+    duplicatesFound,
+    selectedDuplicate,
+    setSelectedDuplicate,
+    isSubmitting,
+    success,
+    handleSubmit,
+    handleConfirmCreate,
+    handleBackToForm,
+    handleClose,
+  } = useProposeEntityForm({ articleUrn, userId, ambito, onSuccess, onClose });
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Proponi Nuova Entità" size="md">
@@ -183,7 +88,7 @@ export function ProposeEntityModal({
                 Entità simili trovate
               </h3>
               <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                Abbiamo trovato {duplicates.length} entità simili a "{nome}".
+                Abbiamo trovato {duplicates.length} entità simili a "{formData.nome}".
                 Verifica se la tua proposta è un duplicato.
               </p>
             </div>
@@ -192,8 +97,8 @@ export function ProposeEntityModal({
           {/* Your proposal summary */}
           <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">La tua proposta:</p>
-            <p className="font-medium text-slate-900 dark:text-white">{nome}</p>
-            <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{tipo}</p>
+            <p className="font-medium text-slate-900 dark:text-white">{formData.nome}</p>
+            <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{formData.tipo}</p>
           </div>
 
           {/* Duplicates list */}
@@ -325,8 +230,8 @@ export function ProposeEntityModal({
             </label>
             <select
               id="modal-entity-tipo"
-              value={tipo}
-              onChange={(e) => setTipo(e.target.value as EntityType)}
+              value={formData.tipo}
+              onChange={(e) => setFormField('tipo', e.target.value as EntityType)}
               className={cn(
                 'w-full px-4 py-3 rounded-xl border transition-all',
                 'bg-slate-50 dark:bg-slate-800',
@@ -355,8 +260,8 @@ export function ProposeEntityModal({
             <input
               id="modal-entity-nome"
               type="text"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
+              value={formData.nome}
+              onChange={(e) => setFormField('nome', e.target.value)}
               placeholder="Es. Buona fede, Creditore, Mora del debitore..."
               className={cn(
                 'w-full px-4 py-3 rounded-xl border transition-all',
@@ -375,8 +280,8 @@ export function ProposeEntityModal({
             </label>
             <textarea
               id="modal-entity-descrizione"
-              value={descrizione}
-              onChange={(e) => setDescrizione(e.target.value)}
+              value={formData.descrizione}
+              onChange={(e) => setFormField('descrizione', e.target.value)}
               placeholder="Descrivi brevemente cosa rappresenta questa entità nel contesto giuridico..."
               rows={3}
               className={cn(
@@ -388,7 +293,7 @@ export function ProposeEntityModal({
               )}
             />
             <p className="mt-1 text-xs text-slate-400">
-              Minimo 10 caratteri ({descrizione.length}/10)
+              Minimo 10 caratteri ({formData.descrizione.length}/10)
             </p>
           </div>
 
@@ -399,8 +304,8 @@ export function ProposeEntityModal({
             </label>
             <textarea
               id="modal-entity-evidence"
-              value={evidence}
-              onChange={(e) => setEvidence(e.target.value)}
+              value={formData.evidence}
+              onChange={(e) => setFormField('evidence', e.target.value)}
               placeholder="Cita il passaggio dell'articolo che supporta questa entità..."
               rows={2}
               className={cn(
@@ -432,7 +337,7 @@ export function ProposeEntityModal({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !nome.trim() || !descrizione.trim()}
+              disabled={isSubmitting || !formData.nome.trim() || !formData.descrizione.trim()}
               className={cn(
                 'flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all min-h-[44px]',
                 'bg-primary-600 hover:bg-primary-700 text-white',

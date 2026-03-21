@@ -110,14 +110,16 @@ const TABS: Tab[] = [
 // =============================================================================
 
 interface TabButtonProps {
+  id: string;
   tab: Tab;
   isActive: boolean;
   onClick: () => void;
 }
 
-function TabButton({ tab, isActive, onClick }: TabButtonProps) {
+function TabButton({ id, tab, isActive, onClick }: TabButtonProps) {
   return (
     <button
+      id={id}
       onClick={onClick}
       role="tab"
       aria-selected={isActive}
@@ -163,6 +165,7 @@ export function AcademicDashboard({
 }: AcademicDashboardProps) {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Update timestamp when tab changes
   useEffect(() => {
@@ -177,22 +180,34 @@ export function AcademicDashboard({
     });
   };
 
+  const handleTabKeyDown = (e: React.KeyboardEvent) => {
+    const tabIds = TABS.map(t => t.id);
+    const currentIndex = tabIds.indexOf(activeTab);
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setActiveTab(tabIds[(currentIndex + 1) % tabIds.length]);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setActiveTab(tabIds[(currentIndex - 1 + tabIds.length) % tabIds.length]);
+    }
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <OverviewTab />;
+        return <OverviewTab key={refreshKey} />;
       case 'architecture':
-        return <ArchitectureTab />;
+        return <ArchitectureTab key={refreshKey} />;
       case 'pipeline':
-        return <PipelineTab />;
+        return <PipelineTab key={refreshKey} />;
       case 'rlcf':
-        return <RLCFTab />;
+        return <RLCFTab key={refreshKey} />;
       case 'experts':
-        return <ExpertsTab />;
+        return <ExpertsTab key={refreshKey} />;
       case 'statistics':
-        return <StatisticsTab />;
+        return <StatisticsTab key={refreshKey} />;
       default:
-        return <OverviewTab />;
+        return <OverviewTab key={refreshKey} />;
     }
   };
 
@@ -221,7 +236,7 @@ export function AcademicDashboard({
 
               {/* Refresh button */}
               <button
-                onClick={() => setLastUpdated(new Date())}
+                onClick={() => { setRefreshKey((k: number) => k + 1); setLastUpdated(new Date()); }}
                 className={cn(
                   'p-2 rounded-lg transition-colors',
                   'text-slate-500 hover:text-slate-700 hover:bg-slate-100',
@@ -249,10 +264,11 @@ export function AcademicDashboard({
           </div>
 
           {/* Tabs navigation */}
-          <div className="flex items-center gap-1 pb-2 overflow-x-auto scrollbar-hide" role="tablist" aria-label="Dashboard tabs">
+          <div className="flex items-center gap-1 pb-2 overflow-x-auto scrollbar-hide" role="tablist" aria-label="Dashboard tabs" onKeyDown={handleTabKeyDown}>
             {TABS.map((tab) => (
               <TabButton
                 key={tab.id}
+                id={`tab-${tab.id}`}
                 tab={tab}
                 isActive={activeTab === tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -268,7 +284,7 @@ export function AcademicDashboard({
           <motion.div
             key={activeTab}
             role="tabpanel"
-            aria-label={TABS.find(t => t.id === activeTab)?.label}
+            aria-labelledby={`tab-${activeTab}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}

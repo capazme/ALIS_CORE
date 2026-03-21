@@ -41,10 +41,11 @@ export function PluginSlot<T extends PluginSlotName>({
 
   const rendered = components.map((slotComponent, index) => {
     const Component = slotComponent.component;
-    const element = <Component key={index} {...props} />;
+    const stableKey = (Component as { displayName?: string }).displayName || Component.name || `plugin-${index}`;
+    const element = <Component key={stableKey} {...props} />;
 
     if (Wrapper) {
-      return <Wrapper key={index}>{element}</Wrapper>;
+      return <Wrapper key={stableKey}>{element}</Wrapper>;
     }
 
     return element;

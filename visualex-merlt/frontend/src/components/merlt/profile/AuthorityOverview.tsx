@@ -28,6 +28,8 @@ interface TierConfig {
   borderColor: string;
   gradientFrom: string;
   gradientTo: string;
+  gradientFromHex: string;
+  gradientToHex: string;
   description: string;
   thresholdMin: number;
   thresholdMax: number;
@@ -42,6 +44,8 @@ const TIER_CONFIGS: Record<AuthorityTier, TierConfig> = {
     borderColor: 'border-slate-200 dark:border-slate-700',
     gradientFrom: 'from-slate-400',
     gradientTo: 'to-slate-500',
+    gradientFromHex: '#94a3b8',
+    gradientToHex: '#64748b',
     description: 'Benvenuto! Inizia a validare entità e relazioni per costruire la tua reputazione nel sistema.',
     thresholdMin: 0,
     thresholdMax: 0.4,
@@ -54,6 +58,8 @@ const TIER_CONFIGS: Record<AuthorityTier, TierConfig> = {
     borderColor: 'border-emerald-200 dark:border-emerald-800/30',
     gradientFrom: 'from-emerald-400',
     gradientTo: 'to-emerald-500',
+    gradientFromHex: '#34d399',
+    gradientToHex: '#10b981',
     description: 'Stai costruendo il tuo track record. Ogni voto corretto aumenta la tua authority nel sistema.',
     thresholdMin: 0.4,
     thresholdMax: 0.6,
@@ -66,6 +72,8 @@ const TIER_CONFIGS: Record<AuthorityTier, TierConfig> = {
     borderColor: 'border-blue-200 dark:border-blue-800/30',
     gradientFrom: 'from-blue-400',
     gradientTo: 'to-blue-500',
+    gradientFromHex: '#60a5fa',
+    gradientToHex: '#3b82f6',
     description: 'Hai dimostrato competenza. I tuoi voti hanno peso significativo nelle decisioni del sistema.',
     thresholdMin: 0.6,
     thresholdMax: 0.8,
@@ -78,6 +86,8 @@ const TIER_CONFIGS: Record<AuthorityTier, TierConfig> = {
     borderColor: 'border-purple-200 dark:border-purple-800/30',
     gradientFrom: 'from-purple-400',
     gradientTo: 'to-purple-500',
+    gradientFromHex: '#c084fc',
+    gradientToHex: '#a855f7',
     description: 'Sei riconosciuto come esperto nel dominio giuridico. Il tuo voto pesa molto nelle validazioni.',
     thresholdMin: 0.8,
     thresholdMax: 1.0,
@@ -137,16 +147,8 @@ function RadialProgress({
         />
         <defs>
           <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop
-              offset="0%"
-              className={config.gradientFrom.replace('from-', 'stop-')}
-              stopColor="currentColor"
-            />
-            <stop
-              offset="100%"
-              className={config.gradientTo.replace('to-', 'stop-')}
-              stopColor="currentColor"
-            />
+            <stop offset="0%" stopColor={config.gradientFromHex} />
+            <stop offset="100%" stopColor={config.gradientToHex} />
           </linearGradient>
         </defs>
       </svg>

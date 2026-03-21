@@ -6,7 +6,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { Download, Loader2, ChevronDown, Check, FileText, Code, BookOpen, Braces } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { exportCitations, triggerFileDownload } from '../../services/merltService';
+import { exportCitations, downloadCitationFile } from '../../services/merltService';
 import type { CitationFormat } from '../../types/merlt';
 
 interface FormatOption {
@@ -97,10 +97,7 @@ export function CitationExportButton({ traceId, sourcesCount, className }: Citat
       });
 
       if (result.success && result.download_url) {
-        // H2 fix: build correct URL and use hidden <a> for download
-        const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
-        const downloadPath = result.download_url.replace('/api/v1/', '/merlt/');
-        triggerFileDownload(`${API_BASE_URL}${downloadPath}`, result.filename);
+        downloadCitationFile(result.download_url, result.filename);
         setLastExported(format);
       }
     } catch (err: unknown) {

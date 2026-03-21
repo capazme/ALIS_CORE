@@ -376,6 +376,7 @@ export function StatisticsTab() {
 
   const handleExport = async (format: ExportFormat) => {
     setExportLoading(true);
+    setError(null);
     try {
       const response = await exportStatistics({
         format,
@@ -386,16 +387,16 @@ export function StatisticsTab() {
       });
 
       if (response.success && response.download_url) {
-        // Trigger download
-        const a = document.createElement('a');
-        a.href = `/api/merlt${response.download_url}`;
-        a.download = response.filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        const link = document.createElement('a');
+        link.href = response.download_url;
+        link.download = response.filename || 'statistics-export';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       }
     } catch (err) {
       console.error('Failed to export statistics:', err);
+      setError('Export fallito. Riprova.');
     } finally {
       setExportLoading(false);
     }

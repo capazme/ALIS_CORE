@@ -13,10 +13,11 @@ export interface SourceSplitViewProps {
   leftContent: NodeContent;
   rightContent: NodeContent;
   isOpen: boolean;
+  hasSelectedSource?: boolean;
   className?: string;
 }
 
-export function SourceSplitView({ leftContent, rightContent, isOpen, className }: SourceSplitViewProps) {
+export function SourceSplitView({ leftContent, rightContent, isOpen, hasSelectedSource = false, className }: SourceSplitViewProps) {
   const [splitRatio, setSplitRatio] = useState(0.6); // 60% left, 40% right
   const containerRef = useRef(null as HTMLDivElement | null);
   const isDragging = useRef(false);
@@ -108,9 +109,12 @@ export function SourceSplitView({ leftContent, rightContent, isOpen, className }
       {/* Mobile separator */}
       <div className="md:hidden border-t border-slate-200 dark:border-slate-700" />
 
-      {/* Right panel (source detail) - full width on mobile, split ratio on md+ */}
+      {/* Right panel (source detail) - hidden on mobile when no source selected, split ratio on md+ */}
       <div
-        className="overflow-hidden w-full md:w-[var(--split-right)]"
+        className={cn(
+          "overflow-hidden w-full md:w-[var(--split-right)]",
+          !hasSelectedSource && "hidden md:block"
+        )}
       >
         {rightContent}
       </div>

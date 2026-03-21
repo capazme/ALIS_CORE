@@ -36,7 +36,7 @@ export function SourceRatingWidget({ traceId, sourceUrn, className }: SourceRati
       await submitSourceFeedback({
         trace_id: traceId,
         user_id: userId,
-        source_urn: sourceUrn,
+        source_id: sourceUrn,
         rating: rating as 1 | 2 | 3 | 4 | 5,
       });
       setState({ status: 'submitted', rating });

@@ -29,6 +29,9 @@ import {
   Building2,
   Gavel,
   BookOpen,
+  Store,
+  Receipt,
+  Globe,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import type { ProfileActivityEntry, LegalDomain } from '../../../types/merlt';
@@ -80,6 +83,10 @@ const DOMAIN_ICONS: Partial<Record<LegalDomain, typeof Scale>> = {
   penale: Gavel,
   lavoro: Briefcase,
   amministrativo: Building2,
+  commerciale: Store,
+  tributario: Receipt,
+  internazionale: Globe,
+  costituzionale: BookOpen,
 };
 
 // =============================================================================

@@ -3,6 +3,8 @@
  *
  * Each segment of the synthesis can be attributed to an expert via source references.
  * This component renders subtle background highlights based on expert colors.
+ *
+ * TODO: integrate into TraceViewer as an optional overlay mode alongside SynthesisWithSources.
  */
 
 import { useMemo } from 'react';

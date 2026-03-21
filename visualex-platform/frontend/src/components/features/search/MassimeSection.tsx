@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Search, Scale, ChevronDown, Filter } from 'lucide-react';
 import type { MassimaStructured } from '../../../types';
 import { cn } from '../../../lib/utils';
@@ -77,14 +77,13 @@ export function MassimeSection({ massime, currentNorma }: MassimeSectionProps) {
   }), [currentNorma]);
 
   // Helper to wrap citations in text
-  const wrapWithCitations = (text: string): string => {
+  const wrapWithCitations = useCallback((text: string): string => {
     try {
       return wrapCitationsInHtml(text, citationOptions);
-    } catch (e) {
-      console.warn('[MassimeSection] Citation wrapping failed:', e);
+    } catch {
       return text;
     }
-  };
+  }, [citationOptions]);
 
   // Normalize all massime to structured format
   const normalizedMassime = useMemo(() => {

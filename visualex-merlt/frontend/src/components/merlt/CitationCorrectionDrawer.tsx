@@ -22,6 +22,7 @@ import { X, AlertCircle, CheckCircle2, Loader2, Save } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { merltService } from '../../services/merltService';
 import type { NERFeedbackRequest, NERFeedbackResponse, ParsedCitationData } from '../../types/merlt';
+import { TIPO_ATTO_SELECT_OPTIONS } from '../../constants/legalTypes';
 
 // =============================================================================
 // TYPES
@@ -46,22 +47,6 @@ export interface CitationCorrectionDrawerProps {
   // Callback
   onSuccess?: (response: NERFeedbackResponse) => void;
 }
-
-// Opzioni dropdown tipo atto
-const TIPO_ATTO_OPTIONS = [
-  { value: 'legge', label: 'Legge' },
-  { value: 'decreto legislativo', label: 'Decreto Legislativo (D.Lgs.)' },
-  { value: 'decreto legge', label: 'Decreto Legge (D.L.)' },
-  { value: 'decreto del presidente della repubblica', label: 'D.P.R.' },
-  { value: 'codice civile', label: 'Codice Civile' },
-  { value: 'codice penale', label: 'Codice Penale' },
-  { value: 'codice di procedura civile', label: 'C.P.C.' },
-  { value: 'codice di procedura penale', label: 'C.P.P.' },
-  { value: 'costituzione', label: 'Costituzione' },
-  { value: 'regio decreto', label: 'Regio Decreto' },
-  { value: 'regolamento ue', label: 'Regolamento UE' },
-  { value: 'direttiva ue', label: 'Direttiva UE' },
-];
 
 // =============================================================================
 // COMPONENT
@@ -95,10 +80,10 @@ export function CitationCorrectionDrawer({
   // Pre-fill from original parsed data
   useEffect(() => {
     if (originalParsed && isOpen) {
-      setTipoAtto(originalParsed.actType || '');
-      setNumero(originalParsed.actNumber || '');
-      setAnno(originalParsed.date || '');
-      setArticoli(originalParsed.articles?.join(', ') || '');
+      setTipoAtto(originalParsed.tipo_atto || '');
+      setNumero(originalParsed.numero_atto || '');
+      setAnno(originalParsed.anno || '');
+      setArticoli(originalParsed.articoli?.join(', ') || '');
     } else if (isOpen) {
       // Reset for new annotation
       setTipoAtto('');
@@ -342,9 +327,9 @@ export function CitationCorrectionDrawer({
                       </label>
                       <div className="p-3 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg">
                         <p className="text-sm text-slate-900 dark:text-white">
-                          {originalParsed.actType || 'N/A'} {originalParsed.actNumber || ''} {originalParsed.date || ''}
-                          {originalParsed.articles && originalParsed.articles.length > 0 && (
-                            <span> - Art. {originalParsed.articles.join(', ')}</span>
+                          {originalParsed.tipo_atto || 'N/A'} {originalParsed.numero_atto || ''} {originalParsed.anno || ''}
+                          {originalParsed.articoli && originalParsed.articoli.length > 0 && (
+                            <span> - Art. {originalParsed.articoli.join(', ')}</span>
                           )}
                         </p>
                         {confidenceBefore && (
@@ -387,7 +372,7 @@ export function CitationCorrectionDrawer({
                         )}
                       >
                         <option value="">-- Seleziona tipo --</option>
-                        {TIPO_ATTO_OPTIONS.map((option) => (
+                        {TIPO_ATTO_SELECT_OPTIONS.map((option) => (
                           <option key={option.value} value={option.value}>
                             {option.label}
                           </option>

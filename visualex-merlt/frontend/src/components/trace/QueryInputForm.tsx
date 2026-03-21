@@ -1,17 +1,52 @@
 /**
- * QueryInputForm - Compact query input for the sidebar Analisi tab.
+ * QueryInputForm - Enhanced query input for the sidebar Chiedi tab.
  *
- * Captures user query, submits to merltService.queryExperts(),
- * and returns the trace_id on success.
+ * Features:
+ * - Auto-resize textarea (80px-200px)
+ * - Article context chip when articleUrn present
+ * - Query history from localStorage (last 5)
+ * - Rotating placeholder examples
+ * - Prefill support from store
  */
 
-import { useState, useCallback } from 'react';
-import { Search, Loader2, AlertCircle } from 'lucide-react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { Search, Loader2, AlertCircle, Clock, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { queryExperts } from '../../services/merltService';
+import { useMerltPanelStore } from '../../store/useMerltSidebarStore';
 
 const MIN_QUERY_LENGTH = 10;
 const MAX_QUERY_LENGTH = 2000;
+const HISTORY_KEY = 'merlt-query-history';
+const MAX_HISTORY = 5;
+
+const EXAMPLE_QUERIES = [
+  'Quali sono i presupposti della responsabilità extracontrattuale ex art. 2043 c.c.?',
+  'Come si configura il diritto di recesso nel contratto di locazione?',
+  'Qual è il rapporto tra buona fede e abuso del diritto?',
+  'Come si applica il principio di proporzionalità nelle sanzioni amministrative?',
+];
+
+function getQueryHistory(): string[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveQueryToHistory(query: string) {
+  const history = getQueryHistory().filter((q) => q !== query);
+  history.unshift(query);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
+}
+
+function formatUrnShort(urn: string): string {
+  const match = urn.match(/art[._](\d+[a-z-]*).*?(cod[._]civ|cod[._]pen|cod[._]proc|[a-z.]+)/i);
+  if (match) return `Art. ${match[1]} ${match[2].replace(/[._]/g, '. ')}`;
+  return urn.length > 30 ? urn.slice(0, 30) + '...' : urn;
+}
 
 export interface QueryInputFormProps {
   articleUrn?: string;
@@ -31,8 +66,58 @@ export function QueryInputForm({
   const [query, setQuery] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null as string | null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
+
+  const textareaRef = useRef(null as HTMLTextAreaElement | null);
+  const historyRef = useRef(null as HTMLDivElement | null);
+
+  const prefillQuery = useMerltPanelStore((s) => s.prefillQuery);
+  const clearPrefill = useMerltPanelStore((s) => s.clearPrefill);
+
+  // Handle prefill from store (e.g., "Chiedi a MERL-T" from SelectionPopup)
+  useEffect(() => {
+    if (prefillQuery) {
+      setQuery(prefillQuery);
+      clearPrefill();
+      textareaRef.current?.focus();
+    }
+  }, [prefillQuery, clearPrefill]);
+
+  // Rotate placeholder every 5s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIdx((prev: number) => (prev + 1) % EXAMPLE_QUERIES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auto-resize textarea
+  const autoResize = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(200, Math.max(80, el.scrollHeight))}px`;
+  }, []);
+
+  useEffect(() => {
+    autoResize();
+  }, [query, autoResize]);
+
+  // Close history dropdown on outside click
+  useEffect(() => {
+    if (!showHistory) return;
+    const handleClick = (e: MouseEvent) => {
+      if (historyRef.current && !historyRef.current.contains(e.target as Node)) {
+        setShowHistory(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showHistory]);
 
   const isValid = query.trim().length >= MIN_QUERY_LENGTH;
+  const history = getQueryHistory();
 
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -42,8 +127,11 @@ export function QueryInputForm({
     setIsSubmitting(true);
 
     try {
+      const trimmed = query.trim();
+      saveQueryToHistory(trimmed);
+
       const response = await queryExperts({
-        query: query.trim(),
+        query: trimmed,
         user_id: userId,
         include_trace: true,
         consent_level: 'basic',
@@ -54,14 +142,18 @@ export function QueryInputForm({
 
       onTraceCreated(response.trace_id);
     } catch (err: unknown) {
-      const message =
-        (err as { message?: string })?.message ||
-        'Errore durante la query. Riprova.';
+      const message = (err as { message?: string })?.message || 'Errore durante la query. Riprova.';
       setError(message);
     } finally {
       setIsSubmitting(false);
     }
   }, [query, isValid, isSubmitting, disabled, userId, articleUrn, onTraceCreated]);
+
+  const selectFromHistory = (q: string) => {
+    setQuery(q);
+    setShowHistory(false);
+    textareaRef.current?.focus();
+  };
 
   return (
     <form
@@ -71,25 +163,72 @@ export function QueryInputForm({
       aria-label="Query analisi esperti"
     >
       <div>
-        <label
-          htmlFor="merlt-query-input"
-          className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5"
-        >
-          Domanda giuridica
-        </label>
+        <div className="flex items-center justify-between mb-1.5">
+          <label
+            htmlFor="merlt-query-input"
+            className="block text-xs font-semibold text-slate-600 dark:text-slate-400"
+          >
+            Domanda giuridica
+          </label>
+
+          {/* History button */}
+          {history.length > 0 && (
+            <div className="relative" ref={historyRef}>
+              <button
+                type="button"
+                onClick={() => setShowHistory(!showHistory)}
+                className={cn(
+                  'p-1 rounded-md transition-colors',
+                  'text-slate-400 hover:text-slate-600 hover:bg-slate-100',
+                  'dark:hover:text-slate-300 dark:hover:bg-slate-800',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
+                )}
+                aria-label="Cronologia query"
+                title="Cronologia query"
+              >
+                <Clock size={14} />
+              </button>
+              {showHistory && (
+                <div className="absolute right-0 top-full mt-1 w-64 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg z-10 py-1">
+                  {history.map((q, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => selectFromHistory(q)}
+                      className="w-full text-left px-3 py-2 text-xs text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 truncate transition-colors"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Article context chip */}
+        {articleUrn && (
+          <div className="flex items-center gap-1.5 mb-2">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-full border border-blue-200 dark:border-blue-800">
+              {formatUrnShort(articleUrn)}
+            </span>
+          </div>
+        )}
+
         <textarea
+          ref={textareaRef}
           id="merlt-query-input"
           value={query}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
             setQuery(e.target.value);
             if (error) setError(null);
           }}
-          placeholder="Es. Quali sono i presupposti della responsabilità extracontrattuale ex art. 2043 c.c.?"
+          placeholder={`Es. ${EXAMPLE_QUERIES[placeholderIdx]}`}
           maxLength={MAX_QUERY_LENGTH}
-          rows={3}
           disabled={isSubmitting || disabled}
           className={cn(
             'w-full px-3 py-2 text-sm rounded-lg border resize-none',
+            'min-h-[80px] max-h-[200px]',
             'bg-white dark:bg-slate-800',
             'text-slate-900 dark:text-slate-100',
             'placeholder:text-slate-400 dark:placeholder:text-slate-500',

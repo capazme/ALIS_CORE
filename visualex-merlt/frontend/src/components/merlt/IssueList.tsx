@@ -622,33 +622,52 @@ export function IssueList({ userId, className }: IssueListProps) {
   // Pagination
   const [hasMore, setHasMore] = useState(false);
   const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const PAGE_SIZE = 20;
 
   // Fetch issues
-  const fetchIssues = useCallback(async () => {
-    setLoading(true);
+  const fetchIssues = useCallback(async (pageIndex = 0) => {
+    const isFirstPage = pageIndex === 0;
+    if (isFirstPage) {
+      setLoading(true);
+    } else {
+      setIsLoadingMore(true);
+    }
     setError(null);
 
     try {
       const response = await getOpenIssues({
         status: statusFilter === 'all' ? undefined : statusFilter,
         severity: severityFilter === 'all' ? undefined : severityFilter,
-        limit: 20,
+        limit: PAGE_SIZE,
+        offset: pageIndex * PAGE_SIZE,
       });
 
-      setIssues(response.issues);
+      if (isFirstPage) {
+        setIssues(response.issues);
+      } else {
+        setIssues((prev: EntityIssue[]) => [...prev, ...response.issues]);
+      }
       setHasMore(response.has_more);
       setTotal(response.total);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Errore nel caricamento';
       setError(message);
     } finally {
-      setLoading(false);
+      if (isFirstPage) {
+        setLoading(false);
+      } else {
+        setIsLoadingMore(false);
+      }
     }
   }, [statusFilter, severityFilter]);
 
-  // Initial fetch
+  // Initial fetch (reset page on filter change)
   useEffect(() => {
-    fetchIssues();
+    setPage(0);
+    fetchIssues(0);
   }, [fetchIssues]);
 
   // Handle vote
@@ -843,10 +862,22 @@ export function IssueList({ userId, className }: IssueListProps) {
           {hasMore && (
             <div className="text-center">
               <button
-                onClick={() => {/* TODO: Load more */}}
-                className="px-4 py-2 text-sm text-primary-600 dark:text-primary-400 hover:underline"
+                onClick={() => {
+                  const nextPage = page + 1;
+                  setPage(nextPage);
+                  fetchIssues(nextPage);
+                }}
+                disabled={isLoadingMore}
+                className="px-4 py-2 text-sm text-primary-600 dark:text-primary-400 hover:underline disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
               >
-                Carica altre segnalazioni
+                {isLoadingMore ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                    Caricamento...
+                  </>
+                ) : (
+                  'Carica altre segnalazioni'
+                )}
               </button>
             </div>
           )}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Highlighter, StickyNote, Copy, Search, X } from 'lucide-react';
+import { Highlighter, StickyNote, Copy, Search, X, Brain } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { EventBus } from '../../../lib/plugins/EventBus';
 
@@ -141,7 +141,7 @@ export function SelectionPopup({
     return () => container.removeEventListener('mouseup', handleMouseUp);
   }, [containerRef, handleMouseUp]);
 
-  // Handle keyboard shortcuts
+  // Handle keyboard shortcuts + Tab focus trap
   useEffect(() => {
     if (!popup.visible) return;
 
@@ -149,8 +149,22 @@ export function SelectionPopup({
       if (e.key === 'Escape') {
         hidePopup();
         window.getSelection()?.removeAllRanges();
+      } else if (e.key === 'Tab' && popupRef.current) {
+        const focusable = Array.from(
+          popupRef.current.querySelectorAll<HTMLElement>('button:not([disabled])')
+        );
+        if (focusable.length === 0) return;
+        e.preventDefault();
+        const current = document.activeElement;
+        const idx = focusable.indexOf(current as HTMLElement);
+        if (e.shiftKey) {
+          const prev = idx <= 0 ? focusable[focusable.length - 1] : focusable[idx - 1];
+          prev.focus();
+        } else {
+          const next = idx === -1 || idx === focusable.length - 1 ? focusable[0] : focusable[idx + 1];
+          next.focus();
+        }
       } else if (e.key === 'h' && !e.metaKey && !e.ctrlKey) {
-        // Quick highlight with default color
         onHighlight(popup.text, 'yellow');
         hidePopup();
         window.getSelection()?.removeAllRanges();
@@ -159,7 +173,6 @@ export function SelectionPopup({
         hidePopup();
         window.getSelection()?.removeAllRanges();
       } else if ((e.key === 'c' && (e.metaKey || e.ctrlKey))) {
-        // Let browser handle copy, then hide
         setTimeout(hidePopup, 100);
       }
     };
@@ -168,7 +181,7 @@ export function SelectionPopup({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [popup.visible, popup.text, onHighlight, onAddNote, hidePopup]);
 
-  const handleAction = (action: 'highlight' | 'note' | 'copy' | 'search') => {
+  const handleAction = (action: 'highlight' | 'note' | 'copy' | 'search' | 'merlt') => {
     switch (action) {
       case 'highlight':
         setShowColorPicker(true);
@@ -188,6 +201,11 @@ export function SelectionPopup({
         hidePopup();
         window.getSelection()?.removeAllRanges();
         break;
+      case 'merlt':
+        EventBus.emit('merlt:query-prefill', { text: popup.text, urn });
+        hidePopup();
+        window.getSelection()?.removeAllRanges();
+        break;
     }
   };
 
@@ -203,6 +221,8 @@ export function SelectionPopup({
   return (
     <div
       ref={popupRef}
+      role="dialog"
+      aria-label="Azioni selezione testo"
       className={cn(
         "absolute z-50 transform -translate-x-1/2 -translate-y-full",
         "animate-in fade-in zoom-in-95 duration-150"
@@ -221,6 +241,7 @@ export function SelectionPopup({
             <button
               onClick={() => setShowColorPicker(false)}
               className="p-1.5 rounded hover:bg-slate-700 text-slate-400"
+              aria-label="Torna alle azioni"
             >
               <X size={14} />
             </button>
@@ -233,16 +254,17 @@ export function SelectionPopup({
                   "w-7 h-7 rounded-full border-2 transition-transform hover:scale-110",
                   bg, border, hover
                 )}
-                title={`Evidenzia in ${name}`}
+                aria-label={`Evidenzia in ${name}`}
               />
             ))}
           </div>
         ) : (
           /* Main actions */
-          <div className="flex items-center">
+          <div role="toolbar" aria-label="Azioni testo selezionato" className="flex items-center">
             <button
               onClick={() => handleAction('highlight')}
-              className="p-2.5 hover:bg-slate-700 transition-colors flex items-center gap-1.5 text-sm"
+              className="p-2.5 hover:bg-slate-700 transition-colors flex items-center gap-1.5 text-sm focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:outline-none"
+              aria-label="Evidenzia testo (H)"
               title="Evidenzia (H)"
             >
               <Highlighter size={16} className="text-yellow-400" />
@@ -250,7 +272,8 @@ export function SelectionPopup({
             <div className="w-px h-5 bg-slate-700" />
             <button
               onClick={() => handleAction('note')}
-              className="p-2.5 hover:bg-slate-700 transition-colors flex items-center gap-1.5 text-sm"
+              className="p-2.5 hover:bg-slate-700 transition-colors flex items-center gap-1.5 text-sm focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:outline-none"
+              aria-label="Aggiungi nota (N)"
               title="Aggiungi nota (N)"
             >
               <StickyNote size={16} className="text-blue-400" />
@@ -258,7 +281,8 @@ export function SelectionPopup({
             <div className="w-px h-5 bg-slate-700" />
             <button
               onClick={() => handleAction('copy')}
-              className="p-2.5 hover:bg-slate-700 transition-colors flex items-center gap-1.5 text-sm"
+              className="p-2.5 hover:bg-slate-700 transition-colors flex items-center gap-1.5 text-sm focus-visible:ring-2 focus-visible:ring-green-400 focus-visible:outline-none"
+              aria-label="Copia testo selezionato (Cmd+C)"
               title="Copia (Cmd+C)"
             >
               <Copy size={16} className="text-green-400" />
@@ -268,13 +292,23 @@ export function SelectionPopup({
                 <div className="w-px h-5 bg-slate-700" />
                 <button
                   onClick={() => handleAction('search')}
-                  className="p-2.5 hover:bg-slate-700 transition-colors flex items-center gap-1.5 text-sm"
+                  className="p-2.5 hover:bg-slate-700 transition-colors flex items-center gap-1.5 text-sm focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none"
+                  aria-label="Cerca testo selezionato"
                   title="Cerca"
                 >
                   <Search size={16} className="text-purple-400" />
                 </button>
               </>
             )}
+            <div className="w-px h-5 bg-slate-700" />
+            <button
+              onClick={() => handleAction('merlt')}
+              className="p-2.5 hover:bg-slate-700 transition-colors flex items-center gap-1.5 text-sm focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:outline-none"
+              aria-label="Chiedi a MERL-T"
+              title="Chiedi a MERL-T"
+            >
+              <Brain size={16} className="text-indigo-400" />
+            </button>
           </div>
         )}
       </div>

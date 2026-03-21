@@ -1,13 +1,15 @@
 /**
  * ArticleToolbar - Extracted toolbar from ArticleTabContent.
- * Provides quick actions: quick norms, notes, highlights, copy, more menu.
+ * Provides quick actions: quick norms, notes, highlights, copy, version search, compare, more menu.
+ *
+ * Sprint UX: "Cerca versione" and "Confronta con" promoted from more menu to primary buttons.
+ * More menu keeps: Dossier, Condividi, Esporta.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Zap, StickyNote, Highlighter, Copy, MoreHorizontal,
-  FolderPlus, Share2, Download, Clock, GitCompare,
-  PanelRightOpen
+  FolderPlus, Share2, Download, Clock, GitCompare, PanelRightOpen,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { PluginSlot } from '../../../lib/plugins/PluginSlot';
@@ -68,6 +70,11 @@ export function ArticleToolbar({
 }: ArticleToolbarProps) {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
 
+  const pluginProps = useMemo(
+    () => ({ urn, articleId, tipo_atto, numero_atto, data_atto }),
+    [urn, articleId, tipo_atto, numero_atto, data_atto]
+  );
+
   // Close menu on Escape key
   useEffect(() => {
     if (!showMoreMenu) return;
@@ -80,10 +87,11 @@ export function ArticleToolbar({
 
   return (
     <div className="flex items-center gap-1">
-      {/* Primary buttons */}
+      {/* Core actions */}
       <button
         onClick={onAddToQuickNorms}
         className="p-1.5 rounded-md hover:bg-amber-50 dark:hover:bg-amber-900/20 text-slate-400 hover:text-amber-500 transition-colors"
+        aria-label="Aggiungi a norme rapide"
         title="Aggiungi a norme rapide"
       >
         <Zap size={16} />
@@ -95,6 +103,7 @@ export function ArticleToolbar({
             ? "bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400"
             : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-primary-500"
         )}
+        aria-label="Note personali"
         title="Note Personali"
       >
         <StickyNote size={16} />
@@ -113,6 +122,7 @@ export function ArticleToolbar({
             ? "bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400"
             : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-purple-500"
         )}
+        aria-label="Evidenzia testo"
         title="Evidenzia Testo"
       >
         <Highlighter size={16} />
@@ -128,6 +138,7 @@ export function ArticleToolbar({
         <button
           onClick={onToggleBrocardi}
           className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-indigo-500 transition-colors"
+          aria-label="Approfondimenti Brocardi"
           title="Approfondimenti Brocardi"
         >
           <PanelRightOpen size={16} />
@@ -137,21 +148,40 @@ export function ArticleToolbar({
       {/* Plugin Slot */}
       <PluginSlot
         name="article-toolbar"
-        props={{ urn, articleId, tipo_atto, numero_atto, data_atto }}
+        props={pluginProps}
         className="flex items-center gap-1"
       />
 
       <button
         onClick={onCopy}
         className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-emerald-500 transition-colors"
+        aria-label="Copia articolo"
         title="Copia"
       >
         <Copy size={16} />
       </button>
 
+      {/* Promoted from "more" menu */}
+      <button
+        onClick={onVersionSearch}
+        className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+        aria-label="Cerca versione"
+        title="Cerca versione..."
+      >
+        <Clock size={16} />
+      </button>
+      <button
+        onClick={onCompare}
+        className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+        aria-label="Confronta con..."
+        title="Confronta con..."
+      >
+        <GitCompare size={16} />
+      </button>
+
       <div className="w-px h-4 mx-1 bg-slate-200 dark:bg-slate-700" role="separator" />
 
-      {/* More menu */}
+      {/* More menu — only Dossier, Condividi, Esporta */}
       <div className="relative">
         <button
           onClick={() => setShowMoreMenu(!showMoreMenu)}
@@ -194,25 +224,6 @@ export function ArticleToolbar({
               >
                 <Download size={14} className="text-slate-400" />
                 Esporta...
-              </button>
-
-              <div className="border-t border-slate-200 dark:border-slate-700 my-1" />
-
-              <button
-                onClick={() => { onVersionSearch(); setShowMoreMenu(false); }}
-                role="menuitem"
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-              >
-                <Clock size={14} className="text-slate-400" />
-                Cerca versione...
-              </button>
-              <button
-                onClick={() => { onCompare(); setShowMoreMenu(false); }}
-                role="menuitem"
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
-              >
-                <GitCompare size={14} className="text-slate-400" />
-                Confronta con...
               </button>
             </div>
           </>

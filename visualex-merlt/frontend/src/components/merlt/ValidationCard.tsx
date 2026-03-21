@@ -196,8 +196,10 @@ export const ValidationCard = forwardRef(
     // Get labels based on item type
     const getTypeLabel = () => {
       if (item.type === 'entity') {
-        const entity = item.raw as { tipo: string };
-        return ENTITY_TYPE_LABELS[entity.tipo] || entity.tipo;
+        const raw = item.raw as unknown as Record<string, unknown>;
+        const tipo = typeof raw?.tipo === 'string' ? raw.tipo : undefined;
+        if (!tipo) return 'Entità';
+        return ENTITY_TYPE_LABELS[tipo] || tipo;
       } else {
         return RELATION_TYPE_LABELS[item.name] || item.name;
       }
@@ -269,11 +271,19 @@ export const ValidationCard = forwardRef(
         </div>
 
         {/* Header */}
-        <button
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => setExpanded(!expanded)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setExpanded(!expanded);
+            }
+          }}
           aria-expanded={expanded}
           aria-label={`${item.name} - ${expanded ? 'Comprimi' : 'Espandi'} dettagli`}
-          className="relative z-10 w-full flex items-start gap-3 p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset"
+          className="relative z-10 w-full flex items-start gap-3 p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset cursor-pointer"
         >
           {/* Selection checkbox */}
           {selectionMode && (
@@ -354,7 +364,7 @@ export const ValidationCard = forwardRef(
           ) : (
             <ChevronRight size={16} className="text-slate-400 mt-1 flex-shrink-0" aria-hidden="true" />
           )}
-        </button>
+        </div>
 
         {/* Expanded content */}
         <AnimatePresence>

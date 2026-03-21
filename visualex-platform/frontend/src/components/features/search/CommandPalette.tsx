@@ -60,12 +60,14 @@ export function CommandPalette({ isOpen, onClose, onSearch }: CommandPaletteProp
   useEffect(() => {
     if (!isOpen) {
       const timer = setTimeout(() => {
-        setStep('select_act');
-        setSelectedAct('');
-        setArticle('1');
-        setActNumber('');
-        setActDate('');
-        setInputValue('');
+        if (!isOpen) {
+          setStep('select_act');
+          setSelectedAct('');
+          setArticle('1');
+          setActNumber('');
+          setActDate('');
+          setInputValue('');
+        }
       }, 200);
       return () => clearTimeout(timer);
     }

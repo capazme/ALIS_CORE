@@ -286,6 +286,7 @@ export function ApiKeysSection() {
   };
 
   const handleRevoke = async (keyId: string) => {
+    if (!window.confirm('Revocare questa API key?')) return;
     setRevoking(keyId);
     try {
       await deleteApiKey(keyId);

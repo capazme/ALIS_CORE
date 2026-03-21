@@ -16,8 +16,18 @@ export function ProfilePageWrapper() {
 
   if (!user?.id) {
     return (
-      <div className="flex items-center justify-center min-h-full">
-        <p className="text-slate-500">Caricamento...</p>
+      <div className="min-h-full bg-slate-50 dark:bg-slate-950">
+        <div className="max-w-5xl mx-auto px-6 pt-6 pb-6">
+          <div className="animate-pulse space-y-6" aria-busy="true" aria-label="Caricamento profilo">
+            <div className="h-4 w-24 bg-slate-200 dark:bg-slate-800 rounded" />
+            <div className="h-48 bg-slate-200 dark:bg-slate-800 rounded-xl" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="h-64 bg-slate-200 dark:bg-slate-800 rounded-xl" />
+              <div className="h-64 bg-slate-200 dark:bg-slate-800 rounded-xl" />
+            </div>
+            <div className="h-48 bg-slate-200 dark:bg-slate-800 rounded-xl" />
+          </div>
+        </div>
       </div>
     );
   }

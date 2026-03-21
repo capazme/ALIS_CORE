@@ -293,14 +293,20 @@ function VoteHistoryItem({
         </div>
       ) : showUndo && onUndo ? (
         <button
-          onClick={() => onUndo(entry.id)}
+          onClick={() => {
+            // NOTE: Undo is client-only — the vote is NOT removed from the server.
+            // This only removes the entry from the local session history.
+            onUndo(entry.id);
+            // Inform the user about the limitation
+            alert('Voto rimosso localmente. Questa azione non è sincronizzata con il server.');
+          }}
           className={cn(
             'p-1.5 rounded-md text-slate-400 hover:text-red-500',
             'hover:bg-red-50 dark:hover:bg-red-900/20',
             'transition-colors',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'
           )}
-          title="Annulla voto"
+          title="Annulla voto (solo locale)"
           aria-label={`Annulla voto per ${entry.itemName}`}
         >
           <Undo2 size={14} aria-hidden="true" />

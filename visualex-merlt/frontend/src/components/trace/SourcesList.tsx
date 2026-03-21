@@ -82,7 +82,7 @@ export function SourcesList({ sources, validity, traceId, onSourceClick, classNa
 
         return (
           <button
-            key={source.sourceId || i}
+            key={source.sourceId || `source-${source.label}-${i}`}
             onClick={() => onSourceClick?.(source)}
             aria-label={`Fonte ${i + 1}: ${source.label} - ${VALIDITY_LABEL[status]}`}
             className={cn(

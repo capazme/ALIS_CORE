@@ -31,6 +31,7 @@ export function SearchPanel() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const abortControllerRef = useRef<AbortController | null>(null);
   const [loadingProgress, setLoadingProgress] = useState<{ loaded: number; total?: number } | null>(null);
   const {
     addWorkspaceTab, addNormaToTab, workspaceTabs, removeArticleFromNorma, removeTab,
@@ -64,20 +65,18 @@ export function SearchPanel() {
 
   const processResult = useCallback((result: ArticleData, versionDate?: string, isStreaming = false) => {
     if (result.error) {
-      console.error("Backend Error for item:", result.error);
+      setError(result.error);
       return;
     }
 
     const normaData = result.norma_data;
 
     if (!normaData) {
-      console.error("Received result without norma_data", result);
       return;
     }
 
     // Mark as historical if version_date was provided
     if (versionDate) {
-      console.log('📅 Processing with versionDate:', versionDate, 'norma data_versione:', normaData.data_versione);
       result.versionInfo = {
         isHistorical: true,
         requestedDate: versionDate,
@@ -145,10 +144,12 @@ export function SearchPanel() {
         };
       });
     }
-  }, [workspaceTabs, addNormaToTab, addWorkspaceTab, customTabLabel]);
+  }, [addNormaToTab, addWorkspaceTab, customTabLabel]);
 
   const handleSearch = useCallback(async (params: SearchParams) => {
-    console.log('🔍 SearchPanel handleSearch called with:', params);
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
     setIsLoading(true);
     setError(null);
     setResultsBuffer({}); // Clear buffer before new search
@@ -183,7 +184,8 @@ export function SearchPanel() {
       const response = await fetch('/stream_article_text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(params)
+        body: JSON.stringify(params),
+        signal
       });
 
       if (!response.ok) throw new Error('Errore nella richiesta');
@@ -207,8 +209,8 @@ export function SearchPanel() {
             try {
               const result = JSON.parse(line);
               processResult(result, params.version_date, true); // isStreaming = true
-            } catch (e) {
-              console.error("Error parsing line", line, e);
+            } catch {
+              // malformed line — skip
             }
           }
         }
@@ -219,8 +221,8 @@ export function SearchPanel() {
         try {
           const result = JSON.parse(buffer);
           processResult(result, params.version_date, true); // isStreaming = true
-        } catch (e) {
-          console.error("Error parsing final buffer", e);
+        } catch {
+          // malformed final buffer — skip
         }
       }
 
@@ -231,15 +233,16 @@ export function SearchPanel() {
         article: params.article,
         date: params.date,
         version: params.version,
-      }).catch(err => {
+      }).catch(() => {
         // Silently fail - history is not critical
-        console.debug('Failed to save search history:', err);
       });
 
       // Results buffer will be processed by useEffect below
 
     } catch (err: any) {
-      setError(err.message || "Si è verificato un errore.");
+      if (err?.name !== 'AbortError') {
+        setError(err.message || "Si è verificato un errore.");
+      }
     } finally {
       setIsLoading(false);
       setLoadingProgress(null); // Clear progress when done
@@ -249,15 +252,12 @@ export function SearchPanel() {
   // Process results buffer and create workspace tabs
   useEffect(() => {
     if (Object.keys(resultsBuffer).length > 0 && !isLoading) {
-      console.log('📦 Processing results buffer:', resultsBuffer);
-
       // Use custom label if provided (e.g., from dossier), otherwise generate default
       const useCustomLabel = customTabLabel && Object.keys(resultsBuffer).length > 0;
 
-      Object.entries(resultsBuffer).forEach(([key, group], index) => {
+      Object.entries(resultsBuffer).forEach(([_key, group], index) => {
         // For historical versions, always create a new tab
         const isHistorical = group.articles.some(a => a.versionInfo?.isHistorical);
-        console.log('🏷️ Processing group:', key, 'isHistorical:', isHistorical, 'versionDate:', group.versionDate);
 
         if (isHistorical) {
           // Create new tab with version date in label
@@ -265,7 +265,6 @@ export function SearchPanel() {
           const label = useCustomLabel && index === 0
             ? customTabLabel
             : `${group.norma.tipo_atto}${group.norma.numero_atto ? ` ${group.norma.numero_atto}` : ''}${versionDate}`;
-          console.log('➕ Creating historical tab with label:', label);
           addWorkspaceTab(label, group.norma, group.articles);
         } else {
           // Check if there's an existing tab with this norma (current version)
@@ -304,11 +303,14 @@ export function SearchPanel() {
     if (shareValue) {
       try {
         const decoded = JSON.parse(atob(shareValue));
-        if (decoded) {
+        if (decoded && typeof decoded === 'object' && typeof decoded.act_type === 'string') {
           handleSearch(decoded);
+        } else {
+          console.warn('Invalid share link payload');
+          setError('Link di condivisione non valido');
         }
-      } catch (e) {
-        console.error('Invalid share link', e);
+      } catch {
+        // malformed share link — ignore
       }
       const next = new URLSearchParams(searchParams);
       next.delete('share');
@@ -351,7 +353,6 @@ export function SearchPanel() {
       );
 
       duplicateTabs.forEach(tab => {
-        console.log('🗑️ Auto-switch: Removing duplicate tab', tab.id, tab.label);
         removeTab(tab.id);
       });
     }
@@ -393,8 +394,7 @@ export function SearchPanel() {
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       setPdfState({ isOpen: true, url, isLoading: false });
-    } catch (e) {
-      console.error(e);
+    } catch {
       setPdfState({ isOpen: false, url: null, isLoading: false });
       setError("Impossibile caricare il PDF.");
     }
@@ -643,6 +643,13 @@ export function SearchPanel() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Subtle loading bar for subsequent searches */}
+      {isLoading && hasTabs && (
+        <div className="fixed top-0 left-0 right-0 z-[200] h-0.5 bg-primary-100 dark:bg-primary-900/30 overflow-hidden">
+          <div className="h-full bg-primary-500 animate-[progressSlide_1.5s_ease-in-out_infinite]" style={{ width: '60%', animation: 'progressSlide 1.5s ease-in-out infinite' }} />
         </div>
       )}
 

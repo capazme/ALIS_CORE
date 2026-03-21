@@ -98,9 +98,16 @@ function DomainCell({ domain, stats, index }: DomainCellProps) {
   const hue = 220; // Blue base
   const saturation = 70 + intensity * 20;
   const lightness = 95 - intensity * 45; // Più scuro = più authority
+  const lightnessDark = 20 - intensity * 10; // Dark mode: più scuro
+
+  const isDark =
+    typeof document !== 'undefined' &&
+    document.documentElement.classList.contains('dark');
 
   const bgStyle = {
-    backgroundColor: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+    backgroundColor: isDark
+      ? `hsl(${hue}, ${saturation}%, ${Math.max(5, lightnessDark)}%)`
+      : `hsl(${hue}, ${saturation}%, ${lightness}%)`,
   };
 
   const tooltipContent = (
@@ -194,6 +201,29 @@ export function DomainHeatmap({ domains, className }: DomainHeatmapProps) {
   // Ordina domini per authority (decrescente)
   const sortedDomains = Object.entries(domains)
     .sort(([, a], [, b]) => b.authority - a.authority) as [LegalDomain, DomainStats][];
+
+  if (sortedDomains.length === 0) {
+    return (
+      <div
+        className={cn(
+          'rounded-xl border border-slate-200 dark:border-slate-700',
+          'bg-white dark:bg-slate-900 p-5',
+          className
+        )}
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <Globe size={18} className="text-slate-500" aria-hidden="true" />
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+            Authority per Dominio
+          </h3>
+        </div>
+        <div className="text-center py-8 text-slate-400">
+          <Globe size={32} className="mx-auto mb-2 opacity-50" aria-hidden="true" />
+          <p className="text-sm">Nessun dato di dominio disponibile</p>
+        </div>
+      </div>
+    );
+  }
 
   // Trova dominio più forte
   const topDomain = sortedDomains[0];

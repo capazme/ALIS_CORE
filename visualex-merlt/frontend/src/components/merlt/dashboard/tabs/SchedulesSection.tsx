@@ -172,6 +172,7 @@ export function SchedulesSection() {
   };
 
   const handleDelete = async (id: number) => {
+    if (!window.confirm('Eliminare questo schedule?')) return;
     try {
       await deleteSchedule(id);
       await fetchSchedules();

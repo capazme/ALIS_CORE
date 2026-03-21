@@ -38,10 +38,10 @@ const DICTIONARY_TERMS: Record<string, string> = {
 };
 
 const HIGHLIGHT_STYLES: Record<string, string> = {
-    yellow: 'background-color:#FEF3C7;color:#92400E;',
-    green: 'background-color:#D1FAE5;color:#065F46;',
-    red: 'background-color:#FEE2E2;color:#991B1B;',
-    blue: 'background-color:#DBEAFE;color:#1E3A8A;',
+    yellow: 'background-color:#FEF3C7 !important;color:#92400E !important;',
+    green: 'background-color:#D1FAE5 !important;color:#065F46 !important;',
+    red: 'background-color:#FEE2E2 !important;color:#991B1B !important;',
+    blue: 'background-color:#DBEAFE !important;color:#1E3A8A !important;',
 };
 
 export function ArticleTabContent({ data, onCrossReferenceNavigate, onOpenStudyMode }: ArticleTabContentProps) {
@@ -356,38 +356,8 @@ export function ArticleTabContent({ data, onCrossReferenceNavigate, onOpenStudyM
         const container = contentRef.current;
         if (!container) return;
 
-        // Click handler for citations - navigate to article
+        // Click handler for citations — show preview popup (navigation from popup button)
         const handleClick = (event: Event) => {
-            const target = event.target as HTMLElement;
-            const citationElement = target.closest('.citation-hover');
-            if (citationElement) {
-                const citationData = citationElement.getAttribute('data-citation');
-                if (citationData) {
-                    const parsed = deserializeCitation(citationData);
-                    if (parsed && onCrossReferenceNavigate) {
-                        // Navigate within same norma if possible
-                        if (parsed.act_type === norma_data.tipo_atto &&
-                            parsed.act_number === norma_data.numero_atto) {
-                            onCrossReferenceNavigate(parsed.article, norma_data);
-                        } else {
-                            // Open in new search
-                            triggerSearch({
-                                act_type: parsed.act_type,
-                                act_number: parsed.act_number || '',
-                                date: parsed.date || '',
-                                article: parsed.article,
-                                version: 'vigente',
-                                show_brocardi_info: true,
-                            });
-                        }
-                        hidePreview();
-                    }
-                }
-            }
-        };
-
-        // Hover handler for citations - show preview
-        const handleMouseEnter = (event: Event) => {
             const target = event.target as HTMLElement;
             const citationElement = target.closest('.citation-hover') as HTMLElement;
             if (citationElement) {
@@ -396,36 +366,19 @@ export function ArticleTabContent({ data, onCrossReferenceNavigate, onOpenStudyM
                 if (citationData && cacheKey) {
                     const parsed = deserializeCitation(citationData);
                     if (parsed) {
+                        event.preventDefault();
                         showPreview(citationElement, parsed, cacheKey);
                     }
                 }
             }
         };
 
-        // Mouse leave handler
-        const handleMouseLeave = (event: Event) => {
-            const target = event.target as HTMLElement;
-            const citationElement = target.closest('.citation-hover');
-            if (citationElement) {
-                // Delay hide to allow moving to popup
-                setTimeout(() => {
-                    if (!isHoveringPopupRef.current) {
-                        hidePreview();
-                    }
-                }, 100);
-            }
-        };
-
         container.addEventListener('click', handleClick);
-        container.addEventListener('mouseenter', handleMouseEnter, true);
-        container.addEventListener('mouseleave', handleMouseLeave, true);
 
         return () => {
             container.removeEventListener('click', handleClick);
-            container.removeEventListener('mouseenter', handleMouseEnter, true);
-            container.removeEventListener('mouseleave', handleMouseLeave, true);
         };
-    }, [onCrossReferenceNavigate, norma_data, triggerSearch, showPreview, hidePreview]);
+    }, [showPreview]);
 
     // Handler for compare action from toolbar
     const handleCompare = useCallback(() => {
@@ -582,7 +535,7 @@ export function ArticleTabContent({ data, onCrossReferenceNavigate, onOpenStudyM
 
             {/* Notes panel (study feature) */}
             {(showNotes || itemAnnotations.length > 0) && (
-                <div className="hidden md:block mb-4 bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-800/20 rounded-lg p-4 transition-all">
+                <div className="mb-4 bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-800/20 rounded-lg p-4 transition-all">
                     <h6 className="text-xs font-bold text-amber-700 dark:text-amber-500 uppercase mb-3 flex items-center gap-2">
                         <StickyNote size={14} /> Note Personali
                     </h6>
@@ -625,7 +578,7 @@ export function ArticleTabContent({ data, onCrossReferenceNavigate, onOpenStudyM
             {/* Article Content with Prose Styling + Minimap + Sidebar + Brocardi (inside contentRef for citation handlers) */}
             <div className="relative group/content flex gap-2" ref={contentRef}>
                 {/* Minimap */}
-                <div className="hidden lg:block sticky top-16 self-start ml-1">
+                <div className="hidden md:block sticky top-16 self-start ml-1">
                     <ArticleTextMinimap
                         contentRef={contentRef}
                         highlights={articleHighlights.map(h => ({ text: h.text, color: h.color }))}
@@ -848,10 +801,7 @@ export function ArticleTabContent({ data, onCrossReferenceNavigate, onOpenStudyM
                 onClose={hidePreview}
                 onOpenInTab={handleOpenCitationInTab}
                 onMouseEnter={() => { isHoveringPopupRef.current = true; }}
-                onMouseLeave={() => {
-                    isHoveringPopupRef.current = false;
-                    hidePreview();
-                }}
+                onMouseLeave={() => { isHoveringPopupRef.current = false; }}
             />
             </div>{/* end main content area */}
 

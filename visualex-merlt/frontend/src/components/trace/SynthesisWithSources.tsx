@@ -56,7 +56,7 @@ export function SynthesisWithSources({
             aria-label={`Fonte ${idx + 1}: ${source.label}`}
             className={cn(
               "inline-flex items-center justify-center",
-              "w-5 h-5 rounded-full text-[10px] font-bold",
+              "w-7 h-7 rounded-full text-[11px] font-bold min-w-[28px] min-h-[28px]",
               "align-super -translate-y-0.5",
               "transition-all duration-150 cursor-pointer",
               "hover:scale-110 hover:shadow-md",

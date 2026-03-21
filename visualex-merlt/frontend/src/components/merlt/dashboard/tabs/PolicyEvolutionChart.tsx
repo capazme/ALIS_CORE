@@ -39,8 +39,6 @@ function ConfidenceTimeSeries({ data }: { data: TimeSeriesPoint[] }) {
     );
   }
 
-  const maxQueries = Math.max(...data.map((d: TimeSeriesPoint) => d.query_count), 1);
-
   return (
     <div className="space-y-1">
       {data.slice(-20).map((point: TimeSeriesPoint) => {

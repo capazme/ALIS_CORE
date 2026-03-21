@@ -26,6 +26,7 @@ import {
   MessageSquarePlus,
 } from 'lucide-react';
 import type { SourceResolution, ExpertTraceEntry, ValiditySummary, ValidityResult } from '../../types/trace';
+import { EXPERT_CONFIG as PIPELINE_EXPERT_CONFIG } from '../../types/pipeline';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -47,28 +48,42 @@ interface GroupedSource {
 
 // ─── Config ─────────────────────────────────────────────────────────────────
 
-const EXPERT_CONFIG: Record<string, { label: string; icon: typeof BookOpen; color: string }> = {
-  literal: {
-    label: 'Letterale',
-    icon: BookOpen,
-    color: 'text-blue-600 dark:text-blue-400',
-  },
-  systemic: {
-    label: 'Sistematico',
-    icon: TrendingUp,
-    color: 'text-purple-600 dark:text-purple-400',
-  },
-  principles: {
-    label: 'Principi',
-    icon: Scale,
-    color: 'text-amber-600 dark:text-amber-400',
-  },
-  precedent: {
-    label: 'Giurisprudenza',
-    icon: Gavel,
-    color: 'text-emerald-600 dark:text-emerald-400',
-  },
+const ICON_MAP: Record<string, typeof BookOpen> = {
+  BookOpen,
+  TrendingUp,
+  Scale,
+  Gavel,
 };
+
+const COLOR_CLASS_MAP: Record<string, string> = {
+  '#3b82f6': 'text-blue-600 dark:text-blue-400',
+  '#8b5cf6': 'text-purple-600 dark:text-purple-400',
+  '#f59e0b': 'text-amber-600 dark:text-amber-400',
+  '#10b981': 'text-emerald-600 dark:text-emerald-400',
+};
+
+// Build expert display config from canonical PIPELINE_EXPERT_CONFIG
+// This maps both full IDs (e.g. "literal_interpreter") and short aliases (e.g. "literal")
+const EXPERT_CONFIG: Record<string, { label: string; icon: typeof BookOpen; color: string }> = (() => {
+  const shortAlias: Record<string, string> = {
+    literal_interpreter: 'literal',
+    systemic_teleological: 'systemic',
+    principles_balancer: 'principles',
+    precedent_analyst: 'precedent',
+  };
+  const result: Record<string, { label: string; icon: typeof BookOpen; color: string }> = {};
+  for (const [id, cfg] of Object.entries(PIPELINE_EXPERT_CONFIG)) {
+    const entry = {
+      label: cfg.displayName,
+      icon: ICON_MAP[cfg.icon] || BookOpen,
+      color: COLOR_CLASS_MAP[cfg.color] || 'text-slate-600 dark:text-slate-400',
+    };
+    result[id] = entry;
+    const alias = shortAlias[id];
+    if (alias) result[alias] = entry;
+  }
+  return result;
+})();
 
 const SOURCE_TYPE_BADGES: Record<SourceType, { label: string; bg: string; text: string }> = {
   norma: {
@@ -224,7 +239,7 @@ export function SourcesUsedPanel({
   onRateSource,
   onSuggestMissing,
 }: SourcesUsedPanelProps) {
-  const [expandedExperts, setExpandedExperts] = useState<Set<string>>(new Set(['literal', 'systemic', 'principles', 'precedent']));
+  const [expandedExperts, setExpandedExperts] = useState(new Set(['literal', 'systemic', 'principles', 'precedent']) as Set<string>);
   const [showMissingInput, setShowMissingInput] = useState(false);
   const [missingUrn, setMissingUrn] = useState('');
 
@@ -264,7 +279,7 @@ export function SourcesUsedPanel({
   }, [sources, experts, validityMap]);
 
   const toggleExpert = useCallback((expertId: string) => {
-    setExpandedExperts((prev) => {
+    setExpandedExperts((prev: Set<string>) => {
       const next = new Set(prev);
       if (next.has(expertId)) {
         next.delete(expertId);
@@ -353,7 +368,7 @@ export function SourcesUsedPanel({
                   className="overflow-hidden"
                 >
                   <div className="space-y-1.5 pl-6 pt-1">
-                    {expertSources.map((gs) => (
+                    {expertSources.map((gs: GroupedSource) => (
                       <SourceCard
                         key={gs.source.sourceId}
                         grouped={gs}

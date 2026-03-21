@@ -364,6 +364,7 @@ const NODE_POSITIONS: Record<string, { x: number; y: number }> = {
   // RLCF (bottom-right)
   gating: { x: 560, y: 420 },
   traversal: { x: 380, y: 490 },
+  authority: { x: 700, y: 420 },
 };
 
 // =============================================================================

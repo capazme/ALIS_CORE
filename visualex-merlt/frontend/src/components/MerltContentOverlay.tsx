@@ -36,11 +36,14 @@ export function MerltContentOverlay({ urn, articleId, contentRef }: Props): Reac
     if (!contentRef.current) return '';
 
     const text = contentRef.current.innerText || contentRef.current.textContent || '';
+    const startOff = selection?.startOffset ?? 0;
+    const endOff = selection?.endOffset ?? 0;
 
-    // Return surrounding text (up to 500 chars before and after selection)
-    // In a real implementation, you'd use startOffset/endOffset to find exact position
-    return text.substring(0, 1000);
-  }, [contentRef]);
+    // Return up to 500 chars before and after the selection
+    const contextStart = Math.max(0, startOff - 500);
+    const contextEnd = Math.min(text.length, endOff + 500);
+    return text.substring(contextStart, contextEnd);
+  }, [contentRef, selection?.startOffset, selection?.endOffset]);
 
   // Listen to article:text-selected events
   useEffect(() => {
@@ -48,23 +51,37 @@ export function MerltContentOverlay({ urn, articleId, contentRef }: Props): Reac
       // Only handle events for current article
       if (data.urn !== urn) return;
 
-      // Check if text is long enough to be a citation
-      if (data.text.length < 5) {
+      // Minimum length + multi-pattern confidence scoring
+      if (data.text.length < 15) {
         setSelection(null);
         return;
       }
 
-      // Simple heuristic: check if text contains citation keywords
-      const citationKeywords = /\b(art\.?|articolo|comma|legge|decreto|codice)\b/i;
-      if (!citationKeywords.test(data.text)) {
+      // Multi-pattern confidence scoring instead of single regex
+      let confidence = 0;
+      const patterns: [RegExp, number][] = [
+        [/\b(art\.?\s*\d+|articolo\s+\d+)/i, 0.4],
+        [/\b(comma\s+\d+|lett\.\s*[a-z])/i, 0.3],
+        [/\b(legge|decreto|d\.?l\.?g?s?\.?|d\.?p\.?r\.?|codice)\b/i, 0.3],
+        [/\b(c\.c\.|c\.p\.|c\.p\.c\.|c\.p\.p\.)/i, 0.3],
+        [/\b(n\.\s*\d+\/\d{4}|\d+\/\d{4})/i, 0.2],
+        [/\b(direttiva|regolamento)\s+(UE|CE)/i, 0.2],
+      ];
+
+      for (const [pattern, score] of patterns) {
+        if (pattern.test(data.text)) confidence += score;
+      }
+
+      if (confidence < 0.3) {
         setSelection(null);
         return;
       }
 
       // Calculate position from event data or Range API
       let position = { top: 100, left: 200 };
-      if (data.position) {
-        position = data.position;
+      const pos = data.position as { top?: number; left?: number } | undefined;
+      if (pos && typeof pos.top === 'number' && typeof pos.left === 'number') {
+        position = { top: pos.top, left: pos.left };
       } else if (contentRef.current) {
         const sel = window.getSelection();
         if (sel && sel.rangeCount > 0) {
@@ -162,9 +179,15 @@ export function MerltContentOverlay({ urn, articleId, contentRef }: Props): Reac
     }
   }, [selection, urn, userId]);
 
-  // Don't render anything if no selection
+  // When no selection, show discrete activity dot
   if (!selection) {
-    return null;
+    return (
+      <div
+        className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse opacity-60"
+        title="MERL-T attivo"
+        aria-label="MERL-T è attivo su questo articolo"
+      />
+    );
   }
 
   // High-confidence citation: show quick "Corretto" button
