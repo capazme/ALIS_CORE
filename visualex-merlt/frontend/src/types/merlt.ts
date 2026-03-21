@@ -184,6 +184,10 @@ export interface ExpertQueryResponse {
   experts_used: string[];
   confidence: number;
   execution_time_ms: number;
+  /** Full pipeline trace, present only when include_trace=true */
+  pipeline_trace?: unknown;
+  /** Pipeline performance metrics, present only when include_trace=true */
+  pipeline_metrics?: unknown;
 }
 
 export interface InlineFeedbackRequest {
@@ -204,7 +208,8 @@ export interface DetailedFeedbackRequest {
 export interface SourceFeedbackRequest {
   trace_id: string;
   user_id: string;
-  source_urn: string;
+  /** Field name matches what the backend expects: source_id (not source_urn) */
+  source_id: string;
   rating: 1 | 2 | 3 | 4 | 5;
   comment?: string;
 }
@@ -401,24 +406,20 @@ export interface AuthorityBreakdown {
 /**
  * Authority utente nel sistema RLCF.
  *
+ * Corrisponde a AuthorityResponseModel dal backend (GET /auth/authority/{user_id}).
  * L'authority determina il peso del voto:
  * - Voto di utente con authority 0.8 vale 0.8
  * - Threshold approvazione: Σ(weighted_votes) >= 2.0
  */
 export interface UserAuthority {
+  /** Operazione riuscita */
+  success: boolean;
+  /** ID utente */
   user_id: string;
-  /** Authority globale calcolata [0-1] */
-  authority_score: number;
-  /** Breakdown della formula RLCF */
-  authority_breakdown?: AuthorityBreakdown;
-  /** Authority per dominio giuridico (civile, penale, amministrativo, etc.) */
-  domain_authorities: Record<string, number>;
-  /** Totale contributi (entità + relazioni proposte) */
-  total_contributions: number;
-  /** Contributi approvati dalla community */
-  approved_contributions: number;
-  /** Ultimo aggiornamento ISO */
-  last_updated: string;
+  /** Authority score [0-1], null se utente non trovato in cache */
+  authority: number | null;
+  /** True se l'utente è stato trovato in cache (altrimenti non ha ancora fatto sync) */
+  found: boolean;
 }
 
 // =============================================================================
@@ -664,8 +665,8 @@ export interface ProfileResponse {
     /** Progresso verso prossimo tier [0-100] */
     progress_to_next: number;
   };
-  /** Authority e stats per ciascuno degli 8 domini */
-  domains: Record<LegalDomain, DomainStats>;
+  /** Authority e stats per dominio — partial dict: non tutti i domini sono sempre presenti */
+  domains: Partial<Record<LegalDomain, DomainStats>>;
   /** Statistiche globali contributi */
   stats: {
     total_contributions: number;
@@ -724,14 +725,14 @@ export interface SubgraphEdge {
 
 /**
  * Metadati della query subgraph.
+ * Corrisponde a SubgraphMetadata Pydantic model in graph_router.py.
  */
 export interface SubgraphMetadata {
-  root_urn: string;
-  depth: number;
-  query_time_ms: number;
-  filtered_by_types: boolean;
-  entity_types_filter?: string[];
-  relation_types_filter?: string[];
+  total_nodes: number;
+  total_edges: number;
+  depth_reached: number;
+  root_node_id: string;
+  query_time_ms?: number | null;
 }
 
 /**
@@ -1141,38 +1142,6 @@ export interface LoadDossierTrainingResponse {
   buffer_size: number;
   training_ready: boolean;
   message: string;
-}
-
-// =============================================================================
-// NER TRAINING FEEDBACK (Citation Recognition)
-// =============================================================================
-
-/**
- * Dati di una citazione normativa parsed automaticamente.
- */
-export interface ParsedCitationData {
-  /** Tipo atto (es. "codice civile", "legge") */
-  actType?: string;
-  /** Numero atto (es. "241") */
-  actNumber?: string;
-  /** Anno o data (es. "1990", "1990-08-07") */
-  date?: string;
-  /** Articoli citati (es. ["3", "4", "5"]) */
-  articles?: string[];
-}
-
-/**
- * Riferimento normativo corretto fornito dall'utente.
- */
-export interface CorrectNormReference {
-  /** Tipo atto normalizzato */
-  tipo_atto: string;
-  /** Numero atto (opzionale) */
-  numero_atto?: string;
-  /** Anno (opzionale) */
-  anno?: string;
-  /** Articoli citati */
-  articoli: string[];
 }
 
 // =============================================================================

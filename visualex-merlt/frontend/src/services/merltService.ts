@@ -78,6 +78,10 @@ import type {
 
 const MERLT_PREFIX = '/merlt';  // apiClient adds /api prefix; Vite proxy rewrites /api/merlt/* to /api/v1/* on MERL-T backend (port 8000)
 
+// NOTE: Frontend enforces MIN_QUERY_LENGTH=10 for UX, but the backend accepts queries
+// with min_length=5. If the threshold needs to change, update both here and in the UI.
+export const MIN_QUERY_LENGTH = 10;
+
 // =============================================================================
 // EXPERT SYSTEM (Q&A)
 // =============================================================================
@@ -138,7 +142,7 @@ export async function submitDetailedFeedback(
 /**
  * Invia feedback su una singola fonte citata nella risposta.
  *
- * @param data - Feedback con source_urn e rating
+ * @param data - Feedback con source_id e rating
  */
 export async function submitSourceFeedback(
   data: SourceFeedbackRequest
@@ -146,7 +150,7 @@ export async function submitSourceFeedback(
   return post(`${MERLT_PREFIX}/experts/feedback/source`, {
     trace_id: data.trace_id,
     user_id: data.user_id,
-    source_id: data.source_urn,
+    source_id: data.source_id,
     relevance: data.rating,
   });
 }
@@ -243,7 +247,9 @@ export async function checkArticleInGraph(
   return {
     exists: response.in_graph,
     node_id: response.article_urn || undefined,
-    pending_validation: false,  // TODO: backend should return this
+    // enrichment_router does not track pending_validation directly;
+    // has_entities signals enrichment was attempted at least once
+    pending_validation: false,
     entity_count: response.node_count,
   };
 }
@@ -354,7 +360,13 @@ export function requestLiveEnrichmentStreaming(
 
   // Use the API base URL for SSE
   const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
-  const url = `${API_BASE_URL}${MERLT_PREFIX}/enrichment/live/stream?${params}`;
+  let url = `${API_BASE_URL}${MERLT_PREFIX}/enrichment/live/stream?${params}`;
+
+  // EventSource doesn't support custom headers — append JWT as query param
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    url = `${url}&token=${encodeURIComponent(token)}`;
+  }
 
   const eventSource = new EventSource(url);
 
@@ -635,6 +647,9 @@ export async function proposeRelation(data: {
 /**
  * Recupera l'authority score di un utente.
  *
+ * Endpoint: GET /auth/authority/{user_id} (auth_api.py)
+ * Response: { success, user_id, authority: float|null, found }
+ *
  * L'authority determina il peso dei voti nelle validazioni.
  * Si basa su:
  * - Contributi validati (entità/relazioni approvate)
@@ -642,7 +657,7 @@ export async function proposeRelation(data: {
  * - Accuratezza dei voti precedenti
  */
 export async function getUserAuthority(user_id: string): Promise<UserAuthority> {
-  return get<UserAuthority>(`${MERLT_PREFIX}/authority/${user_id}`);
+  return get<UserAuthority>(`/auth/authority/${user_id}`);
 }
 
 /**
@@ -889,13 +904,26 @@ export async function getOpenIssues(
 /**
  * Recupera le entità associate a un articolo.
  *
+ * Backend returns: { article_urn, entities: [{ entity_id, entity_type, entity_text,
+ *   validation_status, approval_score, relation_type }] }
+ *
  * @param articleUrn - URN dell'articolo
  * @param validationStatus - Filtro opzionale per stato validazione
  */
 export async function getArticleEntities(
   articleUrn: string,
   validationStatus?: string
-): Promise<{ entities: Array<{ id: string; name: string; type: string; confidence: number; position?: { start: number; end: number } }> }> {
+): Promise<{
+  article_urn: string;
+  entities: Array<{
+    entity_id: string;
+    entity_type: string;
+    entity_text: string;
+    validation_status: string;
+    approval_score: number;
+    relation_type?: string;
+  }>;
+}> {
   const params = new URLSearchParams({ article_urn: articleUrn });
   if (validationStatus) params.set('validation_status', validationStatus);
   return get(`${MERLT_PREFIX}/graph/article-entities?${params}`);
@@ -931,6 +959,10 @@ export async function getNodeDetails(node_id: string): Promise<NodeDetails> {
 
 /**
  * Recupera il sottografo locale intorno a un articolo.
+ *
+ * Wrapper semplificato rispetto a `getSubgraph`: accetta solo article_urn e depth
+ * e restituisce `GraphData` (formato legacy per MerltGraphView). Usa `getSubgraph`
+ * quando serve il formato `SubgraphResponse` con metadati completi per GraphCanvas.
  *
  * @param article_urn - URN dell'articolo
  * @param depth - Profondità di traversal (default 2)
@@ -1072,12 +1104,19 @@ export async function exportCitations(
  * Rewrites the backend download URL through the frontend proxy path
  * and initiates the download without popup blockers.
  *
- * @param downloadUrl - URL from exportCitations response (e.g. "/api/v1/citations/download/...")
+ * Backend returns URLs like "/api/v1/citations/download/...".
+ * The Vite proxy maps /api/merlt/* → backend /api/v1/*, so we strip any
+ * known backend prefix and prepend the frontend MERLT_PREFIX instead.
+ *
+ * @param downloadUrl - URL from exportCitations response
  * @param filename - Suggested filename for the download
  */
 export function downloadCitationFile(downloadUrl: string, filename: string = 'citations'): void {
   const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
-  const downloadPath = downloadUrl.replace('/api/v1/', '/merlt/');
+  // Strip any backend prefix (e.g. "/api/v1/", "/v1/", "/api/") then prepend our proxy prefix
+  const backendPrefixRe = /^\/?(?:api\/v\d+|v\d+|api)\//;
+  const stripped = downloadUrl.replace(backendPrefixRe, '');
+  const downloadPath = `${MERLT_PREFIX}/${stripped}`;
   triggerFileDownload(`${API_BASE_URL}${downloadPath}`, filename);
 }
 

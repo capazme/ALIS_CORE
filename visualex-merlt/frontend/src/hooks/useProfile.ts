@@ -12,58 +12,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getUserProfile } from '../services/merltService';
-import type { ProfileResponse, AuthorityTier, LegalDomain, DomainStats } from '../types/merlt';
-
-// =============================================================================
-// TIER UTILITIES
-// =============================================================================
-
-/**
- * Thresholds per i tier RLCF (allineati con backend).
- */
-const TIER_THRESHOLDS: Record<AuthorityTier, { min: number; max: number }> = {
-  novizio: { min: 0, max: 0.4 },
-  contributore: { min: 0.4, max: 0.6 },
-  esperto: { min: 0.6, max: 0.8 },
-  autorita: { min: 0.8, max: 1.0 },
-};
-
-/**
- * Determina il tier dall'authority score.
- */
-export function getTierFromScore(score: number): AuthorityTier {
-  if (score >= 0.8) return 'autorita';
-  if (score >= 0.6) return 'esperto';
-  if (score >= 0.4) return 'contributore';
-  return 'novizio';
-}
-
-/**
- * Calcola il progresso verso il prossimo tier.
- */
-export function getProgressToNextTier(score: number): {
-  progress: number;
-  nextThreshold: number;
-  nextTier: AuthorityTier | null;
-} {
-  const currentTier = getTierFromScore(score);
-  const { max } = TIER_THRESHOLDS[currentTier];
-
-  if (currentTier === 'autorita') {
-    return { progress: 100, nextThreshold: 1.0, nextTier: null };
-  }
-
-  const { min } = TIER_THRESHOLDS[currentTier];
-  const tierRange = max - min;
-  const positionInTier = score - min;
-  const progress = Math.min(100, Math.max(0, (positionInTier / tierRange) * 100));
-
-  const tierOrder: AuthorityTier[] = ['novizio', 'contributore', 'esperto', 'autorita'];
-  const currentIndex = tierOrder.indexOf(currentTier);
-  const nextTier = tierOrder[currentIndex + 1] || null;
-
-  return { progress, nextThreshold: max, nextTier };
-}
+import type { ProfileResponse, LegalDomain, DomainStats } from '../types/merlt';
 
 // =============================================================================
 // HOOK STATE
@@ -146,11 +95,16 @@ export function useProfile(
   }, [fetchProfile, autoFetch, userId]);
 
   /**
-   * Computed: progress info.
+   * Computed: progress info — sourced directly from backend authority data.
    */
   const progressInfo = useMemo(() => {
     if (!state.profile) return null;
-    return getProgressToNextTier(state.profile.authority.score);
+    const { tier, progress_to_next, next_tier_threshold } = state.profile.authority;
+    return {
+      progress: progress_to_next,
+      nextThreshold: next_tier_threshold,
+      nextTier: tier === 'autorita' ? null : tier,
+    };
   }, [state.profile]);
 
   /**
@@ -190,9 +144,6 @@ export function useProfile(
     sortedDomains,
     globalSuccessRate,
 
-    // Utilities
-    getTierFromScore,
-    getProgressToNextTier,
   };
 }
 

@@ -19,8 +19,9 @@ let websocket: WebSocket | null = null;
 export async function initializeMerltServices(cfg: MerltConfig): Promise<void> {
   config = cfg;
 
-  // Connect to MERLT WebSocket for real-time updates
-  const merltWsUrl = cfg.apiBaseUrl.replace(/^http/, 'ws') + '/merlt/ws';
+  // Connect to MERLT WebSocket via proxy (same host as frontend)
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const merltWsUrl = `${wsProtocol}//${window.location.host}/api/merlt/ws`;
 
   try {
     const token = await cfg.getAuthToken();
@@ -32,8 +33,12 @@ export async function initializeMerltServices(cfg: MerltConfig): Promise<void> {
       };
 
       websocket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        handleMerltMessage(data);
+        try {
+          const data = JSON.parse(event.data) as { type: string; payload: unknown };
+          handleMerltMessage(data);
+        } catch {
+          // Ignore malformed messages (e.g., keepalive text)
+        }
       };
 
       websocket.onerror = (error) => {

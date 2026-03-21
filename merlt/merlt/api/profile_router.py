@@ -14,13 +14,13 @@ Endpoint:
 
 import structlog
 from typing import Dict, List, Optional, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, HTTPException, Query, status, Depends
+from fastapi import APIRouter, HTTPException, Query, status, Depends, Response
 from sqlalchemy import select, func, and_, or_, case
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from merlt.api.auth import verify_api_key, require_role
+from merlt.api.auth import verify_api_key, require_role, get_current_user_id
 from merlt.experts.models import ApiKey
 from merlt.api.models.profile_models import (
     FullProfileResponse,
@@ -392,7 +392,7 @@ async def get_recent_activity(
                 item_name=entity.entity_text[:50] if entity.entity_text else "Entità",
                 item_type="entity",
                 outcome=entity.validation_status or "pending",
-                timestamp=entity.created_at or datetime.now(),
+                timestamp=entity.created_at or datetime.now(timezone.utc),
                 domain=normalize_domain(entity.ambito),
                 item_id=entity.entity_id,
             )
@@ -414,7 +414,7 @@ async def get_recent_activity(
                 item_name=f"{rel.relation_type} → {rel.target_entity_id[:30] if rel.target_entity_id else '...'}",
                 item_type="relation",
                 outcome=rel.validation_status or "pending",
-                timestamp=rel.created_at or datetime.now(),
+                timestamp=rel.created_at or datetime.now(timezone.utc),
                 item_id=rel.relation_id,
             )
         )
@@ -446,7 +446,7 @@ async def get_recent_activity(
                 item_name=entity.entity_text[:50] if entity.entity_text else "Entità",
                 item_type="entity",
                 outcome=entity.validation_status or "pending",
-                timestamp=vote.created_at or datetime.now(),
+                timestamp=vote.created_at or datetime.now(timezone.utc),
                 track_record_delta=delta,
                 domain=normalize_domain(vote.legal_domain or entity.ambito),
                 item_id=entity.entity_id,
@@ -478,7 +478,7 @@ async def get_recent_activity(
                 item_name=f"{rel.relation_type}",
                 item_type="relation",
                 outcome=rel.validation_status or "pending",
-                timestamp=vote.created_at or datetime.now(),
+                timestamp=vote.created_at or datetime.now(timezone.utc),
                 track_record_delta=delta,
                 domain=normalize_domain(vote.legal_domain),
                 item_id=rel.relation_id,
@@ -588,8 +588,11 @@ async def get_full_profile(
     user_id: str = Query(..., description="User ID from auth context"),
     session: AsyncSession = Depends(get_db_session_dependency),
     api_key: ApiKey = Depends(verify_api_key),
+    jwt_user_id: Optional[str] = Depends(get_current_user_id),
 ) -> FullProfileResponse:
     """Ritorna profilo completo utente."""
+    if jwt_user_id and jwt_user_id != user_id and api_key is None:
+        raise HTTPException(status_code=403, detail="Cannot access another user's profile")
     log.info("API: get_full_profile", user_id=user_id)
 
     try:
@@ -648,8 +651,8 @@ async def get_full_profile(
             domains={k: v for k, v in domains.items()},  # Convert to dict
             stats=stats,
             recent_activity=recent_activity,
-            joined_at=datetime.now().isoformat(),
-            last_updated=datetime.now().isoformat(),
+            joined_at=None,
+            last_updated=None,
         )
 
         log.info(
@@ -690,7 +693,7 @@ L'authority per dominio è calcolata come:
     """,
 )
 async def get_domain_authority(
-    user_id: str = "current",
+    user_id: str = Query(..., description="User ID from auth context"),
     session: AsyncSession = Depends(get_db_session_dependency),
     api_key: ApiKey = Depends(verify_api_key),
 ) -> DomainAuthorityResponse:
@@ -728,7 +731,7 @@ Accuracy rate = votes_correct / votes_cast
     """,
 )
 async def get_detailed_stats(
-    user_id: str = "current",
+    user_id: str = Query(..., description="User ID from auth context"),
     session: AsyncSession = Depends(get_db_session_dependency),
     api_key: ApiKey = Depends(verify_api_key),
 ) -> DetailedContributionStats:
@@ -781,7 +784,8 @@ Questo aggiornamento impatta il **Baseline (B_u)** dell'authority:
 )
 async def update_qualification(
     request: UpdateQualificationRequest,
-    user_id: str = "current",
+    response: Response,
+    user_id: str = Query(..., description="User ID from auth context"),
     session: AsyncSession = Depends(get_db_session_dependency),
     api_key: ApiKey = Depends(verify_api_key),
 ) -> FullProfileResponse:
@@ -795,8 +799,11 @@ async def update_qualification(
     )
 
     try:
-        # TODO: Update PostgreSQL rlcf_dev.users table when users table exists
-        # Per ora calcoliamo il nuovo baseline dalla qualifica e ricarica il profilo
+        log.warning(
+            "update_qualification: data not persisted - users table not yet implemented",
+            user_id=user_id,
+        )
+        response.headers["X-MERLT-Warning"] = "Data not persisted - users table not yet implemented"
 
         new_baseline = QUALIFICATION_BASELINE.get(request.qualification, DEFAULT_BASELINE)
 
@@ -846,8 +853,8 @@ async def update_qualification(
             domains={k: v for k, v in domains.items()},
             stats=stats,
             recent_activity=recent_activity,
-            joined_at=datetime.now().isoformat(),
-            last_updated=datetime.now().isoformat(),
+            joined_at=None,
+            last_updated=datetime.now(timezone.utc).isoformat(),
         )
 
         log.info(
@@ -885,7 +892,8 @@ Aggiorna le preferenze di notifica email:
 )
 async def update_notifications(
     request: UpdateNotificationsRequest,
-    user_id: str = "current",
+    response: Response,
+    user_id: str = Query(..., description="User ID from auth context"),
     api_key: ApiKey = Depends(verify_api_key),
 ) -> NotificationPreferences:
     """Aggiorna preferenze notifiche."""
@@ -896,8 +904,11 @@ async def update_notifications(
     )
 
     try:
-        # TODO: Update PostgreSQL rlcf_dev.users table when users table exists
-        # Per ora ritorna le preferenze richieste (simula l'update)
+        log.warning(
+            "update_notifications: data not persisted - users table not yet implemented",
+            user_id=user_id,
+        )
+        response.headers["X-MERLT-Warning"] = "Data not persisted - users table not yet implemented"
 
         prefs = NotificationPreferences(
             email_on_validation=request.email_on_validation if request.email_on_validation is not None else True,

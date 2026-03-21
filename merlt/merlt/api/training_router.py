@@ -58,6 +58,12 @@ class TrainingStatusResponse(BaseModel):
     total_epochs: int = Field(0, description="Epoch totali previsti")
     training_sessions_today: int = Field(0, description="Sessioni oggi")
     avg_reward: float = Field(0.0, description="Reward medio nel buffer")
+    # Frontend-compatible alias fields (TrainingStatus in rlcfService.ts)
+    is_running: bool = Field(default=False, description="Alias for is_training")
+    is_paused: bool = Field(default=False)
+    current_loss: Optional[float] = None
+    best_loss: Optional[float] = None
+    learning_rate: Optional[float] = None
 
 
 class StartTrainingRequest(BaseModel):
@@ -178,6 +184,8 @@ async def get_training_status(
         total_epochs=status.total_epochs,
         training_sessions_today=status.training_sessions_today,
         avg_reward=status.avg_reward,
+        is_running=status.is_training,
+        is_paused=status.status.value == "paused",
     )
 
 

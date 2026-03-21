@@ -11,6 +11,8 @@ import { EXPERT_IDS } from '../types/pipeline';
 import { get } from '../services/api';
 
 const PREFIX = '/merlt';
+const POLL_INTERVAL_MS = 2000;
+const MAX_POLL_ATTEMPTS = 45; // 90s total
 
 interface TraceExpertResult {
   expert_name: string;
@@ -85,6 +87,7 @@ export function useExpertPipelineStatus(queryId: string | null): UseExpertPipeli
   const [status, setStatus] = useState(null as ExpertPipelineStatus | null);
   const [error, setError] = useState(null as string | null);
   const pollIntervalRef = useRef(null as number | null);
+  const pollAttemptsRef = useRef(0);
 
   const isActive = status !== null &&
     status.phase !== 'completed' &&
@@ -107,6 +110,7 @@ export function useExpertPipelineStatus(queryId: string | null): UseExpertPipeli
 
     setStatus(createInitialStatus(queryId));
     setError(null);
+    pollAttemptsRef.current = 0;
 
     // Guard against double invocation
     if (pollIntervalRef.current) {
@@ -115,6 +119,20 @@ export function useExpertPipelineStatus(queryId: string | null): UseExpertPipeli
     }
 
     const poll = async () => {
+      pollAttemptsRef.current += 1;
+
+      if (pollAttemptsRef.current > MAX_POLL_ATTEMPTS) {
+        if (pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
+        setStatus((prev: ExpertPipelineStatus | null) =>
+          prev ? { ...prev, phase: 'failed' as const, overallProgress: prev.overallProgress } : null
+        );
+        setError('Timeout: il server non ha risposto entro 90 secondi');
+        return;
+      }
+
       try {
         const trace = await get<TraceResponse>(
           `${PREFIX}/traces/${encodeURIComponent(queryId)}`
@@ -133,10 +151,16 @@ export function useExpertPipelineStatus(queryId: string | null): UseExpertPipeli
       }
     };
 
-    poll();
-    pollIntervalRef.current = window.setInterval(poll, 2000);
+    // B5: initial delay before first poll to allow backend to commit the trace
+    const initialDelay = window.setTimeout(() => {
+      poll();
+      pollIntervalRef.current = window.setInterval(poll, POLL_INTERVAL_MS);
+    }, 500);
 
-    return cleanup;
+    return () => {
+      window.clearTimeout(initialDelay);
+      cleanup();
+    };
   }, [queryId, cleanup]);
 
   return { status, isActive, error };

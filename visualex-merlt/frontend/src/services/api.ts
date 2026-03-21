@@ -4,7 +4,7 @@
 type RequestMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
-const DEFAULT_TIMEOUT_MS = 30000;
+const DEFAULT_TIMEOUT_MS = 60000;
 
 async function refreshAccessToken(): Promise<string | null> {
   const refreshToken = localStorage.getItem('refresh_token');
@@ -48,6 +48,11 @@ async function request<T>(
 
   if (token) {
     headers.Authorization = `Bearer ${token}`;
+  }
+
+  const apiKey = localStorage.getItem('merlt_api_key');
+  if (apiKey) {
+    headers['X-API-Key'] = apiKey;
   }
 
   const controller = new AbortController();
@@ -124,6 +129,12 @@ export const patch = async <T = unknown>(url: string, data?: unknown): Promise<T
 
 export const del = async <T = unknown>(url: string): Promise<T> =>
   request<T>('DELETE', url);
+
+// SSE Auth Note: EventSource does not support custom headers. When creating
+// an EventSource for a protected endpoint, append the token as a query param:
+//   const token = localStorage.getItem('access_token');
+//   const src = new EventSource(token ? `${url}&token=${token}` : url);
+// This is handled in merltService.ts (owned separately).
 
 export default {
   get,

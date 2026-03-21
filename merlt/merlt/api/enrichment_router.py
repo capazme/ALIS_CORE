@@ -746,7 +746,8 @@ async def live_enrich_stream(
     allowed, remaining = _check_rate_limit(user_id)
     if not allowed:
         async def rate_limit_error():
-            yield f"event: error\ndata: {json.dumps({'message': 'Rate limit exceeded. Riprova tra un\'ora.'})}\n\n"
+            msg = json.dumps({"message": "Rate limit exceeded. Riprova tra un'ora."})
+            yield f"event: error\ndata: {msg}\n\n"
         return StreamingResponse(
             rate_limit_error(),
             media_type="text/event-stream",

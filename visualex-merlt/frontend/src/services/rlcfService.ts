@@ -190,11 +190,14 @@ export function connectTrainingStream(handlers: TrainingStreamHandler): () => vo
   let ws: WebSocket | null = null;
   let pingInterval: number | null = null;
   let isClosedIntentionally = false;
+  let reconnectAttempts = 0;
+  const MAX_RECONNECT_ATTEMPTS = 10;
 
   const connect = () => {
     ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
+      reconnectAttempts = 0;
       console.log('[RLCFTrainingWS] Connected');
 
       // Keep-alive ping every 25 seconds
@@ -270,8 +273,15 @@ export function connectTrainingStream(handlers: TrainingStreamHandler): () => vo
       }
 
       if (!isClosedIntentionally) {
-        console.log('[RLCFTrainingWS] Reconnecting in 3 seconds...');
-        setTimeout(connect, 3000);
+        if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+          reconnectAttempts++;
+          const delay = Math.min(3000 * Math.pow(1.5, reconnectAttempts - 1), 30000);
+          console.log(`[RLCFTrainingWS] Reconnecting in ${Math.round(delay / 1000)}s (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+          setTimeout(connect, delay);
+        } else {
+          console.warn('[RLCFTrainingWS] Max reconnect attempts reached');
+          handlers.onConnectionError?.(new Event('max_reconnect_exceeded'));
+        }
       } else {
         handlers.onConnectionClose?.();
       }

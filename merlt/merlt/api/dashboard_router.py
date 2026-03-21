@@ -60,6 +60,11 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 # Start time per uptime calculation
 _start_time = time.time()
 
+# Use explicit IN for index-friendly query (avoids full table scan on != operator).
+# NOTE: For optimal performance on large tables, ensure a partial index exists:
+# CREATE INDEX idx_qa_traces_public ON qa_traces (created_at) WHERE consent_level != 'anonymous';
+_PUBLIC_CONSENT_LEVELS = ("basic", "full")
+
 
 # =============================================================================
 # HELPER FUNCTIONS
@@ -355,14 +360,14 @@ async def _get_activity_feed(
             # Total count for pagination
             count_result = await session.execute(
                 select(func.count(QATrace.trace_id))
-                .where(QATrace.consent_level != "anonymous")
+                .where(QATrace.consent_level.in_(_PUBLIC_CONSENT_LEVELS))
             )
             total_count = count_result.scalar() or 0
 
             # Paginated query
             result = await session.execute(
                 select(QATrace)
-                .where(QATrace.consent_level != "anonymous")
+                .where(QATrace.consent_level.in_(_PUBLIC_CONSENT_LEVELS))
                 .order_by(QATrace.created_at.desc())
                 .offset(offset)
                 .limit(limit)

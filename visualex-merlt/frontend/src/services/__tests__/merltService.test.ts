@@ -165,8 +165,8 @@ describe('merltService', () => {
       await submitSourceFeedback({
         trace_id: 'trace-1',
         user_id: 'user-1',
-        source_urn: 'urn:nir:stato:codice.civile:1942;262~art1218',
-        rating: 0.9,
+        source_id: 'urn:nir:stato:codice.civile:1942;262~art1218',
+        rating: 5,
       });
 
       expect(mockPost).toHaveBeenCalledWith('/merlt/experts/feedback/source', {
@@ -189,7 +189,8 @@ describe('merltService', () => {
       const data = {
         trace_id: 'trace-1',
         user_id: 'user-1',
-        correct_experts: ['literal', 'systemic'],
+        routing_correct: true,
+        suggested_weights: { literal: 0.5, systemic: 0.5 },
         comment: 'Routing was correct',
       };
 

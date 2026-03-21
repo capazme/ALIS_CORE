@@ -22,14 +22,16 @@ export function useTraceData(traceId: string | null): UseTraceDataReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null as string | null);
   const [fetchCounter, setFetchCounter] = useState(0);
-  const cancelledRef = useRef(false);
+  const controllerRef = useRef(undefined as AbortController | undefined);
 
   const refetch = useCallback(() => {
     setFetchCounter((c: number) => c + 1);
   }, []);
 
   useEffect(() => {
-    cancelledRef.current = false;
+    controllerRef.current?.abort();
+    controllerRef.current = new AbortController();
+    const signal = controllerRef.current.signal;
 
     if (!traceId) {
       setTrace(null);
@@ -47,26 +49,30 @@ export function useTraceData(traceId: string | null): UseTraceDataReturn {
         getTraceValidity(traceId),
       ]);
 
-      if (cancelledRef.current) return;
+      if (signal.aborted) return;
 
       if (traceAndSourcesResult.status === 'fulfilled') {
         setTrace(traceAndSourcesResult.value.trace);
         setSources(traceAndSourcesResult.value.sourcesResponse.sources);
       } else {
-        setError('Errore nel caricamento del trace');
+        if (!signal.aborted) {
+          setError('Errore nel caricamento del trace');
+        }
       }
 
       if (validityResult.status === 'fulfilled') {
         setValidity(validityResult.value.validity);
       }
 
-      setIsLoading(false);
+      if (!signal.aborted) {
+        setIsLoading(false);
+      }
     };
 
     doFetch();
 
     return () => {
-      cancelledRef.current = true;
+      controllerRef.current?.abort();
     };
   }, [traceId, fetchCounter]);
 

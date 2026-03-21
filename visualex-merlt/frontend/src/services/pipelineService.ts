@@ -268,11 +268,14 @@ export function connectPipelineWebSocket(
   let ws: WebSocket | null = null;
   let pingInterval: number | null = null;
   let isClosedIntentionally = false;
+  let reconnectAttempts = 0;
+  const MAX_RECONNECT_ATTEMPTS = 10;
 
   const connect = () => {
     ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
+      reconnectAttempts = 0;
       console.log(`[PipelineWS] Connected to ${runId}`);
 
       // Start keep-alive ping every 30 seconds
@@ -332,8 +335,15 @@ export function connectPipelineWebSocket(
 
       // Auto-reconnect if not closed intentionally
       if (!isClosedIntentionally) {
-        console.log('[PipelineWS] Attempting reconnect in 3 seconds...');
-        setTimeout(connect, 3000);
+        if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+          reconnectAttempts++;
+          const delay = Math.min(3000 * Math.pow(1.5, reconnectAttempts - 1), 30000);
+          console.log(`[PipelineWS] Reconnecting in ${Math.round(delay / 1000)}s (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+          setTimeout(connect, delay);
+        } else {
+          console.warn('[PipelineWS] Max reconnect attempts reached');
+          handlers.onConnectionError?.(new Event('max_reconnect_exceeded'));
+        }
       } else {
         handlers.onConnectionClose?.();
       }
