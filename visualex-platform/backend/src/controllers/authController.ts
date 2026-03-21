@@ -1,13 +1,11 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
+import { prisma } from '../lib/prisma';
 import crypto from 'crypto';
 import { hashPassword, verifyPassword } from '../utils/password';
 import { generateAccessToken, generateRefreshToken, verifyToken, verifyTokenType } from '../utils/jwt';
 import { AppError } from '../middleware/errorHandler';
 import { sendVerificationEmail } from '../services/emailService';
-
-const prisma = new PrismaClient();
 
 // Password validation regex: min 8 chars, at least 1 uppercase, 1 lowercase, 1 number
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
@@ -218,15 +216,16 @@ export const resendVerificationEmail = async (req: Request, res: Response) => {
 };
 
 // Security logging helper
-const logSecurityEvent = (event: string, details: Record<string, unknown>) => {
-  const logEntry = {
+function logSecurityEvent(event: string, details: Record<string, unknown>) {
+  const entry = {
+    level: 'security',
     timestamp: new Date().toISOString(),
     event,
     ...details,
   };
-  // In production, this should use a proper logging framework (winston, pino, etc.)
-  console.log('[SECURITY]', JSON.stringify(logEntry));
-};
+  // Structured JSON to stdout for log aggregation
+  process.stdout.write(JSON.stringify(entry) + '\n');
+}
 
 // Login
 export const login = async (req: Request, res: Response) => {
@@ -433,11 +432,17 @@ export const changePassword = async (req: Request, res: Response) => {
   // Hash new password
   const hashedPassword = await hashPassword(new_password);
 
-  // Update password
-  await prisma.user.update({
-    where: { id: req.user.id },
-    data: { password: hashedPassword },
-  });
+  // Update password and invalidate all active refresh tokens
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: req.user.id },
+      data: { password: hashedPassword },
+    }),
+    prisma.refreshToken.updateMany({
+      where: { userId: req.user.id, revoked: false },
+      data: { revoked: true },
+    }),
+  ]);
 
   res.json({ message: 'Password changed successfully' });
 };

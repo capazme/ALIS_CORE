@@ -18,12 +18,29 @@ export function useAuth() {
     user: null,
     loading: true,
     error: null,
-    isAuthenticated: authService.isAuthenticated(),
+    isAuthenticated: false,
   });
 
   /**
-   * Load current user info on mount
+   * Load current user info on mount + listen for forced logout events
    */
+  useEffect(() => {
+    const handleForcedLogout = () => {
+      appStore.getState().clearUserData();
+      setState({
+        user: null,
+        loading: false,
+        error: null,
+        isAuthenticated: false,
+      });
+    };
+
+    window.addEventListener('auth:logout', handleForcedLogout);
+    return () => {
+      window.removeEventListener('auth:logout', handleForcedLogout);
+    };
+  }, []);
+
   useEffect(() => {
     const loadUser = async () => {
       if (!authService.isAuthenticated()) {
@@ -47,6 +64,7 @@ export function useAuth() {
         }
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : 'Failed to load user';
+        authService.clearTokens();
         setState({
           user: null,
           loading: false,
@@ -66,20 +84,9 @@ export function useAuth() {
     setState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
-      await authService.register({ email, username, password });
-
-      // Auto-login after registration
-      await authService.login({ email, password });
-      const currentUser = await authService.getCurrentUser();
-
-      setState({
-        user: currentUser,
-        loading: false,
-        error: null,
-        isAuthenticated: true,
-      });
-
-      return currentUser;
+      const result = await authService.register({ email, username, password });
+      setState((prev) => ({ ...prev, loading: false }));
+      return result;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Registration failed';
       setState((prev) => ({
@@ -127,8 +134,7 @@ export function useAuth() {
    * Logout user
    */
   const logout = useCallback(() => {
-    authService.logout();
-    // Clear user data from store
+    authService.clearTokens();
     appStore.getState().clearUserData();
     setState({
       user: null,

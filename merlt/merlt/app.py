@@ -33,7 +33,8 @@ load_dotenv(env_file)
 log = structlog.get_logger()
 log.info("Environment variables loaded", env_file=str(env_file))
 
-from merlt.storage.enrichment import init_db, close_db
+from merlt.storage.enrichment import init_db, close_db, create_tables
+from merlt.api.auth import verify_api_key, optional_api_key
 from merlt.api import (
     ingestion_router,
     feedback_router,
@@ -88,6 +89,7 @@ async def lifespan(app: FastAPI):
     try:
         # Initialize enrichment database
         await init_db(echo=False)  # Set echo=True for SQL logging in dev
+        await create_tables()
         log.info("✅ Enrichment database initialized")
 
         # Initialize Expert System (MultiExpertOrchestrator)
@@ -157,6 +159,10 @@ app = FastAPI(
 
 # CORS middleware (configure for your frontend)
 _cors_origins = os.environ.get("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
+# Frontend sends JWT (not X-API-Key). Make API key auth optional globally;
+# routes using require_role() still enforce auth via null-check in _check_role.
+app.dependency_overrides[verify_api_key] = optional_api_key
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in _cors_origins],

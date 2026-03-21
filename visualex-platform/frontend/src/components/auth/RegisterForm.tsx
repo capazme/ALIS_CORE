@@ -3,7 +3,7 @@
  */
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { register } from '../../services/authService';
+import { register, resendVerificationEmail } from '../../services/authService';
 import { validateInvitation } from '../../services/invitationService';
 import type { InvitationValidateResponse } from '../../types/api';
 import { UserPlus, Mail, Lock, User, Eye, EyeOff, AlertCircle, ArrowLeft, CheckCircle, Check, X, Loader2, UserCircle } from 'lucide-react';
@@ -241,7 +241,10 @@ export function RegisterForm() {
 
             <div className="text-sm text-slate-500 dark:text-slate-400 mb-6">
               Non hai ricevuto l'email? Controlla la cartella spam o{' '}
-              <button className="text-blue-600 hover:underline font-medium">
+              <button
+                className="text-blue-600 hover:underline font-medium"
+                onClick={() => resendVerificationEmail({ email })}
+              >
                 richiedi un nuovo link
               </button>
             </div>

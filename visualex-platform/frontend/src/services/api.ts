@@ -34,6 +34,10 @@ apiClient.interceptors.request.use(
   }
 );
 
+// Mutex to prevent multiple simultaneous refresh token calls
+let isRefreshing = false;
+let refreshPromise: Promise<string> | null = null;
+
 /**
  * Response interceptor to handle token refresh on 401 errors
  */
@@ -46,39 +50,46 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      try {
-        const refreshToken = localStorage.getItem('refresh_token');
+      const refreshToken = localStorage.getItem('refresh_token');
 
-        if (!refreshToken) {
-          // No refresh token, redirect to login
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          window.location.href = '/login';
-          return Promise.reject(error);
+      if (!refreshToken) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        window.dispatchEvent(new Event('auth:logout'));
+        return Promise.reject(error);
+      }
+
+      try {
+        if (!isRefreshing) {
+          isRefreshing = true;
+          refreshPromise = axios
+            .post(`${API_BASE_URL}/auth/refresh`, { refresh_token: refreshToken })
+            .then((response) => {
+              const { access_token, refresh_token: newRefreshToken } = response.data as {
+                access_token: string;
+                refresh_token: string;
+              };
+              localStorage.setItem('access_token', access_token);
+              localStorage.setItem('refresh_token', newRefreshToken);
+              return access_token;
+            })
+            .finally(() => {
+              isRefreshing = false;
+              refreshPromise = null;
+            });
         }
 
-        // Attempt to refresh the access token
-        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-          refresh_token: refreshToken,
-        });
+        const newToken = await refreshPromise!;
 
-        const { access_token, refresh_token } = response.data;
-
-        // Store new tokens
-        localStorage.setItem('access_token', access_token);
-        localStorage.setItem('refresh_token', refresh_token);
-
-        // Retry original request with new token
         if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${access_token}`;
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
         }
 
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, clear tokens and redirect to login
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        window.location.href = '/login';
+        window.dispatchEvent(new Event('auth:logout'));
         return Promise.reject(refreshError);
       }
     }

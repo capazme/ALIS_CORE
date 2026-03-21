@@ -47,8 +47,9 @@ export function LoginForm() {
     try {
       await login(email, password);
       navigate(from, { replace: true });
-    } catch (error: any) {
-      setFormError(error.message || 'Login failed. Please check your credentials.');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : (error as { message?: string })?.message || 'Login failed';
+      setFormError(message);
     }
   };
 
@@ -87,7 +88,7 @@ export function LoginForm() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email Field */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 ml-1">
+              <label htmlFor="login-email" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 ml-1">
                 Email
               </label>
               <div
@@ -106,6 +107,7 @@ export function LoginForm() {
                   />
                 </div>
                 <input
+                  id="login-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -121,7 +123,7 @@ export function LoginForm() {
 
             {/* Password Field */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 ml-1">
+              <label htmlFor="login-password" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 ml-1">
                 Password
               </label>
               <div
@@ -140,6 +142,7 @@ export function LoginForm() {
                   />
                 </div>
                 <input
+                  id="login-password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -153,8 +156,8 @@ export function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Nascondi password' : 'Mostra password'}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-white/5"
-                  tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>

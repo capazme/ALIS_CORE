@@ -35,13 +35,20 @@ export const login = async (credentials: UserLoginRequest): Promise<TokenRespons
 };
 
 /**
- * Logout user (clear tokens)
+ * Clear tokens without dispatching the auth:logout event.
+ * Use when the caller already handles UI state reset.
  */
-export const logout = (): void => {
+export const clearTokens = (): void => {
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
-  // Optionally redirect to login page
-  window.location.href = '/login';
+};
+
+/**
+ * Logout user (clear tokens and notify via custom event)
+ */
+export const logout = (): void => {
+  clearTokens();
+  window.dispatchEvent(new Event('auth:logout'));
 };
 
 /**

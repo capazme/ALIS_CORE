@@ -9,7 +9,7 @@ import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth as useAuthHook } from '../hooks/useAuth';
 import { getAccessToken } from '../services/authService';
-import type { UserResponse } from '../types/api';
+import type { UserResponse, RegisterResponse, ProfileType } from '../types/api';
 
 interface AuthContextValue {
   user: UserResponse | null;
@@ -18,7 +18,9 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isAdmin: boolean;
   isMerltEnabled: boolean;
-  register: (email: string, username: string, password: string) => Promise<UserResponse>;
+  profileType: ProfileType;
+  authorityScore: number;
+  register: (email: string, username: string, password: string) => Promise<RegisterResponse>;
   login: (email: string, password: string) => Promise<UserResponse>;
   logout: () => void;
   changePassword: (currentPassword: string, newPassword: string) => Promise<UserResponse>;

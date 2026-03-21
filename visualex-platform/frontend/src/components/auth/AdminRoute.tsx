@@ -1,17 +1,17 @@
 /**
  * Admin route wrapper that requires admin privileges
  */
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ShieldAlert } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuthContext } from '../../contexts/AuthContext';
 
 interface AdminRouteProps {
   children: React.ReactNode;
 }
 
 export function AdminRoute({ children }: AdminRouteProps) {
-  const { isAuthenticated, isAdmin, loading } = useAuth();
+  const { isAuthenticated, isAdmin, loading } = useAuthContext();
   const location = useLocation();
 
   // Show loading state while checking authentication
@@ -55,12 +55,12 @@ export function AdminRoute({ children }: AdminRouteProps) {
             Non hai i permessi necessari per accedere a questa sezione.
             Contatta un amministratore se ritieni sia un errore.
           </p>
-          <a
-            href="/"
+          <Link
+            to="/"
             className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors"
           >
             Torna alla Home
-          </a>
+          </Link>
         </div>
       </div>
     );

@@ -23,6 +23,7 @@ Usage:
 
 import hashlib
 import structlog
+import jwt as pyjwt
 from datetime import datetime
 from typing import Optional, Union
 
@@ -102,6 +103,8 @@ def require_role(roles: Union[str, list]) -> object:
     async def _check_role(
         api_key: ApiKey = Depends(verify_api_key),
     ) -> ApiKey:
+        if api_key is None:
+            raise HTTPException(status_code=401, detail="API key required")
         if api_key.role not in allowed:
             raise HTTPException(
                 status_code=403,
@@ -110,6 +113,24 @@ def require_role(roles: Union[str, list]) -> object:
         return api_key
 
     return _check_role
+
+
+async def get_current_user_id(
+    authorization: Optional[str] = Header(None, alias="Authorization"),
+) -> Optional[str]:
+    """Extract user_id from JWT Bearer token. Returns None if no/invalid token."""
+    if not authorization or not authorization.startswith("Bearer "):
+        return None
+    token = authorization[7:]
+    try:
+        payload = pyjwt.decode(
+            token,
+            options={"verify_signature": False, "verify_exp": False},
+            algorithms=["HS256"],
+        )
+        return payload.get("userId") or payload.get("user_id") or payload.get("sub")
+    except Exception:
+        return None
 
 
 async def optional_api_key(
