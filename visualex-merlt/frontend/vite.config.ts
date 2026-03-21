@@ -21,8 +21,9 @@ export default defineConfig(({ mode }) => {
             'react-dom',
             /^react\//,
             /^react-dom\//,
-            // Also externalize react/jsx-runtime to avoid bundling it
             'react/jsx-runtime',
+            '@visualex/platform/lib/plugins',
+            /^@visualex\/platform\//,
           ],
           output: {
             // Preserve dynamic imports for code splitting
@@ -73,6 +74,14 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       port: 5174,
+      proxy: {
+        '/api/merlt': {
+          target: 'http://localhost:8000',
+          changeOrigin: true,
+          ws: true,
+          rewrite: (path) => path.replace(/^\/api\/merlt/, '/api/v1'),
+        },
+      },
     },
     resolve: {
       alias: {

@@ -8,6 +8,6 @@
     "declarationMap": true,
     "outDir": "./dist/types"
   },
-  "include": ["src/plugin/index.ts", "src/components/**/*.tsx", "src/services/**/*.ts", "src/types/**/*.ts", "src/hooks/**/*.ts", "src/store/**/*.ts", "src/utils/**/*.ts"],
-  "exclude": ["node_modules", "dist", "src/main.tsx", "src/App.tsx"]
+  "include": ["src/vite-env.d.ts", "src/plugin/index.ts", "src/components/**/*.tsx", "src/services/**/*.ts", "src/types/**/*.ts", "src/hooks/**/*.ts", "src/store/**/*.ts", "src/utils/**/*.ts", "src/lib/**/*.ts"],
+  "exclude": ["node_modules", "dist", "src/main.tsx", "src/App.tsx", "src/**/__tests__", "src/**/*.test.ts", "src/**/*.test.tsx", "src/**/*.spec.ts", "src/**/*.spec.tsx", "src/test"]
 }

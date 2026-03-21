@@ -289,46 +289,18 @@ cmd_rlcf_web() {
 }
 
 cmd_full() {
-  echo -e "${GREEN}Starting complete ALIS ecosystem...${NC}"
+  echo -e "${GREEN}Starting complete ALIS ecosystem (full Docker)...${NC}"
   check_docker
 
   ensure_env_file "visualex-platform"
   ensure_env_file "visualex-merlt"
   ensure_env_file "merlt"
 
-  # Start MERL-T ML databases first
-  if [ -f "$ROOT/merlt/docker-compose.dev.yml" ]; then
-    echo "Starting MERL-T databases (FalkorDB, Qdrant)..."
-    cd "$ROOT/merlt"
-    compose -f docker-compose.dev.yml up -d
-  fi
-
-  # Start MERL-T integration UI only (DBs already running from merlt dev compose,
-  # API started via uvicorn below). --no-deps avoids starting duplicate DB containers.
+  # Start full MERL-T stack via Docker (API + DBs + UI)
   if [ -f "$ROOT/visualex-merlt/docker-compose.yml" ]; then
-    echo "Starting MERL-T UI containers..."
+    echo "Starting MERL-T stack (API + DBs + UI)..."
     cd "$ROOT/visualex-merlt"
-    compose up -d --no-deps merlt-frontend rlcf-web
-  fi
-
-  # Start MERL-T ML API in background (prefer venv if available)
-  echo "Starting MERL-T ML API on :8000..."
-  cd "$ROOT/merlt"
-  MERLT_PYTHON=""
-  if [ -f "$ROOT/merlt/.venv/bin/python" ]; then
-    MERLT_PYTHON="$ROOT/merlt/.venv/bin/python"
-  elif command -v python3 >/dev/null 2>&1; then
-    MERLT_PYTHON="python3"
-  fi
-  if [ -n "$MERLT_PYTHON" ]; then
-    if "$MERLT_PYTHON" -c "import uvicorn" >/dev/null 2>&1; then
-      "$MERLT_PYTHON" -m uvicorn merlt.app:app --reload --port 8000 &
-      MERLT_PID=$!
-      echo "MERL-T API started (PID: $MERLT_PID)"
-    else
-      echo -e "${YELLOW}Warning: uvicorn not installed, skipping MERL-T API${NC}"
-      echo "Install with: cd merlt && pip install -e '.[dev]'"
-    fi
+    compose up -d --build
   fi
 
   # Start platform with everything enabled
@@ -336,9 +308,9 @@ cmd_full() {
   echo "Starting platform with full MERL-T integration..."
   export VITE_MERLT_ENABLED=true
   export MERLT_ENABLED=true
-  export MERLT_API_URL=http://localhost:8000
+  export MERLT_API_URL=http://merlt-api:8000
   MERLT_ENABLED=true print_ports
-  compose up -d frontend backend python-api postgres
+  compose up -d --build frontend backend python-api postgres
 }
 
 cmd_api() {

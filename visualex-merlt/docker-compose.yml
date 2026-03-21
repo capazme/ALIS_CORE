@@ -22,12 +22,25 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=${MERLT_DATABASE_URL}
+      - DATABASE_URL=${MERLT_DATABASE_URL:-postgresql://merlt:merlt@postgres:5432/merlt}
+      - RLCF_DATABASE_URL=postgresql://merlt:merlt@postgres:5432/merlt
+      - RLCF_ASYNC_DATABASE_URL=postgresql+asyncpg://merlt:merlt@postgres:5432/merlt
+      - ENRICHMENT_DB_HOST=postgres
+      - ENRICHMENT_DB_PORT=5432
+      - ENRICHMENT_DB_NAME=merlt
+      - ENRICHMENT_DB_USER=merlt
+      - ENRICHMENT_DB_PASSWORD=merlt
       - QDRANT_HOST=${QDRANT_HOST:-qdrant}
       - QDRANT_PORT=${QDRANT_PORT:-6333}
+      - FALKORDB_HOST=falkordb
+      - FALKORDB_PORT=6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
       - qdrant
       - postgres
+      - redis
+      - falkordb
     volumes:
       - ./config:/app/config
 
@@ -41,6 +54,20 @@ services:
       - VITE_API_URL=http://merlt-api:8000
     depends_on:
       - merlt-api
+
+  # FalkorDB (Knowledge Graph)
+  falkordb:
+    image: falkordb/falkordb:latest
+    ports:
+      - "6380:6379"
+    volumes:
+      - falkordb_data:/var/lib/falkordb/data
+    command: ["falkordb-server", "--loadmodule", "/usr/lib/redis/modules/libgraphdb.so", "--save", "10", "1", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6379", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Vector Database
   qdrant:
@@ -75,3 +102,4 @@ volumes:
   qdrant_data:
   postgres_merlt_data:
   redis_data:
+  falkordb_data:
