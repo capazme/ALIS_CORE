@@ -16,6 +16,7 @@ from .config import (
     RATE_LIMIT_WINDOW,
     FETCH_QUEUE_WORKERS,
     FETCH_QUEUE_DELAY,
+    QUERY_STATS_MAX_BODY_BYTES,
 )
 from .utils.history_manager import history_manager
 from .utils.dossier_manager import dossier_manager
@@ -72,6 +73,106 @@ def add_to_history(data: dict):
     """Aggiunge ricerca alla history con persistenza."""
     if history_manager.add(data):
         log.debug("Added to history", data=data)
+
+
+def build_brocardi_payload(brocardi_info):
+    """Normalize Brocardi scraper output for API responses."""
+    return {
+        'position': brocardi_info[0] if brocardi_info[0] else None,
+        'link': brocardi_info[2],
+        'Brocardi': brocardi_info[1].get('Brocardi') if brocardi_info[1] and 'Brocardi' in brocardi_info[1] else None,
+        'Ratio': brocardi_info[1].get('Ratio') if brocardi_info[1] and 'Ratio' in brocardi_info[1] else None,
+        'Spiegazione': brocardi_info[1].get('Spiegazione') if brocardi_info[1] and 'Spiegazione' in brocardi_info[1] else None,
+        'Massime': brocardi_info[1].get('Massime') if brocardi_info[1] and 'Massime' in brocardi_info[1] else None,
+        'Relazioni': brocardi_info[1].get('Relazioni') if brocardi_info[1] and 'Relazioni' in brocardi_info[1] else None,
+        'RelazioneCostituzione': brocardi_info[1].get('RelazioneCostituzione') if brocardi_info[1] and 'RelazioneCostituzione' in brocardi_info[1] else None,
+        'Footnotes': brocardi_info[1].get('Footnotes') if brocardi_info[1] and 'Footnotes' in brocardi_info[1] else None,
+        'RelatedArticles': brocardi_info[1].get('RelatedArticles') if brocardi_info[1] and 'RelatedArticles' in brocardi_info[1] else None,
+        'CrossReferences': brocardi_info[1].get('CrossReferences') if brocardi_info[1] and 'CrossReferences' in brocardi_info[1] else None
+    }
+
+
+def normalize_article_lookup_key(article):
+    """Normalize article identifiers for smart annex lookup."""
+    return str(article).strip().lower()
+
+
+def resolve_annex_from_annexes(annexes, articles):
+    """Fallback smart lookup for older cached metadata without article index."""
+    for article in articles:
+        article_normalized = normalize_article_lookup_key(article)
+        found_in_dispositivo = False
+        best_annex = None
+        best_annex_count = 0
+
+        for annex_info in annexes:
+            annex_num = annex_info.get('number')
+            article_numbers = annex_info.get('article_numbers', [])
+            article_count = annex_info.get('article_count', 0)
+
+            article_exists = any(
+                normalize_article_lookup_key(article_number) == article_normalized
+                for article_number in article_numbers
+            )
+
+            if article_exists:
+                if annex_num is None:
+                    found_in_dispositivo = True
+                    log.info("Smart lookup: article found in dispositivo", article=article)
+                else:
+                    if article_count > best_annex_count:
+                        best_annex = annex_num
+                        best_annex_count = article_count
+                    log.info(
+                        "Smart lookup: article found in annex",
+                        article=article,
+                        annex=annex_num,
+                        annex_article_count=article_count,
+                    )
+
+        if not found_in_dispositivo and best_annex is not None:
+            log.info(
+                "Smart lookup: auto-redirecting to annex",
+                article=article,
+                target_annex=best_annex,
+            )
+            return best_annex
+
+    return None
+
+
+def resolve_annex_from_tree_metadata(tree_metadata, articles):
+    """Resolve the best annex for requested articles without changing business rules."""
+    if not tree_metadata or not articles:
+        return None
+
+    article_lookup = tree_metadata.get('article_lookup')
+    if isinstance(article_lookup, dict):
+        for article in articles:
+            article_state = article_lookup.get(normalize_article_lookup_key(article))
+            if not article_state:
+                continue
+
+            if article_state.get('in_dispositivo'):
+                log.info("Smart lookup: article found in dispositivo", article=article)
+                continue
+
+            best_annex = article_state.get('best_annex')
+            if best_annex is not None:
+                log.info(
+                    "Smart lookup: auto-redirecting to annex",
+                    article=article,
+                    target_annex=best_annex,
+                )
+                return str(best_annex)
+        return None
+
+    annexes = tree_metadata.get('annexes', [])
+    if annexes:
+        log.info("Smart lookup: using annex scan fallback", annex_count=len(annexes))
+        return resolve_annex_from_annexes(annexes, articles)
+
+    return None
 
 
 # Inizializzazione degli scraper
@@ -269,13 +370,23 @@ class NormaController:
 
             tokens = None
             if response.content_type and "application/json" in response.content_type:
-                # Estrae il testo della risposta e lo decodifica in JSON
-                text = await response.get_data(as_text=True)
-                try:
-                    data = json.loads(text)
-                    tokens = count_tokens(data)
-                except Exception:
-                    tokens = "N/A"
+                content_length = response.content_length
+                if content_length is None:
+                    try:
+                        content_length = response.calculate_content_length()
+                    except Exception:
+                        content_length = None
+
+                if content_length is not None and content_length > QUERY_STATS_MAX_BODY_BYTES:
+                    tokens = "skipped_large_payload"
+                else:
+                    # Avoid reparsing large JSON bodies on the critical response path.
+                    text = await response.get_data(as_text=True)
+                    try:
+                        data = json.loads(text)
+                        tokens = count_tokens(data)
+                    except Exception:
+                        tokens = "N/A"
             log.info("Query statistics", path=request.path, method=request.method, duration=duration, tokens=tokens)
         except Exception as e:
             log.error("Error logging query statistics", error=str(e))
@@ -402,56 +513,16 @@ class NormaController:
         # Smart article lookup: if no annex specified and not a hardcoded codice,
         # check if the article actually exists in the dispositivo or in an annex
         # SKIP smart lookup if user explicitly requested dispositivo (empty string)
-        if annex_value is None and not explicit_dispositivo and norma.url:
+        if annex_value is None and not explicit_dispositivo and norma.url and articles:
             try:
                 # Fetch tree with metadata to check article locations
                 tree_result = await get_tree(norma.url, link=False, details=False, return_metadata=True)
                 if len(tree_result) == 3:
-                    tree_data, tree_count, tree_metadata = tree_result
+                    _, tree_count, tree_metadata = tree_result
                     log.info("Smart lookup: fetched tree", article_count=tree_count, has_metadata=bool(tree_metadata))
 
-                    if tree_metadata and 'annexes' in tree_metadata and tree_count > 0:
-                        annexes = tree_metadata['annexes']
-                        log.info("Smart lookup: found annexes", annex_count=len(annexes))
-
-                        # For each requested article, check where it exists
-                        for article in articles:
-                            article_normalized = article.strip().lower()
-                            found_in_dispositivo = False
-                            found_in_annex = None
-                            best_annex = None
-                            best_annex_count = 0
-
-                            for annex_info in annexes:
-                                annex_num = annex_info.get('number')  # None for dispositivo
-                                article_numbers = annex_info.get('article_numbers', [])
-                                article_count = annex_info.get('article_count', 0)
-
-                                # Check if article exists in this section
-                                article_exists = any(
-                                    art.strip().lower() == article_normalized
-                                    for art in article_numbers
-                                )
-
-                                if article_exists:
-                                    if annex_num is None:
-                                        # Found in dispositivo
-                                        found_in_dispositivo = True
-                                        log.info("Smart lookup: article found in dispositivo", article=article)
-                                    else:
-                                        # Found in an annex - track the one with most articles
-                                        if article_count > best_annex_count:
-                                            best_annex = annex_num
-                                            best_annex_count = article_count
-                                        log.info("Smart lookup: article found in annex", article=article,
-                                                 annex=annex_num, annex_article_count=article_count)
-
-                            # If article NOT in dispositivo but found in annex, auto-redirect
-                            if not found_in_dispositivo and best_annex is not None:
-                                annex_value = best_annex
-                                log.info("Smart lookup: auto-redirecting to annex",
-                                         article=article, target_annex=annex_value)
-                                break  # Use same annex for all articles in this request
+                    if tree_metadata and tree_count > 0:
+                        annex_value = resolve_annex_from_tree_metadata(tree_metadata, articles) or annex_value
 
             except Exception as e:
                 log.warning("Smart lookup failed, proceeding without", error=str(e))
@@ -598,19 +669,7 @@ class NormaController:
                     brocardi_info = await brocardi_scraper.get_info(nv)
                     return {
                         'norma_data': nv.to_dict(),
-                        'brocardi_info': {
-                            'position': brocardi_info[0] if brocardi_info[0] else None,
-                            'link': brocardi_info[2],
-                            'Brocardi': brocardi_info[1].get('Brocardi') if brocardi_info[1] and 'Brocardi' in brocardi_info[1] else None,
-                            'Ratio': brocardi_info[1].get('Ratio') if brocardi_info[1] and 'Ratio' in brocardi_info[1] else None,
-                            'Spiegazione': brocardi_info[1].get('Spiegazione') if brocardi_info[1] and 'Spiegazione' in brocardi_info[1] else None,
-                            'Massime': brocardi_info[1].get('Massime') if brocardi_info[1] and 'Massime' in brocardi_info[1] else None,
-                            'Relazioni': brocardi_info[1].get('Relazioni') if brocardi_info[1] and 'Relazioni' in brocardi_info[1] else None,
-                            'RelazioneCostituzione': brocardi_info[1].get('RelazioneCostituzione') if brocardi_info[1] and 'RelazioneCostituzione' in brocardi_info[1] else None,
-                            'Footnotes': brocardi_info[1].get('Footnotes') if brocardi_info[1] and 'Footnotes' in brocardi_info[1] else None,
-                            'RelatedArticles': brocardi_info[1].get('RelatedArticles') if brocardi_info[1] and 'RelatedArticles' in brocardi_info[1] else None,
-                            'CrossReferences': brocardi_info[1].get('CrossReferences') if brocardi_info[1] and 'CrossReferences' in brocardi_info[1] else None
-                        }
+                        'brocardi_info': build_brocardi_payload(brocardi_info)
                     }
                 except Exception as exc:
                     log.error("Error fetching Brocardi info", error=str(exc))
@@ -648,8 +707,9 @@ class NormaController:
                     return {'error': 'Unsupported act type', 'norma_data': nv.to_dict()}
 
                 try:
-                    article_text, url = await scraper.get_document(nv)
+                    tasks = [scraper.get_document(nv)]
                     brocardi_info = None
+                    should_fetch_brocardi = False
                     if scraper == normattiva_scraper:
                         # Skip Brocardi for dispositivo articles of codes that have their content in allegati
                         # Brocardi.it only has content for the actual code (allegato), not the dispositivo
@@ -666,24 +726,20 @@ class NormaController:
                                              act_type=normalized_type, article=nv.numero_articolo)
 
                         if should_fetch_brocardi:
-                            try:
-                                b_info = await brocardi_scraper.get_info(nv)
-                                brocardi_info = {
-                                    'position': b_info[0] if b_info[0] else None,
-                                    'link': b_info[2],
-                                    'Brocardi': b_info[1].get('Brocardi') if b_info[1] and 'Brocardi' in b_info[1] else None,
-                                    'Ratio': b_info[1].get('Ratio') if b_info[1] and 'Ratio' in b_info[1] else None,
-                                    'Spiegazione': b_info[1].get('Spiegazione') if b_info[1] and 'Spiegazione' in b_info[1] else None,
-                                    'Massime': b_info[1].get('Massime') if b_info[1] and 'Massime' in b_info[1] else None,
-                                    'Relazioni': b_info[1].get('Relazioni') if b_info[1] and 'Relazioni' in b_info[1] else None,
-                                    'RelazioneCostituzione': b_info[1].get('RelazioneCostituzione') if b_info[1] and 'RelazioneCostituzione' in b_info[1] else None,
-                                    'Footnotes': b_info[1].get('Footnotes') if b_info[1] and 'Footnotes' in b_info[1] else None,
-                                    'RelatedArticles': b_info[1].get('RelatedArticles') if b_info[1] and 'RelatedArticles' in b_info[1] else None,
-                                    'CrossReferences': b_info[1].get('CrossReferences') if b_info[1] and 'CrossReferences' in b_info[1] else None
-                                }
-                            except Exception as exc:
-                                log.error("Error fetching Brocardi info", error=str(exc))
-                                brocardi_info = {'error': str(exc)}
+                            tasks.append(brocardi_scraper.get_info(nv))
+
+                    results = await asyncio.gather(*tasks, return_exceptions=True)
+                    if isinstance(results[0], Exception):
+                        raise results[0]
+
+                    article_text, url = results[0]
+
+                    if should_fetch_brocardi and len(results) > 1:
+                        if isinstance(results[1], Exception):
+                            log.error("Error fetching Brocardi info", error=str(results[1]))
+                            brocardi_info = {'error': str(results[1])}
+                        else:
+                            brocardi_info = build_brocardi_payload(results[1])
                     return {
                         'article_text': article_text,
                         'url': url,
@@ -877,53 +933,31 @@ class NormaController:
             'services': {}
         }
 
-        # Test Normattiva (fetch homepage with timeout)
-        try:
-            start = time_module.time()
-            await normattiva_scraper.request_document("https://www.normattiva.it", source="health_check")
-            latency = time_module.time() - start
-            results['services']['normattiva'] = {
-                'status': 'ok',
-                'latency_ms': round(latency * 1000, 2)
-            }
-        except Exception as e:
-            results['services']['normattiva'] = {
-                'status': 'error',
-                'error': str(e)
-            }
-            results['status'] = 'degraded'
+        async def check_service(name, scraper, url):
+            try:
+                start = time_module.time()
+                await scraper.request_document(url, source="health_check")
+                latency = time_module.time() - start
+                return name, {
+                    'status': 'ok',
+                    'latency_ms': round(latency * 1000, 2)
+                }
+            except Exception as exc:
+                return name, {
+                    'status': 'error',
+                    'error': str(exc)
+                }
 
-        # Test EUR-Lex (fetch homepage with timeout)
-        try:
-            start = time_module.time()
-            await eurlex_scraper.request_document("https://eur-lex.europa.eu", source="health_check")
-            latency = time_module.time() - start
-            results['services']['eurlex'] = {
-                'status': 'ok',
-                'latency_ms': round(latency * 1000, 2)
-            }
-        except Exception as e:
-            results['services']['eurlex'] = {
-                'status': 'error',
-                'error': str(e)
-            }
-            results['status'] = 'degraded'
+        service_checks = await asyncio.gather(
+            check_service('normattiva', normattiva_scraper, "https://www.normattiva.it"),
+            check_service('eurlex', eurlex_scraper, "https://eur-lex.europa.eu"),
+            check_service('brocardi', brocardi_scraper, "https://www.brocardi.it"),
+        )
 
-        # Test Brocardi (fetch homepage with timeout)
-        try:
-            start = time_module.time()
-            await brocardi_scraper.request_document("https://www.brocardi.it", source="health_check")
-            latency = time_module.time() - start
-            results['services']['brocardi'] = {
-                'status': 'ok',
-                'latency_ms': round(latency * 1000, 2)
-            }
-        except Exception as e:
-            results['services']['brocardi'] = {
-                'status': 'error',
-                'error': str(e)
-            }
-            results['status'] = 'degraded'
+        for service_name, service_result in service_checks:
+            results['services'][service_name] = service_result
+            if service_result['status'] != 'ok':
+                results['status'] = 'degraded'
 
         status_code = 200 if results['status'] == 'ok' else 503
         return jsonify(results), status_code

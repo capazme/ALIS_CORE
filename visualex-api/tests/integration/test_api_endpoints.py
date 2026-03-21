@@ -3,21 +3,28 @@ Integration tests for visualex-api REST endpoints.
 
 These tests use pytest-asyncio and test the Quart API endpoints.
 """
+import asyncio
+from time import perf_counter
 import pytest
 from unittest.mock import patch, AsyncMock, MagicMock
 
 
 @pytest.fixture
-def app_client():
+async def app_client():
     """Create test client for the Quart app."""
     import sys
     # Mock playwright before importing app
     sys.modules['playwright'] = MagicMock()
     sys.modules['playwright.async_api'] = MagicMock()
 
-    from visualex.app import app
+    from visualex.app import NormaController
 
-    return app.test_client()
+    controller = NormaController()
+    await controller.start_background_services()
+    try:
+        yield controller.app.test_client()
+    finally:
+        await controller.stop_background_services()
 
 
 class TestHealthEndpoint:
@@ -30,7 +37,40 @@ class TestHealthEndpoint:
 
         assert response.status_code == 200
         data = await response.get_json()
-        assert data["status"] == "healthy"
+        assert data["status"] == "ok"
+
+    @pytest.mark.asyncio
+    @patch("visualex.scrapers.brocardi.BrocardiScraper.request_document")
+    @patch("visualex.scrapers.eurlex.EurlexScraper.request_document")
+    @patch("visualex.scrapers.normattiva.NormattivaScraper.request_document")
+    async def test_health_detailed_checks_services_in_parallel(
+        self,
+        mock_normattiva_request,
+        mock_eurlex_request,
+        mock_brocardi_request,
+        app_client,
+    ):
+        """Health checks should run concurrently to keep the endpoint fast."""
+
+        async def delayed_ok(*args, **kwargs):
+            await asyncio.sleep(0.1)
+            return "ok"
+
+        mock_normattiva_request.side_effect = delayed_ok
+        mock_eurlex_request.side_effect = delayed_ok
+        mock_brocardi_request.side_effect = delayed_ok
+
+        start = perf_counter()
+        response = await app_client.get("/health/detailed")
+        elapsed = perf_counter() - start
+
+        assert response.status_code == 200
+        assert elapsed < 0.2
+        data = await response.get_json()
+        assert data["status"] == "ok"
+        assert data["services"]["normattiva"]["status"] == "ok"
+        assert data["services"]["eurlex"]["status"] == "ok"
+        assert data["services"]["brocardi"]["status"] == "ok"
 
 
 class TestFetchNormaDataEndpoint:
@@ -173,3 +213,81 @@ class TestFetchAllDataEndpoint:
         assert response.status_code == 200
         data = await response.get_json()
         assert isinstance(data, list)
+
+    @pytest.mark.asyncio
+    @patch("visualex.app.NormaController.create_norma_visitata_from_data", new_callable=AsyncMock)
+    @patch("visualex.scrapers.normattiva.NormattivaScraper.get_document")
+    @patch("visualex.scrapers.brocardi.BrocardiScraper.get_info")
+    async def test_fetch_all_data_fetches_sources_in_parallel(
+        self,
+        mock_brocardi,
+        mock_normattiva,
+        mock_create_norma_visitata,
+        app_client,
+    ):
+        """Normattiva text and Brocardi info should be fetched concurrently."""
+
+        async def delayed_document(*args, **kwargs):
+            await asyncio.sleep(0.12)
+            return ("Article text...", "https://normattiva.it/...")
+
+        async def delayed_brocardi(*args, **kwargs):
+            await asyncio.sleep(0.12)
+            return ("Position", {"Spiegazione": "..."}, "https://brocardi.it/...")
+
+        fake_norma = MagicMock(tipo_atto="codice civile")
+        fake_nv = MagicMock()
+        fake_nv.norma = fake_norma
+        fake_nv.allegato = None
+        fake_nv.numero_articolo = "1453"
+        fake_nv.to_dict.return_value = {"article": "1453"}
+
+        mock_create_norma_visitata.return_value = [fake_nv]
+        mock_normattiva.side_effect = delayed_document
+        mock_brocardi.side_effect = delayed_brocardi
+
+        start = perf_counter()
+        response = await app_client.post(
+            "/fetch_all_data",
+            json={
+                "act_type": "codice civile",
+                "article": "1453",
+            },
+        )
+        elapsed = perf_counter() - start
+
+        assert response.status_code == 200
+        assert elapsed < 0.2
+        data = await response.get_json()
+        assert isinstance(data, list)
+        assert data[0]["article_text"] == "Article text..."
+        assert data[0]["brocardi_info"]["Spiegazione"] == "..."
+
+
+class TestQueryStatsLogging:
+    """Tests for response statistics logging optimizations."""
+
+    @pytest.mark.asyncio
+    async def test_log_query_stats_skips_large_json_bodies(self):
+        """Large JSON responses should not be reparsed in after_request."""
+        import sys
+
+        sys.modules['playwright'] = MagicMock()
+        sys.modules['playwright.async_api'] = MagicMock()
+
+        from visualex.app import NormaController
+        from visualex.config import QUERY_STATS_MAX_BODY_BYTES
+        from quart import g
+
+        controller = NormaController()
+        response = MagicMock()
+        response.content_type = "application/json"
+        response.content_length = QUERY_STATS_MAX_BODY_BYTES + 1
+        response.get_data = AsyncMock(return_value='{"large": true}')
+
+        async with controller.app.test_request_context("/health"):
+            g.start_time = 0
+            returned = await controller.log_query_stats(response)
+
+        assert returned is response
+        response.get_data.assert_not_called()

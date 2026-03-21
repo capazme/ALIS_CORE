@@ -5,7 +5,6 @@ import logging
 import re
 from aiocache import cached, Cache
 from aiocache.serializers import JsonSerializer
-from playwright.async_api import async_playwright
 
 from .cache import PersistentCache
 
@@ -19,11 +18,56 @@ logging.basicConfig(level=logging.INFO,
 _tree_cache = PersistentCache("tree", ttl=86400)  # 24 hours
 
 
+def _normalize_article_lookup_key(article_num: str) -> str:
+    """Normalize article numbers for metadata lookups."""
+    return article_num.strip().lower()
+
+
+def _build_article_lookup_metadata(annexes_metadata):
+    """Build a cached article -> location index for smart annex lookups."""
+    article_lookup = {}
+    sorted_keys = sorted(
+        annexes_metadata.keys(),
+        key=lambda x: (x is not None, int(x) if (x and str(x).isdigit()) else 999),
+    )
+
+    for annex_num in sorted_keys:
+        annex_data = annexes_metadata[annex_num]
+        for article_num in annex_data['articles']:
+            article_key = _normalize_article_lookup_key(article_num)
+            current_state = article_lookup.setdefault(
+                article_key,
+                {
+                    'in_dispositivo': False,
+                    'best_annex': None,
+                    '_best_annex_count': 0,
+                },
+            )
+
+            if annex_num is None:
+                current_state['in_dispositivo'] = True
+                continue
+
+            if annex_data['count'] > current_state['_best_annex_count']:
+                current_state['best_annex'] = annex_num
+                current_state['_best_annex_count'] = annex_data['count']
+
+    return {
+        article_key: {
+            'in_dispositivo': article_state['in_dispositivo'],
+            'best_annex': article_state['best_annex'],
+        }
+        for article_key, article_state in article_lookup.items()
+    }
+
+
 async def _fetch_with_playwright(url: str) -> str:
     """
     Fetch URL using Playwright to bypass CloudFront WAF protection.
     Used for EUR-Lex which blocks simple HTTP requests.
     """
+    from playwright.async_api import async_playwright
+
     logging.info(f"Fetching with Playwright (WAF bypass): {url[:80]}...")
     async with async_playwright() as p:
         browser = await p.chromium.launch(
@@ -300,6 +344,7 @@ async def _parse_normattiva_tree(soup, normurn, link, details, return_metadata=F
     metadata = {}
     if return_metadata and annexes_metadata:
         metadata['annexes'] = []
+        metadata['article_lookup'] = _build_article_lookup_metadata(annexes_metadata)
         # Sort: None (main text) first, then numeric annexes
         sorted_keys = sorted(annexes_metadata.keys(), key=lambda x: (x is not None, int(x) if (x and str(x).isdigit()) else 999))
         for annex_num in sorted_keys:
